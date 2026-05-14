@@ -877,8 +877,8 @@ describe('browser failing listener read shapes', () => {
     );
   });
 
-  test('signed-in recipient can list own active deliveries', async () => {
-    await assertSucceeds(
+  test('signed-in recipient cannot list own active deliveries directly', async () => {
+    await assertFails(
       dbFor('recipient')
         .collection('deliveries')
         .where('recipientUid', '==', 'recipient')

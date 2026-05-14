@@ -23,6 +23,7 @@ import { registerAiFallbackRoutes } from "./src/server/aiFallbackRoutes";
 import { registerExampleWorryRoutes } from "./src/server/exampleWorryRoutes";
 import { registerUserAccountRoutes } from "./src/server/userAccountRoutes";
 import { registerAdminHidingRoutes } from "./src/server/adminHidingRoutes";
+import { registerAnswerFeedRoutes } from "./src/server/answerFeedRoutes";
 
 // Read client config to get database ID
 const clientConfigPath = path.join(process.cwd(), 'firebase-applet-config.json');
@@ -87,6 +88,10 @@ async function startServer() {
       db,
       auth: getAuth(),
     });
+    registerAnswerFeedRoutes(app, {
+      db,
+      auth: getAuth(),
+    });
     registerPassRoutes(app, {
       db,
       messaging,
@@ -142,6 +147,14 @@ async function startServer() {
       });
     });
     app.post('/api/deliveries/:deliveryId/read', (_req, res) => {
+      res.status(500).json({
+        error: {
+          code: 'firebase_unavailable',
+          message: 'Firebase Admin is not initialized.',
+        },
+      });
+    });
+    app.get('/api/me/answer-feed', (_req, res) => {
       res.status(500).json({
         error: {
           code: 'firebase_unavailable',

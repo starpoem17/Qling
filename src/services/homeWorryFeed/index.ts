@@ -1,5 +1,6 @@
 export { useHomeWorryFeed } from './useHomeWorryFeed';
 export { usePrdAnswerFeed } from './usePrdAnswerFeed';
+export { fetchPrdAnswerFeedViaApi } from './apiClient';
 export {
   adaptPrdAnswerFeedItemToHomeWorryFeedLetter,
   selectActivePrdAnswerFeedItems,

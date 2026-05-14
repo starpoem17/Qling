@@ -186,7 +186,8 @@ export default function App() {
     requestNotificationPermission,
     resetPushRegistrationOnSignOut,
   } = usePushRegistration({ user, loading });
-  const { feedWorries } = useHomeWorryFeed({ profile });
+  const [answerFeedRefreshKey, setAnswerFeedRefreshKey] = useState(0);
+  const { feedWorries } = useHomeWorryFeed({ profile, user, refreshKey: answerFeedRefreshKey });
   const [suppressedDeliveryIds, setSuppressedDeliveryIds] = useState<Set<string>>(() => new Set());
   const [passingDeliveryIds, setPassingDeliveryIds] = useState<Set<string>>(() => new Set());
   const { myWorries } = useMyWorries({ user });
@@ -485,6 +486,7 @@ export default function App() {
       setView(routeAfterReplyPublish());
       setReplyDrafts(prev => worry.deliveryId ? clearDraft(prev, worry.deliveryId) : prev);
       setSelectedWorry(null);
+      setAnswerFeedRefreshKey(prev => prev + 1);
     } catch (e) {
       console.error(e);
       setFilterAlert("답장 전송 실패");
@@ -535,6 +537,7 @@ export default function App() {
       if (selectedWorry?.deliveryId === worry.deliveryId) {
         setSelectedWorry(null);
       }
+      setAnswerFeedRefreshKey(prev => prev + 1);
       setView(routeAfterPass());
     } catch (e) {
       console.error(e);

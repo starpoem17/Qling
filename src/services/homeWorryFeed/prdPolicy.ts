@@ -23,6 +23,7 @@ export interface PrdWorryDoc {
   createdAt?: HomeWorryFeedTimestamp | null;
   status?: string;
   hiddenAt?: unknown;
+  deletedAt?: unknown;
 }
 
 export interface DeliveryReadStateDoc {
@@ -41,7 +42,10 @@ export function isHiddenDelivery(delivery: Pick<PrdDeliveryDoc, 'status' | 'hidd
 }
 
 export function isHiddenWorry(worry: Pick<PrdWorryDoc, 'status' | 'hiddenAt'>): boolean {
-  return worry.status === 'hidden' || Boolean(worry.hiddenAt);
+  return worry.status === 'hidden'
+    || worry.status === 'deleted'
+    || Boolean(worry.hiddenAt)
+    || Boolean((worry as Pick<PrdWorryDoc, 'deletedAt'>).deletedAt);
 }
 
 export function selectVisibleAnswerFeedItems(params: {
