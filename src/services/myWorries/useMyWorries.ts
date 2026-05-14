@@ -8,7 +8,7 @@ import {
   type Firestore,
   type QuerySnapshot,
 } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db, logFirestoreListenerError } from '../../firebase';
 import { selectMyWorries } from './prdPolicy';
 import type { MyWorryListItem, PrdReplyDoc, PrdWorryDoc, ReplyReadStateDoc } from './types';
 
@@ -57,7 +57,7 @@ export function useMyWorries(params: {
         recompute();
       },
       error => {
-        console.error('My worries listener error:', error);
+        logFirestoreListenerError('My worries listener error:', error);
         setMyWorries([]);
       }
     );
@@ -73,7 +73,7 @@ export function useMyWorries(params: {
         recompute();
       },
       error => {
-        console.error('My worries reply listener error:', error);
+        logFirestoreListenerError('My worries reply listener error:', error);
       }
     );
     const unsubscribeReadStates = onSnapshot(
@@ -85,7 +85,7 @@ export function useMyWorries(params: {
         recompute();
       },
       error => {
-        console.error('My worries read-state listener error:', error);
+        logFirestoreListenerError('My worries read-state listener error:', error);
       }
     );
 

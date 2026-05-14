@@ -12,6 +12,12 @@ let testEnv: RulesTestEnvironment;
 
 const projectId = 'demo-qling-rules';
 const rules = fs.readFileSync('firestore.rules', 'utf8');
+const clientConfig = JSON.parse(fs.readFileSync('firebase-applet-config.json', 'utf8')) as {
+  projectId: string;
+  firestoreDatabaseId: string;
+};
+const productionProjectId = 'ai-studio-applet-webapp-81285';
+const productionDatabaseId = 'ai-studio-5b923681-2d77-477b-ae6d-a04fc4c79fb2';
 
 const safeProfile = (uid: string) => ({
   uid,
@@ -144,6 +150,11 @@ after(async () => {
 });
 
 describe('profile and token transition', () => {
+  test('rules tests are pinned to the app Firebase project and named database config', () => {
+    assert.equal(clientConfig.projectId, productionProjectId);
+    assert.equal(clientConfig.firestoreDatabaseId, productionDatabaseId);
+  });
+
   test('first-time own profile create succeeds with safe fields', async () => {
     await assertSucceeds(dbFor('author').doc('users/author').set(safeProfile('author')));
   });
@@ -541,6 +552,11 @@ describe('private read-state rules', () => {
     await assertSucceeds(dbFor('author').doc('users/author/replyReadStates/worry1_recipient').get());
   });
 
+  test('owner can list own private read-state collections', async () => {
+    await assertSucceeds(dbFor('recipient').collection('users/recipient/deliveryReadStates').get());
+    await assertSucceeds(dbFor('author').collection('users/author/replyReadStates').get());
+  });
+
   test('opposite party and unauthenticated users cannot read private read-state docs', async () => {
     await assertFails(dbFor('author').doc('users/recipient/deliveryReadStates/worry1_recipient').get());
     await assertFails(dbFor('recipient').doc('users/author/replyReadStates/worry1_recipient').get());
@@ -793,6 +809,120 @@ describe('Phase 4 mailbox manual-equivalent read paths', () => {
     );
 
     assert.deepEqual(snapshot.docs.map(doc => doc.id), ['manual_delivery']);
+  });
+});
+
+describe('browser failing listener read shapes', () => {
+  beforeEach(async () => {
+    await seedBaseUsers();
+    await seed('worries/manual_worry', {
+      authorUid: 'author',
+      content: 'manual-equivalent worry',
+      matchingCategories: ['career'],
+      createdAt: new Date(),
+      status: 'active',
+      humanReplyCount: 1,
+    });
+    await seed('deliveries/manual_delivery', {
+      worryId: 'manual_worry',
+      recipientUid: 'recipient',
+      authorUid: 'author',
+      status: 'active',
+    });
+    await seed('replies/manual_delivery', {
+      deliveryId: 'manual_delivery',
+      worryId: 'manual_worry',
+      authorUid: 'author',
+      replierUid: 'recipient',
+      content: 'manual-equivalent reply',
+      status: 'active',
+      publisherVisible: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isAiGenerated: false,
+      isExampleReply: false,
+    });
+    await seed('users/recipient/deliveryReadStates/manual_delivery', {
+      ...deliveryReadState,
+      deliveryId: 'manual_delivery',
+      worryId: 'manual_worry',
+    });
+    await seed('users/author/replyReadStates/manual_delivery', {
+      ...replyReadState,
+      replyId: 'manual_delivery',
+      worryId: 'manual_worry',
+    });
+    await seed('feedbacks/manual_delivery', {
+      ...likeFeedback,
+      replyId: 'manual_delivery',
+      deliveryId: 'manual_delivery',
+      worryId: 'manual_worry',
+    });
+  });
+
+  test('signed-in user can read users/{uid}/replyReadStates', async () => {
+    await assertSucceeds(dbFor('author').collection('users/author/replyReadStates').get());
+  });
+
+  test('signed-in user can read users/{uid}/deliveryReadStates', async () => {
+    await assertSucceeds(dbFor('recipient').collection('users/recipient/deliveryReadStates').get());
+  });
+
+  test('signed-in author can list own worries', async () => {
+    await assertSucceeds(
+      dbFor('author')
+        .collection('worries')
+        .where('authorUid', '==', 'author')
+        .get()
+    );
+  });
+
+  test('signed-in recipient can list own active deliveries', async () => {
+    await assertSucceeds(
+      dbFor('recipient')
+        .collection('deliveries')
+        .where('recipientUid', '==', 'recipient')
+        .where('status', '==', 'active')
+        .get()
+    );
+  });
+
+  test('signed-in author can list visible active replies', async () => {
+    await assertSucceeds(
+      dbFor('author')
+        .collection('replies')
+        .where('authorUid', '==', 'author')
+        .where('publisherVisible', '==', true)
+        .where('status', '==', 'active')
+        .get()
+    );
+  });
+
+  test('signed-in replier can list own active replies', async () => {
+    await assertSucceeds(
+      dbFor('recipient')
+        .collection('replies')
+        .where('replierUid', '==', 'recipient')
+        .where('status', '==', 'active')
+        .get()
+    );
+  });
+
+  test('signed-in user can read allowed feedbacks', async () => {
+    await assertSucceeds(
+      dbFor('author')
+        .collection('feedbacks')
+        .where('worryId', '==', 'manual_worry')
+        .where('publisherUid', '==', 'author')
+        .get()
+    );
+    await assertSucceeds(
+      dbFor('recipient')
+        .collection('feedbacks')
+        .where('replierUid', '==', 'recipient')
+        .where('type', '==', 'like')
+        .get()
+    );
   });
 });
 

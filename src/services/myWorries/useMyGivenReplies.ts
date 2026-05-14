@@ -8,7 +8,7 @@ import {
   type Firestore,
   type QuerySnapshot,
 } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db, logFirestoreListenerError } from '../../firebase';
 import {
   composeReplyReadModel,
   selectMyGivenReplies,
@@ -52,7 +52,7 @@ export function useMyGivenReplies(params: {
         }));
       },
       error => {
-        console.error('My given replies listener error:', error);
+        logFirestoreListenerError('My given replies listener error:', error);
         setPrdReplies([]);
       }
     );
@@ -78,7 +78,7 @@ export function useMyGivenReplies(params: {
         ));
       },
       error => {
-        console.error('My feedback listener error:', error);
+        logFirestoreListenerError('My feedback listener error:', error);
         setFeedbacksByReplyId(new Map());
       }
     );

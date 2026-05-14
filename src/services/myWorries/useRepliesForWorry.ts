@@ -8,7 +8,7 @@ import {
   type Firestore,
   type QuerySnapshot,
 } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db, logFirestoreListenerError } from '../../firebase';
 import {
   composeReplyReadModel,
   selectRepliesForWorry,
@@ -63,7 +63,7 @@ export function useRepliesForWorry(params: {
         }));
       },
       error => {
-        console.error('Replies for worry listener error:', error);
+        logFirestoreListenerError('Replies for worry listener error:', error);
         setPrdReplies([]);
       }
     );
@@ -89,7 +89,7 @@ export function useRepliesForWorry(params: {
         ));
       },
       error => {
-        console.error('Publisher feedback listener error:', error);
+        logFirestoreListenerError('Publisher feedback listener error:', error);
         setFeedbacksByReplyId(new Map());
       }
     );
@@ -111,7 +111,7 @@ export function useRepliesForWorry(params: {
         ));
       },
       error => {
-        console.error('Replies read-state listener error:', error);
+        logFirestoreListenerError('Replies read-state listener error:', error);
       }
     );
 

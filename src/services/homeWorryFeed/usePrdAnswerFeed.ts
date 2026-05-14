@@ -9,7 +9,7 @@ import {
   type DocumentData,
   type QuerySnapshot,
 } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db, logFirestoreListenerError } from '../../firebase';
 import {
   adaptPrdAnswerFeedItemToHomeWorryFeedLetter,
   selectActivePrdAnswerFeedItems,
@@ -87,7 +87,7 @@ export function usePrdAnswerFeed(params: {
       } as PrdDeliveryDoc));
       void recompute();
     }, (err) => {
-      console.error('PRD answer feed listener error:', err);
+      logFirestoreListenerError('PRD answer feed listener error:', err);
     });
     const unsubscribeReadStates = onSnapshot(readStatesQuery, snapshot => {
       latestReadStates = new Map(
@@ -95,7 +95,7 @@ export function usePrdAnswerFeed(params: {
       );
       void recompute();
     }, (err) => {
-      console.error('PRD delivery read-state listener error:', err);
+      logFirestoreListenerError('PRD delivery read-state listener error:', err);
     });
 
     return () => {

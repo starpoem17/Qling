@@ -20,7 +20,7 @@ import {
   getDoc,
 } from 'firebase/firestore';
 import { onMessage } from 'firebase/messaging';
-import { auth, db, googleProvider, messaging } from './firebase';
+import { auth, db, firebaseRuntimeConfig, googleProvider, isDevRuntime, messaging } from './firebase';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Send,
@@ -215,6 +215,30 @@ export default function App() {
       try {
         setLoading(true);
         if (currentUser) {
+          try {
+            await currentUser.getIdToken();
+            if (isDevRuntime) {
+              console.info('[Firebase diagnostics] auth ready', {
+                projectId: firebaseRuntimeConfig.projectId,
+                firestoreDatabaseId: firebaseRuntimeConfig.firestoreDatabaseId,
+                authCurrentUserUid: auth.currentUser?.uid ?? null,
+                callbackUid: currentUser.uid,
+                getIdTokenSucceeded: true,
+              });
+            }
+          } catch (tokenError) {
+            const firebaseError = tokenError as { code?: unknown; message?: unknown };
+            console.error('[Firebase diagnostics] getIdToken failed', {
+              projectId: firebaseRuntimeConfig.projectId,
+              firestoreDatabaseId: firebaseRuntimeConfig.firestoreDatabaseId,
+              authCurrentUserUid: auth.currentUser?.uid ?? null,
+              callbackUid: currentUser.uid,
+              code: typeof firebaseError.code === 'string' ? firebaseError.code : 'unknown',
+              message: typeof firebaseError.message === 'string' ? firebaseError.message : String(tokenError),
+              error: tokenError,
+            });
+            throw tokenError;
+          }
           setUser(currentUser);
           
           const userRef = doc(db, 'users', currentUser.uid);
@@ -239,6 +263,14 @@ export default function App() {
             setView('onboarding');
           }
         } else {
+          if (isDevRuntime) {
+            console.info('[Firebase diagnostics] auth signed out', {
+              projectId: firebaseRuntimeConfig.projectId,
+              firestoreDatabaseId: firebaseRuntimeConfig.firestoreDatabaseId,
+              authCurrentUserUid: auth.currentUser?.uid ?? null,
+              getIdTokenSucceeded: false,
+            });
+          }
           setUser(null);
           setProfile(null);
           setView('login');
