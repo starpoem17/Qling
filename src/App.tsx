@@ -42,7 +42,6 @@ import {
   Share2,
   QrCode,
   UserRound,
-  BookOpen,
   Shield,
   Trash2,
 } from 'lucide-react';
@@ -75,7 +74,9 @@ import {
 } from './services/homeWorryFeed';
 import { deleteMyAccountViaApi } from './services/userAccount/client';
 import {
+  CENTRAL_BOTTOM_NAVIGATION_ACTION,
   PRD_APP_TABS,
+  backRouteForRoute,
   backRouteFromMyReplyDetail,
   backRouteFromReceivedReplyDetail,
   backRouteFromWriteReply,
@@ -86,6 +87,8 @@ import {
   routeAfterPass,
   routeAfterReplyPublish,
   routeAfterWorryPublish,
+  routeToEditInterests,
+  routeToMyAnswers,
   routeToMyReplyDetail,
   routeToReceivedReplyDetail,
   routeToWriteReply,
@@ -148,7 +151,6 @@ export default function App() {
   const [selectedReply, setSelectedReply] = useState<ReplyReadModelItem | null>(null);
   
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [worryDraft, setWorryDraft] = useState('');
   const [replyDrafts, setReplyDrafts] = useState<DraftMap>({});
@@ -331,7 +333,7 @@ export default function App() {
         return;
       }
 
-      setIsDeleteConfirmOpen(false);
+      setView(backRouteForRoute('account_deletion_confirmation'));
       try {
         await resetPushRegistrationOnSignOut();
       } catch (cleanupError) {
@@ -446,7 +448,8 @@ export default function App() {
       }
 
       setWorryDraft('');
-      setView(routeAfterWorryPublish());
+      setSelectedMyWorry(null);
+      setView(routeAfterWorryPublish({ worryId: result.worryId }).route);
       window.scrollTo(0, 0);
     } catch (e: any) {
       console.error("Publication Error:", e);
@@ -483,9 +486,14 @@ export default function App() {
         return;
       }
 
-      setView(routeAfterReplyPublish());
+      setView(routeAfterReplyPublish({
+        replyId: result.replyId,
+        deliveryId: worry.deliveryId,
+        worryId: worry.worryId,
+      }).route);
       setReplyDrafts(prev => worry.deliveryId ? clearDraft(prev, worry.deliveryId) : prev);
       setSelectedWorry(null);
+      setSelectedReply(null);
       setAnswerFeedRefreshKey(prev => prev + 1);
     } catch (e) {
       console.error(e);
@@ -497,7 +505,11 @@ export default function App() {
 
   const openWorryForReply = (worry: HomeWorryFeedLetter) => {
     setSelectedWorry(worry);
-    setView(routeToWriteReply());
+    if (worry.deliveryId) {
+      setView(routeToWriteReply({ deliveryId: worry.deliveryId, worryId: worry.worryId }).route);
+    } else {
+      setView('write_reply');
+    }
 
     if (!user || !worry.deliveryId || worry.source !== 'prd_delivery') return;
     void markDeliveryReadWithServer({
@@ -621,7 +633,42 @@ export default function App() {
             </motion.div>
           </motion.div>
         )}
-        {isDeleteConfirmOpen && (
+        {view === 'logout_confirmation' && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+              className="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full text-center space-y-6"
+            >
+              <div className="w-12 h-12 bg-[#FAEDCD] rounded-full flex items-center justify-center mx-auto text-[#D4A373]">
+                <ArrowLeft className="w-6 h-6" />
+              </div>
+              <div className="space-y-2">
+                <p className="font-bold text-lg text-gray-800">로그아웃할까요?</p>
+                <p className="text-sm text-[#8B8B6B] leading-relaxed">이 기기에서 Qling 계정 연결을 해제합니다.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setView(backRouteForRoute('logout_confirmation'))}
+                  disabled={isProcessing}
+                  className="py-3 bg-[#FDFCF8] border border-[#E9EDC9] text-[#5A5A40] rounded-xl font-bold transition-all disabled:opacity-50"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  disabled={isProcessing}
+                  className="py-3 bg-[#5A5A40] text-white rounded-xl font-bold transition-all disabled:opacity-50"
+                >
+                  로그아웃
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+        {view === 'account_deletion_confirmation' && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
@@ -639,7 +686,7 @@ export default function App() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => setIsDeleteConfirmOpen(false)}
+                  onClick={() => setView(backRouteForRoute('account_deletion_confirmation'))}
                   disabled={isProcessing}
                   className="py-3 bg-[#FDFCF8] border border-[#E9EDC9] text-[#5A5A40] rounded-xl font-bold transition-all disabled:opacity-50"
                 >
@@ -730,6 +777,86 @@ export default function App() {
             </motion.div>
           )}
 
+          {view === 'edit_interests' && profile && (
+            <motion.div key="edit_interests" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
+              <button onClick={() => setView(backRouteForRoute('edit_interests'))} className="mb-2 flex items-center gap-2 text-[#8B8B6B] hover:text-[#5A5A40] transition-colors">
+                <ArrowLeft className="w-4 h-4" /> 마이페이지로
+              </button>
+              <div className="text-left space-y-2">
+                <h1 className="text-3xl font-serif font-bold text-[#5A5A40]">관심 분야 수정</h1>
+                <p className="text-[#8B8B6B]">관심 분야 수정 기능은 다음 단계에서 실제 저장 흐름과 연결됩니다.</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-[#E9EDC9] space-y-4">
+                <div className="text-xs font-bold text-[#D4A373]">현재 관심 분야</div>
+                <div className="flex flex-wrap gap-2">
+                  {profile.interests.map(interest => (
+                    <span key={interest} className="px-3 py-1 rounded-full bg-[#FAEDCD] text-xs font-bold text-[#5A5A40]">
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {view === 'my_answers' && (
+            <motion.div key="my_answers" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+              <button onClick={() => setView(backRouteForRoute('my_answers'))} className="mb-2 flex items-center gap-2 text-[#8B8B6B] hover:text-[#5A5A40] transition-colors">
+                <ArrowLeft className="w-4 h-4" /> 마이페이지로
+              </button>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-serif font-bold">내가 쓴 답변</h2>
+                <p className="text-[#8B8B6B] text-sm">내가 보낸 답변과 받은 반응을 확인합니다.</p>
+              </div>
+              {myGivenReplies.length === 0 ? (
+                <div className="text-center py-10 bg-[#FDFCF8] rounded-2xl border border-dashed border-[#E9EDC9]">
+                  <Heart className="w-10 h-10 text-[#E9EDC9] mx-auto mb-3" />
+                  <p className="text-[#8B8B6B] text-sm">아직 내가 보낸 위로가 없어요.</p>
+                </div>
+              ) : (
+                <div className="grid gap-3">
+                  {myGivenReplies.map(reply => (
+                    <button
+                      key={reply.id}
+                      onClick={() => {
+                        setSelectedReply(reply);
+                        setView(routeToMyReplyDetail({
+                          replyId: reply.id,
+                          deliveryId: reply.deliveryId,
+                          worryId: reply.worryId,
+                        }).route);
+                      }}
+                      className="w-full text-left p-4 bg-[#FDFCF8] rounded-xl border border-[#E9EDC9] transition-all hover:bg-[#FAEDCD]"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Send className="w-4 h-4 text-[#A3B18A]" />
+                        <span className="text-xs font-semibold text-[#8B8B6B]">나의 다정한 답장</span>
+                      </div>
+                      <p className="text-[#5A5A40] text-sm font-medium line-clamp-2 leading-relaxed">
+                        {reply.refinedContent}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {(view === 'privacy_policy' || view === 'operation_policy') && (
+            <motion.div key={view} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+              <button onClick={() => setView(backRouteForRoute(view))} className="mb-2 flex items-center gap-2 text-[#8B8B6B] hover:text-[#5A5A40] transition-colors">
+                <ArrowLeft className="w-4 h-4" /> 마이페이지로
+              </button>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-serif font-bold">{view === 'privacy_policy' ? '개인정보처리방침' : '운영정책'}</h2>
+                <p className="text-[#8B8B6B] text-sm">정책 본문 준비 중입니다.</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-[#E9EDC9] text-sm text-[#8B8B6B] leading-relaxed">
+                정책 본문 준비 중입니다.
+              </div>
+            </motion.div>
+          )}
+
           {/* 1.5 My Page View */}
           {view === '마이페이지' && profile && (
             <motion.div key="my_page" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
@@ -772,7 +899,11 @@ export default function App() {
                         key={reply.id}
                         onClick={() => {
                           setSelectedReply(reply);
-                          setView(routeToMyReplyDetail());
+                          setView(routeToMyReplyDetail({
+                            replyId: reply.id,
+                            deliveryId: reply.deliveryId,
+                            worryId: reply.worryId,
+                          }).route);
                         }}
                         className="w-full text-left p-4 bg-[#FDFCF8] rounded-xl border border-[#E9EDC9] transition-all hover:bg-[#FAEDCD]"
                       >
@@ -899,23 +1030,43 @@ export default function App() {
               <div className="bg-white p-6 rounded-2xl border border-[#E9EDC9] space-y-3">
                 <h3 className="font-bold text-[#5A5A40]">더보기</h3>
                 <div className="grid gap-2">
-                  <button className="w-full p-4 rounded-xl bg-[#FDFCF8] border border-[#E9EDC9] text-left flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-[#A3B18A]" />
-                    <span className="font-bold text-sm">이용 가이드</span>
-                  </button>
-                  <button className="w-full p-4 rounded-xl bg-[#FDFCF8] border border-[#E9EDC9] text-left flex items-center gap-3">
-                    <Shield className="w-5 h-5 text-[#A3B18A]" />
-                    <span className="font-bold text-sm">정책 및 개인정보 처리방침</span>
+                  <button
+                    onClick={() => setView(routeToEditInterests())}
+                    className="w-full p-4 rounded-xl bg-[#FDFCF8] border border-[#E9EDC9] text-left flex items-center gap-3"
+                  >
+                    <Sparkles className="w-5 h-5 text-[#A3B18A]" />
+                    <span className="font-bold text-sm">관심 분야 수정</span>
                   </button>
                   <button
-                    onClick={handleSignOut}
+                    onClick={() => setView(routeToMyAnswers())}
+                    className="w-full p-4 rounded-xl bg-[#FDFCF8] border border-[#E9EDC9] text-left flex items-center gap-3"
+                  >
+                    <Send className="w-5 h-5 text-[#A3B18A]" />
+                    <span className="font-bold text-sm">내가 쓴 답변</span>
+                  </button>
+                  <button
+                    onClick={() => setView('privacy_policy')}
+                    className="w-full p-4 rounded-xl bg-[#FDFCF8] border border-[#E9EDC9] text-left flex items-center gap-3"
+                  >
+                    <Shield className="w-5 h-5 text-[#A3B18A]" />
+                    <span className="font-bold text-sm">개인정보처리방침</span>
+                  </button>
+                  <button
+                    onClick={() => setView('operation_policy')}
+                    className="w-full p-4 rounded-xl bg-[#FDFCF8] border border-[#E9EDC9] text-left flex items-center gap-3"
+                  >
+                    <Shield className="w-5 h-5 text-[#A3B18A]" />
+                    <span className="font-bold text-sm">운영정책</span>
+                  </button>
+                  <button
+                    onClick={() => setView('logout_confirmation')}
                     className="w-full p-4 rounded-xl bg-[#FDFCF8] border border-[#E9EDC9] text-left flex items-center gap-3"
                   >
                     <ArrowLeft className="w-5 h-5 text-[#8B8B6B]" />
                     <span className="font-bold text-sm">로그아웃</span>
                   </button>
                   <button
-                    onClick={() => setIsDeleteConfirmOpen(true)}
+                    onClick={() => setView('account_deletion_confirmation')}
                     className="w-full p-4 rounded-xl bg-red-50 border border-red-100 text-left flex items-center gap-3"
                   >
                     <Trash2 className="w-5 h-5 text-red-500" />
@@ -923,18 +1074,6 @@ export default function App() {
                   </button>
                 </div>
               </div>
-
-              <div className="text-left space-y-2 mb-10">
-                <h1 className="text-3xl font-serif font-bold text-[#5A5A40]">프로필 수정</h1>
-                <p className="text-[#8B8B6B]">나의 성별과 가장 관심있는 고민 주제를 변경할 수 있어요.</p>
-              </div>
-
-              <OnboardingForm 
-                onSubmit={handleOnboardingSubmit} 
-                isProcessing={isProcessing} 
-                initialGender={profile.gender}
-                initialInterests={profile.interests}
-              />
             </motion.div>
           )}
 
@@ -1122,7 +1261,10 @@ export default function App() {
                       key={reply.id}
                       onClick={() => {
                         setSelectedReply(reply);
-                        setView(routeToReceivedReplyDetail());
+                        setView(routeToReceivedReplyDetail({
+                          worryId: selectedMyWorry.id,
+                          replyId: reply.id,
+                        }).route);
                       }}
                       className={cn(
                         "w-full text-left p-6 rounded-2xl border transition-all hover:bg-[#FAEDCD]",
@@ -1143,8 +1285,23 @@ export default function App() {
             </motion.div>
           )}
 
+          {view === 'my_worry_detail' && (
+            <motion.div key="my_worry_detail" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+              <button onClick={() => setView(backRouteForRoute('my_worry_detail'))} className="mb-2 flex items-center gap-2 text-[#8B8B6B] hover:text-[#5A5A40] transition-colors">
+                <ArrowLeft className="w-4 h-4" /> 나의 고민으로
+              </button>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-serif font-bold">작성한 고민</h2>
+                <p className="text-[#8B8B6B] text-sm">방금 작성한 고민 상세를 불러오는 중입니다.</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-[#E9EDC9] text-sm text-[#8B8B6B]">
+                작성한 고민 상세 준비 중입니다.
+              </div>
+            </motion.div>
+          )}
+
           {/* 6. Read Reply & Feedback View */}
-          {view === 'read_received_reply' && selectedReply && (
+          {(view === 'read_received_reply' || view === 'received_answer_detail') && selectedReply && (
             <motion.div key="read_received_reply" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
                <button onClick={() => setView(backRouteFromReceivedReplyDetail())} className="mb-6 flex items-center gap-2 text-[#8B8B6B] hover:text-[#5A5A40] transition-colors">
                 <ArrowLeft className="w-4 h-4" /> 목록으로
@@ -1241,7 +1398,7 @@ export default function App() {
           )}
 
           {/* 7. Read My Reply View */}
-          {view === 'read_my_reply' && selectedReply && (
+          {(view === 'read_my_reply' || view === 'my_answer_detail') && selectedReply && (
             <motion.div key="read_my_reply" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
                <button onClick={() => setView(backRouteFromMyReplyDetail())} className="mb-6 flex items-center gap-2 text-[#8B8B6B] hover:text-[#5A5A40] transition-colors">
                 <ArrowLeft className="w-4 h-4" /> 목록으로
@@ -1289,12 +1446,28 @@ export default function App() {
             </motion.div>
           )}
 
+          {view === 'my_answer_detail' && !selectedReply && (
+            <motion.div key="my_answer_detail_loading" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+              <button onClick={() => setView(backRouteForRoute('my_answer_detail'))} className="mb-2 flex items-center gap-2 text-[#8B8B6B] hover:text-[#5A5A40] transition-colors">
+                <ArrowLeft className="w-4 h-4" /> 내가 쓴 답변으로
+              </button>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-serif font-bold">내가 쓴 답변</h2>
+                <p className="text-[#8B8B6B] text-sm">방금 작성한 답변 상세를 불러오는 중입니다.</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-[#E9EDC9] text-sm text-[#8B8B6B]">
+                내가 쓴 답변 상세 준비 중입니다.
+              </div>
+            </motion.div>
+          )}
+
         </AnimatePresence>
       </main>
       {tabForRoute(view) && (
         <BottomTabBar
           activeTab={tabForRoute(view) as PrdAppTab}
           onSelect={(tab) => setView(tab)}
+          onCentralAction={() => setView(routeToWriteWorry())}
         />
       )}
     </div>
@@ -1306,9 +1479,11 @@ export default function App() {
 function BottomTabBar({
   activeTab,
   onSelect,
+  onCentralAction,
 }: {
   activeTab: PrdAppTab;
   onSelect: (tab: PrdAppTab) => void;
+  onCentralAction: () => void;
 }) {
   const iconByTab: Record<PrdAppTab, ReactNode> = {
     답변하기: <MessageSquare className="w-5 h-5" />,
@@ -1318,6 +1493,15 @@ function BottomTabBar({
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-[#E9EDC9]">
+      <button
+        type="button"
+        aria-label={CENTRAL_BOTTOM_NAVIGATION_ACTION.accessibleLabel}
+        onClick={onCentralAction}
+        className="absolute left-1/2 -translate-x-1/2 -top-7 px-4 h-12 rounded-full bg-[#E07A5F] text-white shadow-lg text-xs font-bold flex items-center justify-center gap-2"
+      >
+        <Send className="w-4 h-4" />
+        {CENTRAL_BOTTOM_NAVIGATION_ACTION.label}
+      </button>
       <div className="max-w-2xl mx-auto grid grid-cols-3 px-2 py-2">
         {PRD_APP_TABS.map(tab => {
           const isActive = activeTab === tab;

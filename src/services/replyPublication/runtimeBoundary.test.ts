@@ -16,8 +16,8 @@ test('App clears worry and reply drafts only after successful publish paths', ()
 
   assert.match(source, /if \(result\.status === 'rejected'\) \{\s*showRejectionAlert\(result\);\s*return;\s*\}/);
   assert.match(source, /if \(result\.status === 'failed'\) \{\s*setFilterAlert\(`전송 실패:/);
-  assert.match(source, /setWorryDraft\(''\);\s*setView\(routeAfterWorryPublish\(\)\)/);
-  assert.match(source, /setView\(routeAfterReplyPublish\(\)\);\s*setReplyDrafts\(prev => worry\.deliveryId \? clearDraft\(prev, worry\.deliveryId\) : prev\)/);
+  assert.match(source, /setWorryDraft\(''\);\s*setSelectedMyWorry\(null\);\s*setView\(routeAfterWorryPublish\(\{ worryId: result\.worryId \}\)\.route\)/);
+  assert.match(source, /setView\(routeAfterReplyPublish\(\{\s*replyId: result\.replyId,\s*deliveryId: worry\.deliveryId,\s*worryId: worry\.worryId,\s*\}\)\.route\);\s*setReplyDrafts\(prev => worry\.deliveryId \? clearDraft\(prev, worry\.deliveryId\) : prev\)/);
 });
 
 test('App feedback comments use PRD feedback API and preserve failed drafts', () => {
