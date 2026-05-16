@@ -411,12 +411,12 @@ Functional screen phases must use real production data sources and production ro
 
 ### Phase 8 - Import-Boundary And Deep Module Guardrail Verification
 
-- [ ] TODO-DESIGN-8.1 Add import-boundary tests in a named target such as `src/ui/importBoundaries.test.ts` or `src/screens/importBoundaries.test.ts`.
-- [ ] TODO-DESIGN-8.2 Import-boundary tests must fail if presentational screen files import any pattern forbidden by `Presentational Import Boundary Contract`, including `src/firebase`, `firebase/*`, `firebase-admin/*`, service API clients, production adapters, server modules, Firestore SDK, Firebase auth/messaging SDK, account deletion clients, push internals, read-state API clients, publication API clients, feedback production adapters, or delivery pass API clients.
-- [ ] TODO-DESIGN-8.3 Verify route policy remains in `src/services/appShell/prdNavigationPolicy.ts` and route-policy tests remain in `src/services/appShell/prdNavigationPolicy.test.ts`.
-- [ ] TODO-DESIGN-8.4 Verify domain/service logic remains in `src/services/**` and `packages/domain/**`, not presentational components.
-- [ ] TODO-DESIGN-8.5 Verify `src/App.tsx` did not grow into a larger monolith after Phases 3-7.
-- [ ] TODO-DESIGN-8.V1 Verify Phase 8 with import-boundary test output, route-policy test output, and a module-boundary review note; this is a hard gate before Phase 9 functional product implementation and before any visual reskin.
+- [x] TODO-DESIGN-8.1 Add import-boundary tests in a named target such as `src/ui/importBoundaries.test.ts` or `src/screens/importBoundaries.test.ts`.
+- [x] TODO-DESIGN-8.2 Import-boundary tests must fail if presentational screen files import any pattern forbidden by `Presentational Import Boundary Contract`, including `src/firebase`, `firebase/*`, `firebase-admin/*`, service API clients, production adapters, server modules, Firestore SDK, Firebase auth/messaging SDK, account deletion clients, push internals, read-state API clients, publication API clients, feedback production adapters, or delivery pass API clients.
+- [x] TODO-DESIGN-8.3 Verify route policy remains in `src/services/appShell/prdNavigationPolicy.ts` and route-policy tests remain in `src/services/appShell/prdNavigationPolicy.test.ts`.
+- [x] TODO-DESIGN-8.4 Verify domain/service logic remains in `src/services/**` and `packages/domain/**`, not presentational components.
+- [x] TODO-DESIGN-8.5 Verify `src/App.tsx` did not grow into a larger monolith after Phases 3-7.
+- [x] TODO-DESIGN-8.V1 Verify Phase 8 with import-boundary test output, route-policy test output, and a module-boundary review note; this is a hard gate before Phase 9 functional product implementation and before any visual reskin.
 
 ### Phase 9 - Onboarding Functional Implementation
 
