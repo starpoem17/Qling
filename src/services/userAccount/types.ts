@@ -16,6 +16,13 @@ export type AccountDeletionCleanupPhase =
   | 'verify_user_document_deleted'
   | 'verify_nickname_reservation_deleted';
 
+export type AccountDeletionCleanupStep =
+  | 'list_collections'
+  | 'get_collection_ref'
+  | 'list_token_docs'
+  | 'commit_token_deletes'
+  | 'verify_token_deletes';
+
 export type AccountDeletionCleanupSuccess = {
   status: 'success';
   deletedTokenCount: number;
@@ -27,6 +34,7 @@ export type AccountDeletionCleanupSuccess = {
 export type AccountDeletionCleanupFailure = {
   status: 'failed';
   phase: AccountDeletionCleanupPhase;
+  step?: AccountDeletionCleanupStep;
   firebaseCode?: string;
 };
 

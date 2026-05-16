@@ -22,15 +22,18 @@ function accountDeletionFailure(
   console.error('Account deletion failed:', {
     code,
     uid,
+    step: error instanceof AccountDeletionCleanupError ? error.step : undefined,
     errorCode: typeof error === 'object' && error !== null && 'code' in error ? (error as { code?: unknown }).code : undefined,
     errorMessage: error instanceof Error ? error.message : String(error),
   });
   const phase = error instanceof AccountDeletionCleanupError ? error.phase : undefined;
+  const step = error instanceof AccountDeletionCleanupError ? error.step : undefined;
   const firebaseCode = error instanceof AccountDeletionCleanupError ? error.firebaseCode : undefined;
   res.status(500).json({
     error: {
       code,
       ...(phase ? { phase } : {}),
+      ...(step ? { step } : {}),
       ...(firebaseCode ? { firebaseCode } : {}),
       message: '계정 삭제 처리 중 문제가 발생했습니다.',
     },

@@ -24,9 +24,31 @@ class Ref {
         this.db.maybeFail(`list:${this.path}/${name}`);
         this.db.seenCollectionLists.add(`${this.path}/${name}`);
         return [...this.db.refs.values()]
-          .filter(ref => ref.path.startsWith(`${this.path}/${name}/`));
+          .filter(ref => ref.path.startsWith(`${this.path}/${name}/`) && this.db.docs.has(ref.path));
       },
     };
+  }
+
+  async listCollections() {
+    this.db.maybeFail(`listCollections:${this.path}`);
+    this.db.seenCollectionRoots.add(this.path);
+    const prefix = `${this.path}/`;
+    const collectionIds = new Set<string>();
+
+    for (const path of this.db.docs.keys()) {
+      if (!path.startsWith(prefix)) continue;
+      const remainder = path.slice(prefix.length);
+      const [collectionId, docId] = remainder.split('/');
+      if (collectionId && docId) collectionIds.add(collectionId);
+    }
+
+    for (const path of this.db.existingEmptyCollections) {
+      if (!path.startsWith(prefix)) continue;
+      const collectionId = path.slice(prefix.length);
+      if (collectionId && !collectionId.includes('/')) collectionIds.add(collectionId);
+    }
+
+    return [...collectionIds].map(id => ({ id }));
   }
 }
 
@@ -35,6 +57,7 @@ class FakeDb {
   refs = new Map<string, Ref>();
   deletedPaths: string[] = [];
   seenCollectionLists = new Set<string>();
+  seenCollectionRoots = new Set<string>();
   readonly existingEmptyCollections: Set<string>;
 
   constructor(
@@ -231,7 +254,17 @@ test('delete_fcm_tokens succeeds when fcmTokens subcollection is missing', async
 
   assert.equal(result.status, 'success');
   assert.equal(result.deletedTokenCount, 0);
-  assert.equal(db.seenCollectionLists.has('users/user-1/fcmTokens'), true);
+  assert.equal(db.seenCollectionRoots.has('users/user-1'), true);
+  assert.deepEqual(result.completedPhases, [
+    'load_user_profile',
+    'delete_fcm_tokens',
+    'delete_delivery_read_states',
+    'delete_reply_read_states',
+    'delete_nickname_reservation',
+    'delete_user_document',
+    'verify_user_document_deleted',
+    'verify_nickname_reservation_deleted',
+  ]);
   assert.equal(db.deletedPaths.includes('users/user-1/deliveryReadStates/delivery-1'), true);
   assert.equal(db.deletedPaths.includes('users/user-1/replyReadStates/reply-1'), true);
   assert.equal(db.deletedPaths.includes('users/user-1'), true);
@@ -301,9 +334,60 @@ test('delete_fcm_tokens reports phase only when an actual token delete fails', a
   assert.deepEqual(failingResult, {
     status: 'failed',
     phase: 'delete_fcm_tokens',
+    step: 'commit_token_deletes',
     firebaseCode: 'fake/permission-denied',
   });
   assert.equal(failingDb.deletedPaths.includes('users/user-2'), false);
+});
+
+test('delete_fcm_tokens reports list_collections step when subcollection discovery fails', async () => {
+  const db = new FakeDb({
+    'users/user-1': { uid: 'user-1' },
+  }, new Set(['listCollections:users/user-1']));
+
+  const result = await createFirestoreUserAccountRepository({ db: db as never })
+    .deleteUserAccountState({ uid: 'user-1' });
+
+  assert.deepEqual(result, {
+    status: 'failed',
+    phase: 'delete_fcm_tokens',
+    step: 'list_collections',
+    firebaseCode: 'fake/permission-denied',
+  });
+});
+
+test('delete_fcm_tokens reports list_token_docs step when token doc listing fails', async () => {
+  const db = new FakeDb({
+    'users/user-1': { uid: 'user-1' },
+    'users/user-1/fcmTokens/token-1': { token: 'token-1' },
+  }, new Set(['list:users/user-1/fcmTokens']));
+
+  const result = await createFirestoreUserAccountRepository({ db: db as never })
+    .deleteUserAccountState({ uid: 'user-1' });
+
+  assert.deepEqual(result, {
+    status: 'failed',
+    phase: 'delete_fcm_tokens',
+    step: 'list_token_docs',
+    firebaseCode: 'fake/permission-denied',
+  });
+});
+
+test('delete_fcm_tokens reports commit_token_deletes step when token delete commit fails', async () => {
+  const db = new FakeDb({
+    'users/user-1': { uid: 'user-1' },
+    'users/user-1/fcmTokens/token-1': { token: 'token-1' },
+  }, new Set(['delete:users/user-1/fcmTokens/token-1']));
+
+  const result = await createFirestoreUserAccountRepository({ db: db as never })
+    .deleteUserAccountState({ uid: 'user-1' });
+
+  assert.deepEqual(result, {
+    status: 'failed',
+    phase: 'delete_fcm_tokens',
+    step: 'commit_token_deletes',
+    firebaseCode: 'fake/permission-denied',
+  });
 });
 
 test('Firestore account repository succeeds when nickname reservation is missing', async () => {

@@ -205,3 +205,24 @@ test('delete account route maps storage failure', async () => {
     },
   });
 });
+
+test('delete account route includes cleanup phase and step when available', async () => {
+  const route = captureRoute({
+    deleteAccount: async () => {
+      throw new AccountDeletionCleanupError('delete_fcm_tokens', 'permission-denied', 'list_token_docs');
+    },
+  });
+  const res = createRes();
+  await route.handler({ headers: { authorization: 'Bearer token' }, body: { confirm: true } } as never, res as never);
+
+  assert.equal(res.statusCode, 500);
+  assert.deepEqual(res.body, {
+    error: {
+      code: 'account_deletion_cleanup_failed',
+      phase: 'delete_fcm_tokens',
+      step: 'list_token_docs',
+      firebaseCode: 'permission-denied',
+      message: '계정 삭제 처리 중 문제가 발생했습니다.',
+    },
+  });
+});

@@ -1,5 +1,6 @@
 import type {
   AccountDeletionCleanupPhase,
+  AccountDeletionCleanupStep,
   DeleteMyAccountResult,
   UserAccountClock,
   UserAccountRepository,
@@ -8,7 +9,8 @@ import type {
 export class AccountDeletionCleanupError extends Error {
   constructor(
     readonly phase: AccountDeletionCleanupPhase,
-    readonly firebaseCode: string | undefined
+    readonly firebaseCode: string | undefined,
+    readonly step?: AccountDeletionCleanupStep
   ) {
     super(`Account deletion cleanup failed during ${phase}`);
     this.name = 'AccountDeletionCleanupError';
@@ -23,7 +25,7 @@ export async function deleteMyAccount(params: {
   void params.clock;
   const cleanup = await params.repository.deleteUserAccountState({ uid: params.uid });
   if (cleanup.status === 'failed') {
-    throw new AccountDeletionCleanupError(cleanup.phase, cleanup.firebaseCode);
+    throw new AccountDeletionCleanupError(cleanup.phase, cleanup.firebaseCode, cleanup.step);
   }
   return {
     status: 'deleted',
