@@ -148,7 +148,11 @@ test('delete account route deletes Firestore account state before Firebase Auth 
 
 test('delete account route fails closed when Firebase Auth deletion fails', async () => {
   const route = captureRoute({
-    deleteUser: async () => { throw new Error('auth delete failed'); },
+    deleteUser: async () => {
+      const error = new Error('auth delete failed') as Error & { code: string };
+      error.code = 'auth/internal-error';
+      throw error;
+    },
   });
   const res = createRes();
   await route.handler({ headers: { authorization: 'Bearer token' }, body: { confirm: true } } as never, res as never);
@@ -156,10 +160,26 @@ test('delete account route fails closed when Firebase Auth deletion fails', asyn
   assert.equal(res.statusCode, 500);
   assert.deepEqual(res.body, {
     error: {
-      code: 'account_deletion_failed',
+      code: 'account_deletion_auth_failed',
       message: '계정 삭제 처리 중 문제가 발생했습니다.',
     },
   });
+  assert.equal((route.calls[0] as { uid: string }).uid, 'verified-user');
+});
+
+test('delete account route treats missing Auth user as idempotent deletion success', async () => {
+  const route = captureRoute({
+    deleteUser: async () => {
+      const error = new Error('user not found') as Error & { code: string };
+      error.code = 'auth/user-not-found';
+      throw error;
+    },
+  });
+  const res = createRes();
+  await route.handler({ headers: { authorization: 'Bearer token' }, body: { confirm: true } } as never, res as never);
+
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, { status: 'deleted' });
   assert.equal((route.calls[0] as { uid: string }).uid, 'verified-user');
 });
 
@@ -173,7 +193,7 @@ test('delete account route maps storage failure', async () => {
   assert.equal(res.statusCode, 500);
   assert.deepEqual(res.body, {
     error: {
-      code: 'account_deletion_failed',
+      code: 'account_deletion_cleanup_failed',
       message: '계정 삭제 처리 중 문제가 발생했습니다.',
     },
   });

@@ -109,3 +109,36 @@ test('Firestore account repository cleanup is idempotent without nickname reserv
   });
   assert.deepEqual(db.deletedPaths, ['users/missing-user']);
 });
+
+test('Firestore account repository deletes freshly re-onboarded starpoem profile and reservation', async () => {
+  const db = new FakeDb({
+    'users/m28rhnqrTtcQiT04Szff2HBSZ5q1': {
+      uid: 'm28rhnqrTtcQiT04Szff2HBSZ5q1',
+      nickname: 'starpoem',
+      normalizedNickname: 'starpoem',
+      gender: 'male',
+      age: 22,
+      interests: ['취업', '진로', '학업', '시험', '연애'],
+    },
+    'nicknameReservations/starpoem': {
+      uid: 'm28rhnqrTtcQiT04Szff2HBSZ5q1',
+      nickname: 'starpoem',
+      normalizedNickname: 'starpoem',
+    },
+  });
+
+  const result = await createFirestoreUserAccountRepository({ db: db as never })
+    .deleteUserAccountState({ uid: 'm28rhnqrTtcQiT04Szff2HBSZ5q1' });
+
+  assert.deepEqual(result, {
+    deletedTokenCount: 0,
+    deletedReadStateCount: 0,
+    deletedNicknameReservation: true,
+  });
+  assert.deepEqual(db.deletedPaths.sort(), [
+    'nicknameReservations/starpoem',
+    'users/m28rhnqrTtcQiT04Szff2HBSZ5q1',
+  ].sort());
+  assert.equal(db.docs.has('users/m28rhnqrTtcQiT04Szff2HBSZ5q1'), false);
+  assert.equal(db.docs.has('nicknameReservations/starpoem'), false);
+});
