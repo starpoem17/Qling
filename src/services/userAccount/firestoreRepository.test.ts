@@ -20,11 +20,25 @@ class Ref {
 
   collection(name: string) {
     return {
+      get: async () => {
+        this.db.maybeFail(`getCollection:${this.path}/${name}`);
+        this.db.seenCollectionGets.add(`${this.path}/${name}`);
+        const docs = [...this.db.refs.values()]
+          .filter(ref => ref.path.startsWith(`${this.path}/${name}/`) && this.db.docs.has(ref.path))
+          .map(ref => ({
+            ref,
+            data: () => this.db.docs.get(ref.path),
+          }));
+        return {
+          empty: docs.length === 0,
+          docs,
+        };
+      },
       listDocuments: async () => {
-        this.db.maybeFail(`list:${this.path}/${name}`);
-        this.db.seenCollectionLists.add(`${this.path}/${name}`);
-        return [...this.db.refs.values()]
-          .filter(ref => ref.path.startsWith(`${this.path}/${name}/`) && this.db.docs.has(ref.path));
+        this.db.listDocumentsCalls += 1;
+        throw Object.assign(new Error('listDocuments must not be used by account deletion cleanup'), {
+          code: 'fake/list-documents-forbidden',
+        });
       },
     };
   }
@@ -56,8 +70,10 @@ class FakeDb {
   docs = new Map<string, Record<string, unknown>>();
   refs = new Map<string, Ref>();
   deletedPaths: string[] = [];
-  seenCollectionLists = new Set<string>();
+  deletedRefs: Ref[] = [];
+  seenCollectionGets = new Set<string>();
   seenCollectionRoots = new Set<string>();
+  listDocumentsCalls = 0;
   readonly existingEmptyCollections: Set<string>;
   readonly stickyDeletePaths: Set<string>;
   private readonly failOnCall: Map<string, Set<number>>;
@@ -104,6 +120,7 @@ class FakeDb {
         }
         for (const ref of deletes) {
           ref.deleted = true;
+          this.deletedRefs.push(ref);
           this.deletedPaths.push(ref.path);
           if (this.stickyDeletePaths.has(ref.path)) continue;
           this.docs.delete(ref.path);
@@ -170,6 +187,7 @@ test('Firestore account repository deletes profile session state and nickname re
     'users/user-1/fcmTokens/token-2',
     'users/user-1/replyReadStates/reply-1',
   ].sort());
+  assert.equal(db.listDocumentsCalls, 0);
 });
 
 test('Firestore account repository cleanup is idempotent without nickname reservation', async () => {
@@ -304,9 +322,10 @@ test('delete_fcm_tokens succeeds when fcmTokens subcollection exists but is empt
 });
 
 test('delete_fcm_tokens deletes one token doc', async () => {
+  const tokenPath = 'users/user-1/fcmTokens/token-1';
   const db = new FakeDb({
     'users/user-1': { uid: 'user-1' },
-    'users/user-1/fcmTokens/token-1': { token: 'token-1' },
+    [tokenPath]: { token: 'token-1' },
   });
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
@@ -314,7 +333,9 @@ test('delete_fcm_tokens deletes one token doc', async () => {
 
   assert.equal(result.status, 'success');
   assert.equal(result.deletedTokenCount, 1);
-  assert.equal(db.deletedPaths.includes('users/user-1/fcmTokens/token-1'), true);
+  assert.equal(db.deletedPaths.includes(tokenPath), true);
+  assert.equal(db.deletedRefs.includes(db.ref(tokenPath)), true);
+  assert.equal(db.listDocumentsCalls, 0);
 });
 
 test('delete_fcm_tokens deletes multiple token docs', async () => {
@@ -377,7 +398,7 @@ test('delete_fcm_tokens reports list_token_docs step when token doc listing fail
   const db = new FakeDb({
     'users/user-1': { uid: 'user-1' },
     'users/user-1/fcmTokens/token-1': { token: 'token-1' },
-  }, new Set(['list:users/user-1/fcmTokens']));
+  }, new Set(['getCollection:users/user-1/fcmTokens']));
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
     .deleteUserAccountState({ uid: 'user-1' });
@@ -443,7 +464,7 @@ for (const readState of readStateCases) {
     assert.equal(result.status, 'success');
     assert.equal(result.deletedReadStateCount, 1);
     assert.equal(db.seenCollectionRoots.has('users/user-1'), true);
-    assert.equal(db.seenCollectionLists.has(`users/user-1/${readState.collectionName}`), false);
+    assert.equal(db.seenCollectionGets.has(`users/user-1/${readState.collectionName}`), false);
     assert.equal(db.deletedPaths.includes(`users/user-1/${readState.otherCollectionName}/other-1`), true);
     assert.equal(db.deletedPaths.includes('users/user-1'), true);
   });
@@ -460,15 +481,18 @@ for (const readState of readStateCases) {
 
     assert.equal(result.status, 'success');
     assert.equal(result.deletedReadStateCount, 0);
-    assert.equal(db.seenCollectionLists.has(`users/user-1/${readState.collectionName}`), true);
+    assert.equal(db.seenCollectionGets.has(`users/user-1/${readState.collectionName}`), true);
     assert.equal(db.deletedPaths.includes('users/user-1'), true);
   });
 
   test(`${readState.label} cleanup deletes one document by reference`, async () => {
+    const docPath = `users/user-1/${readState.collectionName}/${readState.docPrefix}-1`;
     const db = new FakeDb({
       'users/user-1': { uid: 'user-1' },
-      [`users/user-1/${readState.collectionName}/${readState.docPrefix}-1`]: {
-        unexpectedId: 'not-a-path-source',
+      [docPath]: {
+        deliveryId: 'field-derived-path-must-not-be-used',
+        recipientUid: 'wrong-user',
+        worryId: 'wrong-worry',
       },
     });
 
@@ -477,7 +501,10 @@ for (const readState of readStateCases) {
 
     assert.equal(result.status, 'success');
     assert.equal(result.deletedReadStateCount, 1);
-    assert.equal(db.deletedPaths.includes(`users/user-1/${readState.collectionName}/${readState.docPrefix}-1`), true);
+    assert.equal(db.deletedPaths.includes(docPath), true);
+    assert.equal(db.deletedRefs.includes(db.ref(docPath)), true);
+    assert.equal(db.deletedPaths.includes(`users/user-1/${readState.collectionName}/field-derived-path-must-not-be-used`), false);
+    assert.equal(db.listDocumentsCalls, 0);
   });
 
   test(`${readState.label} cleanup deletes multiple documents by reference`, async () => {
@@ -518,7 +545,7 @@ for (const readState of readStateCases) {
     const db = new FakeDb({
       'users/user-1': { uid: 'user-1' },
       [`users/user-1/${readState.collectionName}/${readState.docPrefix}-1`]: {},
-    }, new Set([`list:users/user-1/${readState.collectionName}`]));
+    }, new Set([`getCollection:users/user-1/${readState.collectionName}`]));
 
     const result = await createFirestoreUserAccountRepository({ db: db as never })
       .deleteUserAccountState({ uid: 'user-1' });

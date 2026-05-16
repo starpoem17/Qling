@@ -250,7 +250,10 @@ async function cleanupUserSubcollection(params: {
   const refs = await params.runCleanupStep(
     params.phase,
     params.listDocsStep,
-    () => collection.result.listDocuments()
+    async () => {
+      const snapshot = await collection.result.get();
+      return snapshot.docs.map(doc => doc.ref);
+    }
   );
   if (refs.status === 'failed') throw cleanupStepError(refs);
 
@@ -262,8 +265,8 @@ async function cleanupUserSubcollection(params: {
   if (committed.status === 'failed') throw cleanupStepError(committed);
 
   const verified = await params.runCleanupStep(params.phase, params.verifyDeletesStep, async () => {
-    const remainingRefs = await collection.result.listDocuments();
-    if (remainingRefs.length > 0) {
+    const snapshot = await collection.result.get();
+    if (!snapshot.empty && snapshot.docs.length > 0) {
       throw Object.assign(new Error(`${params.collectionName} documents still exist`), {
         code: params.verificationCode,
       });

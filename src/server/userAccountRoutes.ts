@@ -22,9 +22,16 @@ function accountDeletionFailure(
   console.error('Account deletion failed:', {
     code,
     uid,
+    phase: error instanceof AccountDeletionCleanupError ? error.phase : undefined,
     step: error instanceof AccountDeletionCleanupError ? error.step : undefined,
-    errorCode: typeof error === 'object' && error !== null && 'code' in error ? (error as { code?: unknown }).code : undefined,
+    errorCode: error instanceof AccountDeletionCleanupError
+      ? error.firebaseCode
+      : typeof error === 'object' && error !== null && 'code' in error
+        ? (error as { code?: unknown }).code
+        : undefined,
+    errorName: error instanceof Error ? error.name : undefined,
     errorMessage: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
   });
   const phase = error instanceof AccountDeletionCleanupError ? error.phase : undefined;
   const step = error instanceof AccountDeletionCleanupError ? error.step : undefined;
