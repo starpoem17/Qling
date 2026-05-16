@@ -140,6 +140,8 @@ async function listCollectionDocumentRefs(
 }
 
 async function commitDeletes(db: Firestore, refs: DocumentReference[]) {
+  if (refs.length === 0) return;
+
   for (let index = 0; index < refs.length; index += 450) {
     const batch = db.batch();
     for (const ref of refs.slice(index, index + 450)) {
