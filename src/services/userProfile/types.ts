@@ -44,6 +44,17 @@ export type CompleteOnboardingResult =
       readonly message: string;
     };
 
+export type UpdateInterestsResult =
+  | {
+      readonly status: 'updated';
+      readonly interests: readonly WorryCategory[];
+    }
+  | {
+      readonly status: 'invalid' | 'server_error';
+      readonly code: string;
+      readonly message: string;
+    };
+
 export type NicknameReservationRepository = {
   readonly reserveNickname: (params: {
     readonly uid: string;
@@ -51,4 +62,11 @@ export type NicknameReservationRepository = {
     readonly normalizedNickname: string;
   }) => Promise<NicknameReservationResult>;
   readonly completeOnboarding: (params: UserProfileWriteModel) => Promise<CompleteOnboardingResult>;
+};
+
+export type UserProfileRepository = NicknameReservationRepository & {
+  readonly updateInterests: (params: {
+    readonly uid: string;
+    readonly interests: readonly WorryCategory[];
+  }) => Promise<UpdateInterestsResult>;
 };

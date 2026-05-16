@@ -155,7 +155,7 @@ test('routes pass, feedback, write, detail, and my-page subroute targets', () =>
     worryId: undefined,
   });
   assert.equal(routeToMyAnswers(), 'my_answers');
-  assert.equal(routeToMyWorries(), '나의 고민');
+  assert.equal(routeToMyWorries(), 'my_worries');
   assert.equal(routeToEditInterests(), 'edit_interests');
 });
 
@@ -182,6 +182,7 @@ test('defines my-page subroutes including confirmations and policy routes', () =
   assert.deepEqual(MY_PAGE_SUBROUTES, [
     'edit_interests',
     'my_answers',
+    'my_worries',
     'privacy_policy',
     'operation_policy',
     'logout_confirmation',
@@ -213,6 +214,27 @@ test('maps detail, write, policy, and confirmation routes to their owning PRD ta
   assert.equal(tabForRoute('login'), null);
   assert.equal(tabForRoute('loading'), null);
   assert.equal(tabForRoute('onboarding_interests'), null);
+});
+
+test('Phase 10 my-page account routes include policy/settings/confirmation routes and exclude login policy links', () => {
+  for (const route of [
+    '마이페이지',
+    'edit_interests',
+    'my_answers',
+    'my_worries',
+    'privacy_policy',
+    'operation_policy',
+    'logout_confirmation',
+    'account_deletion_confirmation',
+    'notification_settings',
+    'app_install_guide',
+  ] as const) {
+    assert.equal(tabForRoute(route), route === 'my_worries' ? '나의 고민' : '마이페이지');
+  }
+
+  assert.equal((MY_PAGE_SUBROUTES as readonly string[]).includes('terms'), false);
+  assert.equal((MY_PAGE_SUBROUTES as readonly string[]).includes('usage_guide'), false);
+  assert.equal(tabForRoute('login'), null);
 });
 
 test('defines the central bottom-navigation write-worry action contract', () => {

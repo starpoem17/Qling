@@ -62,6 +62,7 @@ export type DeprecatedMyPageMoreItem = (typeof DEPRECATED_MY_PAGE_MORE_ITEMS)[nu
 export const MY_PAGE_SUBROUTES = [
   'edit_interests',
   'my_answers',
+  'my_worries',
   'privacy_policy',
   'operation_policy',
   'logout_confirmation',
@@ -184,7 +185,7 @@ export function routeToMyAnswers(): AppRoute {
 }
 
 export function routeToMyWorries(): AppRoute {
-  return '나의 고민';
+  return 'my_worries';
 }
 
 export function routeToMyWorryDetail(params: { worryId: string }): AppRouteState {

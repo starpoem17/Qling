@@ -2,6 +2,7 @@ import { ArrowLeft, Bell, Heart, QrCode, Send, Share2, Shield, Sparkles, Trash2,
 import { QRCodeSVG } from 'qrcode.react';
 import type {
   ConfirmationProps,
+  EditInterestsProps,
   MyPageScreenProps,
   MyPageSettingItem,
   PolicyScreenProps,
@@ -125,7 +126,7 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
   );
 }
 
-export function EditInterestsStubScreen(props: { readonly interests: readonly string[]; readonly onBack: () => void }) {
+export function EditInterestsScreen(props: EditInterestsProps) {
   return (
     <div className="space-y-8">
       <button onClick={props.onBack} className="mb-2 flex items-center gap-2 text-[#8B8B6B] hover:text-[#5A5A40] transition-colors">
@@ -133,15 +134,33 @@ export function EditInterestsStubScreen(props: { readonly interests: readonly st
       </button>
       <div className="text-left space-y-2">
         <h1 className="text-3xl font-serif font-bold text-[#5A5A40]">관심 분야 수정</h1>
-        <p className="text-[#8B8B6B]">관심 분야 수정 기능은 다음 단계에서 실제 저장 흐름과 연결됩니다.</p>
+        <p className="text-[#8B8B6B]">답변하고 싶은 주제를 선택해주세요.</p>
       </div>
       <div className="bg-white p-6 rounded-2xl border border-[#E9EDC9] space-y-4">
-        <div className="text-xs font-bold text-[#D4A373]">현재 관심 분야</div>
+        <div className="text-xs font-bold text-[#D4A373]">관심 분야</div>
         <div className="flex flex-wrap gap-2">
-          {props.interests.map(interest => (
-            <span key={interest} className="px-3 py-1 rounded-full bg-[#FAEDCD] text-xs font-bold text-[#5A5A40]">{interest}</span>
+          {props.categoryOptions.map(interest => (
+            <button
+              key={interest}
+              type="button"
+              onClick={() => props.onInterestToggle(interest)}
+              className={`px-3 py-2 rounded-full text-xs font-bold border ${props.selectedInterests.includes(interest) ? 'bg-[#FAEDCD] border-[#E07A5F] text-[#5A5A40]' : 'bg-white border-[#E9EDC9] text-[#8B8B6B]'}`}
+            >
+              {interest}
+            </button>
           ))}
         </div>
+        {props.validationMessages.interests && (
+          <p className="text-sm text-red-500">{props.validationMessages.interests}</p>
+        )}
+        <button
+          type="button"
+          onClick={props.onSubmit}
+          disabled={props.isProcessing}
+          className="w-full py-3 bg-[#5A5A40] text-white rounded-xl font-bold disabled:opacity-50"
+        >
+          {props.isProcessing ? '저장 중...' : '저장'}
+        </button>
       </div>
     </div>
   );

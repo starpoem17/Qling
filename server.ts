@@ -25,6 +25,7 @@ import { registerUserAccountRoutes } from "./src/server/userAccountRoutes";
 import { registerUserProfileRoutes } from "./src/server/userProfileRoutes";
 import { registerAdminHidingRoutes } from "./src/server/adminHidingRoutes";
 import { registerAnswerFeedRoutes } from "./src/server/answerFeedRoutes";
+import { registerPolicyRoutes } from "./src/server/policyRoutes";
 
 // Read client config to get database ID
 const clientConfigPath = path.join(process.cwd(), 'firebase-applet-config.json');
@@ -64,6 +65,7 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+  registerPolicyRoutes(app);
 
   if (getApps().length > 0) {
     registerWorryRoutes(app, {

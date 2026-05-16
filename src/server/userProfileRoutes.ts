@@ -3,9 +3,10 @@ import type { Auth } from 'firebase-admin/auth';
 import type { Firestore } from 'firebase-admin/firestore';
 import { createRequireActiveFirebaseAuth, type ActiveAuthenticatedRequest } from './auth';
 import { completeOnboarding, reserveNickname } from '../services/userProfile/onboardingProfile';
+import { updateMyInterests } from '../services/userProfile/profileInterests';
 import { validateAge, validateNickname, isValidGender, normalizeInterests } from '../services/userProfile/profileValidation';
 import { createUserProfileFirestoreRepository } from '../services/userProfile/firestoreRepository';
-import type { NicknameReservationRepository } from '../services/userProfile/types';
+import type { UserProfileRepository } from '../services/userProfile/types';
 
 function sendServiceResult(res: express.Response, result: { status: string; code?: string; message?: string }) {
   if (result.status === 'available' || result.status === 'completed') {
@@ -26,13 +27,16 @@ function sendServiceResult(res: express.Response, result: { status: string; code
 export function registerUserProfileRoutes(app: express.Express, deps: {
   readonly db: Firestore | null;
   readonly auth: Pick<Auth, 'verifyIdToken'>;
-  readonly repository?: NicknameReservationRepository;
+  readonly repository?: UserProfileRepository;
 }): void {
   if (!deps.db && !deps.repository) {
     app.post('/api/users/me/nickname-reservation', (_req, res) => {
       res.status(503).json({ error: { code: 'firebase_unavailable', message: 'Firebase Admin is not initialized.' } });
     });
     app.post('/api/users/me/onboarding-profile', (_req, res) => {
+      res.status(503).json({ error: { code: 'firebase_unavailable', message: 'Firebase Admin is not initialized.' } });
+    });
+    app.patch('/api/users/me/interests', (_req, res) => {
       res.status(503).json({ error: { code: 'firebase_unavailable', message: 'Firebase Admin is not initialized.' } });
     });
     return;
@@ -83,5 +87,21 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
       },
       repository,
     }));
+  });
+
+  app.patch('/api/users/me/interests', requireAuth, async (req, res) => {
+    const authReq = req as ActiveAuthenticatedRequest;
+    const result = await updateMyInterests({
+      uid: authReq.auth.uid,
+      interests: Array.isArray(req.body?.interests) ? req.body.interests : [],
+      repository,
+    });
+
+    if (result.status === 'updated') {
+      res.status(200).json(result);
+      return;
+    }
+
+    res.status(400).json({ error: { code: result.code, message: result.message } });
   });
 }

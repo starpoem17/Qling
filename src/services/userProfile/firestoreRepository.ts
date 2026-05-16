@@ -6,6 +6,7 @@ import type {
   CompleteOnboardingResult,
   NicknameReservationRepository,
   NicknameReservationResult,
+  UserProfileRepository,
   UserProfileWriteModel,
 } from './types';
 
@@ -25,7 +26,7 @@ function profileData(params: UserProfileWriteModel, timestamp: unknown) {
 
 export function createUserProfileFirestoreRepository(params: {
   readonly db: Firestore;
-}): NicknameReservationRepository {
+}): UserProfileRepository {
   const { db } = params;
 
   return {
@@ -106,6 +107,19 @@ export function createUserProfileFirestoreRepository(params: {
           profile: params,
         };
       });
+    },
+
+    async updateInterests(params) {
+      const timestamp = FieldValue.serverTimestamp();
+      await db.collection('users').doc(params.uid).set({
+        interests: [...params.interests],
+        updatedAt: timestamp,
+      }, { merge: true });
+
+      return {
+        status: 'updated' as const,
+        interests: params.interests,
+      };
     },
   };
 }

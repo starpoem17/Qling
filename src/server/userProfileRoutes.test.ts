@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { registerUserProfileRoutes } from './userProfileRoutes';
-import type { NicknameReservationRepository } from '../services/userProfile/types';
+import type { UserProfileRepository } from '../services/userProfile/types';
 
 function createRes() {
   return {
@@ -18,10 +18,13 @@ function createRes() {
   };
 }
 
-function captureRoutes(repository: NicknameReservationRepository) {
+function captureRoutes(repository: UserProfileRepository) {
   const routes = new Map<string, Array<(req: unknown, res: unknown, next?: () => void) => unknown>>();
   const app = {
     post(path: string, ...handlers: Array<(req: unknown, res: unknown, next?: () => void) => unknown>) {
+      routes.set(path, handlers);
+    },
+    patch(path: string, ...handlers: Array<(req: unknown, res: unknown, next?: () => void) => unknown>) {
       routes.set(path, handlers);
     },
   };
@@ -69,6 +72,9 @@ test('nickname reservation route uses verified uid and maps duplicate response',
     async completeOnboarding() {
       throw new Error('unused');
     },
+    async updateInterests() {
+      throw new Error('unused');
+    },
   });
 
   const res = await route.call('/api/users/me/nickname-reservation', { nickname: ' QLING ' });
@@ -92,6 +98,9 @@ test('onboarding profile route persists required age, gender, interests, and nic
       });
       return { status: 'completed', profile: params };
     },
+    async updateInterests() {
+      throw new Error('unused');
+    },
   });
 
   const res = await route.call('/api/users/me/onboarding-profile', {
@@ -114,6 +123,9 @@ test('onboarding profile route rejects invalid required fields before persistenc
       called = true;
       throw new Error('should not persist');
     },
+    async updateInterests() {
+      throw new Error('unused');
+    },
   });
 
   const res = await route.call('/api/users/me/onboarding-profile', {
@@ -122,6 +134,55 @@ test('onboarding profile route rejects invalid required fields before persistenc
     age: 13,
     interests: ['워라밸'],
   });
+  assert.equal(res.statusCode, 400);
+  assert.equal(called, false);
+});
+
+test('interests update route accepts only valid interests and verified uid', async () => {
+  const route = captureRoutes({
+    async reserveNickname() {
+      throw new Error('unused');
+    },
+    async completeOnboarding() {
+      throw new Error('unused');
+    },
+    async updateInterests(params) {
+      assert.deepEqual(params, {
+        uid: 'verified-user',
+        interests: ['워라밸'],
+      });
+      return { status: 'updated', interests: params.interests };
+    },
+  });
+
+  const res = await route.call('/api/users/me/interests', {
+    interests: ['워라밸', '워라벨'],
+    nickname: 'should-not-persist',
+    gender: 'male',
+    age: 30,
+  });
+
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, { status: 'updated', interests: ['워라밸'] });
+});
+
+test('interests update route rejects empty interests before persistence', async () => {
+  let called = false;
+  const route = captureRoutes({
+    async reserveNickname() {
+      throw new Error('unused');
+    },
+    async completeOnboarding() {
+      throw new Error('unused');
+    },
+    async updateInterests() {
+      called = true;
+      throw new Error('should not persist');
+    },
+  });
+
+  const res = await route.call('/api/users/me/interests', { interests: [] });
+
   assert.equal(res.statusCode, 400);
   assert.equal(called, false);
 });

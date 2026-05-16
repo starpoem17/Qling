@@ -437,20 +437,20 @@ Functional screen phases must use real production data sources and production ro
 
 ### Phase 10 - My-Page/Account Functional Expansion
 
-- [ ] TODO-DESIGN-10.1 Implement profile summary using dynamic nickname, interests, PRD-approved self-profile fields only, and helpedCount/received hearts; keep avatar motif as visual detail and do not expose nickname outside my-page summary.
-- [ ] TODO-DESIGN-10.2 Implement edit-interests route/state backed by existing profile update behavior for interests only; gender is not editable in MVP and no gender edit UI should be added.
-- [ ] TODO-DESIGN-10.3 Implement my-answers route/state backed by `useMyGivenReplies`, with dynamic list items and detail navigation; include replies to example worries exactly like real replies and hide any content suppressed by moderation/admin policy.
-- [ ] TODO-DESIGN-10.4 Implement my-worries route/state backed by `useMyWorries` and `useRepliesForWorry`, with dynamic list items and received replies navigation; hide worries and replies suppressed by moderation/admin policy from both publisher and answerer views.
-- [ ] TODO-DESIGN-10.5 Implement privacy policy and operation policy route/state using `docs/privacy_policy.md` and `docs/operation_policy.md` as body sources; if a source file is empty, show a production-safe empty state such as policy body preparation; do not add fake policy copy and do not implement terms or a dedicated usage-guide route for MVP.
-- [ ] TODO-DESIGN-10.6 Implement logout confirmation route/state before calling existing sign-out behavior.
-- [ ] TODO-DESIGN-10.7 Implement account deletion confirmation route/state before calling `deleteMyAccountViaApi`.
-- [ ] TODO-DESIGN-10.8 Preserve logout cleanup: local push registration state is cleared and Firebase auth signs out.
-- [ ] TODO-DESIGN-10.9 Preserve account deletion cleanup: server deletion path runs, local push state is cleaned, and user is signed out.
-- [ ] TODO-DESIGN-10.10 Preserve required push notification settings access in my-page/more with real Web Push permission request, FCM registration, and granted/denied/default status display; do not reduce this to static guidance.
-- [ ] TODO-DESIGN-10.11 Preserve required PWA install/share access in my-page/more as an "앱처럼 사용하기" flow covering Android install, iOS share-to-home-screen guidance, and service URL/QR sharing as applicable.
-- [ ] TODO-DESIGN-10.12 Add route-policy tests for my-page subroutes in `src/services/appShell/prdNavigationPolicy.test.ts`.
-- [ ] TODO-DESIGN-10.13 Add account behavior tests in existing account/push locations, including `src/services/userAccount/deleteMyAccount.test.ts` and `src/services/pushRegistration/internalLifecycle.test.ts` when cleanup behavior changes; push tests must cover permission request, FCM registration, and status mapping when touched.
-- [ ] TODO-DESIGN-10.14 Add pure props-contract tests for helpedCount fallback, destructive-action confirmation props, and settings item routing in the my-page contract test target from Phase 4.
+- [x] TODO-DESIGN-10.1 Implement profile summary using dynamic nickname, interests, PRD-approved self-profile fields only, and helpedCount/received hearts; keep avatar motif as visual detail and do not expose nickname outside my-page summary.
+- [x] TODO-DESIGN-10.2 Implement edit-interests route/state backed by existing profile update behavior for interests only; gender is not editable in MVP and no gender edit UI should be added.
+- [x] TODO-DESIGN-10.3 Implement my-answers route/state backed by `useMyGivenReplies`, with dynamic list items and detail navigation; include replies to example worries exactly like real replies and hide any content suppressed by moderation/admin policy.
+- [x] TODO-DESIGN-10.4 Implement my-worries route/state backed by `useMyWorries` and `useRepliesForWorry`, with dynamic list items and received replies navigation; hide worries and replies suppressed by moderation/admin policy from both publisher and answerer views.
+- [x] TODO-DESIGN-10.5 Implement privacy policy and operation policy route/state using `docs/privacy_policy.md` and `docs/operation_policy.md` as body sources; if a source file is empty, show a production-safe empty state such as policy body preparation; do not add fake policy copy and do not implement terms or a dedicated usage-guide route for MVP.
+- [x] TODO-DESIGN-10.6 Implement logout confirmation route/state before calling existing sign-out behavior.
+- [x] TODO-DESIGN-10.7 Implement account deletion confirmation route/state before calling `deleteMyAccountViaApi`.
+- [x] TODO-DESIGN-10.8 Preserve logout cleanup: local push registration state is cleared and Firebase auth signs out.
+- [x] TODO-DESIGN-10.9 Preserve account deletion cleanup: server deletion path runs, local push state is cleaned, and user is signed out.
+- [x] TODO-DESIGN-10.10 Preserve required push notification settings access in my-page/more with real Web Push permission request, FCM registration, and granted/denied/default status display; do not reduce this to static guidance.
+- [x] TODO-DESIGN-10.11 Preserve required PWA install/share access in my-page/more as an "앱처럼 사용하기" flow covering Android install, iOS share-to-home-screen guidance, and service URL/QR sharing as applicable.
+- [x] TODO-DESIGN-10.12 Add route-policy tests for my-page subroutes in `src/services/appShell/prdNavigationPolicy.test.ts`.
+- [x] TODO-DESIGN-10.13 Add account behavior tests in existing account/push locations, including `src/services/userAccount/deleteMyAccount.test.ts` and `src/services/pushRegistration/internalLifecycle.test.ts` when cleanup behavior changes; push tests must cover permission request, FCM registration, and status mapping when touched.
+- [x] TODO-DESIGN-10.14 Add pure props-contract tests for helpedCount fallback, destructive-action confirmation props, and settings item routing in the my-page contract test target from Phase 4.
 - [ ] TODO-DESIGN-10.15 Add manual screenshot evidence for my page, logout confirmation, and account deletion confirmation using dynamic data, proving hardcoded design values such as `라미` and `314` are gone.
 - [ ] TODO-DESIGN-10.V1 Verify Phase 10 with route tests, account/push tests, props-contract tests, and manual screenshot evidence.
 

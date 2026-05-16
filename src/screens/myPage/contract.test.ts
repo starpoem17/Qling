@@ -10,6 +10,9 @@ import {
   type MyAnswersScreenProps,
   type MyWorriesScreenProps,
   type PolicyScreenProps,
+  type EditInterestsProps,
+  type ConfirmationProps,
+  type AppInstallAccessProps,
 } from './contract';
 
 test('my-page summary limits nickname to profile summary and labels helpedCount as received hearts', () => {
@@ -157,4 +160,49 @@ test('policy screen contract carries title, body or unavailable state', () => {
 
   assert.equal(props.policy, 'privacy_policy');
   assert.equal(props.state.status, 'empty');
+});
+
+test('edit-interests contract exposes only interest fields and callbacks', () => {
+  const props = {
+    categoryOptions: WORRY_CATEGORIES,
+    selectedInterests: ['워라밸'],
+    validationMessages: {},
+    isProcessing: false,
+    onBack: () => undefined,
+    onInterestToggle: () => undefined,
+    onSubmit: () => undefined,
+  } satisfies EditInterestsProps;
+
+  assert.equal(props.selectedInterests.includes('워라밸'), true);
+  for (const forbidden of ['nickname', 'gender', 'age', 'onNicknameChange', 'onGenderChange', 'onAgeChange']) {
+    assert.equal(Object.hasOwn(props, forbidden), false);
+  }
+});
+
+test('confirmation props require explicit destructive/account callbacks without importing deletion logic', () => {
+  const confirmation = {
+    isOpen: true,
+    isProcessing: false,
+    errorMessage: undefined,
+    onCancel: () => undefined,
+    onConfirm: () => undefined,
+  } satisfies ConfirmationProps;
+
+  assert.equal(confirmation.isOpen, true);
+  assert.equal(typeof confirmation.onCancel, 'function');
+  assert.equal(typeof confirmation.onConfirm, 'function');
+});
+
+test('PWA install/share props expose real browser capability states', () => {
+  const props = {
+    canInstall: true,
+    canShare: true,
+    platformGuidance: 'android-install',
+    onInstall: () => undefined,
+    onShare: () => undefined,
+  } satisfies AppInstallAccessProps;
+
+  assert.equal(props.canInstall, true);
+  assert.equal(props.canShare, true);
+  assert.equal(props.platformGuidance, 'android-install');
 });

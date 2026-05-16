@@ -73,9 +73,11 @@ export type PolicyScreenProps = {
 };
 
 export type EditInterestsProps = {
+  readonly categoryOptions: readonly WorryCategory[];
   readonly selectedInterests: readonly WorryCategory[];
   readonly validationMessages: FieldValidationMessages<'interests'>;
   readonly isProcessing: boolean;
+  readonly onBack: () => void;
   readonly onInterestToggle: (value: WorryCategory) => void;
   readonly onSubmit: () => void;
 };

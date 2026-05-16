@@ -1,5 +1,5 @@
 import type { User } from 'firebase/auth';
-import type { CompleteOnboardingInput, CompleteOnboardingResult, NicknameReservationResult } from './types';
+import type { CompleteOnboardingInput, CompleteOnboardingResult, NicknameReservationResult, UpdateInterestsResult } from './types';
 
 async function authHeaders(user: User) {
   return {
@@ -61,4 +61,22 @@ export async function createExampleWorriesViaApi(params: {
     throw new Error(body?.error?.message ?? 'Example worry creation failed.');
   }
   return parseJson(response);
+}
+
+export async function updateMyInterestsViaApi(params: {
+  readonly user: User;
+  readonly interests: readonly string[];
+}): Promise<UpdateInterestsResult> {
+  const response = await fetch('/api/users/me/interests', {
+    method: 'PATCH',
+    headers: await authHeaders(params.user),
+    body: JSON.stringify({ interests: params.interests }),
+  });
+  const body = await parseJson(response);
+  if (response.ok) return body as UpdateInterestsResult;
+  return {
+    status: 'server_error',
+    code: body?.error?.code ?? 'interests_update_failed',
+    message: body?.error?.message ?? '관심 분야 저장 중 문제가 발생했어요.',
+  };
 }
