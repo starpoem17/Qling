@@ -72,13 +72,10 @@ export const APP_TSX_RESPONSIBILITY_INVENTORY = [
   {
     id: 'feature-feed-pass-reply',
     category: 'feature container logic',
-    responsibility: 'Wire received-worries feed, delivery read state, pass mutation, selected worry state, and reply publication',
+    responsibility: 'Select the received-worries route container while write-reply publication remains in App until its container phase',
     appEvidence: [
-      'useHomeWorryFeed({ profile, user, refreshKey })',
-      'markDeliveryReadWithServer(...)',
-      'passDeliveryViaApi(...)',
+      '<ReceivedWorriesContainer ... />',
       'publishReplyViaApi(...)',
-      'filterSuppressedFeedWorries(...)',
     ],
     phase3Boundary: 'future route container',
   },

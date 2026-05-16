@@ -1,7 +1,6 @@
 import {
   useState,
   useEffect,
-  type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from 'react';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
@@ -49,15 +48,9 @@ import { QRCodeSVG } from 'qrcode.react';
 import { cn } from './lib/utils';
 import { publishReplyViaApi } from './services/replyPublication/apiClient';
 import {
-  markDeliveryReadWithServer,
   markRepliesForWorryReadWithServer,
 } from './services/readState/apiClient';
 import { publishWorryViaApi } from './services/worryPublication/apiClient';
-import { passDeliveryViaApi } from './services/deliveries/apiClient';
-import {
-  applyPassResultToSuppressedDeliveryIds,
-  filterSuppressedFeedWorries,
-} from './services/deliveries/uiPolicy';
 import { submitReplyFeedbackWithProductionAdapters } from './services/replyFeedback/production';
 import type { ReplyFeedback } from './services/replyFeedback/types';
 import {
@@ -68,10 +61,6 @@ import {
   type ReplyReadModelItem,
 } from './services/myWorries';
 import { usePushRegistration } from './services/pushRegistration';
-import {
-  useHomeWorryFeed,
-  type HomeWorryFeedLetter,
-} from './services/homeWorryFeed';
 import { deleteMyAccountViaApi } from './services/userAccount/client';
 import {
   CENTRAL_BOTTOM_NAVIGATION_ACTION,
@@ -84,14 +73,12 @@ import {
   routeAfterFeedbackPublish,
   routeAfterAuthProfileLoad,
   routeAfterOnboardingComplete,
-  routeAfterPass,
   routeAfterReplyPublish,
   routeAfterWorryPublish,
   routeToEditInterests,
   routeToMyAnswers,
   routeToMyReplyDetail,
   routeToReceivedReplyDetail,
-  routeToWriteReply,
   routeToWriteWorry,
   resolveAppRouteState,
   type AppRouteState,
@@ -102,6 +89,10 @@ import { routeRenderingBoundaryForRoute } from './services/appShell/routeRenderi
 import { CONTENT_MAX_LENGTH, validateDraftContent } from './services/validation/content';
 import { clearDraft, getDraft, setDraft, type DraftMap } from './services/drafts/contentDrafts';
 import { withAuthProfileUid } from './services/authProfile/profileIdentity';
+import {
+  ReceivedWorriesContainer,
+  type SelectedReceivedWorry,
+} from './screens/receivedWorries/ReceivedWorriesContainer';
 
 // --- Constants ---
 const CATEGORIES = WORRY_CATEGORIES;
@@ -148,7 +139,7 @@ export default function App() {
   
   const [view, setView] = useState<AppRouteViewState>('login');
   
-  const [selectedWorry, setSelectedWorry] = useState<HomeWorryFeedLetter | null>(null);
+  const [selectedWorry, setSelectedWorry] = useState<SelectedReceivedWorry | null>(null);
   const [selectedMyWorry, setSelectedMyWorry] = useState<MyWorryListItem | null>(null);
   const [selectedReply, setSelectedReply] = useState<ReplyReadModelItem | null>(null);
   
@@ -190,10 +181,6 @@ export default function App() {
     requestNotificationPermission,
     resetPushRegistrationOnSignOut,
   } = usePushRegistration({ user, loading });
-  const [answerFeedRefreshKey, setAnswerFeedRefreshKey] = useState(0);
-  const { feedWorries } = useHomeWorryFeed({ profile, user, refreshKey: answerFeedRefreshKey });
-  const [suppressedDeliveryIds, setSuppressedDeliveryIds] = useState<Set<string>>(() => new Set());
-  const [passingDeliveryIds, setPassingDeliveryIds] = useState<Set<string>>(() => new Set());
   const { myWorries } = useMyWorries({ user });
   const { repliesForWorry } = useRepliesForWorry({
     user,
@@ -463,7 +450,7 @@ export default function App() {
 
 
   // 2. Send Reply -> Filter Check First
-  const sendReply = async (content: string, worry: HomeWorryFeedLetter) => {
+  const sendReply = async (content: string, worry: SelectedReceivedWorry) => {
     if (!user) return;
     if (!worry.deliveryId) {
       setFilterAlert("이전 형식의 고민에는 새 답장을 보낼 수 없습니다.");
@@ -496,72 +483,11 @@ export default function App() {
       setReplyDrafts(prev => worry.deliveryId ? clearDraft(prev, worry.deliveryId) : prev);
       setSelectedWorry(null);
       setSelectedReply(null);
-      setAnswerFeedRefreshKey(prev => prev + 1);
     } catch (e) {
       console.error(e);
       setFilterAlert("답장 전송 실패");
     } finally {
       setIsProcessing(false);
-    }
-  };
-
-  const openWorryForReply = (worry: HomeWorryFeedLetter) => {
-    setSelectedWorry(worry);
-    if (worry.deliveryId) {
-      setView(routeToWriteReply({ deliveryId: worry.deliveryId, worryId: worry.worryId }));
-    } else {
-      setView('write_reply');
-    }
-
-    if (!user || !worry.deliveryId || worry.source !== 'prd_delivery') return;
-    void markDeliveryReadWithServer({
-      user,
-      deliveryId: worry.deliveryId,
-    }).then(result => {
-      if (result.status === 'failed') {
-        console.error('Failed to mark delivery read:', result.reason);
-      }
-    });
-  };
-
-  const passWorry = async (event: ReactMouseEvent, worry: HomeWorryFeedLetter) => {
-    event.stopPropagation();
-    if (!user || !worry.deliveryId || worry.source !== 'prd_delivery') {
-      setFilterAlert("이전 형식의 고민은 패스할 수 없습니다.");
-      return;
-    }
-
-    setPassingDeliveryIds(prev => new Set(prev).add(worry.deliveryId as string));
-    try {
-      const result = await passDeliveryViaApi({
-        user,
-        deliveryId: worry.deliveryId,
-      });
-
-      if (result.status === 'failed') {
-        setFilterAlert(result.reason || "패스 처리 실패");
-        return;
-      }
-
-      setSuppressedDeliveryIds(prev => applyPassResultToSuppressedDeliveryIds({
-        result,
-        deliveryId: worry.deliveryId as string,
-        suppressedDeliveryIds: prev,
-      }));
-      if (selectedWorry?.deliveryId === worry.deliveryId) {
-        setSelectedWorry(null);
-      }
-      setAnswerFeedRefreshKey(prev => prev + 1);
-      setView(routeAfterPass());
-    } catch (e) {
-      console.error(e);
-      setFilterAlert("패스 처리 실패");
-    } finally {
-      setPassingDeliveryIds(prev => {
-        const next = new Set(prev);
-        next.delete(worry.deliveryId as string);
-        return next;
-      });
     }
   };
 
@@ -593,7 +519,6 @@ export default function App() {
   const homeInterestBadgeText = profileInterests.length === 0
     ? '관심 주제'
     : `${visibleHomeInterestBadgeText}${profileInterests.length > 5 ? '...' : ''}`;
-  const visibleFeedWorries = filterSuppressedFeedWorries({ feedWorries, suppressedDeliveryIds });
   const routeBoundary = routeRenderingBoundaryForRoute(view);
   const currentRoute = routeBoundary.currentRoute;
   const currentMyWorryDetailRoute: Extract<AppRouteState, { route: 'my_worry_detail' }> | null =
@@ -1092,65 +1017,14 @@ export default function App() {
                 <h2 className="text-2xl font-serif font-bold">답변하기</h2>
                 <span className="text-xs bg-[#E9EDC9] text-[#5A5A40] px-3 py-1 rounded-full">{homeInterestBadgeText}</span>
               </div>
-
-              {visibleFeedWorries.length === 0 ? (
-                <div className="text-center py-16 bg-white/50 rounded-3xl border border-dashed border-[#E9EDC9]">
-                  <MessageSquare className="w-12 h-12 text-[#E9EDC9] mx-auto mb-3" />
-                  <p className="text-[#8B8B6B]">아직 답변할 고민이 없어요.</p>
-                </div>
-              ) : (
-                <div className="grid gap-6">
-                  {visibleFeedWorries.map(worry => (
-                    <div
-                      key={worry.id}
-                      className={cn(
-                        "bg-white p-6 rounded-2xl shadow-sm border relative group",
-                        worry.hasUnread ? "border-[#E07A5F] bg-[#FFF8F1]" : "border-[#FAEDCD]"
-                      )}
-                    >
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="px-2.5 py-1 bg-[#FAEDCD] text-[#D4A373] text-[10px] font-bold rounded-lg border border-[#E9EDC9]">
-                          {worry.category || '기타'}
-                        </span>
-                        <span className="text-[#8B8B6B] text-xs">· 조금 전 수신됨</span>
-                      </div>
-                      <p className="text-[#5A5A40] leading-relaxed mb-6 whitespace-pre-wrap font-medium">
-                        "{worry.refinedContent}"
-                      </p>
-                      {myGivenReplies.some(r => (
-                        r.deliveryId === worry.deliveryId
-                        || r.worryId === worry.worryId
-                        || r.replyTo === worry.id
-                      )) ? (
-                        <div className="w-full py-3 bg-[#E9EDC9]/30 text-[#A3B18A] font-bold border border-[#E9EDC9] rounded-xl flex items-center justify-center gap-2">
-                          <CheckCircle2 className="w-4 h-4" /> 답장 완료!
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-[1fr_auto] gap-2">
-                          <button
-                            onClick={() => openWorryForReply(worry)}
-                            className="min-w-0 py-3 bg-[#FDFCF8] text-[#8B8B6B] font-medium border border-[#E9EDC9] rounded-xl hover:bg-[#FAEDCD] hover:text-[#5A5A40] transition-colors flex items-center justify-center gap-2"
-                          >
-                            <MessageSquare className="w-4 h-4" /> 다정하게 답장해주기
-                          </button>
-                          <button
-                            onClick={(event) => passWorry(event, worry)}
-                            disabled={!worry.deliveryId || passingDeliveryIds.has(worry.deliveryId)}
-                            className="px-4 py-3 bg-white text-[#8B8B6B] font-bold border border-[#E9EDC9] rounded-xl hover:bg-[#FDFCF8] hover:text-[#5A5A40] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                            title="패스"
-                          >
-                            {worry.deliveryId && passingDeliveryIds.has(worry.deliveryId)
-                              ? <Loader2 className="w-4 h-4 animate-spin" />
-                              : <XCircle className="w-4 h-4" />}
-                            <span className="hidden sm:inline">패스</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
+              <ReceivedWorriesContainer
+                user={user}
+                profile={profile}
+                setView={setView}
+                selectedWorry={selectedWorry}
+                setSelectedWorry={setSelectedWorry}
+                setFilterAlert={setFilterAlert}
+              />
             </motion.div>
           )}
 

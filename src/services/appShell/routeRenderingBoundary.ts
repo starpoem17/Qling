@@ -69,7 +69,7 @@ export const ROUTE_RENDERING_BOUNDARY = {
   'received worries': {
     routes: ['답변하기', 'received_worries'],
     appBoundary: 'App shell may select the received-worries route container.',
-    nextContainerBoundary: 'Feed loading, pass/open/read-state, reply entry, loading/empty/error presentation move in Phase 5.',
+    nextContainerBoundary: 'Feed loading, pass/open/read-state, reply entry, and loading/empty/error presentation are owned by the Phase 5 received-worries route container.',
   },
   'write worry': {
     routes: ['write_worry'],

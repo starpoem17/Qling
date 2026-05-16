@@ -385,12 +385,12 @@ Presentational screen contracts must be defined before container wiring. Present
 
 Functional screen phases must use real production data sources and production route state. Skeleton data is allowed only when explicitly marked as temporary, isolated to non-user-facing route exercise, and removed before the corresponding functional phase verification item is checked.
 
-- [ ] TODO-DESIGN-5.1 Implement received-worries container wiring to `useHomeWorryFeed`, `filterSuppressedFeedWorries`, and route helpers.
-- [ ] TODO-DESIGN-5.2 Keep pass behavior in the container/service path using `passDeliveryViaApi`, delivery suppression policy, loading-by-delivery-id state, and feed refresh behavior.
-- [ ] TODO-DESIGN-5.3 Keep open-for-reply behavior in the container/service path using selected worry state, route helpers, and read-state marking.
-- [ ] TODO-DESIGN-5.4 Ensure the received-worries presentational screen only receives props and emits events; it must not import delivery APIs, read-state APIs, Firebase, or service internals.
-- [ ] TODO-DESIGN-5.5 Verify no visual reskin work begins in this phase beyond minimal functional UI needed to exercise the container.
-- [ ] TODO-DESIGN-5.V1 Verify Phase 5 with container notes, props-contract tests, and manual browser-note evidence for a functional received-worries skeleton.
+- [x] TODO-DESIGN-5.1 Implement received-worries container wiring to `useHomeWorryFeed`, `filterSuppressedFeedWorries`, and route helpers.
+- [x] TODO-DESIGN-5.2 Keep pass behavior in the container/service path using `passDeliveryViaApi`, delivery suppression policy, loading-by-delivery-id state, and feed refresh behavior.
+- [x] TODO-DESIGN-5.3 Keep open-for-reply behavior in the container/service path using selected worry state, route helpers, and read-state marking.
+- [x] TODO-DESIGN-5.4 Ensure the received-worries presentational screen only receives props and emits events; it must not import delivery APIs, read-state APIs, Firebase, or service internals.
+- [x] TODO-DESIGN-5.5 Verify no visual reskin work begins in this phase beyond minimal functional UI needed to exercise the container.
+- [x] TODO-DESIGN-5.V1 Verify Phase 5 with container notes, props-contract tests, and manual browser-note evidence for a functional received-worries skeleton.
 
 ### Phase 6 - Write Forms Container Boundary
 

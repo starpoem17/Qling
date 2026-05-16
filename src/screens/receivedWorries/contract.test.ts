@@ -51,3 +51,10 @@ test('received-worries contract has no completed-reply display state', () => {
     assert.equal(itemKeys.includes(forbidden), false);
   }
 });
+
+test('received-worries pass callback accepts delivery id without a DOM event', () => {
+  type PassCallbackParameter = Parameters<ReceivedWorriesScreenProps['onPass']>[0];
+  const deliveryId: PassCallbackParameter = 'delivery-1';
+
+  assert.equal(deliveryId, 'delivery-1');
+});
