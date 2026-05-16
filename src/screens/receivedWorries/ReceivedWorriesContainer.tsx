@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { User } from 'firebase/auth';
 import { passDeliveryViaApi } from '../../services/deliveries/apiClient';
@@ -18,6 +18,7 @@ import {
   type AppRouteViewState,
 } from '../../services/appShell/prdNavigationPolicy';
 import { ReceivedWorriesScreen } from './ReceivedWorriesScreen';
+import { canStartPassMutation, stateForReceivedWorries } from './containerPolicy';
 import { mapHomeWorryFeedLetterToReceivedWorryFeedItem } from './mapping';
 
 export type SelectedReceivedWorry = Pick<
@@ -36,22 +37,21 @@ export type ReceivedWorriesContainerProps = {
 
 export function ReceivedWorriesContainer(props: ReceivedWorriesContainerProps) {
   const [answerFeedRefreshKey, setAnswerFeedRefreshKey] = useState(0);
-  const { feedWorries } = useHomeWorryFeed({
+  const { feedWorries, feedStatus, feedError } = useHomeWorryFeed({
     profile: props.profile,
     user: props.user,
     refreshKey: answerFeedRefreshKey,
   });
   const [suppressedDeliveryIds, setSuppressedDeliveryIds] = useState<Set<string>>(() => new Set());
   const [passingDeliveryIds, setPassingDeliveryIds] = useState<Set<string>>(() => new Set());
+  const passingDeliveryIdsRef = useRef<Set<string>>(new Set());
 
   const visibleFeedWorries = filterSuppressedFeedWorries({ feedWorries, suppressedDeliveryIds });
   const items = visibleFeedWorries.flatMap(worry => {
     const item = mapHomeWorryFeedLetterToReceivedWorryFeedItem(worry);
     return item ? [item] : [];
   });
-  const state = items.length === 0
-    ? { status: 'empty' as const, message: '아직 답변할 고민이 없어요.' }
-    : { status: 'ready' as const };
+  const state = stateForReceivedWorries({ feedStatus, feedError, items });
 
   const openWorryForReply = (deliveryId: string) => {
     const worry = visibleFeedWorries.find(item => item.deliveryId === deliveryId);
@@ -81,8 +81,12 @@ export function ReceivedWorriesContainer(props: ReceivedWorriesContainerProps) {
       props.setFilterAlert('이전 형식의 고민은 패스할 수 없습니다.');
       return;
     }
+    if (!canStartPassMutation({ deliveryId: worry.deliveryId, passingDeliveryIds: passingDeliveryIdsRef.current })) {
+      return;
+    }
 
-    setPassingDeliveryIds(prev => new Set(prev).add(worry.deliveryId as string));
+    passingDeliveryIdsRef.current = new Set(passingDeliveryIdsRef.current).add(worry.deliveryId);
+    setPassingDeliveryIds(new Set(passingDeliveryIdsRef.current));
     try {
       const result = await passDeliveryViaApi({
         user: props.user,
@@ -108,11 +112,10 @@ export function ReceivedWorriesContainer(props: ReceivedWorriesContainerProps) {
       console.error(e);
       props.setFilterAlert('패스 처리 실패');
     } finally {
-      setPassingDeliveryIds(prev => {
-        const next = new Set(prev);
-        next.delete(worry.deliveryId as string);
-        return next;
-      });
+      const next = new Set(passingDeliveryIdsRef.current);
+      next.delete(worry.deliveryId);
+      passingDeliveryIdsRef.current = next;
+      setPassingDeliveryIds(next);
     }
   };
 

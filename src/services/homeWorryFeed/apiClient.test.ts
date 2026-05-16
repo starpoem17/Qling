@@ -68,3 +68,17 @@ test('answer feed API client rejects malformed success response', async () => {
     reason: '답변 피드 응답을 해석할 수 없습니다.',
   });
 });
+
+test('answer feed API client rejects missing items response', async () => {
+  const result = await fetchPrdAnswerFeedViaApi({
+    user: user as never,
+    fetchImpl: async () => new Response(JSON.stringify({
+      status: 'ok',
+    }), { status: 200 }),
+  });
+
+  assert.deepEqual(result, {
+    status: 'failed',
+    reason: '답변 피드 응답을 해석할 수 없습니다.',
+  });
+});

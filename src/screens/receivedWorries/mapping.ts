@@ -30,6 +30,9 @@ function displayDateFromTimestamp(createdAt: HomeWorryFeedLetter['createdAt']): 
 export function mapHomeWorryFeedLetterToReceivedWorryFeedItem(
   worry: HomeWorryFeedLetter
 ): ReceivedWorryFeedItem | null {
+  if (worry.status && worry.status !== 'active') {
+    return null;
+  }
   if (!worry.deliveryId || !worry.worryId) {
     return null;
   }

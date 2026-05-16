@@ -45,6 +45,24 @@ test('drops legacy fallback items without delivery and worry ids', () => {
   assert.equal(item, null);
 });
 
+test('drops answered or terminal feed letters before they reach screen props', () => {
+  for (const status of ['answered', 'passed', 'hidden'] as const) {
+    const item = mapHomeWorryFeedLetterToReceivedWorryFeedItem({
+      id: `delivery-${status}`,
+      senderId: 'author-1',
+      receiverId: 'recipient-1',
+      originalContent: 'Original worry',
+      refinedContent: 'Visible worry body',
+      category: WORRY_CATEGORIES[1],
+      deliveryId: `delivery-${status}`,
+      worryId: 'worry-1',
+      status,
+    });
+
+    assert.equal(item, null);
+  }
+});
+
 test('falls back to a valid category and stable date label for incomplete feed data', () => {
   const item = mapHomeWorryFeedLetterToReceivedWorryFeedItem({
     id: 'delivery-1',

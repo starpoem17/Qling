@@ -20,7 +20,7 @@ export interface HomeWorryFeedLetter {
   worryId?: string;
   authorUid?: string;
   recipientUid?: string;
-  status?: 'active';
+  status?: 'active' | 'answered' | 'passed' | 'hidden';
   hasUnread?: boolean;
 }
 

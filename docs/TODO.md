@@ -456,19 +456,19 @@ Functional screen phases must use real production data sources and production ro
 
 ### Phase 11 - Received Worries And Pass/Reply Functional Alignment
 
-- [ ] TODO-DESIGN-11.1 Wire received-worries data to `useHomeWorryFeed` and `filterSuppressedFeedWorries`.
-- [ ] TODO-DESIGN-11.2 Render dynamic category, received-time/fallback copy, unread state, worry content, loading, error, and empty states; exclude deliveries/replies that have already been answered from the received-worries feed instead of rendering a completed-reply state.
-- [ ] TODO-DESIGN-11.3 Ensure card body opens write reply through route helpers and marks delivery read where applicable.
-- [ ] TODO-DESIGN-11.4 Ensure `건너뛰기` maps to existing `passDeliveryViaApi` behavior, not UI-only removal.
-- [ ] TODO-DESIGN-11.5 Ensure pass click does not trigger card body open.
-- [ ] TODO-DESIGN-11.6 Ensure pass loading/disabled state is keyed by delivery id and prevents duplicate mutation.
-- [ ] TODO-DESIGN-11.7 Ensure pass success suppresses/hides the delivery and refreshes feed behavior correctly.
-- [ ] TODO-DESIGN-11.8 Ensure pass failure preserves the card, clears loading, and displays the existing error path.
-- [ ] TODO-DESIGN-11.9 Preserve unread/read-state behavior through existing read-state service/API modules.
-- [ ] TODO-DESIGN-11.10 Add or update tests in existing delivery/feed/read-state locations: `src/services/deliveries/uiPolicy.test.ts`, `src/services/deliveries/passDelivery.test.ts`, `src/services/homeWorryFeed/prdPolicy.test.ts`, `src/services/homeWorryFeed/apiClient.test.ts`, and read-state tests as behavior changes require; include coverage that answered deliveries/replies and hidden worries/replies are excluded from the answer feed/read model.
-- [ ] TODO-DESIGN-11.11 Add pure props-contract tests for card open, pass click isolation, pass loading, answered-item exclusion from props, empty state, and error state.
-- [ ] TODO-DESIGN-11.12 Add manual browser-note evidence for one card open, one pass success, one pass failure or simulated failure, reply success removing the submitted item from the answer feed, and empty feed.
-- [ ] TODO-DESIGN-11.V1 Verify Phase 11 with service tests, props-contract tests, and manual browser-note evidence.
+- [x] TODO-DESIGN-11.1 Wire received-worries data to `useHomeWorryFeed` and `filterSuppressedFeedWorries`.
+- [x] TODO-DESIGN-11.2 Render dynamic category, received-time/fallback copy, unread state, worry content, loading, error, and empty states; exclude deliveries/replies that have already been answered from the received-worries feed instead of rendering a completed-reply state.
+- [x] TODO-DESIGN-11.3 Ensure card body opens write reply through route helpers and marks delivery read where applicable.
+- [x] TODO-DESIGN-11.4 Ensure `건너뛰기` maps to existing `passDeliveryViaApi` behavior, not UI-only removal.
+- [x] TODO-DESIGN-11.5 Ensure pass click does not trigger card body open.
+- [x] TODO-DESIGN-11.6 Ensure pass loading/disabled state is keyed by delivery id and prevents duplicate mutation.
+- [x] TODO-DESIGN-11.7 Ensure pass success suppresses/hides the delivery and refreshes feed behavior correctly.
+- [x] TODO-DESIGN-11.8 Ensure pass failure preserves the card, clears loading, and displays the existing error path.
+- [x] TODO-DESIGN-11.9 Preserve unread/read-state behavior through existing read-state service/API modules.
+- [x] TODO-DESIGN-11.10 Add or update tests in existing delivery/feed/read-state locations: `src/services/deliveries/uiPolicy.test.ts`, `src/services/deliveries/passDelivery.test.ts`, `src/services/homeWorryFeed/prdPolicy.test.ts`, `src/services/homeWorryFeed/apiClient.test.ts`, and read-state tests as behavior changes require; include coverage that answered deliveries/replies and hidden worries/replies are excluded from the answer feed/read model.
+- [x] TODO-DESIGN-11.11 Add pure props-contract tests for card open, pass click isolation, pass loading, answered-item exclusion from props, empty state, and error state.
+- [x] TODO-DESIGN-11.12 Add manual browser-note evidence for one card open, one pass success, one pass failure or simulated failure, reply success removing the submitted item from the answer feed, and empty feed.
+- [x] TODO-DESIGN-11.V1 Verify Phase 11 with service tests, props-contract tests, and manual browser-note evidence.
 
 ### Phase 12 - Worry Writing And Reply Writing Functional Alignment
 

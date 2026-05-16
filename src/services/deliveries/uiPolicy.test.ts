@@ -36,3 +36,15 @@ test('failed pass keeps the card visible', () => {
 
   assert.deepEqual(visible.map(item => item.deliveryId), ['d1']);
 });
+
+test('pass suppression is keyed by delivery id only', () => {
+  const visible = filterSuppressedFeedWorries({
+    suppressedDeliveryIds: new Set(['d1']),
+    feedWorries: [
+      { id: 'same-worry-a', deliveryId: 'd1', worryId: 'w1' },
+      { id: 'same-worry-b', deliveryId: 'd2', worryId: 'w1' },
+    ] as HomeWorryFeedLetter[],
+  });
+
+  assert.deepEqual(visible.map(item => item.deliveryId), ['d2']);
+});

@@ -213,6 +213,37 @@ test('worry hiddenAt is excluded from answer feed', () => {
   assert.deepEqual(items, []);
 });
 
+test('worry deletedAt is excluded from answer feed', () => {
+  const items = selectActivePrdAnswerFeedItems({
+    profileUid: 'recipient',
+    deliveries: [
+      { id: 'delivery1', worryId: 'w1', authorUid: 'a', recipientUid: 'recipient', status: 'active' },
+    ],
+    worriesById: new Map([['w1', { id: 'w1', content: 'content', deletedAt: {} }]]),
+  });
+
+  assert.deepEqual(items, []);
+});
+
+test('domain category 워라밸 is preserved in answer feed categories', () => {
+  const items = selectActivePrdAnswerFeedItems({
+    profileUid: 'recipient',
+    deliveries: [
+      { id: 'delivery1', worryId: 'w1', authorUid: 'a', recipientUid: 'recipient', status: 'active' },
+    ],
+    worriesById: new Map([[
+      'w1',
+      {
+        id: 'w1',
+        content: 'content',
+        matchingCategories: ['워라밸'],
+      },
+    ]]),
+  });
+
+  assert.deepEqual(items.map(item => item.categories), [['워라밸']]);
+});
+
 test('status answered delivery is excluded even without answeredAt', () => {
   const items = selectActivePrdAnswerFeedItems({
     profileUid: 'recipient',
