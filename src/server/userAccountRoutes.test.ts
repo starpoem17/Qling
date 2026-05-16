@@ -2,12 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { AccountDeletionCleanupError } from '../services/userAccount';
 import { registerUserAccountRoutes } from './userAccountRoutes';
+import { applyQlingReleaseHeaders } from './versionRoutes';
 import type { deleteMyAccount } from '../services/userAccount';
 
 function createRes() {
   return {
+    headers: new Map<string, string>(),
     statusCode: 200,
     body: null as unknown,
+    setHeader(name: string, value: string) {
+      this.headers.set(name, value);
+    },
     status(code: number) {
       this.statusCode = code;
       return this;
@@ -225,4 +230,38 @@ test('delete account route includes cleanup phase and step when available', asyn
       message: '계정 삭제 처리 중 문제가 발생했습니다.',
     },
   });
+});
+
+test('delete account route includes read-state cleanup phase and step on failures', async () => {
+  const route = captureRoute({
+    deleteAccount: async () => {
+      throw new AccountDeletionCleanupError(
+        'delete_delivery_read_states',
+        'permission-denied',
+        'commit_delivery_read_state_deletes'
+      );
+    },
+  });
+  const res = createRes();
+  applyQlingReleaseHeaders(res as never, {
+    service: 'Qling',
+    gitSha: 'sha-read-state',
+    buildTime: 'time-read-state',
+    nodeEnv: 'production',
+  });
+
+  await route.handler({ headers: { authorization: 'Bearer token' }, body: { confirm: true } } as never, res as never);
+
+  assert.equal(res.statusCode, 500);
+  assert.deepEqual(res.body, {
+    error: {
+      code: 'account_deletion_cleanup_failed',
+      phase: 'delete_delivery_read_states',
+      step: 'commit_delivery_read_state_deletes',
+      firebaseCode: 'permission-denied',
+      message: '계정 삭제 처리 중 문제가 발생했습니다.',
+    },
+  });
+  assert.equal(res.headers.get('X-Qling-Release-Sha'), 'sha-read-state');
+  assert.equal(res.headers.get('X-Qling-Build-Time'), 'time-read-state');
 });

@@ -40,7 +40,11 @@ export function createFirestoreUserAccountRepository(params: {
           };
         }
       };
-      const runTokenStep = async <T>(step: AccountDeletionCleanupStep, action: () => Promise<T>) => {
+      const runCleanupStep = async <T>(
+        phase: AccountDeletionCleanupPhase,
+        step: AccountDeletionCleanupStep,
+        action: () => Promise<T>
+      ) => {
         try {
           return {
             status: 'success' as const,
@@ -49,7 +53,7 @@ export function createFirestoreUserAccountRepository(params: {
         } catch (error) {
           return {
             status: 'failed' as const,
-            phase: 'delete_fcm_tokens' as const,
+            phase,
             step,
             firebaseCode: firebaseErrorCode(error),
           };
@@ -78,42 +82,47 @@ export function createFirestoreUserAccountRepository(params: {
       }
 
       const tokenRefs = await runPhase('delete_fcm_tokens', async () => {
-        const collectionCheck = await runTokenStep('list_collections', () => listUserSubcollectionIds(userRef));
-        if (collectionCheck.status === 'failed') throw cleanupStepError(collectionCheck);
-        if (!collectionCheck.result.includes('fcmTokens')) return [];
-
-        const tokenCollection = await runTokenStep('get_collection_ref', async () => userRef.collection('fcmTokens'));
-        if (tokenCollection.status === 'failed') throw cleanupStepError(tokenCollection);
-
-        const refs = await runTokenStep('list_token_docs', () => tokenCollection.result.listDocuments());
-        if (refs.status === 'failed') throw cleanupStepError(refs);
-
-        const committed = await runTokenStep('commit_token_deletes', () => commitDeletes(params.db, refs.result));
-        if (committed.status === 'failed') throw cleanupStepError(committed);
-
-        const verified = await runTokenStep('verify_token_deletes', async () => {
-          const remainingRefs = await tokenCollection.result.listDocuments();
-          if (remainingRefs.length > 0) {
-            throw Object.assign(new Error('token documents still exist'), { code: 'verification/token-documents-exist' });
-          }
+        return cleanupUserSubcollection({
+          db: params.db,
+          userRef,
+          collectionName: 'fcmTokens',
+          phase: 'delete_fcm_tokens',
+          listDocsStep: 'list_token_docs',
+          commitDeletesStep: 'commit_token_deletes',
+          verifyDeletesStep: 'verify_token_deletes',
+          verificationCode: 'verification/token-documents-exist',
+          runCleanupStep,
         });
-        if (verified.status === 'failed') throw cleanupStepError(verified);
-
-        return refs.result;
       });
       if (tokenRefs.status === 'failed') return cleanupFailure(tokenRefs);
 
       const deliveryReadStateRefs = await runPhase('delete_delivery_read_states', async () => {
-        const refs = await listCollectionDocumentRefs(userRef, 'deliveryReadStates');
-        await commitDeletes(params.db, refs);
-        return refs;
+        return cleanupUserSubcollection({
+          db: params.db,
+          userRef,
+          collectionName: 'deliveryReadStates',
+          phase: 'delete_delivery_read_states',
+          listDocsStep: 'list_delivery_read_state_docs',
+          commitDeletesStep: 'commit_delivery_read_state_deletes',
+          verifyDeletesStep: 'verify_delivery_read_state_deletes',
+          verificationCode: 'verification/delivery-read-state-documents-exist',
+          runCleanupStep,
+        });
       });
       if (deliveryReadStateRefs.status === 'failed') return cleanupFailure(deliveryReadStateRefs);
 
       const replyReadStateRefs = await runPhase('delete_reply_read_states', async () => {
-        const refs = await listCollectionDocumentRefs(userRef, 'replyReadStates');
-        await commitDeletes(params.db, refs);
-        return refs;
+        return cleanupUserSubcollection({
+          db: params.db,
+          userRef,
+          collectionName: 'replyReadStates',
+          phase: 'delete_reply_read_states',
+          listDocsStep: 'list_reply_read_state_docs',
+          commitDeletesStep: 'commit_reply_read_state_deletes',
+          verifyDeletesStep: 'verify_reply_read_state_deletes',
+          verificationCode: 'verification/reply-read-state-documents-exist',
+          runCleanupStep,
+        });
       });
       if (replyReadStateRefs.status === 'failed') return cleanupFailure(replyReadStateRefs);
 
@@ -193,13 +202,6 @@ function cleanupErrorStep(error: unknown) {
     : undefined;
 }
 
-async function listCollectionDocumentRefs(
-  userRef: DocumentReference,
-  collectionName: 'fcmTokens' | 'deliveryReadStates' | 'replyReadStates'
-) {
-  return userRef.collection(collectionName).listDocuments();
-}
-
 async function listUserSubcollectionIds(userRef: DocumentReference) {
   const refWithListCollections = userRef as DocumentReference & {
     listCollections?: () => Promise<Array<{ id: string }>>;
@@ -210,6 +212,66 @@ async function listUserSubcollectionIds(userRef: DocumentReference) {
 
   const collections = await refWithListCollections.listCollections();
   return collections.map(collection => collection.id);
+}
+
+async function cleanupUserSubcollection(params: {
+  db: Firestore;
+  userRef: DocumentReference;
+  collectionName: 'fcmTokens' | 'deliveryReadStates' | 'replyReadStates';
+  phase: AccountDeletionCleanupPhase;
+  listDocsStep: AccountDeletionCleanupStep;
+  commitDeletesStep: AccountDeletionCleanupStep;
+  verifyDeletesStep: AccountDeletionCleanupStep;
+  verificationCode: string;
+  runCleanupStep: <T>(
+    phase: AccountDeletionCleanupPhase,
+    step: AccountDeletionCleanupStep,
+    action: () => Promise<T>
+  ) => Promise<
+    | { status: 'success'; result: T }
+    | AccountDeletionCleanupPhaseFailure
+  >;
+}) {
+  const collectionCheck = await params.runCleanupStep(
+    params.phase,
+    'list_collections',
+    () => listUserSubcollectionIds(params.userRef)
+  );
+  if (collectionCheck.status === 'failed') throw cleanupStepError(collectionCheck);
+  if (!collectionCheck.result.includes(params.collectionName)) return [];
+
+  const collection = await params.runCleanupStep(
+    params.phase,
+    'get_collection_ref',
+    async () => params.userRef.collection(params.collectionName)
+  );
+  if (collection.status === 'failed') throw cleanupStepError(collection);
+
+  const refs = await params.runCleanupStep(
+    params.phase,
+    params.listDocsStep,
+    () => collection.result.listDocuments()
+  );
+  if (refs.status === 'failed') throw cleanupStepError(refs);
+
+  const committed = await params.runCleanupStep(
+    params.phase,
+    params.commitDeletesStep,
+    () => commitDeletes(params.db, refs.result)
+  );
+  if (committed.status === 'failed') throw cleanupStepError(committed);
+
+  const verified = await params.runCleanupStep(params.phase, params.verifyDeletesStep, async () => {
+    const remainingRefs = await collection.result.listDocuments();
+    if (remainingRefs.length > 0) {
+      throw Object.assign(new Error(`${params.collectionName} documents still exist`), {
+        code: params.verificationCode,
+      });
+    }
+  });
+  if (verified.status === 'failed') throw cleanupStepError(verified);
+
+  return refs.result;
 }
 
 async function commitDeletes(db: Firestore, refs: DocumentReference[]) {

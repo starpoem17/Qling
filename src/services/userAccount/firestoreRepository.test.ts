@@ -59,13 +59,24 @@ class FakeDb {
   seenCollectionLists = new Set<string>();
   seenCollectionRoots = new Set<string>();
   readonly existingEmptyCollections: Set<string>;
+  readonly stickyDeletePaths: Set<string>;
+  private readonly failOnCall: Map<string, Set<number>>;
+  private readonly operationCalls = new Map<string, number>();
 
   constructor(
     seed: Record<string, Record<string, unknown>>,
     readonly failOperations = new Set<string>(),
-    options: { existingEmptyCollections?: string[] } = {}
+    options: {
+      existingEmptyCollections?: string[];
+      stickyDeletePaths?: string[];
+      failOnCall?: Record<string, number[]>;
+    } = {}
   ) {
     this.existingEmptyCollections = new Set(options.existingEmptyCollections ?? []);
+    this.stickyDeletePaths = new Set(options.stickyDeletePaths ?? []);
+    this.failOnCall = new Map(
+      Object.entries(options.failOnCall ?? {}).map(([operation, calls]) => [operation, new Set(calls)])
+    );
     for (const [path, data] of Object.entries(seed)) {
       this.docs.set(path, data);
       this.ref(path);
@@ -94,6 +105,7 @@ class FakeDb {
         for (const ref of deletes) {
           ref.deleted = true;
           this.deletedPaths.push(ref.path);
+          if (this.stickyDeletePaths.has(ref.path)) continue;
           this.docs.delete(ref.path);
         }
       },
@@ -109,6 +121,11 @@ class FakeDb {
   }
 
   maybeFail(operation: string) {
+    const calls = (this.operationCalls.get(operation) ?? 0) + 1;
+    this.operationCalls.set(operation, calls);
+    if (this.failOnCall.get(operation)?.has(calls)) {
+      throw Object.assign(new Error(`failed ${operation} on call ${calls}`), { code: 'fake/permission-denied' });
+    }
     if (this.failOperations.has(operation)) {
       throw Object.assign(new Error(`failed ${operation}`), { code: 'fake/permission-denied' });
     }
@@ -388,6 +405,197 @@ test('delete_fcm_tokens reports commit_token_deletes step when token delete comm
     step: 'commit_token_deletes',
     firebaseCode: 'fake/permission-denied',
   });
+});
+
+const readStateCases = [
+  {
+    label: 'deliveryReadStates',
+    collectionName: 'deliveryReadStates',
+    otherCollectionName: 'replyReadStates',
+    phase: 'delete_delivery_read_states',
+    listStep: 'list_delivery_read_state_docs',
+    commitStep: 'commit_delivery_read_state_deletes',
+    verifyStep: 'verify_delivery_read_state_deletes',
+    docPrefix: 'delivery',
+  },
+  {
+    label: 'replyReadStates',
+    collectionName: 'replyReadStates',
+    otherCollectionName: 'deliveryReadStates',
+    phase: 'delete_reply_read_states',
+    listStep: 'list_reply_read_state_docs',
+    commitStep: 'commit_reply_read_state_deletes',
+    verifyStep: 'verify_reply_read_state_deletes',
+    docPrefix: 'reply',
+  },
+] as const;
+
+for (const readState of readStateCases) {
+  test(`${readState.label} cleanup succeeds when subcollection is missing`, async () => {
+    const db = new FakeDb({
+      'users/user-1': { uid: 'user-1' },
+      [`users/user-1/${readState.otherCollectionName}/other-1`]: {},
+    });
+
+    const result = await createFirestoreUserAccountRepository({ db: db as never })
+      .deleteUserAccountState({ uid: 'user-1' });
+
+    assert.equal(result.status, 'success');
+    assert.equal(result.deletedReadStateCount, 1);
+    assert.equal(db.seenCollectionRoots.has('users/user-1'), true);
+    assert.equal(db.seenCollectionLists.has(`users/user-1/${readState.collectionName}`), false);
+    assert.equal(db.deletedPaths.includes(`users/user-1/${readState.otherCollectionName}/other-1`), true);
+    assert.equal(db.deletedPaths.includes('users/user-1'), true);
+  });
+
+  test(`${readState.label} cleanup succeeds when subcollection exists but is empty`, async () => {
+    const db = new FakeDb({
+      'users/user-1': { uid: 'user-1' },
+    }, new Set(), {
+      existingEmptyCollections: [`users/user-1/${readState.collectionName}`],
+    });
+
+    const result = await createFirestoreUserAccountRepository({ db: db as never })
+      .deleteUserAccountState({ uid: 'user-1' });
+
+    assert.equal(result.status, 'success');
+    assert.equal(result.deletedReadStateCount, 0);
+    assert.equal(db.seenCollectionLists.has(`users/user-1/${readState.collectionName}`), true);
+    assert.equal(db.deletedPaths.includes('users/user-1'), true);
+  });
+
+  test(`${readState.label} cleanup deletes one document by reference`, async () => {
+    const db = new FakeDb({
+      'users/user-1': { uid: 'user-1' },
+      [`users/user-1/${readState.collectionName}/${readState.docPrefix}-1`]: {
+        unexpectedId: 'not-a-path-source',
+      },
+    });
+
+    const result = await createFirestoreUserAccountRepository({ db: db as never })
+      .deleteUserAccountState({ uid: 'user-1' });
+
+    assert.equal(result.status, 'success');
+    assert.equal(result.deletedReadStateCount, 1);
+    assert.equal(db.deletedPaths.includes(`users/user-1/${readState.collectionName}/${readState.docPrefix}-1`), true);
+  });
+
+  test(`${readState.label} cleanup deletes multiple documents by reference`, async () => {
+    const db = new FakeDb({
+      'users/user-1': { uid: 'user-1' },
+      [`users/user-1/${readState.collectionName}/${readState.docPrefix}-1`]: {},
+      [`users/user-1/${readState.collectionName}/${readState.docPrefix}-2`]: {},
+    });
+
+    const result = await createFirestoreUserAccountRepository({ db: db as never })
+      .deleteUserAccountState({ uid: 'user-1' });
+
+    assert.equal(result.status, 'success');
+    assert.equal(result.deletedReadStateCount, 2);
+    assert.equal(db.deletedPaths.includes(`users/user-1/${readState.collectionName}/${readState.docPrefix}-1`), true);
+    assert.equal(db.deletedPaths.includes(`users/user-1/${readState.collectionName}/${readState.docPrefix}-2`), true);
+  });
+
+  test(`${readState.label} cleanup ignores malformed document data`, async () => {
+    const db = new FakeDb({
+      'users/user-1': { uid: 'user-1' },
+      [`users/user-1/${readState.collectionName}/${readState.docPrefix}-1`]: {
+        deliveryId: null,
+        recipientUid: 123,
+        worryId: undefined,
+      },
+    });
+
+    const result = await createFirestoreUserAccountRepository({ db: db as never })
+      .deleteUserAccountState({ uid: 'user-1' });
+
+    assert.equal(result.status, 'success');
+    assert.equal(result.deletedReadStateCount, 1);
+    assert.equal(db.deletedPaths.includes(`users/user-1/${readState.collectionName}/${readState.docPrefix}-1`), true);
+  });
+
+  test(`${readState.label} cleanup reports list docs step when listing fails`, async () => {
+    const db = new FakeDb({
+      'users/user-1': { uid: 'user-1' },
+      [`users/user-1/${readState.collectionName}/${readState.docPrefix}-1`]: {},
+    }, new Set([`list:users/user-1/${readState.collectionName}`]));
+
+    const result = await createFirestoreUserAccountRepository({ db: db as never })
+      .deleteUserAccountState({ uid: 'user-1' });
+
+    assert.deepEqual(result, {
+      status: 'failed',
+      phase: readState.phase,
+      step: readState.listStep,
+      firebaseCode: 'fake/permission-denied',
+    });
+    assert.equal(db.deletedPaths.includes('users/user-1'), false);
+  });
+
+  test(`${readState.label} cleanup reports commit deletes step when commit fails`, async () => {
+    const docPath = `users/user-1/${readState.collectionName}/${readState.docPrefix}-1`;
+    const db = new FakeDb({
+      'users/user-1': { uid: 'user-1' },
+      [docPath]: {},
+    }, new Set([`delete:${docPath}`]));
+
+    const result = await createFirestoreUserAccountRepository({ db: db as never })
+      .deleteUserAccountState({ uid: 'user-1' });
+
+    assert.deepEqual(result, {
+      status: 'failed',
+      phase: readState.phase,
+      step: readState.commitStep,
+      firebaseCode: 'fake/permission-denied',
+    });
+    assert.equal(db.deletedPaths.includes('users/user-1'), false);
+  });
+
+  test(`${readState.label} cleanup reports verify deletes step when verification fails`, async () => {
+    const docPath = `users/user-1/${readState.collectionName}/${readState.docPrefix}-1`;
+    const db = new FakeDb({
+      'users/user-1': { uid: 'user-1' },
+      [docPath]: {},
+    }, new Set(), {
+      stickyDeletePaths: [docPath],
+    });
+
+    const result = await createFirestoreUserAccountRepository({ db: db as never })
+      .deleteUserAccountState({ uid: 'user-1' });
+
+    assert.deepEqual(result, {
+      status: 'failed',
+      phase: readState.phase,
+      step: readState.verifyStep,
+      firebaseCode: readState.collectionName === 'deliveryReadStates'
+        ? 'verification/delivery-read-state-documents-exist'
+        : 'verification/reply-read-state-documents-exist',
+    });
+    assert.equal(db.deletedPaths.includes('users/user-1'), false);
+  });
+}
+
+test('read-state cleanup proceeds to nickname reservation cleanup after delivery and reply states succeed', async () => {
+  const db = new FakeDb({
+    'users/user-1': { uid: 'user-1', normalizedNickname: 'reader' },
+    'users/user-1/deliveryReadStates/delivery-1': {},
+    'users/user-1/replyReadStates/reply-1': {},
+    'nicknameReservations/reader': { uid: 'user-1' },
+  });
+
+  const result = await createFirestoreUserAccountRepository({ db: db as never })
+    .deleteUserAccountState({ uid: 'user-1' });
+
+  assert.equal(result.status, 'success');
+  assert.deepEqual(result.completedPhases.slice(0, 6), [
+    'load_user_profile',
+    'load_user_profile',
+    'delete_fcm_tokens',
+    'delete_delivery_read_states',
+    'delete_reply_read_states',
+    'delete_nickname_reservation',
+  ]);
+  assert.equal(db.deletedPaths.includes('nicknameReservations/reader'), true);
 });
 
 test('Firestore account repository succeeds when nickname reservation is missing', async () => {

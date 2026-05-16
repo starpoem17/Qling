@@ -21,7 +21,13 @@ export type AccountDeletionCleanupStep =
   | 'get_collection_ref'
   | 'list_token_docs'
   | 'commit_token_deletes'
-  | 'verify_token_deletes';
+  | 'verify_token_deletes'
+  | 'list_delivery_read_state_docs'
+  | 'commit_delivery_read_state_deletes'
+  | 'verify_delivery_read_state_deletes'
+  | 'list_reply_read_state_docs'
+  | 'commit_reply_read_state_deletes'
+  | 'verify_reply_read_state_deletes';
 
 export type AccountDeletionCleanupSuccess = {
   status: 'success';
