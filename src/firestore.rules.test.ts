@@ -397,6 +397,19 @@ describe('deleted transition', () => {
     await assertFails(dbFor('deletedUser').doc('users/deletedUser/fcmTokens/token-1').delete());
   });
 
+  test('partial account deletion state denies users uid read for same authenticated uid', async () => {
+    await seed('users/m28rhnqrTtcQiT04Szff2HBSZ5q1', {
+      ...safeProfile('m28rhnqrTtcQiT04Szff2HBSZ5q1'),
+      deleted: true,
+    });
+
+    await assertFails(
+      dbFor('m28rhnqrTtcQiT04Szff2HBSZ5q1')
+        .doc('users/m28rhnqrTtcQiT04Szff2HBSZ5q1')
+        .get()
+    );
+  });
+
   test('missing deleted does not block transition user', async () => {
     await seed('users/missingDeletedUser', safeProfile('missingDeletedUser'));
     await assertSucceeds(dbFor('missingDeletedUser').doc('users/missingDeletedUser').get());

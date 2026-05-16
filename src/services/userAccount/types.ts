@@ -1,6 +1,8 @@
 export type DeleteMyAccountResult = {
   status: 'deleted';
   deletedTokenCount: number;
+  deletedReadStateCount: number;
+  deletedNicknameReservation: boolean;
 };
 
 export type UserAccountClock = {
@@ -8,10 +10,9 @@ export type UserAccountClock = {
 };
 
 export type UserAccountRepository = {
-  softDeleteUser(params: {
-    uid: string;
-    deletedAt: unknown;
-    updatedAt: unknown;
-  }): Promise<void>;
-  deletePushTokens(params: { uid: string }): Promise<{ deletedCount: number }>;
+  deleteUserAccountState(params: { uid: string }): Promise<{
+    deletedTokenCount: number;
+    deletedReadStateCount: number;
+    deletedNicknameReservation: boolean;
+  }>;
 };

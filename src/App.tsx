@@ -33,6 +33,7 @@ import {
   PRD_APP_TABS,
   routeAfterAuthProfileLoad,
   routeAfterOnboardingComplete,
+  routeAfterProfileReadDenied,
   routeToWriteWorry,
   type AppRouteViewState,
   type PrdAppTab,
@@ -143,7 +144,15 @@ export default function App() {
           setUser(currentUser);
           
           const userRef = doc(db, 'users', currentUser.uid);
-          const userSnap = await getDoc(userRef);
+          let userSnap;
+          try {
+            userSnap = await getDoc(userRef);
+          } catch (profileReadError) {
+            console.error('Profile read failed after auth sign-in:', profileReadError);
+            setProfile(null);
+            setView(routeAfterProfileReadDenied());
+            return;
+          }
           
           if (userSnap.exists()) {
             const userData = userSnap.data() as UserProfile;

@@ -18,6 +18,8 @@ function createRepository(options: {
     lastSeenAt: 'last-seen-at',
   };
   const tokens = new Set(['token-1', 'token-2']);
+  const readStates = new Set(['delivery-1', 'reply-1']);
+  const nicknameReservations = new Set(['user-1-normalized']);
   let cleanupFailuresRemaining = options.failCleanupOnce ? 1 : 0;
   const contentSentinel = {
     worries: [{ id: 'worry-1' }],
@@ -30,30 +32,26 @@ function createRepository(options: {
   const calls: string[] = [];
 
   const repository: UserAccountRepository = {
-    async softDeleteUser(params) {
-      calls.push(`softDelete:${params.uid}`);
-      Object.assign(profile, {
-        deleted: true,
-        deletedAt: params.deletedAt,
-        updatedAt: params.updatedAt,
-      });
-    },
-    async deletePushTokens(params) {
-      calls.push(`deleteTokens:${params.uid}`);
+    async deleteUserAccountState(params) {
+      calls.push(`deleteUserAccountState:${params.uid}`);
       if (cleanupFailuresRemaining > 0) {
         cleanupFailuresRemaining -= 1;
-        throw new Error('token cleanup failed');
+        throw new Error('account cleanup failed');
       }
-      const deletedCount = tokens.size;
+      const deletedTokenCount = tokens.size;
+      const deletedReadStateCount = readStates.size;
+      const deletedNicknameReservation = nicknameReservations.delete('user-1-normalized');
       tokens.clear();
-      return { deletedCount };
+      readStates.clear();
+      delete profile.uid;
+      return { deletedTokenCount, deletedReadStateCount, deletedNicknameReservation };
     },
   };
 
-  return { repository, profile, tokens, contentSentinel, calls };
+  return { repository, profile, tokens, readStates, nicknameReservations, contentSentinel, calls };
 }
 
-test('deleteMyAccount soft deletes profile, preserves profile fields and removes tokens', async () => {
+test('deleteMyAccount deletes profile/session state and removes tokens and nickname reservation', async () => {
   const harness = createRepository();
   const beforeContent = structuredClone(harness.contentSentinel);
 
@@ -63,21 +61,16 @@ test('deleteMyAccount soft deletes profile, preserves profile fields and removes
     clock: { now: () => 'deleted-at' },
   });
 
-  assert.deepEqual(result, { status: 'deleted', deletedTokenCount: 2 });
-  assert.deepEqual(harness.profile, {
-    uid: 'user-1',
-    gender: 'female',
-    interests: ['career'],
-    helpedCount: 3,
-    activeDeliveryCount: 2,
-    createdAt: 'created-at',
-    updatedAt: 'deleted-at',
-    lastActive: 'last-active',
-    lastSeenAt: 'last-seen-at',
-    deleted: true,
-    deletedAt: 'deleted-at',
+  assert.deepEqual(result, {
+    status: 'deleted',
+    deletedTokenCount: 2,
+    deletedReadStateCount: 2,
+    deletedNicknameReservation: true,
   });
+  assert.equal(harness.profile.uid, undefined);
   assert.equal(harness.tokens.size, 0);
+  assert.equal(harness.readStates.size, 0);
+  assert.equal(harness.nicknameReservations.size, 0);
   assert.deepEqual(harness.contentSentinel, beforeContent);
 });
 
@@ -95,14 +88,16 @@ test('deleteMyAccount is idempotent for already deleted users and empty token co
     clock: { now: () => 'second-delete' },
   });
 
-  assert.deepEqual(result, { status: 'deleted', deletedTokenCount: 0 });
-  assert.equal(harness.profile.deleted, true);
-  assert.equal(harness.profile.deletedAt, 'second-delete');
-  assert.equal(harness.profile.updatedAt, 'second-delete');
+  assert.deepEqual(result, {
+    status: 'deleted',
+    deletedTokenCount: 0,
+    deletedReadStateCount: 0,
+    deletedNicknameReservation: false,
+  });
   assert.equal(harness.tokens.size, 0);
 });
 
-test('deleteMyAccount reports token cleanup failure after soft delete and retry removes remaining tokens', async () => {
+test('deleteMyAccount reports account cleanup failure and retry removes remaining state', async () => {
   const harness = createRepository({ failCleanupOnce: true });
 
   await assert.rejects(
@@ -111,9 +106,8 @@ test('deleteMyAccount reports token cleanup failure after soft delete and retry 
       repository: harness.repository,
       clock: { now: () => 'failed-delete' },
     }),
-    /token cleanup failed/
+    /account cleanup failed/
   );
-  assert.equal(harness.profile.deleted, true);
   assert.equal(harness.tokens.size, 2);
 
   const result = await deleteMyAccount({
@@ -122,8 +116,12 @@ test('deleteMyAccount reports token cleanup failure after soft delete and retry 
     clock: { now: () => 'retry-delete' },
   });
 
-  assert.deepEqual(result, { status: 'deleted', deletedTokenCount: 2 });
-  assert.equal(harness.profile.deletedAt, 'retry-delete');
+  assert.deepEqual(result, {
+    status: 'deleted',
+    deletedTokenCount: 2,
+    deletedReadStateCount: 2,
+    deletedNicknameReservation: true,
+  });
   assert.equal(harness.tokens.size, 0);
 });
 
@@ -136,6 +134,6 @@ test('deleteMyAccount accepts only the verified uid parameter and repository exp
     clock: { now: () => 'deleted-at' },
   });
 
-  assert.deepEqual(harness.calls, ['softDelete:verified-user', 'deleteTokens:verified-user']);
-  assert.deepEqual(Object.keys(harness.repository).sort(), ['deletePushTokens', 'softDeleteUser']);
+  assert.deepEqual(harness.calls, ['deleteUserAccountState:verified-user']);
+  assert.deepEqual(Object.keys(harness.repository).sort(), ['deleteUserAccountState']);
 });

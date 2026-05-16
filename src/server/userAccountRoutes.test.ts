@@ -20,6 +20,7 @@ function createRes() {
 
 function captureRoute(options: {
   verifyIdToken?: () => Promise<{ uid: string }>;
+  deleteUser?: (uid: string) => Promise<void>;
   deleteAccount?: typeof deleteMyAccount;
 } = {}) {
   const handlers: Array<(req: unknown, res: unknown) => unknown> = [];
@@ -31,8 +32,11 @@ function captureRoute(options: {
     },
   };
   const repository = {
-    softDeleteUser: async () => undefined,
-    deletePushTokens: async () => ({ deletedCount: 0 }),
+    deleteUserAccountState: async () => ({
+      deletedTokenCount: 0,
+      deletedReadStateCount: 0,
+      deletedNicknameReservation: false,
+    }),
   };
   const clock = { now: () => 'now' };
 
@@ -40,12 +44,18 @@ function captureRoute(options: {
     db: {} as never,
     auth: {
       verifyIdToken: options.verifyIdToken ?? (async () => ({ uid: 'verified-user' })),
+      deleteUser: options.deleteUser ?? (async uid => { calls.push(`deleteAuth:${uid}`); }),
     } as never,
     repository,
     clock,
     deleteAccount: options.deleteAccount ?? (async params => {
       calls.push(params);
-      return { status: 'deleted', deletedTokenCount: 0 };
+      return {
+        status: 'deleted',
+        deletedTokenCount: 0,
+        deletedReadStateCount: 0,
+        deletedNicknameReservation: false,
+      };
     }),
   });
 
@@ -105,19 +115,52 @@ test('delete account route uses verified uid and ignores spoofed body identity f
 
   assert.equal(res.statusCode, 200);
   assert.deepEqual(res.body, { status: 'deleted' });
-  assert.equal(route.calls.length, 1);
-  assert.equal((route.calls[0] as { uid: string }).uid, 'verified-user');
+  assert.equal(route.calls.length, 2);
+  assert.equal(route.calls[0], 'deleteAuth:verified-user');
+  assert.equal((route.calls[1] as { uid: string }).uid, 'verified-user');
 });
 
 test('delete account route returns 200 for already deleted service result', async () => {
   const route = captureRoute({
-    deleteAccount: async () => ({ status: 'deleted', deletedTokenCount: 0 }),
+    deleteAccount: async () => ({
+      status: 'deleted',
+      deletedTokenCount: 0,
+      deletedReadStateCount: 0,
+      deletedNicknameReservation: false,
+    }),
   });
   const res = createRes();
   await route.handler({ headers: { authorization: 'Bearer token' }, body: { confirm: true } } as never, res as never);
 
   assert.equal(res.statusCode, 200);
   assert.deepEqual(res.body, { status: 'deleted' });
+});
+
+test('delete account route deletes Firebase Auth user before Firestore cleanup', async () => {
+  const route = captureRoute();
+  const res = createRes();
+  await route.handler({ headers: { authorization: 'Bearer token' }, body: { confirm: true } } as never, res as never);
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(route.calls[0], 'deleteAuth:verified-user');
+  assert.equal((route.calls[1] as { uid: string }).uid, 'verified-user');
+});
+
+test('delete account route fails closed when Firebase Auth deletion fails', async () => {
+  const route = captureRoute({
+    deleteUser: async () => { throw new Error('auth delete failed'); },
+  });
+  const res = createRes();
+  await route.handler({ headers: { authorization: 'Bearer token' }, body: { confirm: true } } as never, res as never);
+
+  assert.equal(res.statusCode, 500);
+  assert.deepEqual(res.body, {
+    error: {
+      code: 'account_deletion_failed',
+      message: '계정 삭제 처리 중 문제가 발생했습니다.',
+    },
+  });
+  assert.deepEqual(route.calls, []);
 });
 
 test('delete account route maps storage failure', async () => {

@@ -9,16 +9,10 @@ export async function deleteMyAccount(params: {
   repository: UserAccountRepository;
   clock: UserAccountClock;
 }): Promise<DeleteMyAccountResult> {
-  const deletedAt = params.clock.now();
-  await params.repository.softDeleteUser({
-    uid: params.uid,
-    deletedAt,
-    updatedAt: deletedAt,
-  });
-
-  const cleanup = await params.repository.deletePushTokens({ uid: params.uid });
+  void params.clock;
+  const cleanup = await params.repository.deleteUserAccountState({ uid: params.uid });
   return {
     status: 'deleted',
-    deletedTokenCount: cleanup.deletedCount,
+    ...cleanup,
   };
 }

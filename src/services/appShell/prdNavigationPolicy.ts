@@ -126,6 +126,10 @@ export function routeAfterAuthProfileLoad(previousRoute: AppRouteViewState): App
     : previousRouteName;
 }
 
+export function routeAfterProfileReadDenied(): AppRoute {
+  return 'onboarding';
+}
+
 export function routeAfterOnboardingComplete(): AppRoute {
   return DEFAULT_AUTHENTICATED_TAB;
 }

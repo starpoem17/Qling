@@ -31,7 +31,7 @@ async function requireDeletionAuth(req: express.Request, res: express.Response, 
 
 export function registerUserAccountRoutes(app: express.Express, deps: {
   db: Firestore | null;
-  auth: Pick<Auth, 'verifyIdToken'>;
+  auth: Pick<Auth, 'verifyIdToken' | 'deleteUser'>;
   repository?: UserAccountRepository;
   clock?: UserAccountClock;
   deleteAccount?: typeof deleteMyAccount;
@@ -66,6 +66,7 @@ export function registerUserAccountRoutes(app: express.Express, deps: {
       const repository = deps.repository ?? createFirestoreUserAccountRepository({ db: deps.db as Firestore });
       const clock = deps.clock ?? createServerTimestampClock();
       const deleteAccount = deps.deleteAccount ?? deleteMyAccount;
+      await deps.auth.deleteUser(uid);
       await deleteAccount({ uid, repository, clock });
       res.status(200).json({ status: 'deleted' });
     } catch (error) {

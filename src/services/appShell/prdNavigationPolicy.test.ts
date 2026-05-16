@@ -17,6 +17,7 @@ import {
   backRouteFromWriteWorry,
   resolveAppRouteState,
   routeAfterAuthProfileLoad,
+  routeAfterProfileReadDenied,
   routeAfterFeedbackPublish,
   routeAfterOnboardingComplete,
   routeAfterPass,
@@ -90,6 +91,10 @@ test('routes auth/profile load and onboarding completion to answer feed', () => 
   assert.equal(routeAfterAuthProfileLoad('나의 고민'), '나의 고민');
   assert.equal(routeAfterOnboardingComplete(), '답변하기');
   assert.equal(tabForRoute(DEFAULT_AUTHENTICATED_ROUTE), DEFAULT_AUTHENTICATED_TAB);
+});
+
+test('routes profile read denial to safe onboarding recovery instead of login failure', () => {
+  assert.equal(routeAfterProfileReadDenied(), 'onboarding');
 });
 
 test('routes publish success with created ids and has no standalone write success routes', () => {
