@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { AccountDeletionCleanupError } from '../services/userAccount';
 import { registerUserAccountRoutes } from './userAccountRoutes';
 import type { deleteMyAccount } from '../services/userAccount';
 
@@ -33,9 +34,11 @@ function captureRoute(options: {
   };
   const repository = {
     deleteUserAccountState: async () => ({
+      status: 'success' as const,
       deletedTokenCount: 0,
       deletedReadStateCount: 0,
       deletedNicknameReservation: false,
+      completedPhases: [],
     }),
   };
   const clock = { now: () => 'now' };
@@ -55,6 +58,7 @@ function captureRoute(options: {
         deletedTokenCount: 0,
         deletedReadStateCount: 0,
         deletedNicknameReservation: false,
+        completedPhases: [],
       };
     }),
   });
@@ -127,6 +131,7 @@ test('delete account route returns 200 for already deleted service result', asyn
       deletedTokenCount: 0,
       deletedReadStateCount: 0,
       deletedNicknameReservation: false,
+      completedPhases: [],
     }),
   });
   const res = createRes();
@@ -185,7 +190,7 @@ test('delete account route treats missing Auth user as idempotent deletion succe
 
 test('delete account route maps storage failure', async () => {
   const route = captureRoute({
-    deleteAccount: async () => { throw new Error('cleanup failed'); },
+    deleteAccount: async () => { throw new AccountDeletionCleanupError('delete_nickname_reservation', 'permission-denied'); },
   });
   const res = createRes();
   await route.handler({ headers: { authorization: 'Bearer token' }, body: { confirm: true } } as never, res as never);
@@ -194,6 +199,8 @@ test('delete account route maps storage failure', async () => {
   assert.deepEqual(res.body, {
     error: {
       code: 'account_deletion_cleanup_failed',
+      phase: 'delete_nickname_reservation',
+      firebaseCode: 'permission-denied',
       message: '계정 삭제 처리 중 문제가 발생했습니다.',
     },
   });

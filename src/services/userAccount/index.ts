@@ -1,2 +1,2 @@
-export { deleteMyAccount } from './deleteMyAccount';
+export { AccountDeletionCleanupError, deleteMyAccount } from './deleteMyAccount';
 export type { DeleteMyAccountResult } from './types';

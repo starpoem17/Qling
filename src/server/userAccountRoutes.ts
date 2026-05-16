@@ -2,7 +2,7 @@ import type express from 'express';
 import type { Auth } from 'firebase-admin/auth';
 import type { Firestore } from 'firebase-admin/firestore';
 import { parseBearerToken } from './auth';
-import { deleteMyAccount } from '../services/userAccount';
+import { AccountDeletionCleanupError, deleteMyAccount } from '../services/userAccount';
 import {
   createFirestoreUserAccountRepository,
   createServerTimestampClock,
@@ -25,9 +25,13 @@ function accountDeletionFailure(
     errorCode: typeof error === 'object' && error !== null && 'code' in error ? (error as { code?: unknown }).code : undefined,
     errorMessage: error instanceof Error ? error.message : String(error),
   });
+  const phase = error instanceof AccountDeletionCleanupError ? error.phase : undefined;
+  const firebaseCode = error instanceof AccountDeletionCleanupError ? error.firebaseCode : undefined;
   res.status(500).json({
     error: {
       code,
+      ...(phase ? { phase } : {}),
+      ...(firebaseCode ? { firebaseCode } : {}),
       message: '계정 삭제 처리 중 문제가 발생했습니다.',
     },
   });

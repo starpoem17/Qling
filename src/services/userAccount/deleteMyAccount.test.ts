@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { deleteMyAccount } from './deleteMyAccount';
+import { AccountDeletionCleanupError, deleteMyAccount } from './deleteMyAccount';
 import type { UserAccountRepository } from './types';
 
 function createRepository(options: {
@@ -36,7 +36,11 @@ function createRepository(options: {
       calls.push(`deleteUserAccountState:${params.uid}`);
       if (cleanupFailuresRemaining > 0) {
         cleanupFailuresRemaining -= 1;
-        throw new Error('account cleanup failed');
+        return {
+          status: 'failed',
+          phase: 'delete_user_document',
+          firebaseCode: 'permission-denied',
+        };
       }
       const deletedTokenCount = tokens.size;
       const deletedReadStateCount = readStates.size;
@@ -44,7 +48,13 @@ function createRepository(options: {
       tokens.clear();
       readStates.clear();
       delete profile.uid;
-      return { deletedTokenCount, deletedReadStateCount, deletedNicknameReservation };
+      return {
+        status: 'success',
+        deletedTokenCount,
+        deletedReadStateCount,
+        deletedNicknameReservation,
+        completedPhases: ['load_user_profile', 'delete_user_document'],
+      };
     },
   };
 
@@ -66,6 +76,7 @@ test('deleteMyAccount deletes profile/session state and removes tokens and nickn
     deletedTokenCount: 2,
     deletedReadStateCount: 2,
     deletedNicknameReservation: true,
+    completedPhases: ['load_user_profile', 'delete_user_document'],
   });
   assert.equal(harness.profile.uid, undefined);
   assert.equal(harness.tokens.size, 0);
@@ -93,6 +104,7 @@ test('deleteMyAccount is idempotent for already deleted users and empty token co
     deletedTokenCount: 0,
     deletedReadStateCount: 0,
     deletedNicknameReservation: false,
+    completedPhases: ['load_user_profile', 'delete_user_document'],
   });
   assert.equal(harness.tokens.size, 0);
 });
@@ -106,7 +118,9 @@ test('deleteMyAccount reports account cleanup failure and retry removes remainin
       repository: harness.repository,
       clock: { now: () => 'failed-delete' },
     }),
-    /account cleanup failed/
+    (error) => error instanceof AccountDeletionCleanupError
+      && error.phase === 'delete_user_document'
+      && error.firebaseCode === 'permission-denied'
   );
   assert.equal(harness.tokens.size, 2);
 
@@ -121,6 +135,7 @@ test('deleteMyAccount reports account cleanup failure and retry removes remainin
     deletedTokenCount: 2,
     deletedReadStateCount: 2,
     deletedNicknameReservation: true,
+    completedPhases: ['load_user_profile', 'delete_user_document'],
   });
   assert.equal(harness.tokens.size, 0);
 });
