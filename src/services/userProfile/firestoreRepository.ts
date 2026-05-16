@@ -49,15 +49,25 @@ export function createUserProfileFirestoreRepository(params: {
         }
 
         const existingUser = userDoc.data();
+        const existingUserIsDeleted = existingUser?.deleted === true;
         if (
           typeof existingUser?.normalizedNickname === 'string'
           && existingUser.normalizedNickname !== normalizedNickname
+          && !existingUserIsDeleted
         ) {
           return {
             status: 'conflict' as const,
             code: 'normalized_name_conflict',
             message: '이미 다른 닉네임 예약이 있어요. 다시 시도해주세요.',
           };
+        }
+
+        if (
+          existingUserIsDeleted
+          && typeof existingUser?.normalizedNickname === 'string'
+          && existingUser.normalizedNickname !== normalizedNickname
+        ) {
+          transaction.delete(db.collection('nicknameReservations').doc(existingUser.normalizedNickname));
         }
 
         transaction.set(reservationRef, {
@@ -100,7 +110,7 @@ export function createUserProfileFirestoreRepository(params: {
         }
 
         const timestamp = FieldValue.serverTimestamp();
-        transaction.set(userRef, profileData(params, timestamp), { merge: true });
+        transaction.set(userRef, profileData(params, timestamp));
 
         return {
           status: 'completed' as const,

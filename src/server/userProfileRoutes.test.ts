@@ -18,7 +18,9 @@ function createRes() {
   };
 }
 
-function captureRoutes(repository: UserProfileRepository) {
+function captureRoutes(repository: UserProfileRepository, options: {
+  readonly userDoc?: Record<string, unknown>;
+} = {}) {
   const routes = new Map<string, Array<(req: unknown, res: unknown, next?: () => void) => unknown>>();
   const app = {
     post(path: string, ...handlers: Array<(req: unknown, res: unknown, next?: () => void) => unknown>) {
@@ -32,7 +34,7 @@ function captureRoutes(repository: UserProfileRepository) {
     collection: () => ({
       doc: () => ({
         async get() {
-          return { data: () => ({ deleted: false }) };
+          return { data: () => options.userDoc ?? { deleted: false } };
         },
       }),
     }),
@@ -80,6 +82,56 @@ test('nickname reservation route uses verified uid and maps duplicate response',
   const res = await route.call('/api/users/me/nickname-reservation', { nickname: ' QLING ' });
   assert.equal(res.statusCode, 409);
   assert.deepEqual(res.body, { status: 'duplicate', code: 'nickname_taken', message: '이미 사용 중인 닉네임이에요.' });
+});
+
+test('onboarding recovery routes do not reject legacy deleted tombstone before repository seam', async () => {
+  let called = false;
+  const route = captureRoutes({
+    async reserveNickname(params) {
+      called = true;
+      assert.equal(params.uid, 'verified-user');
+      return {
+        status: 'available',
+        uid: params.uid,
+        nickname: params.nickname,
+        normalizedNickname: params.normalizedNickname,
+      };
+    },
+    async completeOnboarding() {
+      throw new Error('unused');
+    },
+    async updateInterests() {
+      throw new Error('unused');
+    },
+  }, { userDoc: { deleted: true } });
+
+  const res = await route.call('/api/users/me/nickname-reservation', { nickname: '새닉' });
+
+  assert.equal(res.statusCode, 200);
+  assert.equal((res.body as { status: string }).status, 'available');
+  assert.equal(called, true);
+});
+
+test('post-onboarding interests edit still rejects legacy deleted tombstone', async () => {
+  let called = false;
+  const route = captureRoutes({
+    async reserveNickname() {
+      throw new Error('unused');
+    },
+    async completeOnboarding() {
+      throw new Error('unused');
+    },
+    async updateInterests() {
+      called = true;
+      throw new Error('should not update');
+    },
+  }, { userDoc: { deleted: true } });
+
+  const res = await route.call('/api/users/me/interests', { interests: ['워라밸'] });
+
+  assert.equal(res.statusCode, 403);
+  assert.deepEqual(res.body, { error: { code: 'user_deleted', message: '삭제된 계정입니다.' } });
+  assert.equal(called, false);
 });
 
 test('onboarding profile route persists required age, gender, interests, and nickname', async () => {

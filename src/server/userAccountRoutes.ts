@@ -66,8 +66,8 @@ export function registerUserAccountRoutes(app: express.Express, deps: {
       const repository = deps.repository ?? createFirestoreUserAccountRepository({ db: deps.db as Firestore });
       const clock = deps.clock ?? createServerTimestampClock();
       const deleteAccount = deps.deleteAccount ?? deleteMyAccount;
-      await deps.auth.deleteUser(uid);
       await deleteAccount({ uid, repository, clock });
+      await deps.auth.deleteUser(uid);
       res.status(200).json({ status: 'deleted' });
     } catch (error) {
       console.error('Account deletion failed:', error);

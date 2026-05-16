@@ -116,8 +116,8 @@ test('delete account route uses verified uid and ignores spoofed body identity f
   assert.equal(res.statusCode, 200);
   assert.deepEqual(res.body, { status: 'deleted' });
   assert.equal(route.calls.length, 2);
-  assert.equal(route.calls[0], 'deleteAuth:verified-user');
-  assert.equal((route.calls[1] as { uid: string }).uid, 'verified-user');
+  assert.equal((route.calls[0] as { uid: string }).uid, 'verified-user');
+  assert.equal(route.calls[1], 'deleteAuth:verified-user');
 });
 
 test('delete account route returns 200 for already deleted service result', async () => {
@@ -136,14 +136,14 @@ test('delete account route returns 200 for already deleted service result', asyn
   assert.deepEqual(res.body, { status: 'deleted' });
 });
 
-test('delete account route deletes Firebase Auth user before Firestore cleanup', async () => {
+test('delete account route deletes Firestore account state before Firebase Auth user', async () => {
   const route = captureRoute();
   const res = createRes();
   await route.handler({ headers: { authorization: 'Bearer token' }, body: { confirm: true } } as never, res as never);
 
   assert.equal(res.statusCode, 200);
-  assert.equal(route.calls[0], 'deleteAuth:verified-user');
-  assert.equal((route.calls[1] as { uid: string }).uid, 'verified-user');
+  assert.equal((route.calls[0] as { uid: string }).uid, 'verified-user');
+  assert.equal(route.calls[1], 'deleteAuth:verified-user');
 });
 
 test('delete account route fails closed when Firebase Auth deletion fails', async () => {
@@ -160,7 +160,7 @@ test('delete account route fails closed when Firebase Auth deletion fails', asyn
       message: '계정 삭제 처리 중 문제가 발생했습니다.',
     },
   });
-  assert.deepEqual(route.calls, []);
+  assert.equal((route.calls[0] as { uid: string }).uid, 'verified-user');
 });
 
 test('delete account route maps storage failure', async () => {

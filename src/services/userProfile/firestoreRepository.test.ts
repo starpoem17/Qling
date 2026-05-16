@@ -5,7 +5,8 @@ import { createUserProfileFirestoreRepository } from './firestoreRepository';
 type StoredDoc = Record<string, unknown>;
 type Operation =
   | { type: 'get'; path: string }
-  | { type: 'set'; path: string; data: StoredDoc; options?: { merge?: boolean } };
+  | { type: 'set'; path: string; data: StoredDoc; options?: { merge?: boolean } }
+  | { type: 'delete'; path: string };
 type DocRef = { readonly path: string };
 
 function createFakeFirestore(initial: Record<string, StoredDoc> = {}) {
@@ -26,6 +27,7 @@ function createFakeFirestore(initial: Record<string, StoredDoc> = {}) {
     async runTransaction<T>(callback: (transaction: {
       get(ref: DocRef): Promise<{ exists: boolean; data(): StoredDoc | undefined }>;
       set(ref: DocRef, data: StoredDoc, options?: { merge?: boolean }): void;
+      delete(ref: DocRef): void;
     }) => Promise<T>): Promise<T> {
       const staged = new Map<string, StoredDoc>();
       writeStarted = false;
@@ -45,8 +47,16 @@ function createFakeFirestore(initial: Record<string, StoredDoc> = {}) {
           const existing = options?.merge ? (staged.get(ref.path) ?? committed.get(ref.path) ?? {}) : {};
           staged.set(ref.path, { ...existing, ...data });
         },
+        delete(ref) {
+          writeStarted = true;
+          operations.push({ type: 'delete', path: ref.path });
+          staged.set(ref.path, undefined as never);
+        },
       });
-      for (const [path, data] of staged) committed.set(path, data);
+      for (const [path, data] of staged) {
+        if (data === undefined) committed.delete(path);
+        else committed.set(path, data);
+      }
       return result;
     },
   };
@@ -169,6 +179,34 @@ test('real repository rejects same uid changing normalized nickname without corr
   assert.equal(db.committed.get('nicknameReservations/qling')?.uid, 'user-1');
 });
 
+test('real repository allows legacy deleted tombstone to reserve a fresh nickname and removes old reservation', async () => {
+  const db = createFakeFirestore({
+    'users/user-1': {
+      uid: 'user-1',
+      nickname: 'OLD',
+      normalizedNickname: 'old',
+      deleted: true,
+      helpedCount: 7,
+    },
+    'nicknameReservations/old': {
+      uid: 'user-1',
+      nickname: 'OLD',
+      normalizedNickname: 'old',
+    },
+  });
+  const repository = createUserProfileFirestoreRepository({ db: db as never });
+
+  const result = await repository.reserveNickname({
+    uid: 'user-1',
+    nickname: 'NEW',
+    normalizedNickname: 'new',
+  });
+
+  assert.equal(result.status, 'available');
+  assert.equal(db.committed.has('nicknameReservations/old'), false);
+  assert.equal(db.committed.get('nicknameReservations/new')?.uid, 'user-1');
+});
+
 test('real repository completeOnboarding requires matching reservation', async () => {
   const missingDb = createFakeFirestore();
   const missingRepository = createUserProfileFirestoreRepository({ db: missingDb as never });
@@ -215,6 +253,7 @@ test('real repository completeOnboarding writes server-owned profile fields afte
     ['get', 'nicknameReservations/qling'],
     ['set', 'users/user-1'],
   ]);
+  assert.equal((db.operations.find(op => op.type === 'set' && op.path === 'users/user-1') as { options?: { merge?: boolean } }).options, undefined);
   const written = db.committed.get('users/user-1');
   assert.equal(written?.uid, 'user-1');
   assert.equal(written?.nickname, 'QLING');
@@ -225,4 +264,35 @@ test('real repository completeOnboarding writes server-owned profile fields afte
   assert.ok(Object.hasOwn(written ?? {}, 'createdAt'));
   assert.ok(Object.hasOwn(written ?? {}, 'updatedAt'));
   assert.ok(Object.hasOwn(written ?? {}, 'lastActive'));
+});
+
+test('real repository completeOnboarding replaces legacy deleted tombstone profile fields', async () => {
+  const db = createFakeFirestore({
+    'nicknameReservations/qling': {
+      uid: 'user-1',
+      nickname: 'QLING',
+      normalizedNickname: 'qling',
+    },
+    'users/user-1': {
+      uid: 'user-1',
+      nickname: 'OLD',
+      normalizedNickname: 'old',
+      deleted: true,
+      deletedAt: 'old-delete',
+      helpedCount: 99,
+      notificationPermission: 'granted',
+    },
+  });
+  const repository = createUserProfileFirestoreRepository({ db: db as never });
+
+  const result = await repository.completeOnboarding(profile);
+
+  assert.equal(result.status, 'completed');
+  const written = db.committed.get('users/user-1');
+  assert.equal(written?.nickname, 'QLING');
+  assert.equal(written?.normalizedNickname, 'qling');
+  assert.equal(Object.hasOwn(written ?? {}, 'deleted'), false);
+  assert.equal(Object.hasOwn(written ?? {}, 'deletedAt'), false);
+  assert.equal(Object.hasOwn(written ?? {}, 'helpedCount'), false);
+  assert.equal(Object.hasOwn(written ?? {}, 'notificationPermission'), false);
 });
