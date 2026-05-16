@@ -371,15 +371,15 @@ Phase 3 must constrain `src/App.tsx` before new route and screen work increases 
 
 Presentational screen contracts must be defined before container wiring. Presentational components must receive props and emit events only; they must not import Firebase, Firestore SDK, API clients, service implementation internals, moderation, matching, read-state, push/PWA, or account deletion logic.
 
-- [ ] TODO-DESIGN-4.1 Define screen props contracts for login/loading/splash screens, including auth/loading/error/submit props and no Firebase imports.
-- [ ] TODO-DESIGN-4.2 Define screen props contracts for onboarding basic, duplicate check, and interests, including field values, validation messages, submit/check callbacks, processing states, and no Firestore/API imports.
-- [ ] TODO-DESIGN-4.3 Define screen props contracts for received-worries, including feed items, pass/open callbacks, loading/error/empty states, unread state, and no delivery API imports; do not include a completed-reply display state because replied deliveries must be excluded from the answer feed.
-- [ ] TODO-DESIGN-4.4 Define screen props contracts for write-worry and write-reply forms, including draft value, validation result, character count, publish callback, processing/moderation/error states, and no publication API imports.
-- [ ] TODO-DESIGN-4.5 Define screen props contracts for reply-check/detail screens, including original worry, reply, feedback, comment, submit callbacks, existing-feedback states, and no feedback API imports.
-- [ ] TODO-DESIGN-4.6 Define screen props contracts for my-page/account screens, including profile summary, helpedCount/received hearts, interests, required push notification settings access, required PWA install/share access, policy settings items, logout/delete callbacks, and no Firebase/userAccount imports.
-- [ ] TODO-DESIGN-4.7 Add pure props-contract tests in named targets near the screen contract modules, such as `src/screens/receivedWorries/contract.test.ts`, `src/screens/writeForm/contract.test.ts`, and `src/screens/myPage/contract.test.ts`; do not require React DOM rendering tests unless a React test harness is deliberately added.
-- [ ] TODO-DESIGN-4.8 If a React DOM component test harness is added deliberately, document the dependency, setup file, and first test target; otherwise rely on pure props-contract tests, import-boundary tests, service tests, and manual browser evidence.
-- [ ] TODO-DESIGN-4.V1 Verify Phase 4 with contract definitions and props-contract test output before container wiring begins.
+- [x] TODO-DESIGN-4.1 Define screen props contracts for login/loading/splash screens, including auth/loading/error/submit props and no Firebase imports.
+- [x] TODO-DESIGN-4.2 Define screen props contracts for onboarding basic, duplicate check, and interests, including field values, validation messages, submit/check callbacks, processing states, and no Firestore/API imports.
+- [x] TODO-DESIGN-4.3 Define screen props contracts for received-worries, including feed items, pass/open callbacks, loading/error/empty states, unread state, and no delivery API imports; do not include a completed-reply display state because replied deliveries must be excluded from the answer feed.
+- [x] TODO-DESIGN-4.4 Define screen props contracts for write-worry and write-reply forms, including draft value, validation result, character count, publish callback, processing/moderation/error states, and no publication API imports.
+- [x] TODO-DESIGN-4.5 Define screen props contracts for reply-check/detail screens, including original worry, reply, feedback, comment, submit callbacks, existing-feedback states, and no feedback API imports.
+- [x] TODO-DESIGN-4.6 Define screen props contracts for my-page/account screens, including profile summary, helpedCount/received hearts, interests, required push notification settings access, required PWA install/share access, policy settings items, logout/delete callbacks, and no Firebase/userAccount imports.
+- [x] TODO-DESIGN-4.7 Add pure props-contract tests in named targets near the screen contract modules, such as `src/screens/receivedWorries/contract.test.ts`, `src/screens/writeForm/contract.test.ts`, and `src/screens/myPage/contract.test.ts`; do not require React DOM rendering tests unless a React test harness is deliberately added.
+- [x] TODO-DESIGN-4.8 If a React DOM component test harness is added deliberately, document the dependency, setup file, and first test target; otherwise rely on pure props-contract tests, import-boundary tests, service tests, and manual browser evidence.
+- [x] TODO-DESIGN-4.V1 Verify Phase 4 with contract definitions and props-contract test output before container wiring begins.
 
 ### Phase 5 - Received-Worries Container Boundary
 
