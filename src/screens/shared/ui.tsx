@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import {
   AlertCircle,
   CheckCircle2,
@@ -74,7 +74,7 @@ export function BottomNavigation({
         data-target-route={centralAction.targetRoute}
         data-owner-tab={centralAction.ownerTab}
         onClick={onCentralAction}
-        className="absolute left-1/2 top-0 flex h-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-2 rounded-[var(--qling-radius-pill)] bg-[var(--qling-color-primary-orange)] px-4 text-xs font-bold text-white shadow-[var(--qling-shadow-card)] transition-transform hover:-translate-y-[55%] focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)] focus:ring-offset-2"
+        className="absolute left-1/2 top-0 flex h-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-2 rounded-[var(--qling-radius-pill)] bg-[var(--qling-color-primary-orange)] px-4 text-xs font-bold text-[var(--qling-color-text)] shadow-[var(--qling-shadow-card)] transition-transform hover:-translate-y-[55%] focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)] focus:ring-offset-2"
       >
         <Send className="h-4 w-4" aria-hidden="true" />
         {centralAction.label}
@@ -115,7 +115,7 @@ export function ContentSheet({ children, className }: { readonly children: React
 
 export function OrangeHeaderBand({ children, className }: { readonly children: ReactNode; readonly className?: string }) {
   return (
-    <section className={cn('rounded-b-[var(--qling-radius-content-sheet)] bg-[var(--qling-color-primary-orange)] px-[var(--qling-space-shell-x)] py-6 text-white', className)}>
+    <section className={cn('rounded-b-[var(--qling-radius-content-sheet)] bg-[var(--qling-color-primary-orange)] px-[var(--qling-space-shell-x)] py-6 text-[var(--qling-color-text)]', className)}>
       {children}
     </section>
   );
@@ -126,11 +126,12 @@ function CTA({ children, onClick, disabled, processing, type = 'button', accessi
     <button
       type={type}
       aria-label={accessibilityLabel}
+      aria-busy={processing || undefined}
       disabled={disabled || processing}
       onClick={onClick}
       className={cn(
         'inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[var(--qling-radius-cta)] px-5 py-3 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55',
-        variant === 'primary' && 'bg-[var(--qling-color-primary-orange)] text-white focus:ring-[var(--qling-color-primary-orange)]',
+        variant === 'primary' && 'bg-[var(--qling-color-primary-orange)] text-[var(--qling-color-text)] focus:ring-[var(--qling-color-primary-orange)]',
         variant === 'secondary' && 'border border-[var(--qling-color-border)] bg-[var(--qling-color-surface)] text-[var(--qling-color-text)] focus:ring-[var(--qling-color-secondary-orange)]',
         variant === 'destructive' && 'bg-[var(--qling-color-danger)] text-white focus:ring-[var(--qling-color-danger)]',
       )}
@@ -169,9 +170,9 @@ export function CategoryChip({ label, selected, disabled, onSelect, className }:
       aria-pressed={selected}
       onClick={onSelect}
       className={cn(
-        'rounded-[var(--qling-radius-pill)] border px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-55',
+        'min-w-0 rounded-[var(--qling-radius-pill)] border px-3 py-1.5 text-sm font-semibold leading-5 transition-colors disabled:cursor-not-allowed disabled:opacity-55',
         selected
-          ? 'border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-cream-soft)] text-[var(--qling-color-primary-orange)]'
+          ? 'border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-cream-soft)] text-[var(--qling-color-text)]'
           : 'border-[var(--qling-color-border)] bg-[var(--qling-color-surface)] text-[var(--qling-color-muted)]',
         className,
       )}
@@ -231,14 +232,29 @@ export function QlingDialog({
   onCancel,
   onConfirm,
 }: QlingDialogProps) {
+  const titleId = useId();
+  const descriptionId = useId();
+  const errorId = useId();
+  const describedBy = [
+    description ? descriptionId : undefined,
+    errorMessage ? errorId : undefined,
+  ].filter(Boolean).join(' ') || undefined;
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm" role="presentation">
-      <section role="dialog" aria-modal="true" aria-labelledby="qling-dialog-title" className="w-full max-w-sm rounded-[var(--qling-radius-modal)] bg-[var(--qling-color-surface)] p-6 shadow-[var(--qling-shadow-modal)]">
-        <h2 id="qling-dialog-title" className="text-lg font-bold text-[var(--qling-color-text)]">{title}</h2>
-        {description && <p className="mt-2 text-sm leading-6 text-[var(--qling-color-muted)]">{description}</p>}
-        {errorMessage && <p className="mt-3 text-sm font-semibold text-[var(--qling-color-danger)]">{errorMessage}</p>}
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={describedBy}
+        aria-busy={processing || undefined}
+        className="w-full max-w-sm rounded-[var(--qling-radius-modal)] bg-[var(--qling-color-surface)] p-6 shadow-[var(--qling-shadow-modal)]"
+      >
+        <h2 id={titleId} className="text-lg font-bold text-[var(--qling-color-text)]">{title}</h2>
+        {description && <p id={descriptionId} className="mt-2 text-sm leading-6 text-[var(--qling-color-muted)]">{description}</p>}
+        {errorMessage && <p id={errorId} className="mt-3 text-sm font-semibold text-[var(--qling-color-danger)]">{errorMessage}</p>}
         <div className="mt-6 flex gap-[var(--qling-space-cta-gap)]">
           <SecondaryCTA onClick={onCancel} disabled={processing}>{cancelLabel}</SecondaryCTA>
           {destructive ? (

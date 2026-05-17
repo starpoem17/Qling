@@ -60,7 +60,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                   {item.receivedAt.label}
                 </time>
                 {item.isUnread && (
-                  <span className="rounded-[var(--qling-radius-pill)] bg-[var(--qling-color-primary-orange)] px-2 py-0.5 text-[10px] font-bold text-white">
+                  <span className="rounded-[var(--qling-radius-pill)] bg-[var(--qling-color-primary-orange)] px-2 py-0.5 text-[10px] font-bold text-[var(--qling-color-text)]">
                     새 고민
                   </span>
                 )}
@@ -73,7 +73,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                 }}
                 disabled={isPassing}
                 aria-label={`${item.category} 고민 건너뛰기`}
-                className="inline-flex h-7 shrink-0 items-center justify-center gap-1 rounded-[var(--qling-radius-pill)] border border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-primary-orange)] px-3 text-[11px] font-bold text-white transition-colors hover:bg-[var(--qling-color-secondary-orange)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-7 shrink-0 items-center justify-center gap-1 rounded-[var(--qling-radius-pill)] border border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-primary-orange)] px-3 text-[11px] font-bold text-[var(--qling-color-text)] transition-colors hover:bg-[var(--qling-color-secondary-orange)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isPassing ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : <XCircle className="h-3.5 w-3.5" aria-hidden="true" />}
                 {isPassing ? '처리 중' : '건너뛰기'}
@@ -85,7 +85,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
               aria-label={`${item.category} 고민에 답변 작성하기`}
               className="group flex w-full items-end justify-between gap-3 px-4 pb-4 pt-4 text-left focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)] focus:ring-inset"
             >
-              <span className="min-w-0 whitespace-pre-wrap text-base font-extrabold leading-7 text-[var(--qling-color-text)]">
+              <span className="min-w-0 whitespace-pre-wrap break-words text-base font-extrabold leading-7 text-[var(--qling-color-text)]">
                 {content}
               </span>
               <span className="mb-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--qling-color-cream-soft)] text-[var(--qling-color-primary-orange)] transition-transform group-hover:translate-x-0.5" aria-hidden="true">

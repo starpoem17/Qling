@@ -40,7 +40,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
               </time>
             )}
           </div>
-          <p className="whitespace-pre-wrap text-base font-extrabold leading-7 text-[var(--qling-color-text)]">
+          <p className="whitespace-pre-wrap break-words text-base font-extrabold leading-7 text-[var(--qling-color-text)]">
             {props.originalWorry.bodyText}
           </p>
         </ContentSheet>

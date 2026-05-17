@@ -76,7 +76,7 @@ test('onboarding interests use the design-aligned 7 by 3 category order and pres
   assert.deepEqual(orderOnboardingInterestCategories(WORRY_CATEGORIES), Array.from(ONBOARDING_INTEREST_CATEGORY_ORDER));
 });
 
-test('onboarding interest grid contract copies design chip dimensions', () => {
+test('onboarding interest grid contract preserves design chip dimensions with accessible letter spacing', () => {
   assert.deepEqual(ONBOARDING_INTEREST_GRID, {
     columns: 3,
     rows: 7,
@@ -90,7 +90,7 @@ test('onboarding interest grid contract copies design chip dimensions', () => {
     unselectedBackgroundColor: '#fff1d1',
     unselectedBorderColor: '#d4be91',
     textSizePx: 14,
-    textLetterSpacingPx: -0.14,
+    textLetterSpacingPx: 0,
   });
 });
 

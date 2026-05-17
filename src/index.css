@@ -13,7 +13,7 @@
   --color-qling-text: #25221f;
   --color-qling-muted: #77716b;
   --color-qling-border: #e7ded5;
-  --color-qling-danger: #d84b4b;
+  --color-qling-danger: #c83a3a;
   --color-qling-success: #4f9f68;
 
   --color-warm-bg: var(--color-qling-cream);
@@ -34,7 +34,7 @@
   --qling-color-text: #25221f;
   --qling-color-muted: #77716b;
   --qling-color-border: #e7ded5;
-  --qling-color-danger: #d84b4b;
+  --qling-color-danger: #c83a3a;
   --qling-color-success: #4f9f68;
 
   --qling-radius-card: 1.25rem;

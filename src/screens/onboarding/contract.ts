@@ -38,7 +38,7 @@ export const ONBOARDING_INTEREST_GRID = {
   unselectedBackgroundColor: '#fff1d1',
   unselectedBorderColor: '#d4be91',
   textSizePx: 14,
-  textLetterSpacingPx: -0.14,
+  textLetterSpacingPx: 0,
 } as const;
 
 export function orderOnboardingInterestCategories(

@@ -11,13 +11,13 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
             type="button"
             onClick={props.onBack}
             aria-label="마이페이지로 돌아가기"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--qling-color-text)] transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-text)]"
           >
             <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           </button>
           <h1 className="text-center text-lg font-extrabold">내가 쓴 답변</h1>
         </div>
-        <p className="mx-auto mt-4 max-w-xs text-center text-sm font-semibold leading-6 text-white/90">
+        <p className="mx-auto mt-4 max-w-xs text-center text-sm font-semibold leading-6 text-[var(--qling-color-text)]">
           내가 보낸 답변과 받은 반응을 확인합니다.
         </p>
       </OrangeHeaderBand>
@@ -51,10 +51,10 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
                   {reply.dateLabel && <span>{reply.dateLabel}</span>}
                   {reply.feedbackLabel && <span>{reply.feedbackLabel}</span>}
                 </div>
-                <p className="line-clamp-2 text-base font-extrabold leading-7 text-[var(--qling-color-text)]">
+                <p className="whitespace-pre-wrap break-words text-base font-extrabold leading-7 text-[var(--qling-color-text)]">
                   {reply.originalWorryPreview}
                 </p>
-                <p className="line-clamp-2 text-sm font-semibold leading-6 text-[var(--qling-color-muted)]">
+                <p className="whitespace-pre-wrap break-words text-sm font-semibold leading-6 text-[var(--qling-color-muted)]">
                   {reply.previewText}
                 </p>
               </div>

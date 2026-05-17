@@ -158,7 +158,9 @@ test('modal dialog contract preserves aria-capable confirmation and processing/e
   assert.equal(dialog.processing, true);
   assert.match(source, /role="dialog"/);
   assert.match(source, /aria-modal="true"/);
-  assert.match(source, /aria-labelledby="qling-dialog-title"/);
+  assert.match(source, /aria-labelledby=\{titleId\}/);
+  assert.match(source, /aria-describedby=\{describedBy\}/);
+  assert.match(source, /useId/);
 });
 
 test('shared primitive module does not import Firebase, API, server, or service mutation boundaries', () => {

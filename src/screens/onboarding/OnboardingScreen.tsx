@@ -38,10 +38,10 @@ export function OnboardingScreen(props: Props) {
 
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-xl flex-col">
-      <div className="rounded-b-[2rem] bg-[var(--qling-color-primary-orange)] px-5 pb-16 pt-8 text-white shadow-[var(--qling-shadow-card)]">
-        <p className="text-[0.68rem] font-black uppercase tracking-[0.22em] text-[var(--qling-color-cream-soft)]">Question 1</p>
+      <div className="rounded-b-[2rem] bg-[var(--qling-color-primary-orange)] px-5 pb-16 pt-8 text-[var(--qling-color-text)] shadow-[var(--qling-shadow-card)]">
+        <p className="text-[0.68rem] font-black uppercase tracking-[0.22em] text-[var(--qling-color-text)]">Question 1</p>
         <h1 className="mt-3 text-[1.65rem] font-black leading-tight">기본 정보를 알려주세요</h1>
-        <p className="mt-3 text-sm font-semibold leading-6 text-white/85">
+        <p className="mt-3 text-sm font-semibold leading-6 text-[var(--qling-color-text)]">
           외부에는 공개되지 않는 정보예요. 닉네임은 나중에 마이페이지에서만 본인이 확인할 수 있어요.
         </p>
         <div className="mt-7 h-1.5 overflow-hidden rounded-full bg-[#2a2c30]">
@@ -115,7 +115,7 @@ export function OnboardingScreen(props: Props) {
                   className={cn(
                     'min-h-[3.75rem] rounded-[var(--qling-radius-input)] border px-4 text-sm font-black transition-colors focus:outline-none focus:ring-2 focus:ring-[rgb(224_122_95/0.18)] disabled:cursor-not-allowed disabled:opacity-55',
                     selected
-                      ? 'border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-cream-soft)] text-[var(--qling-color-primary-orange)]'
+                      ? 'border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-cream-soft)] text-[var(--qling-color-text)]'
                       : 'border-[#d4be91] bg-white text-[var(--qling-color-text)]',
                   )}
                 >
@@ -181,7 +181,7 @@ export function OnboardingScreen(props: Props) {
                   disabled={props.isProcessing}
                   onSelect={() => props.onInterestToggle(category)}
                   className={cn(
-                    'box-border h-[44px] w-full max-w-[103px] justify-self-center rounded-[22px] border-2 px-1 py-0 text-[14px] font-bold tracking-[-0.14px] text-[var(--qling-color-text)]',
+                    'box-border h-[44px] w-full max-w-[103px] justify-self-center rounded-[22px] border-2 px-1 py-0 text-[14px] font-bold tracking-normal text-[var(--qling-color-text)]',
                     selected
                       ? 'border-[#ff8b0d] bg-[var(--qling-color-surface)]'
                       : 'border-[#d4be91] bg-[#fff1d1]',

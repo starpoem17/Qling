@@ -97,7 +97,7 @@ function OriginalWorryCard(props: ReplyDetailScreenProps) {
         <p className="text-xs font-bold text-[var(--qling-color-muted)]">
           {props.variant === 'my-answer-detail' ? '전달받았던 고민' : '내가 보낸 고민'}
         </p>
-        <p className="whitespace-pre-wrap text-base font-extrabold leading-7 text-[var(--qling-color-text)]">
+        <p className="whitespace-pre-wrap break-words text-base font-extrabold leading-7 text-[var(--qling-color-text)]">
           {worry.bodyText ?? worry.summaryText}
         </p>
       </div>
@@ -122,9 +122,9 @@ function ReplyCard(props: ReplyDetailScreenProps) {
             {props.variant === 'my-answer-detail' ? '내가 쓴 답변' : '도착한 답변'}
           </span>
         </div>
-        {reply.date.label && <span className="shrink-0 text-xs font-semibold text-[var(--qling-color-muted)]">{reply.date.label}</span>}
+        {reply.date.label && <span className="text-right text-xs font-semibold text-[var(--qling-color-muted)]">{reply.date.label}</span>}
       </div>
-      <p className="whitespace-pre-wrap text-base font-semibold leading-8 text-[var(--qling-color-text)]">
+      <p className="whitespace-pre-wrap break-words text-base font-semibold leading-8 text-[var(--qling-color-text)]">
         {reply.bodyText}
       </p>
     </QlingCard>
@@ -208,7 +208,7 @@ function FeedbackButton({
       className={cn(
         'flex min-h-16 w-full items-center justify-center gap-2 rounded-[var(--qling-radius-cta)] border px-4 py-3 text-sm font-extrabold transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55',
         isLike
-          ? 'border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-primary-orange)] text-white'
+          ? 'border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-primary-orange)] text-[var(--qling-color-text)]'
           : 'border-[var(--qling-color-border)] bg-[var(--qling-color-surface)] text-[var(--qling-color-muted)]',
         selected && !isLike && 'border-[var(--qling-color-primary-orange)] text-[var(--qling-color-primary-orange)]',
       )}

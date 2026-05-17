@@ -172,7 +172,7 @@ test('onboarding screen remains presentational while container owns API calls', 
   assert.match(container, /submitAvailableOnboarding/);
 });
 
-test('onboarding interests use a fixed three-column chip grid contract', () => {
+test('onboarding interests use a responsive three-column chip grid contract', () => {
   const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
 
   assert.match(screen, /grid-cols-3/);
@@ -184,6 +184,6 @@ test('onboarding interests use a fixed three-column chip grid contract', () => {
   assert.match(screen, /rounded-\[22px\]/);
   assert.match(screen, /border-2/);
   assert.match(screen, /text-\[14px\]/);
-  assert.match(screen, /tracking-\[-0\.14px\]/);
+  assert.match(screen, /tracking-normal/);
   assert.doesNotMatch(screen, /flex flex-wrap gap-2/);
 });

@@ -65,6 +65,9 @@ const platformGuidanceLabels: Record<AppInstallAccessProps['platformGuidance'], 
 };
 
 export function MyPageScreen(props: MyPageScreenProps) {
+  const isLogoutProcessing = props.logoutConfirmation.isProcessing;
+  const isAccountDeletionProcessing = props.accountDeletionConfirmation.isProcessing;
+
   return (
     <div className="space-y-6">
       <OrangeHeaderBand className="space-y-2">
@@ -77,19 +80,21 @@ export function MyPageScreen(props: MyPageScreenProps) {
         <div className="min-w-0 flex-1 space-y-3">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
-              <h2 className="truncate text-xl font-extrabold text-[var(--qling-color-text)]">{props.profile.nickname}</h2>
+              <h2 className="break-words text-xl font-extrabold leading-7 text-[var(--qling-color-text)]">{props.profile.nickname}</h2>
               <p className="mt-1 flex items-center gap-1 text-sm font-bold text-[var(--qling-color-muted)]">
                 <Heart className="h-4 w-4 fill-[var(--qling-color-danger)] text-[var(--qling-color-danger)]" aria-hidden="true" />
                 <span className="text-[var(--qling-color-danger)]">{props.profile.helpedCount}</span>
                 <span>{props.profile.helpedCountLabel}</span>
               </p>
             </div>
-            <SecondaryCTA
-              onClick={() => props.onSettingSelect('edit_interests')}
-              accessibilityLabel="관심 분야 수정으로 이동"
-            >
-              관심 분야 수정
-            </SecondaryCTA>
+            <div className="w-full sm:w-40">
+              <SecondaryCTA
+                onClick={() => props.onSettingSelect('edit_interests')}
+                accessibilityLabel="관심 분야 수정으로 이동"
+              >
+                관심 분야 수정
+              </SecondaryCTA>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2" aria-label="내 관심 분야">
             {props.profile.interests.length === 0 ? (
@@ -156,6 +161,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
               label={settingLabels[item]}
               description={settingDescriptions[item]}
               danger={item === 'delete_account'}
+              disabled={(item === 'logout' && isLogoutProcessing) || (item === 'delete_account' && isAccountDeletionProcessing)}
               accessibilityLabel={`${settingLabels[item]}으로 이동`}
               onSelect={() => props.onSettingSelect(item)}
             />
@@ -265,6 +271,7 @@ function BackButton({ onBack, label }: { readonly onBack: () => void; readonly l
     <button
       type="button"
       onClick={onBack}
+      aria-label={`${label} 돌아가기`}
       className="inline-flex items-center gap-2 rounded-[var(--qling-radius-small-button)] px-2 py-1 text-sm font-bold text-[var(--qling-color-muted)] transition-colors hover:text-[var(--qling-color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)]"
     >
       <ArrowLeft className="h-4 w-4" aria-hidden="true" />

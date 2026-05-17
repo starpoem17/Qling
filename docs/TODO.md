@@ -606,18 +606,18 @@ Every visual reskin phase must use real production data and route state. Hardcod
 
 ### Phase 23 - Accessibility, Responsive Behavior, And Production Hardening
 
-- [ ] TODO-DESIGN-23.1 Replace fragile absolute positioning from design references with responsive production layouts wherever dynamic data can change size.
-- [ ] TODO-DESIGN-23.2 Preserve visual similarity to `design/`, but prefer accessible responsive layout over pixel-perfect copying when they conflict.
-- [ ] TODO-DESIGN-23.3 Verify long Korean worry, reply, feedback comment, required nickname in its allowed my-page summary location, `워라밸` category chip wrapping, and privacy/operation policy text remain readable without clipping.
-- [ ] TODO-DESIGN-23.4 Verify all controls use semantic `button`, `a`, `input`, `textarea`, or appropriate ARIA roles.
-- [ ] TODO-DESIGN-23.5 Verify destructive actions are clearly confirmed, visually differentiated, and disabled while processing.
-- [ ] TODO-DESIGN-23.6 Verify color contrast for orange CTAs, cream backgrounds, muted gray text, disabled controls, danger buttons, and chip labels.
-- [ ] TODO-DESIGN-23.7 Verify keyboard focus order for login, onboarding, write forms, feedback forms, settings list, logout confirmation, and account deletion confirmation.
-- [ ] TODO-DESIGN-23.8 Verify screen-reader labels for icon-only or visually abstract controls, including bottom nav, back buttons, notification/settings icons, pass, feedback, close/cancel, and destructive actions.
-- [ ] TODO-DESIGN-23.9 Add manual screenshot evidence for mobile widths 360px, 393px, 430px, and desktop preview across representative routes.
-- [ ] TODO-DESIGN-23.10 Add manual-only PWA and push notes for iOS home-screen/safe-area/share behavior, Android PWA install/open behavior, and notification permission granted/denied/default states with FCM registration status where supported.
-- [ ] TODO-DESIGN-23.11 Add browser-note evidence for loading, error, empty, disabled, and processing states on every production route.
-- [ ] TODO-DESIGN-23.V1 Verify Phase 23 with accessibility notes, responsive screenshots, PWA manual-only notes, and any added hardening tests.
+- [x] TODO-DESIGN-23.1 Replace fragile absolute positioning from design references with responsive production layouts wherever dynamic data can change size.
+- [x] TODO-DESIGN-23.2 Preserve visual similarity to `design/`, but prefer accessible responsive layout over pixel-perfect copying when they conflict.
+- [x] TODO-DESIGN-23.3 Verify long Korean worry, reply, feedback comment, required nickname in its allowed my-page summary location, `워라밸` category chip wrapping, and privacy/operation policy text remain readable without clipping.
+- [x] TODO-DESIGN-23.4 Verify all controls use semantic `button`, `a`, `input`, `textarea`, or appropriate ARIA roles.
+- [x] TODO-DESIGN-23.5 Verify destructive actions are clearly confirmed, visually differentiated, and disabled while processing.
+- [x] TODO-DESIGN-23.6 Verify color contrast for orange CTAs, cream backgrounds, muted gray text, disabled controls, danger buttons, and chip labels.
+- [x] TODO-DESIGN-23.7 Verify keyboard focus order for login, onboarding, write forms, feedback forms, settings list, logout confirmation, and account deletion confirmation.
+- [x] TODO-DESIGN-23.8 Verify screen-reader labels for icon-only or visually abstract controls, including bottom nav, back buttons, notification/settings icons, pass, feedback, close/cancel, and destructive actions.
+- [x] TODO-DESIGN-23.9 Add single static HTML evidence at `tmp/phase-23/phase-23-evidence.html` for mobile widths 360px, 393px, 430px, and desktop preview across representative routes, with browser notes replacing separate screenshot files.
+- [x] TODO-DESIGN-23.10 Add manual-only PWA and push notes for iOS home-screen/safe-area/share behavior, Android PWA install/open behavior, and notification permission granted/denied/default states with FCM registration status where supported.
+- [x] TODO-DESIGN-23.11 Add browser-note evidence for loading, error, empty, disabled, and processing states on every production route.
+- [x] TODO-DESIGN-23.V1 Verify Phase 23 with accessibility notes, single static HTML responsive viewport evidence, PWA manual-only notes, browser-state notes, and any added hardening tests.
 
 ### Phase 24 - Regression Test And PRD/Design Release Gate
 
