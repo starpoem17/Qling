@@ -53,6 +53,7 @@ export type AppInstallAccessProps = {
   readonly canInstall: boolean;
   readonly canShare: boolean;
   readonly platformGuidance: 'android-install' | 'ios-share-to-home' | 'share-url-or-qr' | 'unsupported';
+  readonly shareUrl?: string;
   readonly onInstall?: () => void;
   readonly onShare?: () => void;
 };

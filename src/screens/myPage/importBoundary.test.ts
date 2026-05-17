@@ -33,6 +33,24 @@ test('my-page presentational screens do not import production services', () => {
   }
 });
 
+test('MyPageScreen uses shared Phase 14 primitives without browser global URL reads', () => {
+  const source = readFileSync(join(process.cwd(), 'src/screens/myPage/MyPageScreen.tsx'), 'utf8');
+
+  assert.equal(source.includes("from '../shared/ui'"), true);
+  for (const primitive of [
+    'ProfileMotif',
+    'SettingsRow',
+    'PolicyTextContainer',
+    'CategoryChip',
+    'QlingDialog',
+    'PrimaryCTA',
+    'LoadingState',
+  ]) {
+    assert.match(source, new RegExp(primitive));
+  }
+  assert.equal(source.includes('window.location'), false);
+});
+
 test('App no longer imports Phase 7 production modules except justified push lifecycle hook', () => {
   const source = readFileSync(join(process.cwd(), 'src/App.tsx'), 'utf8');
   const imports = source.split('\n').filter(line => line.trim().startsWith('import ')).join('\n');

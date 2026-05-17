@@ -14,10 +14,14 @@ test('profile mapping uses safe helpedCount fallback and visual-only motif', () 
     nickname: '나',
     interests: [WORRY_CATEGORIES[0]],
   });
+  const missing = mapProfileToMyPageSummary(null);
+  const negative = mapProfileToMyPageSummary({ helpedCount: -3 });
 
   assert.equal(summary.helpedCount, 0);
   assert.equal(summary.helpedCountLabel, '받은 하트');
   assert.equal(summary.profileMotif.kind, 'visual-only');
+  assert.equal(missing.nickname, '나');
+  assert.equal(negative.helpedCount, 0);
   assert.equal(Object.hasOwn(summary, 'avatarUrl'), false);
 });
 
@@ -27,6 +31,19 @@ test('push mapping distinguishes browser permission states', () => {
   assert.equal(mapPushStatus({ permission: 'default' }).status, 'default');
   assert.equal(mapPushStatus({ permission: 'unsupported' }).status, 'unsupported');
   assert.equal(mapPushStatus({ permission: 'granted', registrationStatus: 'registered' }).status, 'registered');
+  assert.equal(mapPushStatus({ permission: 'granted', registrationStatus: 'error' }).status, 'error');
+  assert.match(mapPushStatus({ permission: 'denied' }).message ?? '', /브라우저 설정/);
+});
+
+test('my-page mapping preserves canonical 워라밸 category value', () => {
+  const summary = mapProfileToMyPageSummary({
+    nickname: '관심사용자',
+    interests: ['워라밸'],
+  });
+
+  assert.equal(WORRY_CATEGORIES.includes('워라밸'), true);
+  assert.equal(summary.interests.includes('워라밸'), true);
+  assert.equal(summary.interests.includes('워라벨' as never), false);
 });
 
 test('reply and worry read models map to list props without example labels', () => {

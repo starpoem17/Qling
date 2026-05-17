@@ -37,6 +37,7 @@ test('my-page summary limits nickname to profile summary and labels helpedCount 
       canInstall: false,
       canShare: true,
       platformGuidance: 'share-url-or-qr',
+      shareUrl: 'https://qling.example',
       onShare: () => undefined,
     },
     logoutConfirmation: {
@@ -100,6 +101,19 @@ test('push and app-like usage access are UI states with callbacks', () => {
     'unsupported',
     'registered',
     'error',
+  ]);
+
+  const appInstallStates = [
+    'android-install',
+    'ios-share-to-home',
+    'share-url-or-qr',
+    'unsupported',
+  ] satisfies readonly AppInstallAccessProps['platformGuidance'][];
+  assert.deepEqual(appInstallStates, [
+    'android-install',
+    'ios-share-to-home',
+    'share-url-or-qr',
+    'unsupported',
   ]);
 });
 
@@ -169,9 +183,22 @@ test('policy screen contract carries title, body or unavailable state', () => {
     title: 'Privacy policy',
     state: { status: 'empty', message: 'Policy content unavailable' },
   } satisfies PolicyScreenProps;
+  const body = {
+    policy: 'operation_policy',
+    title: 'Operation policy',
+    body: '실제 운영정책 본문',
+    state: { status: 'ready' },
+  } satisfies PolicyScreenProps;
+  const error = {
+    policy: 'privacy_policy',
+    title: 'Privacy policy',
+    state: { status: 'error', message: 'Policy load failed', canRetry: false },
+  } satisfies PolicyScreenProps;
 
   assert.equal(props.policy, 'privacy_policy');
   assert.equal(props.state.status, 'empty');
+  assert.equal(body.body, '실제 운영정책 본문');
+  assert.equal(error.state.status, 'error');
 });
 
 test('edit-interests contract exposes only interest fields and callbacks', () => {
@@ -203,6 +230,7 @@ test('confirmation props require explicit destructive/account callbacks without 
   assert.equal(confirmation.isOpen, true);
   assert.equal(typeof confirmation.onCancel, 'function');
   assert.equal(typeof confirmation.onConfirm, 'function');
+  assert.equal(confirmation.errorMessage, undefined);
 });
 
 test('PWA install/share props expose real browser capability states', () => {
@@ -210,6 +238,7 @@ test('PWA install/share props expose real browser capability states', () => {
     canInstall: true,
     canShare: true,
     platformGuidance: 'android-install',
+    shareUrl: 'https://qling.example',
     onInstall: () => undefined,
     onShare: () => undefined,
   } satisfies AppInstallAccessProps;
@@ -217,4 +246,5 @@ test('PWA install/share props expose real browser capability states', () => {
   assert.equal(props.canInstall, true);
   assert.equal(props.canShare, true);
   assert.equal(props.platformGuidance, 'android-install');
+  assert.equal(props.shareUrl, 'https://qling.example');
 });

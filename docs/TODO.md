@@ -570,15 +570,15 @@ Every visual reskin phase must use real production data and route state. Hardcod
 
 ### Phase 20 - My Page/Account/Policy Visual Reskin
 
-- [ ] TODO-DESIGN-20.1 Confirm Phase 7 my-page/account container, Phase 10 my-page/account functional expansion, and Phase 14 shared primitives are complete before visual work starts; do not duplicate bottom navigation, settings row, policy text container, profile motif, modal, CTA, or loading/error primitives inside this phase.
-- [ ] TODO-DESIGN-20.2 Reskin my page with dynamic profile summary, helpedCount/received hearts, required push notification settings access, required "앱처럼 사용하기" PWA install/share access, policy settings routes, loading/error state, bottom-nav overlap prevention, and accessible navigation buttons.
-- [ ] TODO-DESIGN-20.3 Reskin edit interests with selected interests, save disabled/processing/error states, bottom-nav overlap prevention, and accessible selection controls.
-- [ ] TODO-DESIGN-20.4 Reskin privacy policy and operation policy access with policy body content from the dedicated policy files, loading/error state if applicable, readable long text, production-safe empty state for empty policy files, and no fake policy copy.
-- [ ] TODO-DESIGN-20.5 Reskin logout confirmation with cancel/confirm wiring, processing disabled state, error state, focus trap/escape behavior if modal, and destructive-action copy.
-- [ ] TODO-DESIGN-20.6 Reskin account deletion confirmation with cancel/confirm wiring, processing disabled state, error state, focus trap/escape behavior if modal, and destructive-action copy.
-- [ ] TODO-DESIGN-20.7 Verify 393px hierarchy matches the design intent and 360px/430px/desktop remain usable and not clipped.
-- [ ] TODO-DESIGN-20.8 Add manual screenshot/browser-note evidence for my page, edit interests, privacy policy, operation policy, empty policy state if applicable, logout confirmation, and account deletion confirmation.
-- [ ] TODO-DESIGN-20.V1 Verify Phase 20 with screenshots/browser notes and account/push/route test output.
+- [x] TODO-DESIGN-20.1 Confirm Phase 7 my-page/account container, Phase 10 my-page/account functional expansion, and Phase 14 shared primitives are complete before visual work starts; do not duplicate bottom navigation, settings row, policy text container, profile motif, modal, CTA, or loading/error primitives inside this phase.
+- [x] TODO-DESIGN-20.2 Reskin my page with dynamic profile summary, helpedCount/received hearts, required push notification settings access, required "앱처럼 사용하기" PWA install/share access, policy settings routes, loading/error state, bottom-nav overlap prevention, and accessible navigation buttons.
+- [x] TODO-DESIGN-20.3 Reskin edit interests with selected interests, save disabled/processing/error states, bottom-nav overlap prevention, and accessible selection controls.
+- [x] TODO-DESIGN-20.4 Reskin privacy policy and operation policy access with policy body content from the dedicated policy files, loading/error state if applicable, readable long text, production-safe empty state for empty policy files, and no fake policy copy.
+- [x] TODO-DESIGN-20.5 Reskin logout confirmation with cancel/confirm wiring, processing disabled state, error state, focus trap/escape behavior if modal, and destructive-action copy.
+- [x] TODO-DESIGN-20.6 Reskin account deletion confirmation with cancel/confirm wiring, processing disabled state, error state, focus trap/escape behavior if modal, and destructive-action copy.
+- [x] TODO-DESIGN-20.7 Verify 393px hierarchy matches the design intent and 360px/430px/desktop remain usable and not clipped.
+- [x] TODO-DESIGN-20.8 Add single static HTML evidence under `tmp/phase-20/` plus final browser-note/manual-equivalent report for my page, edit interests, privacy policy, operation policy, empty policy state if applicable, logout confirmation, and account deletion confirmation; do not create screenshot or separate MD evidence files for Phase 20.
+- [x] TODO-DESIGN-20.V1 Verify Phase 20 with the single static HTML evidence file, final browser notes/manual-equivalent notes, and account/push/route test output.
 
 ### Phase 21 - Static Hardcoded Data Audit And Visual Acceptance Pass
 

@@ -6,6 +6,7 @@ import {
   SHARED_UI_PRIMITIVE_OWNERSHIP,
   type BottomNavigationProps,
   type CategoryChipProps,
+  type QlingDialogProps,
   type PolicyTextContainerProps,
   type ProfileMotifProps,
   type QlingTextAreaProps,
@@ -136,6 +137,28 @@ test('category chip contract allows layout classes without changing selection be
   assert.equal(chip.selected, true);
   assert.equal(chip.className?.includes('max-w-[103px]'), true);
   assert.equal(Object.hasOwn(chip, 'apiClient'), false);
+});
+
+test('modal dialog contract preserves aria-capable confirmation and processing/error states', () => {
+  const dialog = {
+    isOpen: true,
+    title: '계정을 삭제할까요?',
+    description: '계정 삭제는 되돌릴 수 없습니다.',
+    cancelLabel: '취소',
+    confirmLabel: '계정 삭제',
+    destructive: true,
+    processing: true,
+    errorMessage: '계정 삭제 처리 중 문제가 발생했습니다.',
+    onCancel: () => undefined,
+    onConfirm: () => undefined,
+  } satisfies QlingDialogProps;
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+
+  assert.equal(dialog.destructive, true);
+  assert.equal(dialog.processing, true);
+  assert.match(source, /role="dialog"/);
+  assert.match(source, /aria-modal="true"/);
+  assert.match(source, /aria-labelledby="qling-dialog-title"/);
 });
 
 test('shared primitive module does not import Firebase, API, server, or service mutation boundaries', () => {

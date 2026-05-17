@@ -51,6 +51,8 @@ export function MyPageContainer(props: MyPageContainerProps) {
   const [selectedInterests, setSelectedInterests] = useState<readonly WorryCategory[]>([]);
   const [interestsError, setInterestsError] = useState<string | undefined>();
   const [policyDocument, setPolicyDocument] = useState<PolicyDocumentResult | null>(null);
+  const [logoutError, setLogoutError] = useState<string | undefined>();
+  const [accountDeletionError, setAccountDeletionError] = useState<string | undefined>();
 
   useEffect(() => {
     const handler = (event: Event) => {
@@ -69,6 +71,11 @@ export function MyPageContainer(props: MyPageContainerProps) {
     setSelectedInterests((props.profile?.interests ?? []) as readonly WorryCategory[]);
     setInterestsError(undefined);
   }, [props.profile?.interests]);
+
+  useEffect(() => {
+    if (currentRoute !== 'logout_confirmation') setLogoutError(undefined);
+    if (currentRoute !== 'account_deletion_confirmation') setAccountDeletionError(undefined);
+  }, [currentRoute]);
 
   useEffect(() => {
     if (currentRoute !== 'privacy_policy' && currentRoute !== 'operation_policy') {
@@ -90,12 +97,14 @@ export function MyPageContainer(props: MyPageContainerProps) {
   const closeConfirmation = () => props.setView(backRouteForRoute(currentRoute));
   const signOutWithCleanup = async () => {
     setIsProcessing(true);
+    setLogoutError(undefined);
     try {
       const result = await confirmLogoutWithCleanup({
         cleanupLocalPushState: props.resetPushRegistrationOnSignOut,
         signOut: () => signOut(auth),
       });
       if (result.status === 'failed') {
+        setLogoutError(result.reason);
         props.setFilterAlert(result.reason);
       }
     } finally {
@@ -134,6 +143,7 @@ export function MyPageContainer(props: MyPageContainerProps) {
     if (!props.user) return;
 
     setIsProcessing(true);
+    setAccountDeletionError(undefined);
     try {
       const result = await confirmAccountDeletionWithCleanup({
         deleteAccount: async () => {
@@ -146,6 +156,7 @@ export function MyPageContainer(props: MyPageContainerProps) {
         signOut: () => signOut(auth),
       });
       if (result.status === 'failed') {
+        setAccountDeletionError(result.reason);
         props.setFilterAlert(result.reason);
         return;
       }
@@ -156,6 +167,7 @@ export function MyPageContainer(props: MyPageContainerProps) {
       props.onAccountDeleted();
     } catch (error) {
       console.error('Account deletion failed:', error);
+      setAccountDeletionError('계정 삭제 처리 중 문제가 발생했습니다.');
       props.setFilterAlert('계정 삭제 처리 중 문제가 발생했습니다.');
     } finally {
       setIsProcessing(false);
@@ -222,6 +234,7 @@ export function MyPageContainer(props: MyPageContainerProps) {
         canInstall: installCapability.canInstall,
         canShare: installCapability.canShare,
         platformGuidance: installCapability.platformGuidance,
+        shareUrl: typeof window !== 'undefined' ? window.location.origin : undefined,
         onInstall: async () => {
           if (!deferredPrompt) return;
           deferredPrompt.prompt();
@@ -244,12 +257,14 @@ export function MyPageContainer(props: MyPageContainerProps) {
       logoutConfirmation={{
         isOpen: currentRoute === 'logout_confirmation',
         isProcessing,
+        errorMessage: logoutError,
         onCancel: closeConfirmation,
         onConfirm: signOutWithCleanup,
       }}
       accountDeletionConfirmation={{
         isOpen: currentRoute === 'account_deletion_confirmation',
         isProcessing,
+        errorMessage: accountDeletionError,
         onCancel: closeConfirmation,
         onConfirm: deleteAccount,
       }}
