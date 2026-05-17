@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>온보딩 픽셀 정렬 측정</title>
+  <style>
+    body { font-family: sans-serif; margin: 24px; color: #1a1a1a; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
+    th { background: #fff1d1; }
+  </style>
+</head>
+<body>
+  <h1>온보딩 03/04/05 픽셀 정렬 측정</h1>
+  <p>이 문서는 구현 시점에 PIL로 reference PNG를 다시 읽어 생성했다. 구현 좌표는 <code>src/screens/onboarding/OnboardingScreen.tsx</code>의 absolute 좌표 기준이다.</p>
+  <table>
+    <thead><tr><th>화면</th><th>항목</th><th>크기/좌표</th><th>dominant color</th><th>non-bg bbox</th><th>비고</th></tr></thead>
+    <tbody><tr><td>03</td><td>PNG fresh</td><td>393x852</td><td>#fff7e3 226111px, #ff8b0d 92531px, #ffffff 2687px, #d4be91 2017px</td><td>(0, 21, 393, 843)</td><td>구현 좌표와 비교 기준</td></tr>
+<tr><td>03</td><td>size</td><td colspan='3'>393x852</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>03</td><td>status/time</td><td colspan='3'>(30,18)-(74,34)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>03</td><td>header title</td><td colspan='3'>(165,70)-(222,87)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>03</td><td>question badge</td><td colspan='3'>(30,127)-(118,147)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>03</td><td>main title</td><td colspan='3'>(28,141)-(253,175)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>03</td><td>progress</td><td colspan='3'>(24,235)-(369,241)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>03</td><td>subtitle</td><td colspan='3'>(24,258)-(350,277)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>03</td><td>nickname input</td><td colspan='3'>(22,339)-(367,399)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>03</td><td>gender boxes</td><td colspan='3'>(22,452)-(367,512)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>03</td><td>age input</td><td colspan='3'>(22,580)-(367,640)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>03</td><td>CTA</td><td colspan='3'>(24,752)-(369,808)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>03</td><td>production screenshot</td><td>393x852</td><td>#fff7e3 227032px, #ff8b0d 92271px, #ffffff 2517px, #d4be91 1149px</td><td>(0, 20, 393, 843)</td><td>Playwright harness screenshot</td></tr>
+<tr><td>04</td><td>PNG fresh</td><td>393x852</td><td>#fff7e3 224562px, #ff8b0d 92531px, #ffffff 2687px, #d4be91 1139px</td><td>(0, 21, 393, 843)</td><td>구현 좌표와 비교 기준</td></tr>
+<tr><td>04</td><td>size</td><td colspan='3'>393x852</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>04</td><td>duplicate message</td><td colspan='3'>(89,308)-(365,323)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>04</td><td>red error/input bbox</td><td colspan='3'>(22,308)-(367,399)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>04</td><td>other major boxes</td><td colspan='3'>03과 동일</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>04</td><td>production screenshot</td><td>393x852</td><td>#fff7e3 224658px, #ff8b0d 73956px, #ffbb6d 18316px, #ffffff 2517px</td><td>(0, 20, 393, 843)</td><td>Playwright harness screenshot</td></tr>
+<tr><td>05</td><td>PNG fresh</td><td>393x852</td><td>#fff7e3 163556px, #ff8b0d 88103px, #fff1d1 57070px, #d4be91 6724px</td><td>(0, 21, 393, 843)</td><td>구현 좌표와 비교 기준</td></tr>
+<tr><td>05</td><td>size</td><td colspan='3'>393x852</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>05</td><td>header title</td><td colspan='3'>(171,70)-(228,87)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>05</td><td>question badge</td><td colspan='3'>(30,127)-(120,147)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>05</td><td>main title</td><td colspan='3'>(28,141)-(287,175)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>05</td><td>subtitle/helper</td><td colspan='3'>(24,258)-(365,296)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>05</td><td>chip grid outer</td><td colspan='3'>(34,322)-(358,708)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>05</td><td>chip size/gap</td><td colspan='3'>각 103x44, gap-x 7, gap-y 13</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>05</td><td>previous CTA</td><td colspan='3'>(24,752)-(120,808)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>05</td><td>complete CTA</td><td colspan='3'>(130,752)-(369,808)</td><td>OnboardingScreen.tsx absolute 좌표</td></tr>
+<tr><td>05</td><td>production screenshot</td><td>393x852</td><td>#fff7e3 162335px, #ff8b0d 87536px, #fff1d1 56157px, #d4be91 6438px</td><td>(0, 20, 393, 843)</td><td>Playwright harness screenshot</td></tr></tbody>
+  </table>
+</body>
+</html>
