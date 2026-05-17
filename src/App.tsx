@@ -1,7 +1,6 @@
 import {
   useState,
   useEffect,
-  type ReactNode,
 } from 'react';
 import {
   onAuthStateChanged,
@@ -18,13 +17,9 @@ import { onMessage } from 'firebase/messaging';
 import { auth, db, firebaseRuntimeConfig, googleProvider, isDevRuntime, messaging } from './firebase';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Send,
   Radio,
   Loader2,
-  MessageSquare,
   XCircle,
-  FileText,
-  UserRound,
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { usePushRegistration } from './services/pushRegistration';
@@ -56,6 +51,10 @@ import {
 } from './screens/myPage/MyWorriesContainer';
 import { ReplyDetailContainer } from './screens/replyDetail/ReplyDetailContainer';
 import { OnboardingContainer } from './screens/onboarding/OnboardingContainer';
+import {
+  BottomNavigation,
+  MobileAppShell,
+} from './screens/shared/ui';
 
 // --- Types ---
 interface UserProfile {
@@ -264,22 +263,56 @@ export default function App() {
   const currentRoute = routeBoundary.currentRoute;
 
   if (loading) {
-    return <div className="min-h-screen bg-[#FDFCF8] flex items-center justify-center"><Loader2 className="w-8 h-8 text-[#D4A373] animate-spin" /></div>;
+    return (
+      <MobileAppShell mainClassName="flex min-h-dvh items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--qling-color-primary-orange)]" />
+      </MobileAppShell>
+    );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#FDFCF8] flex flex-col items-center justify-center p-6 text-center">
+      <MobileAppShell mainClassName="flex min-h-dvh flex-col items-center justify-center text-center">
         <XCircle className="w-12 h-12 text-red-500 mb-4" />
         <h1 className="text-xl font-bold mb-2">접속 문제가 발생했습니다</h1>
         <p className="text-[#8B8B6B] mb-6">{error}</p>
         <button onClick={() => window.location.reload()} className="px-6 py-2 bg-[#5A5A40] text-white rounded-xl font-bold">다시 시도</button>
-      </div>
+      </MobileAppShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFCF8] text-[#5A5A40] font-sans selection:bg-[#FAEDCD]">
+    <MobileAppShell
+      header={routeBoundary.mountsAuthenticatedShell && (
+        <header className="fixed top-0 left-0 right-0 bg-[#FDFCF8]/80 backdrop-blur-md z-50 border-b border-[#E9EDC9]/50">
+          <div className="max-w-2xl mx-auto px-6 h-16 flex items-center justify-between">
+            <button onClick={() => setView('답변하기')} className="text-xl font-serif font-bold tracking-tight text-[#D4A373] flex items-center gap-2">
+              <Radio className="w-5 h-5" /> Qling
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E9EDC9]/50 rounded-full text-[10px] sm:text-xs font-bold text-[#A3B18A]">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A3B18A] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#A3B18A]"></span>
+                </span>
+                연결됨
+              </div>
+            </div>
+          </div>
+        </header>
+      )}
+      bottomNavigation={routeBoundary.mountsBottomNavigation && routeBoundary.authenticatedTab && (
+        <BottomNavigation
+          tabs={PRD_APP_TABS.map(tab => ({ tab, label: tab }))}
+          activeTab={routeBoundary.authenticatedTab}
+          centralAction={CENTRAL_BOTTOM_NAVIGATION_ACTION}
+          onSelectTab={(tab) => setView(tab)}
+          onCentralAction={() => setView(routeToWriteWorry())}
+        />
+      )}
+      hasBottomNavigation={routeBoundary.mountsBottomNavigation}
+      mainClassName={cn(routeBoundary.routeGroup === 'onboarding flow' ? "pt-12" : "pt-24")}
+    >
       <AnimatePresence>
         {filterAlert && (
           <motion.div 
@@ -304,29 +337,7 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Header (hidden before the authenticated shell) */}
-      {routeBoundary.mountsAuthenticatedShell && (
-        <header className="fixed top-0 left-0 right-0 bg-[#FDFCF8]/80 backdrop-blur-md z-50 border-b border-[#E9EDC9]/50">
-          <div className="max-w-2xl mx-auto px-6 h-16 flex items-center justify-between">
-            <button onClick={() => setView('답변하기')} className="text-xl font-serif font-bold tracking-tight text-[#D4A373] flex items-center gap-2">
-              <Radio className="w-5 h-5" /> Qling
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E9EDC9]/50 rounded-full text-[10px] sm:text-xs font-bold text-[#A3B18A]">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A3B18A] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#A3B18A]"></span>
-                </span>
-                연결됨
-              </div>
-            </div>
-          </div>
-        </header>
-      )}
-
-      <main className={cn("max-w-2xl mx-auto px-6", routeBoundary.routeGroup === 'onboarding flow' ? "pt-12 pb-12" : "pt-24 pb-32")}>
-        <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait">
           
           {/* 0. Login View */}
           {currentRoute === 'login' && (
@@ -538,65 +549,7 @@ export default function App() {
             </motion.div>
           )}
 
-        </AnimatePresence>
-      </main>
-      {routeBoundary.mountsBottomNavigation && routeBoundary.authenticatedTab && (
-        <BottomTabBar
-          activeTab={routeBoundary.authenticatedTab}
-          onSelect={(tab) => setView(tab)}
-          onCentralAction={() => setView(routeToWriteWorry())}
-        />
-      )}
-    </div>
-  );
-}
-
-// --- Sub Components ---
-
-function BottomTabBar({
-  activeTab,
-  onSelect,
-  onCentralAction,
-}: {
-  activeTab: PrdAppTab;
-  onSelect: (tab: PrdAppTab) => void;
-  onCentralAction: () => void;
-}) {
-  const iconByTab: Record<PrdAppTab, ReactNode> = {
-    답변하기: <MessageSquare className="w-5 h-5" />,
-    '나의 고민': <FileText className="w-5 h-5" />,
-    마이페이지: <UserRound className="w-5 h-5" />,
-  };
-
-  return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-[#E9EDC9]">
-      <button
-        type="button"
-        aria-label={CENTRAL_BOTTOM_NAVIGATION_ACTION.accessibleLabel}
-        onClick={onCentralAction}
-        className="absolute left-1/2 -translate-x-1/2 -top-7 px-4 h-12 rounded-full bg-[#E07A5F] text-white shadow-lg text-xs font-bold flex items-center justify-center gap-2"
-      >
-        <Send className="w-4 h-4" />
-        {CENTRAL_BOTTOM_NAVIGATION_ACTION.label}
-      </button>
-      <div className="max-w-2xl mx-auto grid grid-cols-3 px-2 py-2">
-        {PRD_APP_TABS.map(tab => {
-          const isActive = activeTab === tab;
-          return (
-            <button
-              key={tab}
-              onClick={() => onSelect(tab)}
-              className={cn(
-                "h-14 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 transition-colors",
-                isActive ? "bg-[#FAEDCD] text-[#5A5A40]" : "text-[#8B8B6B] hover:bg-[#FDFCF8]"
-              )}
-            >
-              {iconByTab[tab]}
-              <span>{tab}</span>
-            </button>
-          );
-        })}
-      </div>
-    </nav>
+      </AnimatePresence>
+    </MobileAppShell>
   );
 }

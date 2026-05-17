@@ -1,13 +1,80 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+@import url("https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css");
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", serif;
-  
-  --color-warm-bg: #FDFCF8;
-  --color-warm-accent: #D4A373;
-  --color-warm-soft: #FAEDCD;
-  --color-warm-green: #E9EDC9;
-  --color-warm-text: #5A5A40;
+  --font-sans: "SUIT Variable", "SUIT", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-serif: "SUIT Variable", "SUIT", ui-sans-serif, system-ui, sans-serif;
+
+  --color-qling-primary-orange: #e07a5f;
+  --color-qling-secondary-orange: #f4a261;
+  --color-qling-cream: #fff8ef;
+  --color-qling-cream-soft: #fff3df;
+  --color-qling-surface: #ffffff;
+  --color-qling-text: #25221f;
+  --color-qling-muted: #77716b;
+  --color-qling-border: #e7ded5;
+  --color-qling-danger: #d84b4b;
+  --color-qling-success: #4f9f68;
+
+  --color-warm-bg: var(--color-qling-cream);
+  --color-warm-accent: var(--color-qling-primary-orange);
+  --color-warm-soft: var(--color-qling-cream-soft);
+  --color-warm-green: #e7f0da;
+  --color-warm-text: var(--color-qling-text);
+}
+
+:root {
+  --qling-font-sans: "SUIT Variable", "SUIT", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --qling-color-primary-orange: #e07a5f;
+  --qling-color-secondary-orange: #f4a261;
+  --qling-color-cream: #fff8ef;
+  --qling-color-cream-soft: #fff3df;
+  --qling-color-surface: #ffffff;
+  --qling-color-text: #25221f;
+  --qling-color-muted: #77716b;
+  --qling-color-border: #e7ded5;
+  --qling-color-danger: #d84b4b;
+  --qling-color-success: #4f9f68;
+
+  --qling-radius-card: 1.25rem;
+  --qling-radius-modal: 1.5rem;
+  --qling-radius-input: 1rem;
+  --qling-radius-small-button: 0.875rem;
+  --qling-radius-pill: 999px;
+  --qling-radius-bottom-nav: 1.25rem;
+  --qling-radius-content-sheet: 1.75rem;
+  --qling-radius-cta: 1rem;
+
+  --qling-shadow-card: 0 12px 28px rgb(37 34 31 / 0.08);
+  --qling-shadow-modal: 0 24px 60px rgb(37 34 31 / 0.18);
+  --qling-shadow-sheet: 0 18px 44px rgb(37 34 31 / 0.12);
+  --qling-shadow-nav: 0 -10px 32px rgb(37 34 31 / 0.10);
+
+  --qling-space-shell-x: clamp(1rem, 4vw, 1.5rem);
+  --qling-space-section-gap: 1.5rem;
+  --qling-space-card-padding: 1.25rem;
+  --qling-space-nav-height: 5rem;
+  --qling-space-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --qling-space-cta-gap: 0.75rem;
+  --qling-space-scroll-bottom: calc(var(--qling-space-nav-height) + var(--qling-space-safe-bottom) + 2rem);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--qling-font-sans);
+  background: var(--qling-color-cream);
+  color: var(--qling-color-text);
+}
+
+button,
+textarea,
+input {
+  font: inherit;
 }

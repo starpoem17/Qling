@@ -1,0 +1,144 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {
+  SHARED_UI_PRIMITIVE_OWNERSHIP,
+  type BottomNavigationProps,
+  type PolicyTextContainerProps,
+  type ProfileMotifProps,
+  type QlingTextAreaProps,
+  type SettingsRowProps,
+} from './uiContract';
+
+test('shared primitive inventory covers every Phase 14 ownership item', () => {
+  assert.deepEqual(
+    SHARED_UI_PRIMITIVE_OWNERSHIP.map(item => item.id),
+    [
+      'appShellMobileFrame',
+      'bottomNavigation',
+      'centralWriteWorryAction',
+      'contentSheet',
+      'orangeHeaderBand',
+      'primaryCta',
+      'secondaryDestructiveCta',
+      'card',
+      'categoryChip',
+      'textArea',
+      'modalDialog',
+      'emptyLoadingErrorState',
+      'profileMotif',
+      'policyTextContainer',
+      'settingsRow',
+    ],
+  );
+});
+
+test('bottom navigation contract preserves PRD tabs and central write-worry action', () => {
+  const props = {
+    tabs: [
+      { tab: '답변하기', label: '답변하기' },
+      { tab: '나의 고민', label: '나의 고민' },
+      { tab: '마이페이지', label: '마이페이지' },
+    ],
+    activeTab: '답변하기',
+    centralAction: {
+      label: '고민 작성',
+      accessibleLabel: '고민 작성',
+      targetRoute: 'write_worry',
+      ownerTab: '나의 고민',
+    },
+    onSelectTab: () => undefined,
+    onCentralAction: () => undefined,
+  } satisfies BottomNavigationProps;
+
+  assert.deepEqual(props.tabs.map(tab => tab.label), ['답변하기', '나의 고민', '마이페이지']);
+  assert.equal(props.activeTab, '답변하기');
+  assert.equal(props.centralAction.label, '고민 작성');
+  assert.equal(props.centralAction.targetRoute, 'write_worry');
+  assert.equal(props.centralAction.ownerTab, '나의 고민');
+});
+
+test('profile motif remains visual-only without avatar data requirements', () => {
+  const props = {
+    label: 'Profile motif',
+  } satisfies ProfileMotifProps;
+
+  assert.equal(props.label, 'Profile motif');
+  for (const forbidden of ['avatarUrl', 'avatarUpload', 'avatarImageData', 'photoURL']) {
+    assert.equal(Object.hasOwn(props, forbidden), false);
+  }
+});
+
+test('policy text container accepts empty, error, and real body states without fake body', () => {
+  const empty = {
+    state: 'empty',
+    title: '개인정보처리방침',
+    message: '정책 본문을 준비 중입니다.',
+  } satisfies PolicyTextContainerProps;
+  const error = {
+    state: 'error',
+    title: '운영정책',
+    message: '정책 본문을 불러오지 못했습니다.',
+    onRetry: () => undefined,
+  } satisfies PolicyTextContainerProps;
+  const body = {
+    state: 'body',
+    title: '운영정책',
+    body: '실제 정책 본문',
+  } satisfies PolicyTextContainerProps;
+
+  assert.equal(empty.state, 'empty');
+  assert.equal(error.state, 'error');
+  assert.equal(body.state, 'body');
+  assert.equal(Object.hasOwn(empty, 'body'), false);
+});
+
+test('text area and settings row contracts expose required state mapping props', () => {
+  const textArea = {
+    value: '고민 내용',
+    onChange: () => undefined,
+    maxLength: 1000,
+    errorMessage: '너무 길어요.',
+    disabled: false,
+    processing: false,
+  } satisfies QlingTextAreaProps;
+  const settingsRow = {
+    label: '탈퇴',
+    description: '계정을 삭제합니다.',
+    danger: true,
+    disabled: false,
+    accessibilityLabel: '계정 탈퇴',
+    onSelect: () => undefined,
+  } satisfies SettingsRowProps;
+
+  assert.equal(textArea.value.length, 5);
+  assert.equal(textArea.maxLength, 1000);
+  assert.equal(textArea.errorMessage, '너무 길어요.');
+  assert.equal(textArea.disabled, false);
+  assert.equal(textArea.processing, false);
+  assert.equal(settingsRow.danger, true);
+  assert.equal(settingsRow.disabled, false);
+  assert.equal(settingsRow.accessibilityLabel, '계정 탈퇴');
+});
+
+test('shared primitive module does not import Firebase, API, server, or service mutation boundaries', () => {
+  const uiSource = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+  const forbidden = [
+    'firebase',
+    'firestore',
+    'src/services/',
+    '../../services/',
+    'apiClient',
+    'server.ts',
+    'deleteMyAccountViaApi',
+    'submitReplyFeedbackWithProductionAdapters',
+    'passDeliveryViaApi',
+    'routeToWriteWorry',
+    'tabForRoute',
+  ];
+
+  for (const pattern of forbidden) {
+    assert.equal(uiSource.includes(pattern), false, `shared primitive module includes forbidden boundary ${pattern}`);
+  }
+});

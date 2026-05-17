@@ -504,21 +504,21 @@ Functional screen phases must use real production data sources and production ro
 
 ### Phase 14 - Design Token And Global Style Foundation
 
-- [ ] TODO-DESIGN-14.1 Add production design tokens in `src/index.css` or the production global CSS entry for SUIT font, primary/secondary orange, cream backgrounds, white surfaces, dark text, muted text, border gray, danger red, and success/positive accents.
-- [ ] TODO-DESIGN-14.2 Add radius, shadow, and spacing tokens/conventions for cards, modals, input areas, small buttons, pill chips, app shell, content sheets, CTAs, and bottom safe-area padding.
-- [ ] TODO-DESIGN-14.3 Import SUIT in production global CSS or document an approved local/font-loading alternative.
-- [ ] TODO-DESIGN-14.4 Do not copy `design/package.json` dependencies blindly; document every new dependency and why existing production dependencies cannot cover it.
-- [ ] TODO-DESIGN-14.5 Implement or adapt every primitive owned by `Shared UI Primitive Ownership`: app shell/mobile frame, bottom navigation, central write-worry action, content sheet, orange header band, primary CTA, secondary/destructive CTA, card, category chip, text area, modal/dialog, empty/loading/error state, profile eye/avatar motif, policy text container, and settings row.
-- [ ] TODO-DESIGN-14.6 Implement the bottom navigation primitive contract from Phase 2: left `답변하기`, central `고민 작성` action that routes to write worry, right `마이페이지`, default authenticated screen on `답변하기`, active-tab mapping through route policy, and `write_worry` owned visually/semantically by the `나의 고민` area while still navigating directly to write worry.
-- [ ] TODO-DESIGN-14.7 Implement shell spacing primitives for bottom-navigation height, scroll-container bottom padding, `env(safe-area-inset-bottom)`, and CTA/form/list overlap prevention so Phases 17-20 can integrate screen-specific spacing without inventing the shell.
-- [ ] TODO-DESIGN-14.8 Add route-policy or primitive contract tests for bottom-tab mapping and central write-worry action if not already fully covered by Phase 2 tests.
-- [ ] TODO-DESIGN-14.9 Acceptance criteria: 393px width preserves the design hierarchy and main layout; 360px, 430px, and desktop widths remain usable and not clipped.
-- [ ] TODO-DESIGN-14.10 Acceptance criteria: fake status bars and fake home indicators from `design/` are replaced by safe-area-aware production layout using viewport/safe-area handling.
-- [ ] TODO-DESIGN-14.11 Acceptance criteria: dynamic content may expand layout; pixel-perfect copying is not required when it harms accessibility, readability, or production data.
-- [ ] TODO-DESIGN-14.12 Acceptance criteria: color, font, CTA, card, chip, bottom-nav, modal, text-area, and profile motif alignment are visually recognizable against `design/`.
-- [ ] TODO-DESIGN-14.13 Add pure props-contract tests for primitive state mappings where useful; do not require React DOM rendering tests unless a harness was deliberately added in Phase 4.
-- [ ] TODO-DESIGN-14.14 Add manual screenshot evidence for primitives or first integrated screens at 393px, 360px, 430px, and desktop preview, including bottom navigation and central write-worry action.
-- [ ] TODO-DESIGN-14.V1 Verify Phase 14 with token inventory, dependency diff, shared primitive inventory, duplication review against `Shared UI Primitive Ownership`, props-contract test output if added, and manual screenshot evidence.
+- [x] TODO-DESIGN-14.1 Add production design tokens in `src/index.css` or the production global CSS entry for SUIT font, primary/secondary orange, cream backgrounds, white surfaces, dark text, muted text, border gray, danger red, and success/positive accents.
+- [x] TODO-DESIGN-14.2 Add radius, shadow, and spacing tokens/conventions for cards, modals, input areas, small buttons, pill chips, app shell, content sheets, CTAs, and bottom safe-area padding.
+- [x] TODO-DESIGN-14.3 Import SUIT in production global CSS or document an approved local/font-loading alternative.
+- [x] TODO-DESIGN-14.4 Do not copy `design/package.json` dependencies blindly; document every new dependency and why existing production dependencies cannot cover it.
+- [x] TODO-DESIGN-14.5 Implement or adapt every primitive owned by `Shared UI Primitive Ownership`: app shell/mobile frame, bottom navigation, central write-worry action, content sheet, orange header band, primary CTA, secondary/destructive CTA, card, category chip, text area, modal/dialog, empty/loading/error state, profile eye/avatar motif, policy text container, and settings row.
+- [x] TODO-DESIGN-14.6 Implement the bottom navigation primitive contract from Phase 2: left `답변하기`, central `고민 작성` action that routes to write worry, right `마이페이지`, default authenticated screen on `답변하기`, active-tab mapping through route policy, and `write_worry` owned visually/semantically by the `나의 고민` area while still navigating directly to write worry.
+- [x] TODO-DESIGN-14.7 Implement shell spacing primitives for bottom-navigation height, scroll-container bottom padding, `env(safe-area-inset-bottom)`, and CTA/form/list overlap prevention so Phases 17-20 can integrate screen-specific spacing without inventing the shell.
+- [x] TODO-DESIGN-14.8 Add route-policy or primitive contract tests for bottom-tab mapping and central write-worry action if not already fully covered by Phase 2 tests.
+- [x] TODO-DESIGN-14.9 Acceptance criteria: 393px width preserves the design hierarchy and main layout; 360px, 430px, and desktop widths remain usable and not clipped.
+- [x] TODO-DESIGN-14.10 Acceptance criteria: fake status bars and fake home indicators from `design/` are replaced by safe-area-aware production layout using viewport/safe-area handling.
+- [x] TODO-DESIGN-14.11 Acceptance criteria: dynamic content may expand layout; pixel-perfect copying is not required when it harms accessibility, readability, or production data.
+- [x] TODO-DESIGN-14.12 Acceptance criteria: color, font, CTA, card, chip, bottom-nav, modal, text-area, and profile motif alignment are visually recognizable against `design/`.
+- [x] TODO-DESIGN-14.13 Add pure props-contract tests for primitive state mappings where useful; do not require React DOM rendering tests unless a harness was deliberately added in Phase 4.
+- [x] TODO-DESIGN-14.14 Add manual screenshot evidence for primitives or first integrated screens at 393px, 360px, 430px, and desktop preview, including bottom navigation and central write-worry action.
+- [x] TODO-DESIGN-14.V1 Verify Phase 14 with token inventory, dependency diff, shared primitive inventory, duplication review against `Shared UI Primitive Ownership`, props-contract test output if added, and manual screenshot evidence.
 
 ### Phase 15 - Loading/Login Visual Reskin
 
