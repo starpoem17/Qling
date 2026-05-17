@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import type { ReplyDetailScreenProps } from './contract';
 
@@ -77,3 +79,82 @@ test('reply detail contract represents rejection and unavailable states without 
   assert.equal(Object.hasOwn(props, 'feedbackClient'), false);
   assert.equal(Object.hasOwn(props, 'read' + 'StateClient'), false);
 });
+
+test('reply detail contract covers both feedback callbacks and comment callback', () => {
+  const events: string[] = [];
+  const props = makeReadyProps({
+    onFeedbackChange: value => events.push(`change:${value}`),
+    onFeedbackSubmit: () => events.push('feedback'),
+    onCommentChange: value => events.push(`comment:${value}`),
+    onCommentSubmit: () => events.push('comment-submit'),
+  });
+
+  props.onFeedbackChange('like');
+  props.onFeedbackSubmit();
+  props.onFeedbackChange('dislike');
+  props.onFeedbackSubmit();
+  props.onCommentChange('고마워요');
+  props.onCommentSubmit();
+
+  assert.deepEqual(events, [
+    'change:like',
+    'feedback',
+    'change:dislike',
+    'feedback',
+    'comment:고마워요',
+    'comment-submit',
+  ]);
+});
+
+test('reply detail contract represents failed feedback/comment and existing display states', () => {
+  const props = makeReadyProps({
+    existingFeedback: { status: 'submitted', value: 'like', comment: '고마워요' },
+    commentValidation: { status: 'invalid', message: '전송 실패' },
+    commentModeration: { status: 'rejected', reason: '거절됨\n\n도움말' },
+  });
+
+  assert.equal(props.existingFeedback.status, 'submitted');
+  assert.equal(props.existingFeedback.status === 'submitted' ? props.existingFeedback.comment : '', '고마워요');
+  assert.equal(props.commentValidation.status, 'invalid');
+  assert.equal(props.commentModeration.status, 'rejected');
+});
+
+test('reply detail source disables feedback and comment buttons while processing', () => {
+  const source = readFileSync(join(process.cwd(), 'src/screens/replyDetail/ReplyDetailScreen.tsx'), 'utf8');
+
+  assert.match(source, /disabled=\{props\.isFeedbackProcessing\}/);
+  assert.match(source, /disabled=\{props\.isCommentProcessing\}/);
+});
+
+function makeReadyProps(overrides: Partial<ReplyDetailScreenProps> = {}): ReplyDetailScreenProps {
+  return {
+    variant: 'received-answer-detail',
+    state: { status: 'ready' },
+    originalWorry: {
+      worryId: 'worry-1',
+      category: WORRY_CATEGORIES[0],
+      summaryText: 'Original worry',
+      bodyText: 'Original worry',
+      date: { label: 'Today' },
+    },
+    reply: {
+      replyId: 'reply-1',
+      bodyText: 'Reply',
+      date: { label: 'Today' },
+      replierDisplay: 'anonymous',
+    },
+    existingFeedback: { status: 'none' },
+    selectedFeedback: 'like',
+    commentDraft: '',
+    commentValidation: { status: 'valid' },
+    commentModeration: { status: 'approved' },
+    isFeedbackProcessing: false,
+    isCommentProcessing: false,
+    onBack: () => undefined,
+    onFeedbackChange: () => undefined,
+    onFeedbackSubmit: () => undefined,
+    onCommentChange: () => undefined,
+    onCommentSubmit: () => undefined,
+    ...overrides,
+  };
+}

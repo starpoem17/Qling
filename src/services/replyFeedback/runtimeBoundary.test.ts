@@ -5,6 +5,7 @@ import path from 'node:path';
 
 const runtimeFiles = [
   'src/App.tsx',
+  'src/screens/replyDetail/ReplyDetailContainer.tsx',
   'src/services/replyFeedback/submitReplyFeedback.ts',
   'src/services/replyFeedback/production.ts',
   'src/services/replyFeedback/apiClient.ts',

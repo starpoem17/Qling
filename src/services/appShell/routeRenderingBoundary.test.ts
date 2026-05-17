@@ -36,6 +36,7 @@ test('maps canonical route states to their Phase 3 route rendering boundaries', 
   assert.equal(routeRenderingGroupForRoute('write_worry'), 'write worry');
   assert.equal(routeRenderingGroupForRoute('write_reply'), 'write reply');
   assert.equal(routeRenderingGroupForRoute('나의 고민'), 'authenticated shell');
+  assert.equal(routeRenderingGroupForRoute('answer_check'), 'reply details');
   assert.equal(routeRenderingGroupForRoute('received_answer_detail'), 'reply details');
   assert.equal(routeRenderingGroupForRoute('my_answer_detail'), 'reply details');
   assert.equal(routeRenderingGroupForRoute('my_worry_detail'), 'reply details');

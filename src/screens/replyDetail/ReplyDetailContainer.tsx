@@ -1,10 +1,20 @@
 import { useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
-import { clearDraft, getDraft, setDraft, type DraftMap } from '../../services/drafts/contentDrafts';
+import type { User } from 'firebase/auth';
+import {
+  clearStoredDraft,
+  feedbackCommentDraftKey,
+  getStoredDraft,
+  setStoredDraft,
+} from '../../services/drafts/contentDrafts';
 import { CONTENT_MAX_LENGTH, validateDraftContent } from '../../services/validation/content';
 import { submitReplyFeedbackWithProductionAdapters } from '../../services/replyFeedback/production';
 import type { ReplyFeedback } from '../../services/replyFeedback/types';
-import type { ReplyReadModelItem } from '../../services/myWorries';
+import {
+  useMyGivenReplies,
+  useRepliesForWorry,
+  type ReplyReadModelItem,
+} from '../../services/myWorries';
 import {
   backRouteFromMyReplyDetail,
   backRouteFromReceivedReplyDetail,
@@ -12,13 +22,14 @@ import {
   type AppRouteViewState,
 } from '../../services/appShell/prdNavigationPolicy';
 import { ReplyDetailScreen } from './ReplyDetailScreen';
-import { mapFeedbackValueToLegacy, mapReplyToDetailProps } from './mapping';
+import { mapFeedbackValueToLegacy, mapReplyToDetailProps, selectReplyForDetailRoute } from './mapping';
 import type { FeedbackValue, ReplyDetailVariant } from './contract';
 
 export type ReplyDetailContainerMode = 'received-reply' | 'my-answer';
 
 export type ReplyDetailContainerProps = {
   readonly mode: ReplyDetailContainerMode;
+  readonly user: User | null;
   readonly route: AppRouteViewState;
   readonly selectedReply: ReplyReadModelItem | null;
   readonly setSelectedReply: Dispatch<SetStateAction<ReplyReadModelItem | null>>;
@@ -28,26 +39,50 @@ export type ReplyDetailContainerProps = {
 };
 
 export function ReplyDetailContainer(props: ReplyDetailContainerProps) {
-  const [feedbackCommentDrafts, setFeedbackCommentDrafts] = useState<DraftMap>({});
   const [isFeedbackProcessing, setIsFeedbackProcessing] = useState(false);
   const [isCommentProcessing, setIsCommentProcessing] = useState(false);
   const [moderationMessage, setModerationMessage] = useState<string | null>(null);
   const [failureMessage, setFailureMessage] = useState<string | null>(null);
+  const [, rerenderDraft] = useState(0);
   const selectedFeedbackRef = useRef<FeedbackValue>('like');
   const variant: ReplyDetailVariant = props.mode === 'my-answer' ? 'my-answer-detail' : 'received-answer-detail';
-  const commentDraft = props.selectedReply ? getDraft(feedbackCommentDrafts, props.selectedReply.id) : '';
+  const routeWorryId = typeof props.route === 'string' ? undefined : 'worryId' in props.route ? props.route.worryId : undefined;
+  const { repliesForWorry, isLoadingRepliesForWorry } = useRepliesForWorry({
+    user: props.mode === 'received-reply' ? props.user : null,
+    worryId: props.mode === 'received-reply'
+      ? routeWorryId ?? props.selectedReply?.worryId ?? null
+      : null,
+  });
+  const { myGivenReplies, isLoadingMyGivenReplies } = useMyGivenReplies({
+    user: props.mode === 'my-answer' ? props.user : null,
+  });
+  const detailReply = selectReplyForDetailRoute({
+    route: props.route,
+    selectedReply: props.selectedReply,
+    productionReplies: props.mode === 'my-answer' ? myGivenReplies : repliesForWorry,
+    isProductionReadModelLoading: props.mode === 'my-answer' ? isLoadingMyGivenReplies : isLoadingRepliesForWorry,
+  });
+  const commentDraftKey = detailReply ? feedbackCommentDraftKey(detailReply.id) : null;
+  const commentDraft = getStoredDraft(commentDraftKey);
   const validation = validateDraftContent(commentDraft, 'feedback_comment');
   const detailProps = mapReplyToDetailProps({
-    reply: props.selectedReply,
+    reply: detailReply,
     variant,
     originalWorryFallback: props.selectedMyWorryContent,
   });
+  const existingFeedback = detailReply?.feedback
+    ? {
+      status: 'submitted' as const,
+      value: detailReply.feedback === 'helpful' ? 'like' as const : 'dislike' as const,
+      comment: detailReply.publisherComment,
+    }
+    : detailProps.existingFeedback;
 
   const submitFeedback = async (feedbackType: ReplyFeedback, comment?: string) => {
-    if (!props.selectedReply) return null;
+    if (!detailReply) return null;
 
     const result = await submitReplyFeedbackWithProductionAdapters({
-      reply: props.selectedReply,
+      reply: detailReply,
       feedbackType,
       comment,
     });
@@ -69,6 +104,7 @@ export function ReplyDetailContainer(props: ReplyDetailContainerProps) {
   };
 
   const onFeedbackSubmit = async () => {
+    if (isFeedbackProcessing || existingFeedback.status === 'submitted') return;
     setFailureMessage(null);
     setModerationMessage(null);
     setIsFeedbackProcessing(true);
@@ -84,7 +120,7 @@ export function ReplyDetailContainer(props: ReplyDetailContainerProps) {
   };
 
   const onCommentSubmit = async () => {
-    if (!props.selectedReply || validation.status !== 'valid') return;
+    if (!detailReply || isCommentProcessing || validation.status !== 'valid') return;
 
     setFailureMessage(null);
     setModerationMessage(null);
@@ -92,7 +128,10 @@ export function ReplyDetailContainer(props: ReplyDetailContainerProps) {
     try {
       const result = await submitFeedback('helpful', commentDraft);
       if (result?.status === 'rejected') return;
-      setFeedbackCommentDrafts(prev => clearDraft(prev, props.selectedReply?.id ?? ''));
+      if (commentDraftKey) {
+        clearStoredDraft(commentDraftKey);
+        rerenderDraft(value => value + 1);
+      }
     } catch (error) {
       console.error(error);
       setFailureMessage('전송 실패');
@@ -108,13 +147,7 @@ export function ReplyDetailContainer(props: ReplyDetailContainerProps) {
       state={detailProps.state}
       originalWorry={detailProps.originalWorry}
       reply={detailProps.reply}
-      existingFeedback={props.selectedReply?.feedback
-        ? {
-          status: 'submitted',
-          value: props.selectedReply.feedback === 'helpful' ? 'like' : 'dislike',
-          comment: props.selectedReply.publisherComment,
-        }
-        : detailProps.existingFeedback}
+      existingFeedback={existingFeedback}
       selectedFeedback={selectedFeedbackRef.current}
       commentDraft={commentDraft}
       commentValidation={failureMessage
@@ -131,8 +164,9 @@ export function ReplyDetailContainer(props: ReplyDetailContainerProps) {
       }}
       onFeedbackSubmit={onFeedbackSubmit}
       onCommentChange={value => {
-        if (!props.selectedReply) return;
-        setFeedbackCommentDrafts(prev => setDraft(prev, props.selectedReply?.id ?? '', value));
+        if (!commentDraftKey) return;
+        setStoredDraft(commentDraftKey, value);
+        rerenderDraft(current => current + 1);
       }}
       onCommentSubmit={onCommentSubmit}
     />

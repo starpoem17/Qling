@@ -159,8 +159,8 @@ export function routeAfterPass(): AppRoute {
   return DEFAULT_AUTHENTICATED_TAB;
 }
 
-export function routeAfterFeedbackPublish(currentRoute: AppRouteViewState): AppRoute {
-  return routeName(currentRoute);
+export function routeAfterFeedbackPublish(currentRoute: AppRouteViewState): AppRouteViewState {
+  return currentRoute;
 }
 
 export function routeToWriteWorry(): AppRoute {
@@ -208,7 +208,7 @@ export function backRouteForRoute(route: AppRouteViewState): AppRoute {
   const currentRoute = routeName(route);
   if (currentRoute === 'write_worry' || currentRoute === 'my_worry_detail') return '나의 고민';
   if (currentRoute === 'write_reply') return DEFAULT_AUTHENTICATED_TAB;
-  if (currentRoute === 'received_answer_detail' || currentRoute === 'read_received_reply') return '나의 고민';
+  if (currentRoute === 'received_answer_detail' || currentRoute === 'read_received_reply' || currentRoute === 'answer_check') return '나의 고민';
   if (currentRoute === 'my_answer_detail' || currentRoute === 'read_my_reply') return 'my_answers';
   if (currentRoute === 'my_worries') return '나의 고민';
   if (MY_PAGE_SUBROUTES.includes(currentRoute as (typeof MY_PAGE_SUBROUTES)[number])) return '마이페이지';
@@ -240,6 +240,7 @@ export function tabForRoute(route: AppRouteViewState): PrdAppTab | null {
     || currentRoute === 'write_worry'
     || currentRoute === 'received_answer_detail'
     || currentRoute === 'read_received_reply'
+    || currentRoute === 'answer_check'
     || currentRoute === 'my_worry_detail'
   ) {
     return '나의 고민';

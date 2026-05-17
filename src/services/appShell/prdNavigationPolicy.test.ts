@@ -147,7 +147,19 @@ test('preserves id-bearing route state when applying routes to App view state', 
 test('routes pass, feedback, write, detail, and my-page subroute targets', () => {
   assert.equal(routeAfterPass(), '답변하기');
   assert.equal(routeAfterFeedbackPublish('received_answer_detail'), 'received_answer_detail');
-  assert.equal(routeAfterFeedbackPublish({ route: 'my_answer_detail', replyId: 'reply-1' }), 'my_answer_detail');
+  assert.deepEqual(routeAfterFeedbackPublish({
+    route: 'received_answer_detail',
+    worryId: 'worry-1',
+    replyId: 'reply-1',
+  }), {
+    route: 'received_answer_detail',
+    worryId: 'worry-1',
+    replyId: 'reply-1',
+  });
+  assert.deepEqual(routeAfterFeedbackPublish({ route: 'my_answer_detail', replyId: 'reply-1' }), {
+    route: 'my_answer_detail',
+    replyId: 'reply-1',
+  });
   assert.equal(routeToWriteWorry(), 'write_worry');
   assert.deepEqual(routeToWriteReply({ deliveryId: 'delivery-1', worryId: 'worry-1' }), {
     route: 'write_reply',
@@ -179,6 +191,7 @@ test('defines every required back route in the service policy', () => {
   assert.equal(backRouteForRoute({ route: 'my_worry_detail', worryId: 'worry-1' }), '나의 고민');
   assert.equal(backRouteForRoute({ route: 'write_reply', deliveryId: 'delivery-1' }), '답변하기');
   assert.equal(backRouteForRoute({ route: 'received_answer_detail', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
+  assert.equal(backRouteForRoute('answer_check'), '나의 고민');
   assert.equal(backRouteForRoute({ route: 'my_answer_detail', replyId: 'reply-1' }), 'my_answers');
   assert.equal(backRouteForRoute('edit_interests'), '마이페이지');
   assert.equal(backRouteForRoute('my_answers'), '마이페이지');
@@ -212,6 +225,7 @@ test('maps detail, write, policy, and confirmation routes to their owning PRD ta
   assert.equal(tabForRoute('write_worry'), '나의 고민');
   assert.equal(tabForRoute('my_worries'), '나의 고민');
   assert.equal(tabForRoute({ route: 'received_answer_detail', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
+  assert.equal(tabForRoute('answer_check'), '나의 고민');
   assert.equal(tabForRoute({ route: 'my_worry_detail', worryId: 'worry-1' }), '나의 고민');
   assert.equal(tabForRoute('edit_interests'), '마이페이지');
   assert.equal(tabForRoute('my_answers'), '마이페이지');

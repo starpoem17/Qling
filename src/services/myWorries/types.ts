@@ -22,6 +22,7 @@ export interface PrdWorryDoc {
   content?: string;
   status?: string;
   hiddenAt?: unknown;
+  deletedAt?: unknown;
   rawCategories?: unknown;
   validCategories?: unknown;
   matchingCategories?: unknown;

@@ -37,6 +37,7 @@ export const ROUTE_RENDERING_BOUNDARY = {
       'my_worries',
       'write_worry',
       'write_reply',
+      'answer_check',
       'received_answer_detail',
       'read_received_reply',
       'my_worry_detail',
@@ -82,7 +83,7 @@ export const ROUTE_RENDERING_BOUNDARY = {
     nextContainerBoundary: 'Selected worry lookup, reply draft, moderation/publication wiring, and form presentation move in Phase 6.',
   },
   'reply details': {
-    routes: ['received_answer_detail', 'read_received_reply', 'my_answer_detail', 'read_my_reply', 'my_worry_detail'],
+    routes: ['answer_check', 'received_answer_detail', 'read_received_reply', 'my_answer_detail', 'read_my_reply', 'my_worry_detail'],
     appBoundary: 'App shell may select the reply/worry detail route container and preserve detail ids.',
     nextContainerBoundary: 'Reply detail read models, feedback/comment mutations, and detail presentation move in Phase 7.',
   },

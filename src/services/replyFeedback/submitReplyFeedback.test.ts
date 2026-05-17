@@ -43,6 +43,67 @@ test('PRD dislike feedback maps to API dislike', async () => {
   assert.deepEqual(calls, ['dislike']);
 });
 
+test('PRD feedback preserves API moderation rejection shape', async () => {
+  const result = await submitReplyFeedback({
+    reply: prdReply,
+    feedbackType: 'helpful',
+    comment: 'comment',
+    apiClient: {
+      async submitReplyFeedback() {
+        return {
+          status: 'rejected',
+          reason: 'rejected',
+          reasonCode: 'self_harm_suicide',
+          userMessage: 'rejected',
+          helpMessage: 'help',
+          moderationLogId: 'mod1',
+        };
+      },
+    },
+  });
+
+  assert.deepEqual(result, {
+    status: 'rejected',
+    reason: 'rejected',
+    reasonCode: 'self_harm_suicide',
+    userMessage: 'rejected',
+    helpMessage: 'help',
+    moderationLogId: 'mod1',
+  });
+});
+
+test('PRD feedback surfaces failed API request without local mutation fallback', async () => {
+  await assert.rejects(
+    submitReplyFeedback({
+      reply: prdReply,
+      feedbackType: 'helpful',
+      apiClient: {
+        async submitReplyFeedback() {
+          throw new Error('network_failed');
+        },
+      },
+    }),
+    /network_failed/
+  );
+});
+
+test('browser feedback target does not expose helpedCount mutation input', async () => {
+  const calls: unknown[] = [];
+  await submitReplyFeedback({
+    reply: prdReply,
+    feedbackType: 'helpful',
+    apiClient: {
+      async submitReplyFeedback(input) {
+        calls.push(input);
+        return { status: 'saved', feedbackId: input.replyId, helpedCountApplied: true };
+      },
+    },
+  });
+
+  assert.equal(Object.hasOwn(calls[0] as Record<string, unknown>, 'helpedCount'), false);
+  assert.equal(Object.hasOwn(calls[0] as Record<string, unknown>, 'helpedCountApplied'), false);
+});
+
 test('PRD feedback fails closed when API path is unavailable', async () => {
   await assert.rejects(
     submitReplyFeedback({

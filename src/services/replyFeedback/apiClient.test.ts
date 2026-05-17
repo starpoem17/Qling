@@ -31,3 +31,17 @@ test('feedback API client preserves structured rejection fields', async () => {
     moderationLogId: 'mod1',
   });
 });
+
+test('feedback API client maps failed response to error without saved result', async () => {
+  const client = createReplyFeedbackApiClient({
+    getIdToken: async () => 'token',
+    fetchImpl: async () => new Response(JSON.stringify({
+      error: { code: 'provider_error' },
+    }), { status: 503 }) as never,
+  });
+
+  await assert.rejects(
+    client.submitReplyFeedback({ replyId: 'reply1', type: 'like', comment: 'comment' }),
+    /provider_error/
+  );
+});

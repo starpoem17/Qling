@@ -40,7 +40,9 @@ test('reply-detail container feedback comments use PRD feedback API and preserve
   assert.match(container, /submitReplyFeedbackWithProductionAdapters/);
   assert.match(container, /comment,/);
   assert.match(container, /feedback:\s*result\.feedback\s*\?\?\s*feedbackType/);
-  assert.match(container, /setFeedbackCommentDrafts\(prev => clearDraft\(prev, props\.selectedReply\?\.id \?\? ''\)\)/);
+  assert.match(container, /feedbackCommentDraftKey\(detailReply\.id\)/);
+  assert.match(container, /clearStoredDraft\(commentDraftKey\)/);
+  assert.match(container, /setStoredDraft\(commentDraftKey, value\)/);
   assert.match(container, /if \(result\.status === 'rejected'\) \{[\s\S]*?return result;\s*\}/);
   assert.doesNotMatch(source, /letters\.publisherComment/);
   assert.doesNotMatch(source, /letters\.feedback/);

@@ -5,7 +5,11 @@ let storedDrafts: DraftMap = {};
 export const WRITE_WORRY_DRAFT_KEY = 'write_worry';
 
 export function replyDraftKey(deliveryId: string): string {
-  return deliveryId;
+  return `reply:${deliveryId}`;
+}
+
+export function feedbackCommentDraftKey(replyId: string): string {
+  return `feedback_comment:${replyId}`;
 }
 
 export function setDraft(drafts: DraftMap, key: string, content: string): DraftMap {

@@ -24,7 +24,10 @@ function sortNewestFirst<T extends { createdAt?: TimestampLike | null }>(items: 
 }
 
 export function isHiddenWorry(worry: Pick<PrdWorryDoc, 'status' | 'hiddenAt'>): boolean {
-  return worry.status === 'hidden' || Boolean(worry.hiddenAt);
+  return worry.status === 'hidden'
+    || worry.status === 'deleted'
+    || Boolean(worry.hiddenAt)
+    || Boolean((worry as Pick<PrdWorryDoc, 'deletedAt'>).deletedAt);
 }
 
 export function isHiddenReply(reply: Pick<PrdReplyDoc, 'status' | 'hiddenAt'>): boolean {
@@ -108,11 +111,19 @@ export function selectVisibleMyGivenReplies(params: {
   replies: PrdReplyDoc[];
   userUid: string;
   feedbacksByReplyId?: Map<string, PrdFeedbackDoc>;
+  worriesById?: Map<string, PrdWorryDoc>;
 }): ReplyReadModelItem[] {
   return adaptPrdReplies(
-    params.replies.filter(reply => reply.replierUid === params.userUid && !isHiddenReply(reply)),
+    params.replies.filter(reply => {
+      if (reply.replierUid !== params.userUid || isHiddenReply(reply)) return false;
+      if (!params.worriesById) return true;
+      if (!reply.worryId) return false;
+      const worry = params.worriesById.get(reply.worryId);
+      return Boolean(worry && !isHiddenWorry(worry));
+    }),
     undefined,
-    params.feedbacksByReplyId
+    params.feedbacksByReplyId,
+    params.worriesById
   );
 }
 
@@ -121,12 +132,15 @@ export const selectMyGivenReplies = selectVisibleMyGivenReplies;
 export function adaptPrdReplies(
   replies: PrdReplyDoc[],
   readStatesByReplyId?: Map<string, ReplyReadStateDoc>,
-  feedbacksByReplyId?: Map<string, PrdFeedbackDoc>
+  feedbacksByReplyId?: Map<string, PrdFeedbackDoc>,
+  worriesById?: Map<string, PrdWorryDoc>
 ): ReplyReadModelItem[] {
   return sortNewestFirst(replies.flatMap(reply => {
     if (!reply.worryId || !reply.authorUid || !reply.replierUid) return [];
     if (typeof reply.content !== 'string') return [];
     const feedback = feedbacksByReplyId?.get(reply.id);
+    const sourceWorry = worriesById?.get(reply.worryId);
+    const sourceWorryContent = typeof sourceWorry?.content === 'string' ? sourceWorry.content : undefined;
 
     return [{
       id: reply.id,
@@ -140,9 +154,10 @@ export function adaptPrdReplies(
       source: 'prd_replies' as const,
       senderId: reply.replierUid,
       receiverId: reply.authorUid,
-      originalContent: reply.content,
+      originalContent: sourceWorryContent ?? reply.content,
       refinedContent: reply.content,
       replyTo: reply.worryId,
+      replyToContent: sourceWorryContent,
       isRead: readStatesByReplyId ? readStatesByReplyId.has(reply.id) : true,
       hasUnread: readStatesByReplyId ? !readStatesByReplyId.has(reply.id) : false,
       isAiGenerated: reply.isAiGenerated,

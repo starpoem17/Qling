@@ -94,6 +94,18 @@ test('my worries excludes hidden worries and hidden replies from unread counts',
   assert.equal(selected[0].unreadReplyCount, 1);
 });
 
+test('my worries excludes deleted worries', () => {
+  const worries: PrdWorryDoc[] = [
+    { id: 'visible', authorUid: 'me', content: 'visible worry' },
+    { id: 'deleted-status', authorUid: 'me', content: 'deleted worry', status: 'deleted' },
+    { id: 'deleted-at', authorUid: 'me', content: 'deleted at worry', deletedAt: {} },
+  ];
+
+  const selected = selectMyWorries({ worries, userUid: 'me' });
+
+  assert.deepEqual(selected.map(worry => worry.id), ['visible']);
+});
+
 test('my worries excludes legacy or mismatched author identity fields', () => {
   const selected = selectMyWorries({
     userUid: 'me',
@@ -182,6 +194,56 @@ test('my given replies excludes hidden replies', () => {
   assert.deepEqual(selected.map(reply => reply.id), ['visible']);
 });
 
+test('my given replies excludes hidden deleted or missing source worries when source worries are loaded', () => {
+  const replies: PrdReplyDoc[] = [
+    prdReply({ id: 'visible', worryId: 'visible-worry', authorUid: 'author', replierUid: 'me' }),
+    prdReply({ id: 'hidden-source', worryId: 'hidden-worry', authorUid: 'author', replierUid: 'me' }),
+    prdReply({ id: 'deleted-source', worryId: 'deleted-worry', authorUid: 'author', replierUid: 'me' }),
+    prdReply({ id: 'missing-source', worryId: 'missing-worry', authorUid: 'author', replierUid: 'me' }),
+  ];
+  const worriesById = new Map<string, PrdWorryDoc>([
+    ['visible-worry', { id: 'visible-worry', content: 'visible original' }],
+    ['hidden-worry', { id: 'hidden-worry', content: 'hidden original', status: 'hidden' }],
+    ['deleted-worry', { id: 'deleted-worry', content: 'deleted original', deletedAt: {} }],
+  ]);
+
+  const selected = selectMyGivenReplies({ replies, userUid: 'me', worriesById });
+
+  assert.deepEqual(selected.map(reply => reply.id), ['visible']);
+  assert.equal(selected[0].originalContent, 'visible original');
+  assert.equal(selected[0].replyToContent, 'visible original');
+});
+
+test('existing feedback and publisher comment appear in received and my-answer read model items', () => {
+  const reply = prdReply({ id: 'with-feedback', worryId: 'w1', authorUid: 'author', replierUid: 'me' });
+  const feedbacksByReplyId = new Map([[
+    'with-feedback',
+    {
+      id: 'with-feedback',
+      type: 'like' as const,
+      comment: '고마워요',
+      commentVisibility: 'replier' as const,
+    },
+  ]]);
+
+  const received = selectRepliesForWorry({
+    replies: [reply],
+    userUid: 'author',
+    worryId: 'w1',
+    feedbacksByReplyId,
+  });
+  const mine = selectMyGivenReplies({
+    replies: [reply],
+    userUid: 'me',
+    feedbacksByReplyId,
+  });
+
+  assert.equal(received[0].feedback, 'helpful');
+  assert.equal(received[0].publisherComment, '고마워요');
+  assert.equal(mine[0].feedback, 'helpful');
+  assert.equal(mine[0].publisherComment, '고마워요');
+});
+
 test('disliked reply is hidden only from publisher view while admin-hidden reply is hidden everywhere', () => {
   const disliked = prdReply({ id: 'disliked', worryId: 'w1', authorUid: 'author', replierUid: 'me' });
   const hidden = prdReply({ id: 'admin-hidden', worryId: 'w1', authorUid: 'author', replierUid: 'me', status: 'hidden' });
@@ -263,6 +325,9 @@ test('example replies remain visible in my given replies', () => {
   assert.equal(selected.length, 1);
   assert.equal(selected[0].id, 'example-reply');
   assert.equal(selected[0].isExampleReply, true);
+  assert.equal('exampleLabel' in selected[0], false);
+  assert.equal('tutorialLabel' in selected[0], false);
+  assert.equal('sampleLabel' in selected[0], false);
 });
 
 function prdReply(overrides: Partial<PrdReplyDoc>): PrdReplyDoc {

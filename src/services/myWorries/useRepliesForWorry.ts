@@ -37,12 +37,15 @@ export function useRepliesForWorry(params: {
   const [prdReplies, setPrdReplies] = useState<ReplyReadModelItem[]>([]);
   const [readStatesByReplyId, setReadStatesByReplyId] = useState(new Map<string, ReplyReadStateDoc>());
   const [feedbacksByReplyId, setFeedbacksByReplyId] = useState(new Map<string, PrdFeedbackDoc>());
+  const [isLoadingRepliesForWorry, setIsLoadingRepliesForWorry] = useState(false);
 
   useEffect(() => {
     if (!user || !worryId) {
       setPrdReplies([]);
+      setIsLoadingRepliesForWorry(false);
       return;
     }
+    setIsLoadingRepliesForWorry(true);
 
     const unsubscribe = onSnapshot(
       query(
@@ -61,10 +64,12 @@ export function useRepliesForWorry(params: {
           readStatesByReplyId,
           feedbacksByReplyId,
         }));
+        setIsLoadingRepliesForWorry(false);
       },
       error => {
         logFirestoreListenerError('Replies for worry listener error:', error);
         setPrdReplies([]);
+        setIsLoadingRepliesForWorry(false);
       }
     );
 
@@ -126,5 +131,5 @@ export function useRepliesForWorry(params: {
     [prdReplies]
   );
 
-  return { repliesForWorry };
+  return { repliesForWorry, isLoadingRepliesForWorry };
 }

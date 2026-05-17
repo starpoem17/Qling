@@ -479,10 +479,26 @@ export default function App() {
           )}
 
           {/* 6. Read Reply & Feedback View */}
-          {(currentRoute === 'read_received_reply' || currentRoute === 'received_answer_detail') && selectedReply && (
+          {(currentRoute === 'answer_check' || currentRoute === 'read_received_reply' || currentRoute === 'received_answer_detail') && selectedReply && (
             <motion.div key="read_received_reply" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
               <ReplyDetailContainer
                 mode="received-reply"
+                user={user}
+                route={view}
+                selectedReply={selectedReply}
+                setSelectedReply={setSelectedReply}
+                selectedMyWorryContent={selectedMyWorry?.content}
+                setView={setView}
+                setFilterAlert={setFilterAlert}
+              />
+            </motion.div>
+          )}
+
+          {(currentRoute === 'answer_check' || currentRoute === 'received_answer_detail') && !selectedReply && (
+            <motion.div key="received_answer_detail_empty" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+              <ReplyDetailContainer
+                mode="received-reply"
+                user={user}
                 route={view}
                 selectedReply={selectedReply}
                 setSelectedReply={setSelectedReply}
@@ -498,6 +514,7 @@ export default function App() {
             <motion.div key="read_my_reply" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
               <ReplyDetailContainer
                 mode="my-answer"
+                user={user}
                 route={view}
                 selectedReply={selectedReply}
                 setSelectedReply={setSelectedReply}
@@ -511,6 +528,7 @@ export default function App() {
             <motion.div key="my_answer_detail_loading" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
               <ReplyDetailContainer
                 mode="my-answer"
+                user={user}
                 route={view}
                 selectedReply={selectedReply}
                 setSelectedReply={setSelectedReply}

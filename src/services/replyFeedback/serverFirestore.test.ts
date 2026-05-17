@@ -91,6 +91,7 @@ test('initial like without comment stores exact feedback document shape', async 
   assert.equal(store['feedbacks/reply1'].helpedCountApplied, true);
   assert.equal(store['feedbacks/reply1'].isForAiReply, false);
   assert.equal(store['feedbacks/reply1'].isForExampleReply, false);
+  assert.ok('helpedCount' in store['users/replier']);
   assert.equal(store['replies/reply1'].feedbackType, 'like');
   assert.ok(!('publisherVisible' in store['replies/reply1']));
   assert.ok('likedAt' in store['replies/reply1']);
@@ -131,6 +132,7 @@ test('initial dislike without comment stores admin-only state only in feedbacks'
   assert.equal(store['feedbacks/reply1'].comment, null);
   assert.equal(store['feedbacks/reply1'].commentVisibility, 'none');
   assert.equal(store['feedbacks/reply1'].commentModerationLogId, null);
+  assert.deepEqual(store['users/replier'], { helpedCount: 0 });
   assert.ok(!('feedbackType' in store['replies/reply1']));
   assert.ok(!('dislikedAt' in store['replies/reply1']));
   assert.ok(!('publisherHiddenBecauseDisliked' in store['replies/reply1']));
