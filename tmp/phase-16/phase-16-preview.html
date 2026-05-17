@@ -52,10 +52,10 @@
       background: var(--surface);
       box-shadow: 0 18px 44px rgb(37 34 31 / 0.10);
     }
-    .viewport-360 { max-width: 360px; }
-    .viewport-393 { max-width: 393px; }
-    .viewport-430 { max-width: 430px; }
-    .desktop { max-width: 620px; }
+    .viewport-360 { max-width: 360px; min-height: 852px; }
+    .viewport-393 { max-width: 393px; min-height: 852px; }
+    .viewport-430 { max-width: 430px; min-height: 852px; }
+    .desktop { max-width: 620px; min-height: 852px; }
     .top {
       background: var(--orange);
       color: white;
@@ -154,19 +154,32 @@
       padding-top: 22px;
     }
     .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .interest-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 103px);
+      column-gap: 7px;
+      row-gap: 13px;
+      justify-content: center;
+    }
     .chip {
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: white;
-      color: var(--muted);
-      padding: 8px 12px;
+      width: 103px;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--line);
+      border-radius: 22px;
+      background: #fff1d1;
+      color: var(--text);
+      padding: 0 4px;
       font-size: 14px;
-      font-weight: 850;
+      font-weight: 700;
+      letter-spacing: -0.14px;
     }
     .chip.selected {
-      border-color: var(--orange);
-      background: var(--cream-soft);
-      color: var(--orange);
+      border-color: #ff8b0d;
+      background: white;
+      color: var(--text);
     }
     .note {
       margin-top: 10px;
@@ -189,6 +202,14 @@
       .button { width: 100%; }
       .top h2 { font-size: 24px; }
       .sheet { padding: 18px; }
+      .interest-grid {
+        width: 100%;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .chip {
+        width: 100%;
+        min-width: 0;
+      }
     }
   </style>
 </head>
@@ -262,7 +283,7 @@
           <div class="field"><div class="label-row"><span>닉네임</span></div><div class="row"><div class="input success">입력된 닉네임</div><div class="button">중복 확인</div></div><div class="message success">사용할 수 있는 닉네임이에요.</div></div>
           <div class="group"><div class="label-row"><span>성별</span></div><div class="choices"><div class="choice selected">여성</div><div class="choice">남성</div></div></div>
           <div class="field"><div class="label-row"><span>나이</span></div><div class="input">입력된 나이 <span>세</span></div></div>
-          <div class="interests"><div class="step" style="color: var(--orange)">Question 2</div><h3>주요 관심사는 무엇인가요?</h3><div class="chips"><span class="chip selected">취업</span><span class="chip selected">워라밸</span><span class="chip">건강</span></div></div>
+          <div class="interests"><div class="step" style="color: var(--orange)">Question 2</div><h3>주요 관심사는 무엇인가요?</h3><div class="chips interest-grid"><span class="chip selected">진로</span><span class="chip selected">취업</span><span class="chip">시험</span><span class="chip">학업</span><span class="chip">소득</span><span class="chip">연애</span><span class="chip">결혼</span><span class="chip">부모</span><span class="chip">자녀</span><span class="chip">우울</span><span class="chip">불안</span><span class="chip">외로움</span><span class="chip">직장</span><span class="chip selected">워라밸</span><span class="chip">외모</span><span class="chip">자존감</span><span class="chip">건강</span><span class="chip">노후</span><span class="chip">미래</span><span class="chip">잡담</span><span class="chip">주거</span></div></div>
           <div class="button primary">답변하기 시작</div>
         </div>
       </article>
@@ -280,7 +301,7 @@
         <div class="state-title">onboarding interests normal state · desktop-centered shell note</div>
         <div class="top"><div class="step">Question 2</div><h2>주요 관심사는 무엇인가요?</h2><p>데스크톱에서는 모바일 구성이 중앙 폭 안에서 유지되고 칩은 자연스럽게 줄바꿈됩니다.</p><div class="progress"><span style="width: 100%"></span></div></div>
         <div class="sheet">
-          <div class="interests" style="border-top: 0; padding-top: 0"><h3>관심 분야</h3><p class="note">production category source includes 워라밸 and does not use design-only category misspellings.</p><div class="chips"><span class="chip">취업</span><span class="chip selected">진로</span><span class="chip">학업</span><span class="chip">시험</span><span class="chip">소득</span><span class="chip">주거</span><span class="chip">연애</span><span class="chip">결혼</span><span class="chip">부모</span><span class="chip">자녀</span><span class="chip">우울</span><span class="chip">불안</span><span class="chip">외로움</span><span class="chip">직장</span><span class="chip selected">워라밸</span><span class="chip">외모</span><span class="chip">자존감</span><span class="chip">건강</span><span class="chip">노후</span><span class="chip">미래</span><span class="chip">잡담</span></div></div>
+          <div class="interests" style="border-top: 0; padding-top: 0"><h3>관심 분야</h3><p class="note">production category source includes 워라밸 and does not use design-only category misspellings. The grid below is 7 rows by 3 columns.</p><div class="chips interest-grid"><span class="chip selected">진로</span><span class="chip">취업</span><span class="chip">시험</span><span class="chip">학업</span><span class="chip selected">소득</span><span class="chip">연애</span><span class="chip">결혼</span><span class="chip">부모</span><span class="chip">자녀</span><span class="chip">우울</span><span class="chip">불안</span><span class="chip">외로움</span><span class="chip">직장</span><span class="chip selected">워라밸</span><span class="chip">외모</span><span class="chip">자존감</span><span class="chip">건강</span><span class="chip">노후</span><span class="chip">미래</span><span class="chip">잡담</span><span class="chip">주거</span></div></div>
           <div class="button primary">답변하기 시작</div>
         </div>
       </article>
@@ -289,7 +310,7 @@
         <div class="state-title">onboarding interests validation-error state</div>
         <div class="top"><div class="step">Question 2</div><h2>주요 관심사는 무엇인가요?</h2><p>선택이 없으면 완료 CTA는 production validation에 따라 비활성 상태여야 합니다.</p><div class="progress"><span style="width: 100%"></span></div></div>
         <div class="sheet">
-          <div class="chips"><span class="chip">취업</span><span class="chip">진로</span><span class="chip">학업</span><span class="chip">워라밸</span><span class="chip">건강</span><span class="chip">잡담</span></div>
+          <div class="chips interest-grid"><span class="chip">진로</span><span class="chip">취업</span><span class="chip">시험</span><span class="chip">학업</span><span class="chip">소득</span><span class="chip">연애</span><span class="chip">결혼</span><span class="chip">부모</span><span class="chip">자녀</span><span class="chip">우울</span><span class="chip">불안</span><span class="chip">외로움</span><span class="chip">직장</span><span class="chip">워라밸</span><span class="chip">외모</span><span class="chip">자존감</span><span class="chip">건강</span><span class="chip">노후</span><span class="chip">미래</span><span class="chip">잡담</span><span class="chip">주거</span></div>
           <div class="message error" style="margin-top: 12px">관심 분야를 1개 이상 선택해주세요.</div>
           <div class="button primary disabled">답변하기 시작</div>
         </div>

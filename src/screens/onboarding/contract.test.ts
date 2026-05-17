@@ -2,7 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import {
+  ONBOARDING_INTEREST_CATEGORY_ORDER,
+  ONBOARDING_INTEREST_GRID,
   ONBOARDING_DUPLICATE_CHECK_STATES,
+  orderOnboardingInterestCategories,
   type OnboardingScreenProps,
 } from './contract';
 
@@ -50,6 +53,45 @@ test('duplicate-check state union covers expected UI states only', () => {
     'network-failed',
     'retry',
   ]);
+});
+
+test('onboarding interests use the design-aligned 7 by 3 category order and preserve 워라밸', () => {
+  assert.equal(ONBOARDING_INTEREST_CATEGORY_ORDER.length, 21);
+  assert.equal(ONBOARDING_INTEREST_GRID.rows, 7);
+  assert.equal(ONBOARDING_INTEREST_GRID.columns, 3);
+  assert.deepEqual(
+    Array.from(ONBOARDING_INTEREST_CATEGORY_ORDER),
+    [
+      '진로', '취업', '시험',
+      '학업', '소득', '연애',
+      '결혼', '부모', '자녀',
+      '우울', '불안', '외로움',
+      '직장', '워라밸', '외모',
+      '자존감', '건강', '노후',
+      '미래', '잡담', '주거',
+    ],
+  );
+  assert.equal(ONBOARDING_INTEREST_CATEGORY_ORDER.includes('워라밸'), true);
+  assert.equal(ONBOARDING_INTEREST_CATEGORY_ORDER.includes('워라벨' as never), false);
+  assert.deepEqual(orderOnboardingInterestCategories(WORRY_CATEGORIES), Array.from(ONBOARDING_INTEREST_CATEGORY_ORDER));
+});
+
+test('onboarding interest grid contract copies design chip dimensions', () => {
+  assert.deepEqual(ONBOARDING_INTEREST_GRID, {
+    columns: 3,
+    rows: 7,
+    chipWidthPx: 103,
+    chipHeightPx: 44,
+    chipRadiusPx: 22,
+    chipBorderWidthPx: 2,
+    columnGapPx: 7,
+    rowGapPx: 13,
+    selectedBorderColor: '#ff8b0d',
+    unselectedBackgroundColor: '#fff1d1',
+    unselectedBorderColor: '#d4be91',
+    textSizePx: 14,
+    textLetterSpacingPx: -0.14,
+  });
 });
 
 test('onboarding contract has no implementation object or design default nickname', () => {

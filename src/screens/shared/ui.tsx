@@ -161,7 +161,7 @@ export function QlingCard({ children, className }: { readonly children: ReactNod
   );
 }
 
-export function CategoryChip({ label, selected, disabled, onSelect }: CategoryChipProps) {
+export function CategoryChip({ label, selected, disabled, onSelect, className }: CategoryChipProps) {
   return (
     <button
       type="button"
@@ -173,6 +173,7 @@ export function CategoryChip({ label, selected, disabled, onSelect }: CategoryCh
         selected
           ? 'border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-cream-soft)] text-[var(--qling-color-primary-orange)]'
           : 'border-[var(--qling-color-border)] bg-[var(--qling-color-surface)] text-[var(--qling-color-muted)]',
+        className,
       )}
     >
       {label}

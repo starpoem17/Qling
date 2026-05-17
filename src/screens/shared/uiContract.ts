@@ -63,6 +63,7 @@ export type CategoryChipProps = {
   readonly selected?: boolean;
   readonly disabled?: boolean;
   readonly onSelect?: () => void;
+  readonly className?: string;
 };
 
 export type QlingTextAreaProps = {

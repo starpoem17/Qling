@@ -5,6 +5,7 @@ import path from 'node:path';
 import {
   SHARED_UI_PRIMITIVE_OWNERSHIP,
   type BottomNavigationProps,
+  type CategoryChipProps,
   type PolicyTextContainerProps,
   type ProfileMotifProps,
   type QlingTextAreaProps,
@@ -120,6 +121,21 @@ test('text area and settings row contracts expose required state mapping props',
   assert.equal(settingsRow.danger, true);
   assert.equal(settingsRow.disabled, false);
   assert.equal(settingsRow.accessibilityLabel, '계정 탈퇴');
+});
+
+test('category chip contract allows layout classes without changing selection behavior', () => {
+  const chip = {
+    label: '워라밸',
+    selected: true,
+    disabled: false,
+    className: 'h-[44px] w-full max-w-[103px]',
+    onSelect: () => undefined,
+  } satisfies CategoryChipProps;
+
+  assert.equal(chip.label, '워라밸');
+  assert.equal(chip.selected, true);
+  assert.equal(chip.className?.includes('max-w-[103px]'), true);
+  assert.equal(Object.hasOwn(chip, 'apiClient'), false);
 });
 
 test('shared primitive module does not import Firebase, API, server, or service mutation boundaries', () => {

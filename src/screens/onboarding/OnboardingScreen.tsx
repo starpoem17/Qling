@@ -7,7 +7,11 @@ import {
   PrimaryCTA,
   SecondaryCTA,
 } from '../shared/ui';
-import type { OnboardingScreenProps } from './contract';
+import {
+  ONBOARDING_INTEREST_GRID,
+  orderOnboardingInterestCategories,
+  type OnboardingScreenProps,
+} from './contract';
 
 type Props = OnboardingScreenProps & {
   readonly categoryOptions: readonly WorryCategory[];
@@ -30,6 +34,7 @@ export function OnboardingScreen(props: Props) {
     && !props.validationMessages.gender
     && !props.validationMessages.age
     && props.duplicateCheck.state === 'available';
+  const orderedCategoryOptions = orderOnboardingInterestCategories(props.categoryOptions);
 
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-xl flex-col">
@@ -44,7 +49,7 @@ export function OnboardingScreen(props: Props) {
         </div>
       </div>
 
-      <ContentSheet className="-mt-8 flex-1 space-y-7 rounded-t-[2rem]">
+      <ContentSheet className="-mt-8 flex-1 space-y-7 rounded-t-[2rem] px-[19px]">
         <div className="space-y-3">
           <div className="flex items-end justify-between gap-3">
             <label className="block text-sm font-black" htmlFor="onboarding-nickname">닉네임</label>
@@ -160,16 +165,30 @@ export function OnboardingScreen(props: Props) {
               고민 매칭에 필요해요. 최소 1개 선택, 복수 선택 가능해요.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2" aria-label="관심 분야 선택">
-            {props.categoryOptions.map(category => (
-              <CategoryChip
-                key={category}
-                label={category}
-                selected={props.values.selectedInterests.includes(category)}
-                disabled={props.isProcessing}
-                onSelect={() => props.onInterestToggle(category)}
-              />
-            ))}
+          <div
+            className="mx-auto grid w-full max-w-[323px] grid-cols-3 justify-center gap-x-[7px] gap-y-[13px]"
+            aria-label="관심 분야 선택"
+            data-columns={ONBOARDING_INTEREST_GRID.columns}
+            data-rows={ONBOARDING_INTEREST_GRID.rows}
+          >
+            {orderedCategoryOptions.map(category => {
+              const selected = props.values.selectedInterests.includes(category);
+              return (
+                <CategoryChip
+                  key={category}
+                  label={category}
+                  selected={selected}
+                  disabled={props.isProcessing}
+                  onSelect={() => props.onInterestToggle(category)}
+                  className={cn(
+                    'box-border h-[44px] w-full max-w-[103px] justify-self-center rounded-[22px] border-2 px-1 py-0 text-[14px] font-bold tracking-[-0.14px] text-[var(--qling-color-text)]',
+                    selected
+                      ? 'border-[#ff8b0d] bg-[var(--qling-color-surface)]'
+                      : 'border-[#d4be91] bg-[#fff1d1]',
+                  )}
+                />
+              );
+            })}
           </div>
           {props.validationMessages.interests && (
             <p className="text-sm font-semibold text-[var(--qling-color-danger)]" role="alert">

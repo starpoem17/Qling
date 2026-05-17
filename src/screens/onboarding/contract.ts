@@ -1,6 +1,58 @@
 import type { WorryCategory } from '@midnight-radio/domain';
 import type { FieldValidationMessages, ProcessingState } from '../shared/contract';
 
+export const ONBOARDING_INTEREST_CATEGORY_ORDER = [
+  '진로',
+  '취업',
+  '시험',
+  '학업',
+  '소득',
+  '연애',
+  '결혼',
+  '부모',
+  '자녀',
+  '우울',
+  '불안',
+  '외로움',
+  '직장',
+  '워라밸',
+  '외모',
+  '자존감',
+  '건강',
+  '노후',
+  '미래',
+  '잡담',
+  '주거',
+] as const satisfies readonly WorryCategory[];
+
+export const ONBOARDING_INTEREST_GRID = {
+  columns: 3,
+  rows: 7,
+  chipWidthPx: 103,
+  chipHeightPx: 44,
+  chipRadiusPx: 22,
+  chipBorderWidthPx: 2,
+  columnGapPx: 7,
+  rowGapPx: 13,
+  selectedBorderColor: '#ff8b0d',
+  unselectedBackgroundColor: '#fff1d1',
+  unselectedBorderColor: '#d4be91',
+  textSizePx: 14,
+  textLetterSpacingPx: -0.14,
+} as const;
+
+export function orderOnboardingInterestCategories(
+  categoryOptions: readonly WorryCategory[],
+): WorryCategory[] {
+  const available = new Set<WorryCategory>(categoryOptions);
+  const ordered = ONBOARDING_INTEREST_CATEGORY_ORDER.filter(category => available.has(category));
+  const orderedSet = new Set<WorryCategory>(ordered);
+  return [
+    ...ordered,
+    ...categoryOptions.filter(category => !orderedSet.has(category)),
+  ];
+}
+
 export const ONBOARDING_DUPLICATE_CHECK_STATES = [
   'idle',
   'checking',
