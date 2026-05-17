@@ -621,19 +621,19 @@ Every visual reskin phase must use real production data and route state. Hardcod
 
 ### Phase 24 - Regression Test And PRD/Design Release Gate
 
-- [ ] TODO-DESIGN-24.1 Run `npm test` and save passing output.
-- [ ] TODO-DESIGN-24.2 Run `npm run lint` and save passing output.
-- [ ] TODO-DESIGN-24.3 Run `npm run build` and save passing output.
-- [ ] TODO-DESIGN-24.4 Run `npm run test:rules` if Firestore rules or Firestore behavior changed, and save passing output.
-- [ ] TODO-DESIGN-24.5 Add any missing focused tests discovered during implementation before release.
+- [x] TODO-DESIGN-24.1 Run `npm test` and save passing output.
+- [x] TODO-DESIGN-24.2 Run `npm run lint` and save passing output.
+- [x] TODO-DESIGN-24.3 Run `npm run build` and save passing output.
+- [x] TODO-DESIGN-24.4 Run `npm run test:rules` if Firestore rules or Firestore behavior changed, and save passing output.
+- [x] TODO-DESIGN-24.5 Add any missing focused tests discovered during implementation before release.
 - [ ] TODO-DESIGN-24.6 Verify auth, onboarding, nickname uniqueness, required age validation/rules, `워라밸` target domain/display value, example worries with no visible example marker, example-worry replies in my answers, worry publication to written worry detail with no standalone terminal success screen, reply publication to my-answer detail with no standalone terminal success screen, reply success removal from answer feed, pass/replacement, read-state, hidden worry/reply exclusion across read models, feedback, comment moderation, push permission/FCM registration/status, account deletion, and PWA install/share still work.
-- [ ] TODO-DESIGN-24.7 Verify every `design/` screen has a matching production route/screen or a documented intentional product-level exclusion in the Phase 0 table.
-- [ ] TODO-DESIGN-24.8 Verify no static hardcoded design text or design-only sample values such as `라미`, `314`, fixed dates, lorem ipsum, or static worry/reply bodies remain where dynamic production data is required.
-- [ ] TODO-DESIGN-24.9 Verify no unused copied design dependencies remain.
-- [ ] TODO-DESIGN-24.10 Verify `src/App.tsx` did not become a larger monolith.
-- [ ] TODO-DESIGN-24.11 Verify deep module boundaries remain intact using the Phase 8 import-boundary tests and the exact forbidden import patterns in `Presentational Import Boundary Contract`.
+- [x] TODO-DESIGN-24.7 Verify every `design/` screen has a matching production route/screen or a documented intentional product-level exclusion in the Phase 0 table.
+- [x] TODO-DESIGN-24.8 Verify no static hardcoded design text or design-only sample values such as `라미`, `314`, fixed dates, lorem ipsum, or static worry/reply bodies remain where dynamic production data is required.
+- [x] TODO-DESIGN-24.9 Verify no unused copied design dependencies remain.
+- [x] TODO-DESIGN-24.10 Verify `src/App.tsx` did not become a larger monolith.
+- [x] TODO-DESIGN-24.11 Verify deep module boundaries remain intact using the Phase 8 import-boundary tests and the exact forbidden import patterns in `Presentational Import Boundary Contract`.
 - [ ] TODO-DESIGN-24.12 Verify the `Minimum Manual Evidence Matrix` is complete before release.
-- [ ] TODO-DESIGN-24.13 Verify every checkbox in `docs/TODO.md` is either checked with evidence or remains unchecked with a clear blocker.
+- [x] TODO-DESIGN-24.13 Verify every checkbox in `docs/TODO.md` is either checked with evidence or remains unchecked with a clear blocker.
 - [ ] TODO-DESIGN-24.V1 Verify Phase 24 by attaching automated test output, completed minimum manual evidence matrix, design route map, and boundary review evidence.
 
 ## Final Release-Gate Checklist
