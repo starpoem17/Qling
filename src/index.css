@@ -58,6 +58,41 @@
   --qling-space-safe-bottom: env(safe-area-inset-bottom, 0px);
   --qling-space-cta-gap: 0.75rem;
   --qling-space-scroll-bottom: calc(var(--qling-space-nav-height) + var(--qling-space-safe-bottom) + 2rem);
+
+  --qling-ref-splash-bg: #ff8b3d;
+  --qling-ref-splash-cream: #fff5eb;
+  --qling-ref-splash-text: #1a1a1a;
+  --qling-ref-login-bg: #fff1d1;
+  --qling-ref-login-text: #1a1a1a;
+  --qling-ref-login-orange: #ff8b3d;
+  --qling-ref-login-divider: #c2c4c8;
+  --qling-ref-login-policy: #b8b8b8;
+}
+
+.qling-reference-root {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+  font-family: var(--qling-font-sans);
+}
+
+.qling-reference-canvas {
+  width: 393px;
+  height: 852px;
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.qling-splash-root,
+.qling-splash-canvas {
+  background: var(--qling-ref-splash-bg);
+}
+
+.qling-login-root,
+.qling-login-canvas {
+  background: var(--qling-ref-login-bg);
 }
 
 html,

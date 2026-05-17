@@ -1,10 +1,9 @@
 import { AlertCircle } from 'lucide-react';
-import { ContentSheet, MobileAppShell, ProfileMotif, SecondaryCTA } from '../shared/ui';
 import type { LoginScreenProps } from './contract';
 
 function GoogleMark() {
   return (
-    <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+    <svg className="absolute left-[14px] top-[11px] h-6 w-6" viewBox="0 0 24 24" aria-hidden="true">
       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
@@ -24,45 +23,45 @@ export function LoginScreen({
   const buttonLabel = isProcessing || sessionState === 'signing-in' ? '로그인 중입니다' : 'Google로 로그인';
 
   return (
-    <MobileAppShell mainClassName="flex min-h-dvh flex-col justify-between gap-8 px-[var(--qling-space-shell-x)] pb-[calc(1.5rem+var(--qling-space-safe-bottom))] pt-[max(5rem,calc(4rem+env(safe-area-inset-top,0px)))]">
-      <section className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
-        <div className="space-y-8">
-          <div className="space-y-5">
-            <ProfileMotif label="Qling" />
-            <div className="space-y-2">
-              <h1 className="text-6xl font-black leading-tight tracking-normal text-[var(--qling-color-text)]">
-                고민끝에<br />
-                큐링
-              </h1>
-              <div className="h-0.5 w-56 max-w-full rounded-full bg-[var(--qling-color-border)]" aria-hidden="true" />
-            </div>
+    <div className="qling-reference-root qling-login-root">
+      <main className="qling-reference-canvas qling-login-canvas" aria-label="로그인">
+        <h1 className="absolute left-[29px] top-[276px] m-0 w-[244px] text-[58px] font-black leading-[1.3] tracking-[-2.9px] text-[var(--qling-ref-login-text)]">
+          고민끝에<br />
+          큐링
+        </h1>
+        <div className="absolute left-[322px] top-[404px] h-[22px] w-[22px] rounded-full bg-[var(--qling-ref-login-orange)]" aria-hidden="true" />
+        <div className="absolute left-[85px] top-[563px] h-[2px] w-[222px] rounded-[3px] bg-[var(--qling-ref-login-divider)]" aria-hidden="true" />
+
+        {errorMessage && (
+          <div
+            className="absolute left-[24px] top-[604px] flex w-[345px] items-start gap-2 rounded-[10px] border border-[rgb(216_75_75/0.22)] bg-[rgb(255_255_255/0.7)] px-3 py-2 text-[12px] font-bold leading-[16px] text-[var(--qling-color-danger)]"
+            role="alert"
+          >
+            <AlertCircle className="mt-[1px] h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>{errorMessage}</span>
           </div>
+        )}
 
-          {errorMessage && (
-            <ContentSheet className="flex items-start gap-3 border border-[rgb(216_75_75/0.22)] bg-[rgb(216_75_75/0.06)] shadow-none" >
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--qling-color-danger)]" aria-hidden="true" />
-              <p className="text-sm font-semibold leading-6 text-[var(--qling-color-danger)]" role="alert">
-                {errorMessage}
-              </p>
-            </ContentSheet>
-          )}
-        </div>
-      </section>
+        <form onSubmit={(event) => {
+          event.preventDefault();
+          if (!isDisabled) onSignIn();
+        }}>
+          <button
+            type="submit"
+            aria-label={buttonLabel}
+            aria-busy={isProcessing || sessionState === 'signing-in' || undefined}
+            disabled={isDisabled}
+            className="absolute left-[24px] top-[663px] h-[47px] w-[345px] rounded-[28px] border border-[#dadce0] bg-white text-[17px] font-black tracking-[-0.85px] text-[var(--qling-ref-login-text)] shadow-[0_2px_8px_0_rgba(0,0,0,0.06)] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {!isProcessing && sessionState !== 'signing-in' && <GoogleMark />}
+            <span className="absolute left-[116px] top-[12px] whitespace-nowrap leading-normal">{buttonLabel}</span>
+          </button>
+        </form>
 
-      <form className="mx-auto w-full max-w-md" onSubmit={(event) => {
-        event.preventDefault();
-        if (!isDisabled) onSignIn();
-      }}>
-        <SecondaryCTA
-          type="submit"
-          disabled={isDisabled}
-          processing={isProcessing || sessionState === 'signing-in'}
-          accessibilityLabel={buttonLabel}
-        >
-          {!isProcessing && sessionState !== 'signing-in' && <GoogleMark />}
-          <span>{buttonLabel}</span>
-        </SecondaryCTA>
-      </form>
-    </MobileAppShell>
+        <p className="absolute left-1/2 top-[765px] m-0 w-[385px] -translate-x-1/2 text-center text-[11px] font-bold leading-[18px] tracking-[-0.55px] text-[var(--qling-ref-login-policy)]">
+          로그인 시 큐링의 개인정보처리방침 및 이용 약관에 동의하는 것으로 간주합니다
+        </p>
+      </main>
+    </div>
   );
 }

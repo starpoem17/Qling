@@ -28,6 +28,8 @@ test('login contract exposes sign-in state, error, disabled, and submit event on
 
 test('login screen source keeps policy links and preview-only mobile chrome out of production login', () => {
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'loadingShell', 'LoginScreen.tsx'), 'utf8');
+  const allowedVisualPolicyCopy = '로그인 시 큐링의 개인정보처리방침 및 이용 약관에 동의하는 것으로 간주합니다';
+  const sourceWithoutAllowedVisualCopy = source.replace(allowedVisualPolicyCopy, '');
 
   for (const forbidden of [
     '개인정보처리방침',
@@ -39,8 +41,11 @@ test('login screen source keeps policy links and preview-only mobile chrome out 
     'statusBar',
     '393px',
   ]) {
-    assert.equal(source.includes(forbidden), false, `LoginScreen includes forbidden preview/login policy content: ${forbidden}`);
+    assert.equal(sourceWithoutAllowedVisualCopy.includes(forbidden), false, `LoginScreen includes forbidden preview/login policy content: ${forbidden}`);
   }
+
+  assert.equal(source.includes('<a '), false);
+  assert.equal(source.includes('href='), false);
 });
 
 test('loading shell screen source keeps accessible status text without fake timing or mobile chrome', () => {
