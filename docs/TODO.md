@@ -21,6 +21,9 @@
   - 각 체크박스는 한 화면 또는 한 정책만 다룬다.
   - 구현 diff, 테스트 결과, production PNG evidence 또는 명시된 수동 검증 근거가 있어야 체크할 수 있다.
   - 나중 phase 결과가 선행되어야 하는 항목은 체크하지 않는다.
+  - 어떤 체크박스도 나중 phase의 PNG, 나중 phase의 구현, 나중 phase의 테스트를 완료 조건으로 삼지 않는다.
+  - later visual confirmation은 completion condition이 아니라 downstream note로만 적는다.
+  - 시각/pixel 작업 체크박스가 PNG를 요구하면 그 PNG는 같은 체크박스 또는 같은 phase 안에서 생성되어야 한다.
   - completion note는 체크박스 아래에 한 줄로 남긴다.
   - 별도 보고 산출물이 꼭 필요하면 프로젝트 규칙에 따라 한국어 HTML만 사용한다. Markdown/JSON 보고 파일은 만들지 않는다.
 - 금지사항:
@@ -44,16 +47,46 @@
   - 캡처 자동화에 필요한 일시적 파일은 생성 후 제거한다. 단, 재현성을 위해 harness를 남길 때는 `tmp/*-pixel-alignment/harness/**` 아래에만 두고 production 코드와 분리한다.
   - 모든 PNG는 393x852 reference PNG와 비교 가능한 production capture인지 확인한다.
 
+## Completion Note Template
+
+각 체크박스 아래 completion note에는 체크 전에 다음을 기록한다. 해당 없는 항목은 `해당 없음`으로 적는다.
+
+- changed files: 실제 변경 파일 목록.
+- test command/result: 실행한 검증 명령과 성공/실패/스킵 사유.
+- production PNG path: visual/pixel 체크박스의 `*-production.png` 경로.
+- capture type: `full route` 또는 `harness component`.
+- harness route/data verification: harness component capture인 경우 route/Container test 이름 또는 수동 route 검증 방법.
+- reference PNG path: 비교한 `design/reference/pngs/screens/*.png`.
+- measured result: reference/production size, dominant colors, non-bg bbox, 주요 bbox 차이.
+- tolerated difference: 허용한 차이가 있으면 이유와 픽셀 범위.
+
 ## Reproducible Pixel Evidence Workflow
 
 성공 사례인 `tmp/onboarding-pixel-alignment` 방식은 엄밀한 pixel-by-pixel diff가 아니라, PNG-measured coordinate alignment와 manual visual review를 위한 evidence workflow다. 이후 phase도 이 수준을 기본으로 삼고, 더 엄밀한 diff가 필요하면 별도 체크박스로 추가한다.
 
 1. `npm run build`로 production CSS를 만든다.
-2. harness를 쓰는 경우 `dist/assets/index-*.css`의 현재 hash를 확인하고 harness import를 맞춘다.
-3. `npx vite tmp/<screen>-pixel-alignment/harness --host 127.0.0.1 --port <free-port>`로 임시 앱을 띄운다.
-4. Playwright 또는 동등한 브라우저 자동화로 viewport `393x852`, `deviceScaleFactor: 1`, `fullPage: false` 캡처를 만든다.
-5. PIL로 reference PNG와 production PNG의 size, dominant colors, non-bg bbox, 주요 element bbox를 측정한다.
-6. 결과는 체크박스 completion note에 요약한다. 파일 보고가 필요하면 한국어 HTML table/report로 작성한다.
+2. `ls dist/assets/index-*.css`로 현재 CSS hash를 확인한다.
+3. harness를 쓰는 경우 harness entry의 CSS import를 현재 hash에 맞춘다. 예: `import '../../../../dist/assets/index-BKXD6mF0.css';`
+4. concrete harness example: `npx vite tmp/<screen-or-phase>-pixel-alignment/harness --host 127.0.0.1 --port 5177`
+5. Playwright 또는 동등한 브라우저 자동화로 viewport `393x852`, `deviceScaleFactor: 1`, `fullPage: false` 캡처를 만든다.
+6. concrete capture conditions:
+   - viewport: `{ width: 393, height: 852 }`
+   - deviceScaleFactor: `1`
+   - screenshot: `{ fullPage: false, path: 'tmp/<screen-or-phase>-pixel-alignment/<screen>-production.png' }`
+7. PIL로 reference PNG와 production PNG의 size, dominant colors, non-bg bbox, 주요 element bbox를 측정한다.
+8. 결과는 체크박스 completion note에 요약한다. 파일 보고가 필요하면 한국어 HTML table/report로 작성한다.
+
+Required capture note fields:
+
+- `capture type: full route` 또는 `capture type: harness component`
+- source route 또는 source screen/component
+- harness component capture인 경우 route/Container verification method
+- reference PNG path
+- production PNG path
+- measured size
+- dominant colors
+- non-bg bbox
+- known tolerated difference, if any
 
 Onboarding 선례의 정확한 표현:
 
@@ -105,7 +138,7 @@ Onboarding 선례의 정확한 표현:
 
 ### 06~20 Initial PIL Anchor Summary
 
-아래 표는 구현 시작 전에 직접 PIL로 재확인해야 하는 초기 요약값이다. 각 화면 phase의 첫 체크박스에서 dominant background color, non-bg bbox, 주요 element bbox, text/glyph bbox, 버튼 bbox, 하단바 bbox, safe-area/home-indicator 제거 여부를 다시 측정하고 완료 note로 보강한다.
+아래 표는 Phase 0에서 inventory 목적으로 확인하는 초기 요약값이다. Phase 0은 reference PNG 존재, size, dominant colors, non-bg bbox, phase assignment, special state classification까지만 고정한다. 주요 element bbox, text/glyph bbox, 버튼 bbox, 하단바 bbox, safe-area/home-indicator 제외 여부, production capture 비교는 각 화면 phase의 첫 측정 체크박스에서 수행한다.
 
 | Screen | Size | Dominant colors | Non-bg bbox | Lower-area bbox from y>=650 |
 |---|---|---|---|---|
@@ -171,16 +204,16 @@ Onboarding 선례의 정확한 표현:
   - 완료 기준: 11번이 없음/미사용으로 명시되고 06~20 중 존재하는 reference PNG가 모두 phase에 배정된다.
   - 검증: `find design/reference/pngs/screens -maxdepth 1 -type f | sort`
   - production PNG evidence: 없음.
-- [ ] TODO-P0.4: 06~20 PNG를 PIL로 재측정해 size, dominant colors, non-bg bbox, 주요 element bbox, text/glyph bbox, 버튼 bbox, 하단바 bbox, safe-area/home-indicator 제외 여부를 completion note로 보강한다.
+- [ ] TODO-P0.4: 06~20 PNG를 PIL로 재측정해 inventory 수준의 size, dominant colors, non-bg bbox, special state classification을 completion note로 보강한다.
   - 대상 파일: `design/reference/pngs/screens/*.png`, `docs/TODO.md`
-  - 완료 기준: 이 파일의 06~20 Initial PIL Anchor Summary가 화면별 주요 element bbox까지 확장된다.
+  - 완료 기준: 이 파일의 06~20 Initial PIL Anchor Summary가 size, dominant colors, non-bg bbox, phase assignment, special state classification을 포함한다.
   - 검증: PIL 기반 일회성 명령 또는 스크립트 출력값을 TODO completion note에 기록한다.
   - production PNG evidence: 없음.
 - [ ] TODO-P0.5: 03/04/05 Fresh Measurement Anchors를 온보딩 회귀 방지 기준으로 유지한다.
   - 대상 파일: `docs/TODO.md`, `design/reference/pngs/screens/03-onboarding-basic.png`, `04-onboarding-duplicate.png`, `05-onboarding-interests.png`
-  - 완료 기준: Phase 12에서 03/04/05 harness component capture PNG evidence와 비교할 수 있는 기준값이 남아 있고, 이 evidence가 full app route 검증이 아님을 문서가 명시한다.
+  - 완료 기준: 03/04/05 harness component capture PNG evidence와 비교할 수 있는 기준값이 남아 있고, 이 evidence가 full app route 검증이 아님을 문서가 명시한다.
   - 검증: `rg -n "Already Implemented Onboarding Regression Anchors|harness component capture|03 |04 |05 " docs/TODO.md`
-  - production PNG evidence: Phase 12에서 `tmp/onboarding-pixel-alignment/*-production.png`; classification은 harness component capture.
+  - production PNG evidence: existing `tmp/onboarding-pixel-alignment/*-production.png` if present; classification은 harness component capture.
 - [ ] TODO-P0.6: phase별 production PNG evidence 경로 규칙을 고정한다.
   - 대상 파일: `docs/TODO.md`
   - 완료 기준: 각 phase에 `tmp/*-pixel-alignment/*-production.png` 경로가 명시되고, 추가 보고 산출물은 한국어 HTML만 허용됨이 명시된다.
@@ -214,32 +247,32 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: `src/screens/shared/uiContract.ts`, `src/screens/shared/uiContract.test.ts`
   - 완료 기준: `centralWriteWorryAction` primitive id가 제거 또는 indicator id로 대체되고, props에 `onCentralAction`/`targetRoute`가 없다.
   - 검증: `rg -n "BottomNavigationCentralAction|onCentralAction|centralWriteWorryAction|targetRoute" src/screens/shared`
-  - production PNG evidence: `tmp/shared-pixel-alignment/bottom-navigation-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P1.8 if captured.
 - [ ] TODO-P1.2: `BottomNavigation`에서 중앙 button/onClick을 제거하고 좌/우/마이페이지 특수 상태 indicator를 구현한다.
   - 대상 파일: `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.ts`
   - 완료 기준: 중앙 눈은 `button`이 아닌 visual element이고, 답변하기/나의 고민/마이페이지 상태별 하이라이트가 PRD 7.2와 일치한다.
   - 검증: shared UI rendering test에서 중앙 element가 click handler를 갖지 않음을 확인한다.
-  - production PNG evidence: `tmp/shared-pixel-alignment/bottom-navigation-production.png` if captured.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P1.8 if captured.
 - [ ] TODO-P1.3: `App.tsx`에서 `onCentralAction={() => setView(routeToWriteWorry())}` 경로를 제거한다.
   - 대상 파일: `src/App.tsx`
-  - 완료 기준: 고민 작성 진입점은 `MyWorriesScreen` 우측 하단 메시지 버튼뿐이다.
+  - 완료 기준: App shell 중앙 눈에서 고민 작성으로 이동하는 경로가 제거되고, 작성 진입 route intent는 MyWorries 쪽 contract에서만 표현된다.
   - 검증: `rg -n "onCentralAction|routeToWriteWorry\\(\\)" src/App.tsx src/screens`
-  - production PNG evidence: `tmp/my-worries-pixel-alignment/20-my-worries-production.png` in Phase 4.
+  - production PNG evidence: 없음. Downstream visual confirmation: 20 phase에서 우측 하단 메시지 버튼을 확인한다.
 - [ ] TODO-P1.4: 고민 제출 성공과 답변 제출 성공 route를 success confirmation route로 바꾼다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.ts`, `src/screens/writeForm/containerPolicy.ts`, 관련 tests
   - 완료 기준: 고민 성공은 09 success screen route, 답변 성공은 19 success screen route로 이동하고 기존 `my_worry_detail`/`my_answer_detail` 자동 이동이 사라진다.
   - 검증: `src/services/appShell/prdNavigationPolicy.test.ts`, `src/screens/writeForm/containerPolicy.test.ts`
-  - production PNG evidence: Phase 5 `09-question-write-b-production.png`, Phase 6 `19-answer-write-3-production.png`.
+  - production PNG evidence: 없음. Downstream visual confirmation: 09/19 화면 phase에서 success screen PNG를 확인한다.
 - [ ] TODO-P1.5: PRD 기준으로 MVP 제외 route/item을 제거한다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/routeRenderingBoundary.ts`, `src/App.tsx`, appShell tests
   - 완료 기준: `operation_policy`, `app_install_guide`, `notification_settings`가 route 목록, subroute 목록, rendering boundary, settings dispatch에서 제거되거나 접근 불가 MVP 제외 상태로 고정된다.
   - 검증: `rg -n "operation_policy|app_install_guide|notification_settings" src/services/appShell src/App.tsx src/screens/myPage`
-  - production PNG evidence: Phase 8 `10-my-page-production.png`.
+  - production PNG evidence: 없음. Downstream visual confirmation: 10 phase에서 설정 항목 PNG를 확인한다.
 - [ ] TODO-P1.6: 06~20 PNG에 없는 `App.tsx` 전역 fixed header를 제거하거나 screen-local header로 이전한다.
   - 대상 파일: `src/App.tsx`, 06~20 각 screen `*Screen.tsx`
   - 완료 기준: App shell은 route selection과 bottom navigation만 조립하고, 화면별 상단 좌측 눈/우측 마이페이지 버튼은 screen contract 또는 shared primitive로 소유권이 분리된다.
   - 검증: `src/services/appShell/appMonolithGuardrail.test.ts`, `src/services/appShell/appShellBoundary.test.ts`
-  - production PNG evidence: 각 화면 phase의 production PNG.
+  - production PNG evidence: 없음. Downstream visual confirmation: 각 화면 phase의 production PNG.
 - [ ] TODO-P1.7: appShell contract/route tests를 PRD route flow로 갱신한다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.test.ts`, `src/services/appShell/routeRenderingBoundary.test.ts`, `src/services/appShell/appShellBoundary.test.ts`
   - 완료 기준: 중앙 눈 클릭 불가, 작성 진입점 단일화, 07→09→20, 17→19→06, 20→08, 10→12/13/14/15/16이 테스트로 검증된다.
@@ -247,7 +280,7 @@ Onboarding 선례의 정확한 표현:
   - production PNG evidence: 없음.
 - [ ] TODO-P1.8: 이 phase에서 캡처가 필요하면 production PNG 중심으로 evidence를 남긴다.
   - 대상 파일: `tmp/*-pixel-alignment/*-production.png`
-  - 완료 기준: `tmp` 안에 production PNG가 남고, 추가 보고 파일이 필요하면 한국어 HTML만 남긴다.
+  - 완료 기준: 이 phase에서 visual confirmation을 수행한 경우 `tmp` 안에 production PNG가 남고, 추가 보고 파일이 필요하면 한국어 HTML만 남긴다. capture note 필수 필드를 기록한다.
   - 검증: `find tmp -path '*pixel-alignment*' -type f | sort`
   - production PNG evidence: 해당되는 `tmp/*-pixel-alignment/*-production.png`.
 
@@ -275,12 +308,12 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: `src/index.css`, `src/screens/shared/ui.tsx`, screen files
   - 완료 기준: capture PNG가 393x852이더라도 OS chrome fake element는 production DOM에 없다.
   - 검증: screen DOM test 또는 수동 DOM inspection note.
-  - production PNG evidence: 각 phase production PNG.
+  - production PNG evidence: 없음. Downstream visual confirmation: 각 화면 phase의 production PNG.
 - [ ] TODO-P2.3: `CategoryChip` 고정 폭 정책을 관심 분야 최장 텍스트 기준으로 구현한다.
   - 대상 파일: `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.ts`, `packages/domain/src/index.ts`
   - 완료 기준: 카테고리 글자 수로 칩 폭이 달라지지 않고 3열 칩 화면에서도 안정적으로 맞는다.
-  - 검증: shared rendering test와 12 화면 capture.
-  - production PNG evidence: Phase 8 `12-edit-interests-production.png`.
+  - 검증: shared rendering test 또는 component-level DOM/style test.
+  - production PNG evidence: 없음. Downstream visual confirmation: 12 phase에서 chip grid PNG를 확인한다.
 - [ ] TODO-P2.4: 로컬 타임존 기준 display date formatter를 shared pure function으로 분리한다.
   - 대상 파일: `src/screens/shared/contract.ts` 또는 new shared mapping utility, mapping tests
   - 완료 기준: 1분 미만 `방금 전`, 1시간 미만 `n분 전`, 날짜가 바뀌기 전 `n시간 전`, 날짜가 바뀌면 `YYYY-MM-DD`가 테스트된다.
@@ -290,7 +323,7 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: `src/screens/shared/ui.tsx`, screen `*Screen.tsx`
   - 완료 기준: PRD empty 문구는 screen별 contract에서 관리하고 loading은 shared spinner primitive로 통일된다.
   - 검증: shared UI tests와 screen state tests.
-  - production PNG evidence: Phase 10 `tmp/empty-loading-pixel-alignment/*-production.png` if captured.
+  - production PNG evidence: 없음. Downstream visual confirmation: empty/loading phase에서 필요 시 캡처한다.
 - [ ] TODO-P2.6: shared primitive 변경이 presentational-only임을 테스트로 증명한다.
   - 대상 파일: `src/screens/shared/uiContract.test.ts`, `src/screens/importBoundaries.test.ts`
   - 완료 기준: shared UI가 `src/services/**`를 import하지 않는다.
@@ -298,7 +331,7 @@ Onboarding 선례의 정확한 표현:
   - production PNG evidence: 없음.
 - [ ] TODO-P2.7: shared primitive evidence는 production PNG 중심으로 생성한다.
   - 대상 파일: `tmp/shared-pixel-alignment/*-production.png`
-  - 완료 기준: shared evidence 디렉터리에 production PNG가 있고, 추가 보고 파일이 필요하면 한국어 HTML만 있다.
+  - 완료 기준: shared evidence 디렉터리에 production PNG가 있고, 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
   - 검증: `find tmp/shared-pixel-alignment -type f | sort`
   - production PNG evidence: `tmp/shared-pixel-alignment/*-production.png`.
 
@@ -318,14 +351,14 @@ Onboarding 선례의 정확한 표현:
 
 - [ ] TODO-P3.1: 06 PNG PIL anchor를 재측정해 주요 element bbox를 completion note로 보강한다.
   - 대상 파일: `design/reference/pngs/screens/06-received-worries.png`, `docs/TODO.md`
-  - 완료 기준: 상단 좌측 눈, 우측 마이페이지 버튼, 고민 카드, 건너뛰기 버튼, 하단바 bbox가 기록된다.
+  - 완료 기준: 상단 좌측 눈, 우측 마이페이지 버튼, 고민 카드, 건너뛰기 버튼, 하단바 bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 출력값을 completion note에 기록한다.
   - production PNG evidence: 없음.
 - [ ] TODO-P3.2: `ReceivedWorriesScreen`을 06 구조로 재구성한다.
   - 대상 파일: `src/screens/receivedWorries/ReceivedWorriesScreen.tsx`, `src/screens/receivedWorries/contract.ts`
   - 완료 기준: 상단 좌측 눈은 기능 없음, 우측 마이페이지 버튼은 이동 action, 고민 카드와 하단 고정바가 06 PNG 구조를 따른다.
   - 검증: screen rendering test 또는 manual DOM check.
-  - production PNG evidence: `tmp/received-worries-pixel-alignment/06-received-worries-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P3.10.
 - [ ] TODO-P3.3: `ReceivedWorriesContainer`는 기존 data/action 경계를 유지하고 screen props만 확장한다.
   - 대상 파일: `src/screens/receivedWorries/ReceivedWorriesContainer.tsx`, `src/screens/receivedWorries/contract.ts`
   - 완료 기준: `useHomeWorryFeed`, `passDeliveryViaApi`, `markDeliveryReadWithServer` import 경계가 유지된다.
@@ -351,14 +384,19 @@ Onboarding 선례의 정확한 표현:
   - 완료 기준: `방금 전`, `n분 전`, `n시간 전`, `YYYY-MM-DD` 케이스가 로컬 타임존 기준으로 통과한다.
   - 검증: `src/screens/receivedWorries/mapping.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P3.8: empty/loading 상태를 PRD 문구와 spinner로 맞춘다.
+- [ ] TODO-P3.8: 06 받은 고민 화면에서 고민 작성자의 개인정보가 노출되지 않음을 검증한다.
+  - 대상 파일: `src/screens/receivedWorries/mapping.ts`, `src/screens/receivedWorries/contract.ts`, `src/screens/receivedWorries/ReceivedWorriesScreen.tsx`
+  - 완료 기준: publisher nickname, gender, age, interests, profile metadata가 screen props와 DOM에 없고 PRD가 허용한 고민 내용/요약/카테고리/시간만 표시된다.
+  - 검증: mapping/screen test 또는 completion note의 수동 DOM verification.
+  - production PNG evidence: 없음.
+- [ ] TODO-P3.9: empty/loading 상태를 PRD 문구와 spinner로 맞춘다.
   - 대상 파일: `src/screens/receivedWorries/ReceivedWorriesScreen.tsx`, `src/screens/receivedWorries/contract.ts`
   - 완료 기준: empty title/message는 `지금은 도착한 고민이 없어요.`, loading은 skeleton이 아닌 spinner.
   - 검증: screen state test.
-  - production PNG evidence: Phase 10 if captured.
-- [ ] TODO-P3.9: 06 production PNG evidence를 생성한다.
+  - production PNG evidence: 없음. 같은 phase에서 empty/loading visual을 캡처하면 `tmp/received-worries-pixel-alignment/06-empty-production.png` 또는 `06-loading-production.png`를 기록한다.
+- [ ] TODO-P3.10: 06 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/received-worries-pixel-alignment/06-received-worries-production.png`
-  - 완료 기준: 393x852 production capture이며 reference PNG 복사본이 아니다.
+  - 완료 기준: 393x852 production capture이며 reference PNG 복사본이 아니고 capture type, source, reference/production path, measured size, dominant colors, non-bg bbox, 주요 bbox 차이가 completion note에 기록된다.
   - 검증: PNG 크기 확인과 reference anchor 비교 completion note.
   - production PNG evidence: `tmp/received-worries-pixel-alignment/06-received-worries-production.png`
 
@@ -379,23 +417,23 @@ Onboarding 선례의 정확한 표현:
 
 - [ ] TODO-P4.1: 20 PNG PIL anchor를 재측정해 주요 element bbox를 보강한다.
   - 대상 파일: `design/reference/pngs/screens/20-my-worries.png`, `docs/TODO.md`
-  - 완료 기준: 상단 눈, 마이페이지 버튼, 목록 카드, 우측 하단 메시지 버튼, 하단바 bbox가 기록된다.
+  - 완료 기준: 상단 눈, 마이페이지 버튼, 목록 카드, 우측 하단 메시지 버튼, 하단바 bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 출력값 completion note.
   - production PNG evidence: 없음.
 - [ ] TODO-P4.2: `MyWorriesScreen`을 20 목록 화면으로 재구성하고 selected worry 아래 reply list 펼침 UI를 제거한다.
   - 대상 파일: `src/screens/myPage/MyWorriesScreen.tsx`, `src/screens/myPage/contract.ts`
-  - 완료 기준: 목록 화면에서 reply list가 inline으로 펼쳐지지 않고 고민 박스 클릭은 08 route로 이동한다.
-  - 검증: screen test에서 selected reply panel DOM 부재 확인.
-  - production PNG evidence: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`.
+  - 완료 기준: 목록 화면에서 reply list가 inline으로 펼쳐지지 않고 고민 박스 클릭은 `onSelectWorryForAnswers(worryId)` 같은 intent callback만 발생시킨다. 08 screen/module 존재는 요구하지 않는다.
+  - 검증: screen test에서 selected reply panel DOM 부재와 intent callback 호출 확인.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P4.9.
 - [ ] TODO-P4.3: 20 화면 좌상단/우상단/우측 하단 action을 PRD대로 구현한다.
   - 대상 파일: `src/screens/myPage/MyWorriesScreen.tsx`, `src/screens/myPage/contract.ts`
   - 완료 기준: 좌상단 눈은 기능 없음, 우상단은 마이페이지 이동, 우측 하단 메시지 버튼만 `write_worry` 진입점이다.
   - 검증: click/role test.
-  - production PNG evidence: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`.
-- [ ] TODO-P4.4: `MyWorriesContainer`가 20 목록 클릭 시 `answer_check` route로 이동하게 바꾼다.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P4.9.
+- [ ] TODO-P4.4: `answer_check` route object/helper intent를 도입하되 08 rendering 구현은 요구하지 않는다.
   - 대상 파일: `src/screens/myPage/MyWorriesContainer.tsx`, `src/services/appShell/prdNavigationPolicy.ts`
-  - 완료 기준: `selectedMyWorry`를 설정한 뒤 `routeToAnswerCheck({ worryId })` 또는 동등한 route state로 이동하고, read 처리는 08 진입에서 수행된다.
-  - 검증: container policy/route test.
+  - 완료 기준: `routeToAnswerCheck({ worryId })` 또는 동등한 route state 생성이 테스트되고, MyWorriesContainer는 선택 intent를 해당 route object로 변환한다. `src/screens/answerCheck/**`와 route rendering은 Phase 7에서 구현한다.
+  - 검증: route helper/container policy test. 08 route rendering test는 Phase 7에서 수행한다.
   - production PNG evidence: 없음.
 - [ ] TODO-P4.5: `MyWorryListItemProps`를 20 표시 정보로 갱신한다.
   - 대상 파일: `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`
@@ -406,15 +444,20 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: `src/screens/myPage/mapping.ts`, `src/services/myWorries/prdPolicy.test.ts` if service policy already owns count
   - 완료 기준: AI 포함, 싫어요 숨김/운영자 숨김 제외, 0개면 `아직 답변이 없어요.` 표시.
   - 검증: mapping/service policy tests.
-  - production PNG evidence: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`.
-- [ ] TODO-P4.7: 나의 고민 empty 문구를 PRD대로 맞춘다.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P4.9에서 count label을 확인한다.
+- [ ] TODO-P4.7: 20 나의 고민 화면에서 답변 작성자의 개인정보가 노출되지 않음을 검증한다.
+  - 대상 파일: `src/screens/myPage/mapping.ts`, `src/screens/myPage/contract.ts`, `src/screens/myPage/MyWorriesScreen.tsx`
+  - 완료 기준: answer writer nickname, gender, age, interests, profile metadata가 목록 props와 DOM에 없고 PRD가 허용한 답변 수/상태 정보만 표시된다.
+  - 검증: mapping/screen test 또는 completion note의 수동 DOM verification.
+  - production PNG evidence: 없음.
+- [ ] TODO-P4.8: 나의 고민 empty 문구를 PRD대로 맞춘다.
   - 대상 파일: `src/screens/myPage/MyWorriesContainer.tsx`, `src/screens/myPage/MyWorriesScreen.tsx`
   - 완료 기준: empty 문구가 `첫 고민을 남겨보세요.`이고 CTA는 우측 하단 메시지 버튼 정책과 충돌하지 않는다.
   - 검증: screen state test.
-  - production PNG evidence: Phase 10 if captured.
-- [ ] TODO-P4.8: 20 production PNG evidence를 생성한다.
+  - production PNG evidence: 없음. 같은 phase에서 empty visual을 캡처하면 `tmp/my-worries-pixel-alignment/20-empty-production.png`를 기록한다.
+- [ ] TODO-P4.9: 20 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`
-  - 완료 기준: 393x852 production capture이며 추가 보고 파일이 필요하면 한국어 HTML만 있다.
+  - 완료 기준: 393x852 production capture이며 추가 보고 파일이 필요하면 한국어 HTML만 있고 capture note 필수 필드가 기록된다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`
 
@@ -434,24 +477,24 @@ Onboarding 선례의 정확한 표현:
 
 - [ ] TODO-P5.1: 07/09 PNG PIL anchor를 재측정한다.
   - 대상 파일: `design/reference/pngs/screens/07-question-write-a.png`, `09-question-write-b.png`, `docs/TODO.md`
-  - 완료 기준: textarea, pencil placeholder, CTA, success dialog/card, 확인 버튼 bbox가 기록된다.
+  - 완료 기준: textarea, pencil placeholder, CTA, success dialog/card, 확인 버튼 bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 completion note.
   - production PNG evidence: 없음.
 - [ ] TODO-P5.2: `WriteWorryContainer`는 API/draft/validation/moderation 경계를 유지하고 성공 route만 09로 바꾼다.
   - 대상 파일: `src/screens/writeForm/WriteWorryContainer.tsx`, `src/screens/writeForm/containerPolicy.ts`
   - 완료 기준: `publishWorryViaApi`, draft storage, validation import 경계는 유지되고 success route는 09 confirmation이다.
   - 검증: `src/screens/writeForm/containerPolicy.test.ts`, import boundary test.
-  - production PNG evidence: `tmp/write-worry-pixel-alignment/09-question-write-b-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P5.8.
 - [ ] TODO-P5.3: 07 write-worry variant를 `WriteWorryScreen` 전용 presentational component로 분리한다.
   - 대상 파일: `src/screens/writeForm/WriteFormScreen.tsx`, `src/screens/writeForm/WriteWorryScreen.tsx`, `src/screens/writeForm/contract.ts`
   - 완료 기준: 답변 작성 17과 고민 작성 07의 JSX/pixel work가 별도 screen component로 분리되고, container/draft 계약은 writeForm deep module 안에 유지된다.
   - 검증: import boundary tests.
-  - production PNG evidence: `tmp/write-worry-pixel-alignment/07-question-write-a-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P5.8.
 - [ ] TODO-P5.4: 07 textarea placeholder를 pencil graphic + `당신의 솔직한 이야기를 들려주세요`로 구현한다.
   - 대상 파일: write worry screen file, `src/screens/writeForm/contract.ts`
   - 완료 기준: 입력 전에는 pencil과 문구가 보이고, 입력 시작 시 둘 다 숨는다.
   - 검증: screen interaction test.
-  - production PNG evidence: `tmp/write-worry-pixel-alignment/07-question-write-a-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P5.8.
 - [ ] TODO-P5.5: 필터링 실패 시 07에 남고 draft를 유지한다.
   - 대상 파일: `src/screens/writeForm/WriteWorryContainer.tsx`, `src/screens/writeForm/containerPolicy.ts`
   - 완료 기준: moderation rejected/failed는 09로 이동하지 않고 draft storage를 clear하지 않는다.
@@ -461,15 +504,15 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: `src/screens/writeForm/*`, `src/App.tsx`
   - 완료 기준: 09에서는 확인 버튼 외 상호작용이 없고 `filterAlert` success toast를 쓰지 않는다.
   - 검증: route/rendering test.
-  - production PNG evidence: `tmp/write-worry-pixel-alignment/09-question-write-b-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P5.8.
 - [ ] TODO-P5.7: 09 확인 버튼은 20-my-worries로 이동한다.
   - 대상 파일: success screen/container contract, `src/services/appShell/prdNavigationPolicy.ts`
   - 완료 기준: 확인 클릭 후 `my_worries` 또는 `나의 고민` route로 이동하고 작성 직후 답변 0개면 `아직 답변이 없어요.` 상태다.
   - 검증: route flow test 07→09→20.
-  - production PNG evidence: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`.
+  - production PNG evidence: 없음. Downstream visual confirmation: 20 phase PNG if needed.
 - [ ] TODO-P5.8: 07/09 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/write-worry-pixel-alignment/07-question-write-a-production.png`, `tmp/write-worry-pixel-alignment/09-question-write-b-production.png`
-  - 완료 기준: 두 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있다.
+  - 완료 기준: 두 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: listed files.
 
@@ -489,19 +532,19 @@ Onboarding 선례의 정확한 표현:
 
 - [ ] TODO-P6.1: 17/18/19 PNG PIL anchor를 재측정한다.
   - 대상 파일: `design/reference/pngs/screens/17-answer-write-1.png`, `18-answer-write-2.png`, `19-answer-write-3.png`
-  - 완료 기준: worry summary card, overlay panel, textarea, success screen, 확인 버튼 bbox가 기록된다.
+  - 완료 기준: worry summary card, overlay panel, textarea, success screen, 확인 버튼 bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 completion note.
   - production PNG evidence: 없음.
 - [ ] TODO-P6.2: `WriteReplyContainer`는 API/draft/validation/moderation 경계를 유지하고 성공 route만 19로 바꾼다.
   - 대상 파일: `src/screens/writeForm/WriteReplyContainer.tsx`, `src/screens/writeForm/containerPolicy.ts`
   - 완료 기준: success route가 19 confirmation이며 draft clear는 성공 시에만 수행된다.
   - 검증: `src/screens/writeForm/containerPolicy.test.ts`
-  - production PNG evidence: `tmp/write-reply-pixel-alignment/19-answer-write-3-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P6.10.
 - [ ] TODO-P6.3: 17 화면 props에 LLM summary, first valid category, createdAt display date, 답변 입력 영역을 명시한다.
   - 대상 파일: `src/screens/writeForm/contract.ts`, `src/screens/writeForm/mapping.ts`, `src/screens/writeForm/WriteFormScreen.tsx`
   - 완료 기준: 원문 대신 summary가 기본 카드에 표시되고 원문은 18 overlay에서만 보인다.
   - 검증: mapping/screen tests.
-  - production PNG evidence: `tmp/write-reply-pixel-alignment/17-answer-write-1-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P6.10.
 - [ ] TODO-P6.4: summary 생성 실패 fallback을 mapping/service boundary에 명시한다.
   - 대상 파일: `src/screens/writeForm/mapping.ts`, service policy test if summary is read model owned
   - 완료 기준: 원문 앞 20자 + `...` fallback이 사용자-facing summary로 표시된다.
@@ -511,7 +554,7 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: `src/screens/writeForm/WriteFormScreen.tsx`, `src/screens/writeForm/contract.ts`
   - 완료 기준: overlay 열기/닫기 후 reply draft가 유지되고 URL route는 17 write_reply 상태다.
   - 검증: state interaction test.
-  - production PNG evidence: `tmp/write-reply-pixel-alignment/18-answer-write-2-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P6.10.
 - [ ] TODO-P6.6: 17 뒤로 가기는 06으로 이동하고 draft를 폐기한다.
   - 대상 파일: `src/screens/writeForm/WriteReplyContainer.tsx`, `src/services/appShell/prdNavigationPolicy.ts`
   - 완료 기준: back click이 `received_worries`로 이동하고 해당 delivery draft key를 clear한다.
@@ -521,15 +564,20 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: write reply screen file, `src/screens/writeForm/contract.ts`
   - 완료 기준: icon과 문구가 겹치지 않고 입력 시작 시 둘 다 숨는다.
   - 검증: screen interaction test.
-  - production PNG evidence: `tmp/write-reply-pixel-alignment/17-answer-write-1-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P6.10.
 - [ ] TODO-P6.8: 19 확인 버튼은 06으로 이동하고 방금 답변한 고민은 목록에서 사라진다.
   - 대상 파일: success route/screen, `src/screens/receivedWorries/ReceivedWorriesContainer.tsx` if suppression state needed
   - 완료 기준: 17→19→06 route flow와 feed suppression/refresh가 테스트된다.
   - 검증: route flow/container policy test.
-  - production PNG evidence: `tmp/received-worries-pixel-alignment/06-received-worries-production.png`.
-- [ ] TODO-P6.9: 17/18/19 production PNG evidence를 생성한다.
+  - production PNG evidence: 없음. Downstream visual confirmation: 06 phase PNG if needed.
+- [ ] TODO-P6.9: 17/18 답변 작성 화면에서 고민 작성자의 개인정보가 노출되지 않음을 검증한다.
+  - 대상 파일: `src/screens/writeForm/mapping.ts`, `src/screens/writeForm/contract.ts`, `src/screens/writeForm/WriteFormScreen.tsx`
+  - 완료 기준: publisher nickname, gender, age, interests, profile metadata가 17 summary card와 18 원문 overlay props/DOM에 없고 PRD가 허용한 고민 내용/context만 표시된다.
+  - 검증: mapping/screen test 또는 completion note의 수동 DOM verification.
+  - production PNG evidence: 없음.
+- [ ] TODO-P6.10: 17/18/19 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/write-reply-pixel-alignment/17-answer-write-1-production.png`, `18-answer-write-2-production.png`, `19-answer-write-3-production.png`
-  - 완료 기준: 세 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있다.
+  - 완료 기준: 세 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: listed files.
 
@@ -549,47 +597,57 @@ Onboarding 선례의 정확한 표현:
 
 - [ ] TODO-P7.1: 08 PNG PIL anchor를 재측정한다.
   - 대상 파일: `design/reference/pngs/screens/08-answer-check.png`, `docs/TODO.md`
-  - 완료 기준: 내 고민 박스, 답변 박스들, 좋아요/싫어요 버튼, 하단바 bbox가 기록된다.
+  - 완료 기준: 내 고민 박스, 답변 박스들, 좋아요/싫어요 버튼, 하단바 bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 completion note.
   - production PNG evidence: 없음.
 - [ ] TODO-P7.2: 08을 `src/screens/answerCheck/**` 전용 deep module로 분리하고 `replyDetail` 단일 답변 상세 의존을 제거한다.
   - 대상 파일: `src/screens/answerCheck/AnswerCheckContainer.tsx`, `src/screens/answerCheck/AnswerCheckScreen.tsx`, `src/screens/answerCheck/contract.ts`, `src/screens/answerCheck/mapping.ts`, `src/screens/importBoundaries.test.ts`
   - 완료 기준: 08은 단일 답변 상세가 아니라 여러 답변 read model을 받는 screen contract를 갖고, `replyDetail`은 새 PRD route flow에서 호출되지 않는다.
   - 검증: import boundary test와 route rendering test.
-  - production PNG evidence: `tmp/answer-check-pixel-alignment/08-answer-check-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P7.11.
 - [ ] TODO-P7.3: 08 뒤로 가기는 20-my-worries로 이동한다.
   - 대상 파일: appShell route helper, answer check container
   - 완료 기준: back route가 `my_worries`이고 06/13/기존 detail로 이동하지 않는다.
   - 검증: route test.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.4: 답변 0개 상태는 내 고민만 보이고 별도 empty 문구를 표시하지 않는다.
+- [ ] TODO-P7.4: Phase 4의 `answer_check` route object를 실제 08 route rendering과 연결한다.
+  - 대상 파일: `src/App.tsx`, `src/services/appShell/routeRenderingBoundary.ts`, `src/screens/answerCheck/AnswerCheckContainer.tsx`, route tests
+  - 완료 기준: 20에서 만든 `answer_check` route state가 `AnswerCheckContainer`를 렌더링하고 worryId를 전달한다. 20 화면 구현 자체를 다시 수정하지 않는다.
+  - 검증: route rendering test와 20→08 container flow test.
+  - production PNG evidence: 없음.
+- [ ] TODO-P7.5: 답변 0개 상태는 내 고민만 보이고 별도 empty 문구를 표시하지 않는다.
   - 대상 파일: answer check screen/contract
   - 완료 기준: replies array가 비어도 empty component가 렌더링되지 않는다.
   - 검증: screen state test.
-  - production PNG evidence: Phase 10에서 캡처할 경우 `tmp/empty-loading-pixel-alignment/08-answer-check-empty-production.png`.
-- [ ] TODO-P7.5: 좋아요 클릭은 즉시 확정되고 helpedCount 증가와 코멘트 선택 입력을 분리한다.
+  - production PNG evidence: 없음. 같은 phase에서 empty visual을 캡처하면 `tmp/answer-check-pixel-alignment/08-answer-check-empty-production.png`를 기록한다.
+- [ ] TODO-P7.6: 좋아요 클릭은 즉시 확정되고 helpedCount 증가와 코멘트 선택 입력을 분리한다.
   - 대상 파일: answer check container, `src/services/replyFeedback/**` tests if existing API supports it
   - 완료 기준: like mutation 성공 후 답변 박스는 유지되고 comment dialog는 submit/skip 가능하다.
   - 검증: container/service policy tests.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.6: 싫어요 클릭은 즉시 확정하되 답변 숨김은 코멘트 창 종료 후 수행한다.
+- [ ] TODO-P7.7: 싫어요 클릭은 즉시 확정하되 답변 숨김은 코멘트 창 종료 후 수행한다.
   - 대상 파일: answer check container/screen
   - 완료 기준: dislike selected state와 comment dialog lifecycle이 테스트되고, dialog 종료 후 해당 answer card가 숨겨진다.
   - 검증: state interaction test.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.7: 좋아요/싫어요 코멘트는 답변 하나당 1개만 허용하고 AI 필터링을 거친다.
+- [ ] TODO-P7.8: 좋아요/싫어요 코멘트는 답변 하나당 1개만 허용하고 AI 필터링을 거친다.
   - 대상 파일: answer check container, `src/services/replyFeedback/*`
   - 완료 기준: duplicate comment attempt와 moderation rejected case가 테스트된다.
   - 검증: `src/services/replyFeedback/*.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P7.8: 싫어요/싫어요 코멘트는 답변자에게 절대 노출되지 않는다.
-  - 대상 파일: `src/screens/myPage/mapping.ts`, `src/services/myWorries/prdPolicy.test.ts`, answer check tests
-  - 완료 기준: my answers read model에서는 dislike가 피드백 없음처럼 보인다.
-  - 검증: mapping/service tests.
-  - production PNG evidence: Phase 8 `13-my-answers-production.png`.
-- [ ] TODO-P7.9: 08 production PNG evidence를 생성한다.
+- [ ] TODO-P7.9: 싫어요와 싫어요 코멘트가 답변자용 read model/API에 노출되지 않는 정책을 검증한다.
+  - 대상 파일: `src/services/replyFeedback/*`, answer check tests, read model policy tests if present
+  - 완료 기준: dislike/comment는 answer-check 피드백 처리에는 저장되지만 답변자에게 반환되는 read model에는 포함되지 않는다. 13 화면 표시 검증은 Phase 8에서 수행한다.
+  - 검증: service/read model policy tests.
+  - production PNG evidence: 없음.
+- [ ] TODO-P7.10: 08 answer check 화면에서 답변 작성자의 개인정보가 노출되지 않음을 검증한다.
+  - 대상 파일: `src/screens/answerCheck/mapping.ts`, `src/screens/answerCheck/contract.ts`, `src/screens/answerCheck/AnswerCheckScreen.tsx`
+  - 완료 기준: answer writer nickname, gender, age, interests, profile metadata가 answer cards props/DOM에 없고 PRD가 허용한 답변 내용과 feedback controls만 표시된다.
+  - 검증: mapping/screen test 또는 completion note의 수동 DOM verification.
+  - production PNG evidence: 없음.
+- [ ] TODO-P7.11: 08 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/answer-check-pixel-alignment/08-answer-check-production.png`
-  - 완료 기준: 393x852 production capture이며 추가 보고 파일이 필요하면 한국어 HTML만 있다.
+  - 완료 기준: 393x852 production capture이며 추가 보고 파일이 필요하면 한국어 HTML만 있고 capture note 필수 필드가 기록된다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: `tmp/answer-check-pixel-alignment/08-answer-check-production.png`.
 
@@ -610,14 +668,14 @@ Onboarding 선례의 정확한 표현:
 
 - [ ] TODO-P8.1: 10/12/13/14 PNG PIL anchor를 재측정한다.
   - 대상 파일: `design/reference/pngs/screens/10-my-page.png`, `12-edit-interests.png`, `13-my-answers.png`, `14-privacy-policy.png`
-  - 완료 기준: profile summary, setting rows, chip grid, answer list cards, policy body area bbox가 기록된다.
+  - 완료 기준: profile summary, setting rows, chip grid, answer list cards, policy body area bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 completion note.
   - production PNG evidence: 없음.
 - [ ] TODO-P8.2: `MyPageScreen`에서 앱처럼 사용하기 QR/공유 영역과 운영정책 항목을 제거한다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/contract.ts`
   - 완료 기준: 10 PNG 항목만 남고 `QrCode`, `Share2`, `QRCodeSVG`, `operation_policy`, `app_install_guide` UI가 없다.
   - 검증: `rg -n "QrCode|Share2|QRCodeSVG|operation_policy|app_install_guide" src/screens/myPage`
-  - production PNG evidence: `tmp/my-page-pixel-alignment/10-my-page-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
 - [ ] TODO-P8.3: `MyPageContainer`/contract에서 MVP 제외 props와 route handling을 제거한다.
   - 대상 파일: `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/contract.ts`, tests
   - 완료 기준: operation policy/app install props와 dispatch가 사라지고 개인정보처리방침만 policy route로 남는다.
@@ -627,35 +685,45 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/mapping.ts`
   - 완료 기준: 닉네임, 받은 좋아요/하트 총합, 관심 분야 수정, 내가 쓴 답변 preview, 전체보기, 알림 토글, 개인정보처리방침, 로그아웃, 회원 탈퇴만 표시한다.
   - 검증: screen rendering test.
-  - production PNG evidence: `tmp/my-page-pixel-alignment/10-my-page-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
 - [ ] TODO-P8.5: 알림 설정을 토글 UI와 브라우저 권한 제약 문구로 표현한다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`
   - 완료 기준: 별도 `notification_settings` route 없이 10 화면 안에서 토글 상태를 제어한다.
   - 검증: screen interaction test.
-  - production PNG evidence: `tmp/my-page-pixel-alignment/10-my-page-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
 - [ ] TODO-P8.6: 12 관심 분야 수정 화면을 PRD대로 맞춘다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/MyPageContainer.tsx`
   - 완료 기준: 3열 고정 크기 칩, 0개 저장 시 `1개 이상의 관심 분야를 선택해주세요.`, 저장 성공 후 10 이동, 실패 시 기존 선택 유지.
   - 검증: container/screen interaction tests.
-  - production PNG evidence: `tmp/my-page-pixel-alignment/12-edit-interests-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
 - [ ] TODO-P8.7: 13 내가 쓴 답변 목록을 PRD feedback visibility로 맞춘다.
   - 대상 파일: `src/screens/myPage/MyAnswersScreen.tsx`, `src/screens/myPage/mapping.ts`, `src/screens/myPage/contract.ts`
   - 완료 기준: 모든 답변 동일 형식, 좋아요는 하트만, 코멘트 있으면 1개 작은 폰트, 싫어요는 피드백 없음처럼 표시.
   - 검증: mapping/screen tests.
-  - production PNG evidence: `tmp/my-page-pixel-alignment/13-my-answers-production.png`.
-- [ ] TODO-P8.8: 내가 쓴 답변 상세 route를 PRD대로 제거 또는 비활성화한다.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
+- [ ] TODO-P8.8: 13 내가 쓴 답변 목록에서 고민 작성자의 개인정보가 노출되지 않음을 검증한다.
+  - 대상 파일: `src/screens/myPage/mapping.ts`, `src/screens/myPage/contract.ts`, `src/screens/myPage/MyAnswersScreen.tsx`
+  - 완료 기준: worry publisher nickname, gender, age, interests, profile metadata가 my answers props/DOM에 없고 PRD가 허용한 고민 context/답변/피드백만 표시된다.
+  - 검증: mapping/screen test 또는 completion note의 수동 DOM verification.
+  - production PNG evidence: 없음.
+- [ ] TODO-P8.9: 마이페이지 profile summary가 PRD가 허용한 현재 사용자 본인 nickname만 표시하는지 검증한다.
+  - 대상 파일: `src/screens/myPage/mapping.ts`, `src/screens/myPage/contract.ts`, `src/screens/myPage/MyPageScreen.tsx`
+  - 완료 기준: 현재 사용자 본인 nickname 외 gender, age, profile metadata가 profile summary에 노출되지 않는다. 관심 분야는 PRD가 허용한 수정 화면/선택 상태에서만 표시된다.
+  - 검증: mapping/screen test 또는 completion note의 수동 DOM verification.
+  - production PNG evidence: 없음.
+- [ ] TODO-P8.10: 내가 쓴 답변 상세 route를 PRD대로 제거 또는 비활성화한다.
   - 대상 파일: `src/screens/myPage/MyAnswersContainer.tsx`, appShell routes, replyDetail routes/tests
   - 완료 기준: 새 PRD의 `내가 쓴 답변 상세 화면은 MVP에서 제공하지 않는다`에 맞춰 `my_answer_detail` 이동이 제거된다.
   - 검증: `rg -n "my_answer_detail|routeToMyReplyDetail|read_my_reply" src`
-  - production PNG evidence: `tmp/my-page-pixel-alignment/13-my-answers-production.png`.
-- [ ] TODO-P8.9: 14 개인정보처리방침 source와 empty 문구를 PRD대로 맞춘다.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
+- [ ] TODO-P8.11: 14 개인정보처리방침 source와 empty 문구를 PRD대로 맞춘다.
   - 대상 파일: `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/MyPageScreen.tsx`, `src/services/policyDocuments/*`
   - 완료 기준: `docs/privacy_policy.md`만 source of truth이고 빈 경우 `정책을 준비 중입니다.`를 표시한다.
   - 검증: `src/services/policyDocuments/policyLoader.test.ts`, screen test.
-  - production PNG evidence: `tmp/my-page-pixel-alignment/14-privacy-policy-production.png`.
-- [ ] TODO-P8.10: 10/12/13/14 production PNG evidence를 생성한다.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
+- [ ] TODO-P8.12: 10/12/13/14 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/my-page-pixel-alignment/10-my-page-production.png`, `12-edit-interests-production.png`, `13-my-answers-production.png`, `14-privacy-policy-production.png`
-  - 완료 기준: 네 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있다.
+  - 완료 기준: 네 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: listed files.
 
@@ -676,24 +744,24 @@ Onboarding 선례의 정확한 표현:
 
 - [ ] TODO-P9.1: 15/16 PNG PIL anchor를 재측정한다.
   - 대상 파일: `design/reference/pngs/screens/15-logout.png`, `16-account-deletion.png`
-  - 완료 기준: dimmed background, dialog card, 취소/확인 버튼 bbox가 기록된다.
+  - 완료 기준: dimmed background, dialog card, 취소/확인 버튼 bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 completion note.
   - production PNG evidence: 없음.
 - [ ] TODO-P9.2: 로그아웃/탈퇴 확인을 마이페이지 위 overlay/dialog로 구현한다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/shared/ui.tsx`
   - 완료 기준: 배경의 마이페이지와 하단바가 흐릿하게 보이고 클릭 불가능하다.
   - 검증: screen interaction/accessibility test.
-  - production PNG evidence: `tmp/account-overlays-pixel-alignment/15-logout-production.png`, `16-account-deletion-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P9.6.
 - [ ] TODO-P9.3: 15 취소/로그아웃 flow를 검증한다.
   - 대상 파일: `src/screens/myPage/MyPageContainer.tsx`, `src/services/userAccount/accountSession.test.ts`
   - 완료 기준: 취소는 10 복귀, 로그아웃은 signOut/cleanup 후 02-login 이동.
   - 검증: container/service tests.
-  - production PNG evidence: `tmp/account-overlays-pixel-alignment/15-logout-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P9.6.
 - [ ] TODO-P9.4: 16 취소/탈퇴 flow를 검증한다.
   - 대상 파일: `src/screens/myPage/MyPageContainer.tsx`, `src/services/userAccount/deleteMyAccount.test.ts`
   - 완료 기준: 취소는 10 복귀, 탈퇴는 account deletion API와 cleanup 후 02-login 이동.
   - 검증: container/service tests.
-  - production PNG evidence: `tmp/account-overlays-pixel-alignment/16-account-deletion-production.png`.
+  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P9.6.
 - [ ] TODO-P9.5: 탈퇴 정책을 접근권 삭제/비활성화 의미로 테스트에 고정한다.
   - 대상 파일: `src/services/userAccount/*`, `src/server/userAccountRoutes.test.ts`, `src/firestore.rules.test.ts`
   - 완료 기준: 추가 확인 입력 없이 동작하고 DB 문서 완전 삭제가 아닌 deleted/inactive 접근 제한 정책을 검증한다.
@@ -701,7 +769,7 @@ Onboarding 선례의 정확한 표현:
   - production PNG evidence: 없음.
 - [ ] TODO-P9.6: 15/16 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/account-overlays-pixel-alignment/15-logout-production.png`, `tmp/account-overlays-pixel-alignment/16-account-deletion-production.png`
-  - 완료 기준: 두 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있다.
+  - 완료 기준: 두 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: listed files.
 
@@ -742,7 +810,7 @@ Onboarding 선례의 정확한 표현:
   - production PNG evidence: 없음.
 - [ ] TODO-P10.5: empty/loading evidence가 필요하면 production PNG 중심으로 생성한다.
   - 대상 파일: `tmp/empty-loading-pixel-alignment/*-production.png`
-  - 완료 기준: production PNG가 있고, 추가 보고 파일이 필요하면 한국어 HTML만 있다.
+  - 완료 기준: production PNG가 있고, 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
   - 검증: `find tmp/empty-loading-pixel-alignment -type f | sort`
   - production PNG evidence: `tmp/empty-loading-pixel-alignment/*-production.png`.
 
