@@ -57,7 +57,7 @@ test('App.tsx delegates Phase 5-7 route data wiring to containers', () => {
     'MyPageContainer',
     'MyAnswersContainer',
     'MyWorriesContainer',
-    'ReplyDetailContainer',
+    'AnswerCheckContainer',
   ]) {
     assert.match(appSource, new RegExp(`<${container}\\b`), `App.tsx should mount ${container}`);
   }

@@ -46,7 +46,7 @@ import {
   type SelectedMyReply,
   type SelectedMyWorry,
 } from './screens/myPage/MyWorriesContainer';
-import { ReplyDetailContainer } from './screens/replyDetail/ReplyDetailContainer';
+import { AnswerCheckContainer } from './screens/answerCheck/AnswerCheckContainer';
 import { OnboardingContainer } from './screens/onboarding/OnboardingContainer';
 import {
   BottomNavigation,
@@ -260,6 +260,7 @@ export default function App() {
   const currentRoute = routeBoundary.currentRoute;
   const currentWriteReplyRoute = typeof view === 'object' && view.route === 'write_reply' ? view : null;
   const currentWriteReplySuccessRoute = typeof view === 'object' && view.route === 'write_reply_success' ? view : null;
+  const currentAnswerCheckRoute = typeof view === 'object' && view.route === 'answer_check' ? view : null;
 
   if (loading) {
     return (
@@ -442,31 +443,12 @@ export default function App() {
             </motion.div>
           )}
 
-          {/* 6. Read Reply & Feedback View */}
-          {(currentRoute === 'answer_check' || currentRoute === 'read_received_reply' || currentRoute === 'received_answer_detail') && selectedReply && (
-            <motion.div key="read_received_reply" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <ReplyDetailContainer
-                mode="received-reply"
+          {/* 6. Answer Check View */}
+          {currentRoute === 'answer_check' && currentAnswerCheckRoute && (
+            <motion.div key="answer_check" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+              <AnswerCheckContainer
                 user={user}
-                route={view}
-                selectedReply={selectedReply}
-                setSelectedReply={setSelectedReply}
-                selectedMyWorryContent={selectedMyWorry?.content}
-                setView={setView}
-                setFilterAlert={setFilterAlert}
-              />
-            </motion.div>
-          )}
-
-          {(currentRoute === 'answer_check' || currentRoute === 'received_answer_detail') && !selectedReply && (
-            <motion.div key="received_answer_detail_empty" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
-              <ReplyDetailContainer
-                mode="received-reply"
-                user={user}
-                route={view}
-                selectedReply={selectedReply}
-                setSelectedReply={setSelectedReply}
-                selectedMyWorryContent={selectedMyWorry?.content}
+                route={currentAnswerCheckRoute}
                 setView={setView}
                 setFilterAlert={setFilterAlert}
               />

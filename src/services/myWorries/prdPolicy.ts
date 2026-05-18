@@ -113,6 +113,9 @@ export function selectVisibleMyGivenReplies(params: {
   feedbacksByReplyId?: Map<string, PrdFeedbackDoc>;
   worriesById?: Map<string, PrdWorryDoc>;
 }): ReplyReadModelItem[] {
+  const replierVisibleFeedbacks = params.feedbacksByReplyId
+    ? new Map([...params.feedbacksByReplyId].filter(([, feedback]) => feedback.type === 'like'))
+    : undefined;
   return adaptPrdReplies(
     params.replies.filter(reply => {
       if (reply.replierUid !== params.userUid || isHiddenReply(reply)) return false;
@@ -122,7 +125,7 @@ export function selectVisibleMyGivenReplies(params: {
       return Boolean(worry && !isHiddenWorry(worry));
     }),
     undefined,
-    params.feedbacksByReplyId,
+    replierVisibleFeedbacks,
     params.worriesById
   );
 }

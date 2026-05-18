@@ -151,6 +151,23 @@ test('initial dislike with comment stores admin-only comment fields', async () =
   assert.equal(store['feedbacks/reply1'].commentModerationLogId, 'mod3');
 });
 
+test('delayed dislike comment updates once and stays admin-only', async () => {
+  const first = await save(baseStore, { type: 'dislike' });
+  const second = await save(first.store, {
+    type: 'dislike',
+    comment: 'later private',
+    commentModerationLogId: 'mod-dislike-later',
+  });
+
+  assert.equal(second.store['feedbacks/reply1'].comment, 'later private');
+  assert.equal(second.store['feedbacks/reply1'].commentVisibility, 'admin_only');
+  assert.equal(second.store['feedbacks/reply1'].helpedCountApplied, false);
+  await assert.rejects(
+    save(second.store, { type: 'dislike', comment: 'different', commentModerationLogId: 'mod-other' }),
+    /feedback_conflict/,
+  );
+});
+
 test('hidden reply and hidden worry cannot receive feedback', async () => {
   await assert.rejects(() => save({
     ...baseStore,

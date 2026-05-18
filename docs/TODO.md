@@ -1183,61 +1183,160 @@ Onboarding 선례의 정확한 표현:
 허용 수정 범위: 새 `src/screens/answerCheck/**` deep module, legacy `src/screens/replyDetail/**` route removal edits, relevant route helpers/tests, feedback container policy tests.
 금지 수정 범위: feedback server/API internals unless PRD 기능 정합성 테스트가 먼저 실패한다.
 
-- [ ] TODO-P7.1: 08 PNG PIL anchor를 재측정한다.
+- [x] TODO-P7.1: 08 PNG PIL anchor를 재측정한다.
   - 대상 파일: `design/reference/pngs/screens/08-answer-check.png`, `docs/TODO.md`
   - 완료 기준: 내 고민 박스, 답변 박스들, 좋아요/싫어요 버튼, 하단바 bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 completion note.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.2: 08을 `src/screens/answerCheck/**` 전용 deep module로 분리하고 `replyDetail` 단일 답변 상세 의존을 제거한다.
+  - completion note:
+    - changed files: `docs/TODO.md`, `tmp/answer-check-pixel-alignment/measurements.html`
+    - test command/result: PIL one-off measurement pass; `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: reference PIL measurement
+    - harness route/data verification: 해당 없음
+    - reference PNG path: `design/reference/pngs/screens/08-answer-check.png`
+    - measured result: reference size `393x852`; dominant `#ffffff 195303`, `#fff1d1 75583`, `#fff5eb 12101`, `#ff8b3d 4265`; non-bg bbox `(0,0)-(393,852)`. Header `(0,0)-(393,130)`, back `(0,50)-(80,130)`, title `(120,50)-(280,127)`, 내 고민 crop `(0,110)-(393,315)`, 내 고민 텍스트 crop `(15,150)-(380,290)`, answer1 `(0,300)-(393,490)`, answer2 `(0,490)-(393,700)`, answer text crop `(15,330)-(380,620)`, like crop `(15,400)-(190,693)`, dislike crop `(190,400)-(380,700)`, bottom bar `(0,720)-(393,852)`, home indicator crop `(80,820)-(320,852)`. Reference에 별도 comment UI는 보이지 않음.
+    - tolerated difference: reference status bar/time/network/battery와 home indicator는 production UI에서 제외하는 static OS chrome으로 기록.
+- [x] TODO-P7.2: 08을 `src/screens/answerCheck/**` 전용 deep module로 분리하고 `replyDetail` 단일 답변 상세 의존을 제거한다.
   - 대상 파일: `src/screens/answerCheck/AnswerCheckContainer.tsx`, `src/screens/answerCheck/AnswerCheckScreen.tsx`, `src/screens/answerCheck/contract.ts`, `src/screens/answerCheck/mapping.ts`, `src/screens/importBoundaries.test.ts`
   - 완료 기준: 08은 단일 답변 상세가 아니라 여러 답변 read model을 받는 screen contract를 갖고, `replyDetail`은 새 PRD route flow에서 호출되지 않는다.
   - 검증: import boundary test와 route rendering test.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P7.11.
-- [ ] TODO-P7.3: 08 뒤로 가기는 20-my-worries로 이동한다.
+  - completion note:
+    - changed files: `src/screens/answerCheck/contract.ts`, `src/screens/answerCheck/mapping.ts`, `src/screens/answerCheck/AnswerCheckScreen.tsx`, `src/screens/answerCheck/AnswerCheckContainer.tsx`, `src/screens/answerCheck/AnswerCheckScreen.test.tsx`, `src/screens/answerCheck/mapping.test.ts`, `src/screens/importBoundaries.test.ts`, `src/App.tsx`, `src/services/appShell/routeRenderingBoundary.ts`, `src/services/appShell/routeRenderingBoundary.test.ts`, `src/services/appShell/appMonolithGuardrail.test.ts`, `src/services/replyPublication/runtimeBoundary.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: `tmp/answer-check-pixel-alignment/08-answer-check-production.png`
+    - capture type: harness component
+    - harness route/data verification: `routeRenderingBoundary.test.ts`, `prdNavigationPolicy.test.ts`, `appMonolithGuardrail.test.ts`, `runtimeBoundary.test.ts`, `importBoundaries.test.ts`가 answerCheck route/container 연결과 replyDetail 비호출/비의존을 검증.
+    - reference PNG path: `design/reference/pngs/screens/08-answer-check.png`
+    - measured result: 08 contract는 `worry` 1개와 `replies[]` 여러 개를 받으며 `AnswerCheckScreen.test.tsx`가 여러 답변 카드 렌더링을 검증. `answerCheck/**`는 `replyDetail` 구현을 import/reference하지 않는다.
+    - tolerated difference: legacy `src/screens/replyDetail/**` 파일은 삭제하지 않고 새 PRD route flow에서 호출하지 않게 분리.
+- [x] TODO-P7.3: 08 뒤로 가기는 20-my-worries로 이동한다.
   - 대상 파일: appShell route helper, answer check container
   - 완료 기준: back route가 `my_worries`이고 06/13/기존 detail로 이동하지 않는다.
   - 검증: route test.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.4: Phase 4의 `answer_check` route object를 실제 08 route rendering과 연결한다.
+  - completion note:
+    - changed files: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/prdNavigationPolicy.test.ts`, `src/screens/answerCheck/AnswerCheckContainer.tsx`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `backRouteForRoute({ route: 'answer_check', worryId })` returns `my_worries`; tests assert it is not `답변하기`, `my_answers`, or `received_answer_detail`.
+    - reference PNG path: 해당 없음
+    - measured result: 08 `onBack` uses route policy and returns to 20/my_worries.
+    - tolerated difference: `my_worries` is canonical route object target; active tab remains `나의 고민`.
+- [x] TODO-P7.4: Phase 4의 `answer_check` route object를 실제 08 route rendering과 연결한다.
   - 대상 파일: `src/App.tsx`, `src/services/appShell/routeRenderingBoundary.ts`, `src/screens/answerCheck/AnswerCheckContainer.tsx`, route tests
   - 완료 기준: 20에서 만든 `answer_check` route state가 `AnswerCheckContainer`를 렌더링하고 worryId를 전달한다. 20 화면 구현 자체를 다시 수정하지 않는다.
   - 검증: route rendering test와 20→08 container flow test.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.5: 답변 0개 상태는 내 고민만 보이고 별도 empty 문구를 표시하지 않는다.
+  - completion note:
+    - changed files: `src/App.tsx`, `src/services/appShell/routeRenderingBoundary.ts`, `src/services/appShell/routeRenderingBoundary.test.ts`, `src/screens/answerCheck/AnswerCheckContainer.tsx`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `MyWorriesContainerPolicy.test.ts` verifies 20 card creates `routeToAnswerCheck({ worryId })`; `routeRenderingBoundary.test.ts` maps `answer_check` to answer-check group; `App.tsx` mounts `AnswerCheckContainer` only for id-bearing `answer_check` route state.
+    - reference PNG path: 해당 없음
+    - measured result: App shell only wires route/container and does not include feedback/data mapping logic.
+    - tolerated difference: string `answer_check` without `worryId` does not mount 08; no PRD-unowned error UI added.
+- [x] TODO-P7.5: 답변 0개 상태는 내 고민만 보이고 별도 empty 문구를 표시하지 않는다.
   - 대상 파일: answer check screen/contract
   - 완료 기준: replies array가 비어도 empty component가 렌더링되지 않는다.
   - 검증: screen state test.
   - production PNG evidence: 없음. 같은 phase에서 empty visual을 캡처하면 `tmp/answer-check-pixel-alignment/08-answer-check-empty-production.png`를 기록한다.
-- [ ] TODO-P7.6: 좋아요 클릭은 즉시 확정되고 helpedCount 증가와 코멘트 선택 입력을 분리한다.
+  - completion note:
+    - changed files: `src/screens/answerCheck/AnswerCheckScreen.test.tsx`, `src/screens/answerCheck/mapping.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `AnswerCheckScreen.test.tsx` verifies zero replies renders my worry and no answer card/empty copy.
+    - reference PNG path: 해당 없음
+    - measured result: replies `[]` keeps worry card visible and renders no `도착한 답변</p>` cards; no `아직 답변이 없어요` or `첫 고민을 남겨보세요` copy.
+    - tolerated difference: optional empty-state PNG not created.
+- [x] TODO-P7.6: 좋아요 클릭은 즉시 확정되고 helpedCount 증가와 코멘트 선택 입력을 분리한다.
   - 대상 파일: answer check container, `src/services/replyFeedback/**` tests if existing API supports it
   - 완료 기준: like mutation 성공 후 답변 박스는 유지되고 comment dialog는 submit/skip 가능하다.
   - 검증: container/service policy tests.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.7: 싫어요 클릭은 즉시 확정하되 답변 숨김은 코멘트 창 종료 후 수행한다.
+  - completion note:
+    - changed files: `src/screens/answerCheck/AnswerCheckContainer.tsx`, `src/screens/answerCheck/AnswerCheckScreen.tsx`, `src/screens/answerCheck/AnswerCheckScreen.test.tsx`, `src/services/replyFeedback/serverFirestore.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `AnswerCheckContainer` calls `submitReplyFeedbackWithProductionAdapters` immediately on like without comment, keeps local feedback state, and opens optional comment dialog after success; `serverFirestore.test.ts` verifies like creates helpedCount application once and delayed like comment does not increment again.
+    - reference PNG path: 해당 없음
+    - measured result: like and comment are separate actions in screen contract; comment dialog supports submit and skip/close.
+    - tolerated difference: mutation failure UX remains existing alert-only `전송 실패`; no optimistic rollback policy added.
+- [x] TODO-P7.7: 싫어요 클릭은 즉시 확정하되 답변 숨김은 코멘트 창 종료 후 수행한다.
   - 대상 파일: answer check container/screen
   - 완료 기준: dislike selected state와 comment dialog lifecycle이 테스트되고, dialog 종료 후 해당 answer card가 숨겨진다.
   - 검증: state interaction test.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.8: 좋아요/싫어요 코멘트는 답변 하나당 1개만 허용하고 AI 필터링을 거친다.
+  - completion note:
+    - changed files: `src/screens/answerCheck/AnswerCheckContainer.tsx`, `src/services/replyFeedback/serverFirestore.ts`, `src/services/replyFeedback/serverFirestore.test.ts`, `src/screens/answerCheck/AnswerCheckScreen.test.tsx`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `AnswerCheckContainer.closeComment` hides disliked reply only when disliked comment dialog closes; `serverFirestore.test.ts` verifies delayed dislike comment updates once and stays `admin_only`.
+    - reference PNG path: 해당 없음
+    - measured result: dislike mutation is immediate; local hidden state is applied after submit/skip close, not on click.
+    - tolerated difference: server read-model hide policy remains separate from local dialog lifecycle.
+- [x] TODO-P7.8: 좋아요/싫어요 코멘트는 답변 하나당 1개만 허용하고 AI 필터링을 거친다.
   - 대상 파일: answer check container, `src/services/replyFeedback/*`
   - 완료 기준: duplicate comment attempt와 moderation rejected case가 테스트된다.
   - 검증: `src/services/replyFeedback/*.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P7.9: 싫어요와 싫어요 코멘트가 답변자용 read model/API에 노출되지 않는 정책을 검증한다.
+  - completion note:
+    - changed files: `src/services/replyFeedback/serverFirestore.ts`, `src/services/replyFeedback/serverFirestore.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: existing moderation tests cover rejected moderation saves moderation log only and no feedback; `serverFirestore.test.ts` covers delayed like/dislike comment one-time update and conflict on duplicate overwrite.
+    - reference PNG path: 해당 없음
+    - measured result: duplicate comment attempts conflict; moderation rejected comments are not stored as feedback; dislike comments use `admin_only`.
+    - tolerated difference: feedback server/API internals changed only after tests exposed delayed dislike comment policy mismatch.
+- [x] TODO-P7.9: 싫어요와 싫어요 코멘트가 답변자용 read model/API에 노출되지 않는 정책을 검증한다.
   - 대상 파일: `src/services/replyFeedback/*`, answer check tests, existing read model policy tests when that layer owns the behavior
   - 완료 기준: dislike/comment는 answer-check 피드백 처리에는 저장되지만 답변자에게 반환되는 read model에는 포함되지 않는다. 13 화면 표시 검증은 Phase 8에서 수행한다.
   - 검증: service/read model policy tests.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.10: 08 answer check 화면에서 답변 작성자의 개인정보가 노출되지 않음을 검증한다.
+  - completion note:
+    - changed files: `src/services/myWorries/prdPolicy.ts`, `src/services/myWorries/prdPolicy.test.ts`, `src/services/replyFeedback/serverFirestore.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `prdPolicy.test.ts` verifies disliked reply remains in replier's given-replies list as no-feedback and dislike comment is absent from replier read model.
+    - reference PNG path: 해당 없음
+    - measured result: `selectMyGivenReplies` filters replier-visible feedbacks to like only; dislike/comment can exist in feedbacks but do not become `feedback` or `publisherComment` in replier read model.
+    - tolerated difference: Phase 8 will handle 13 visual display, but service/read-model policy is locked here.
+- [x] TODO-P7.10: 08 answer check 화면에서 답변 작성자의 개인정보가 노출되지 않음을 검증한다.
   - 대상 파일: `src/screens/answerCheck/mapping.ts`, `src/screens/answerCheck/contract.ts`, `src/screens/answerCheck/AnswerCheckScreen.tsx`
   - 완료 기준: answer writer nickname, gender, age, interests, profile metadata가 answer cards props/DOM에 없고 PRD가 허용한 답변 내용과 feedback controls만 표시된다.
   - 검증: mapping/screen test 또는 completion note의 수동 DOM verification.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.11: 08 production PNG evidence를 생성한다.
+  - completion note:
+    - changed files: `src/screens/answerCheck/contract.ts`, `src/screens/answerCheck/mapping.ts`, `src/screens/answerCheck/AnswerCheckScreen.tsx`, `src/screens/answerCheck/mapping.test.ts`, `src/screens/answerCheck/AnswerCheckScreen.test.tsx`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: mapping fixture injects answer writer nickname/gender/age/interests/profile metadata/internal uid strings and asserts output JSON excludes them; screen DOM test asserts sensitive strings are absent.
+    - reference PNG path: 해당 없음
+    - measured result: answer card props contain only reply id/body/date/feedback control state; worry props contain PRD-allowed worry context only.
+    - tolerated difference: internal `senderId/replierUid` remains service read model input but is not mapped into answer card props/DOM.
+- [x] TODO-P7.11: 08 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/answer-check-pixel-alignment/08-answer-check-production.png`
   - 완료 기준: 393x852 production capture이며 추가 보고 파일이 필요하면 한국어 HTML만 있고 capture note 필수 필드가 기록된다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: `tmp/answer-check-pixel-alignment/08-answer-check-production.png`.
+  - completion note:
+    - changed files: `tmp/answer-check-pixel-alignment/08-answer-check-production.png`, `tmp/answer-check-pixel-alignment/measurements.html`, `tmp/answer-check-pixel-alignment/harness/index.html`, `tmp/answer-check-pixel-alignment/harness/src/main.tsx`
+    - test command/result: `npm run build` pass; Playwright capture pass; PIL PNG size verification pass; `npm test` pass; `npm run lint` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: `tmp/answer-check-pixel-alignment/08-answer-check-production.png`
+    - capture type: harness component
+    - harness route/data verification: production `AnswerCheckScreen.tsx`, real answer-check contract, `MobileAppShell`, and `BottomNavigation` imported by harness; route/container verified by `routeRenderingBoundary.test.ts`, `prdNavigationPolicy.test.ts`, `appMonolithGuardrail.test.ts`, `runtimeBoundary.test.ts`, and `MyWorriesContainerPolicy.test.ts`.
+    - reference PNG path: `design/reference/pngs/screens/08-answer-check.png`
+    - measured result: production size `393x852`; dominant `#ffffff 176638`, `#fff3df 61261`, `#fff8ef 12698`, `#fdf6ed 4624`; non-bg bbox `(0,0)-(393,852)`. Reference size `393x852`; dominant `#ffffff 195303`, `#fff1d1 75583`, `#fff5eb 12101`, `#ff8b3d 4265`; non-bg bbox `(0,0)-(393,852)`. Main crops recorded in `tmp/answer-check-pixel-alignment/measurements.html`.
+    - tolerated difference: reference static OS chrome excluded; full route capture avoided because auth/Firebase seed data would obscure pixel verification; harness capture is component-level with route/container closed by tests.
 
 검증 명령:
 - `npm test`

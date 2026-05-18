@@ -182,7 +182,8 @@ export function backRouteForRoute(route: AppRouteViewState): AppRoute {
   const currentRoute = routeName(route);
   if (currentRoute === 'write_worry' || currentRoute === 'write_worry_success' || currentRoute === 'my_worry_detail') return '나의 고민';
   if (currentRoute === 'write_reply' || currentRoute === 'write_reply_success') return DEFAULT_AUTHENTICATED_TAB;
-  if (currentRoute === 'received_answer_detail' || currentRoute === 'read_received_reply' || currentRoute === 'answer_check') return '나의 고민';
+  if (currentRoute === 'answer_check') return 'my_worries';
+  if (currentRoute === 'received_answer_detail' || currentRoute === 'read_received_reply') return '나의 고민';
   if (currentRoute === 'my_worries') return '나의 고민';
   if (MY_PAGE_SUBROUTES.includes(currentRoute as (typeof MY_PAGE_SUBROUTES)[number])) return '마이페이지';
   return DEFAULT_AUTHENTICATED_TAB;

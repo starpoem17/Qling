@@ -13,6 +13,7 @@ export type RouteRenderingGroup =
   | 'received worries'
   | 'write worry'
   | 'write reply'
+  | 'answer check'
   | 'reply details'
   | 'my-page/account'
   | 'policy screens';
@@ -23,6 +24,7 @@ export const REQUIRED_ROUTE_RENDERING_GROUPS = [
   'received worries',
   'write worry',
   'write reply',
+  'answer check',
   'reply details',
   'my-page/account',
   'policy screens',
@@ -79,8 +81,13 @@ export const ROUTE_RENDERING_BOUNDARY = {
     appBoundary: 'App shell may select the write-reply route container and preserve delivery/worry route ids.',
     nextContainerBoundary: 'Selected worry lookup, reply draft, moderation/publication wiring, and form presentation move in Phase 6.',
   },
+  'answer check': {
+    routes: ['answer_check'],
+    appBoundary: 'App shell may select the answer-check route container and preserve worry id route state.',
+    nextContainerBoundary: 'Answer-check read model loading, feedback/comment mutations, local hidden state, and presentation are owned by the answerCheck deep module.',
+  },
   'reply details': {
-    routes: ['answer_check', 'received_answer_detail', 'read_received_reply', 'my_worry_detail'],
+    routes: ['received_answer_detail', 'read_received_reply', 'my_worry_detail'],
     appBoundary: 'App shell may select the reply/worry detail route container and preserve detail ids.',
     nextContainerBoundary: 'Reply detail read models, feedback/comment mutations, and detail presentation move in Phase 7.',
   },
@@ -135,6 +142,7 @@ export function routeRenderingGroupForRoute(route: AppRoute): RouteRenderingBoun
   if (isRouteInGroup(route, 'policy screens')) return 'policy screens';
   if (isRouteInGroup(route, 'write reply')) return 'write reply';
   if (isRouteInGroup(route, 'write worry')) return 'write worry';
+  if (isRouteInGroup(route, 'answer check')) return 'answer check';
   if (isRouteInGroup(route, 'reply details')) return 'reply details';
   if (isRouteInGroup(route, 'received worries')) return 'received worries';
   if (isRouteInGroup(route, 'my-page/account')) return 'my-page/account';

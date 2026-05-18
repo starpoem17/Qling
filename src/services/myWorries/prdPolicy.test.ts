@@ -258,6 +258,26 @@ test('disliked reply is hidden only from publisher view while admin-hidden reply
     selectMyGivenReplies({ replies: [disliked, hidden], userUid: 'me', feedbacksByReplyId }).map(reply => reply.id),
     ['disliked']
   );
+  const replierView = selectMyGivenReplies({ replies: [disliked], userUid: 'me', feedbacksByReplyId });
+  assert.equal(replierView[0].feedback, undefined);
+  assert.equal(replierView[0].publisherComment, undefined);
+});
+
+test('dislike comment remains hidden from replier read model even when stored', () => {
+  const reply = prdReply({ id: 'disliked', worryId: 'w1', authorUid: 'author', replierUid: 'me' });
+  const feedbacksByReplyId = new Map([['disliked', {
+    id: 'disliked',
+    type: 'dislike' as const,
+    comment: '운영자만 보는 싫어요 이유',
+    commentVisibility: 'admin_only' as const,
+  }]]);
+
+  const selected = selectMyGivenReplies({ replies: [reply], userUid: 'me', feedbacksByReplyId });
+
+  assert.equal(selected.length, 1);
+  assert.equal(selected[0].feedback, undefined);
+  assert.equal(selected[0].publisherComment, undefined);
+  assert.equal(JSON.stringify(selected).includes('운영자만 보는 싫어요 이유'), false);
 });
 
 test('AI reply appears to author as a normal reply without visible label', () => {

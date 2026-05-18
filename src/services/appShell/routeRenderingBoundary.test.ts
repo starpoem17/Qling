@@ -16,6 +16,7 @@ test('covers every Phase 3 required route rendering group', () => {
     'received worries',
     'write worry',
     'write reply',
+    'answer check',
     'reply details',
     'my-page/account',
     'policy screens',
@@ -38,7 +39,7 @@ test('maps canonical route states to their Phase 3 route rendering boundaries', 
   assert.equal(routeRenderingGroupForRoute('write_reply'), 'write reply');
   assert.equal(routeRenderingGroupForRoute('write_reply_success'), 'write reply');
   assert.equal(routeRenderingGroupForRoute('나의 고민'), 'authenticated shell');
-  assert.equal(routeRenderingGroupForRoute('answer_check'), 'reply details');
+  assert.equal(routeRenderingGroupForRoute('answer_check'), 'answer check');
   assert.equal(routeRenderingGroupForRoute('received_answer_detail'), 'reply details');
   assert.equal(routeRenderingGroupForRoute('my_worry_detail'), 'reply details');
   assert.equal(routeRenderingGroupForRoute('마이페이지'), 'my-page/account');
@@ -77,7 +78,7 @@ test('identifies authenticated shell membership separately from route-specific g
   });
   assert.deepEqual(routeRenderingBoundaryForRoute({ route: 'answer_check', worryId: 'worry-1' }), {
     currentRoute: 'answer_check',
-    routeGroup: 'reply details',
+    routeGroup: 'answer check',
     authenticatedTab: '나의 고민',
     mountsAuthenticatedShell: true,
     mountsBottomNavigation: true,

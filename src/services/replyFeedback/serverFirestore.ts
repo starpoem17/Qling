@@ -82,7 +82,7 @@ export function createReplyFeedbackRepository(params: { db: Firestore }): ReplyF
         if (feedbackDoc.exists) {
           transaction.update(feedbackRef, {
             comment: input.comment,
-            commentVisibility: 'replier',
+            commentVisibility: visibilityFor(input.type, input.comment),
             commentModerationLogId: input.commentModerationLogId,
             updatedAt: timestamp,
           });
@@ -167,7 +167,11 @@ function resolveExistingFeedback(
   if (existing.type !== type) return 'conflict';
 
   if (type === 'dislike') {
-    return comment === null ? 'unchanged' : 'conflict';
+    if (existing.comment === null && comment === null) return 'unchanged';
+    if (existing.comment === null && comment !== null) return 'update_like_comment';
+    if (existing.comment !== null && comment === null) return 'unchanged';
+    if (existing.comment === comment) return 'unchanged';
+    return 'conflict';
   }
 
   if (existing.comment === null && comment === null) return 'unchanged';

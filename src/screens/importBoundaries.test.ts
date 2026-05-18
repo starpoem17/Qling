@@ -134,6 +134,7 @@ test('discovers every presentational screen file under src/screens', () => {
   assert.deepEqual(
     listPresentationalScreenFiles().map(relativeProjectPath),
     [
+      'src/screens/answerCheck/AnswerCheckScreen.tsx',
       'src/screens/loadingShell/LoadingShellScreen.tsx',
       'src/screens/loadingShell/LoginScreen.tsx',
       'src/screens/myPage/MyAnswersScreen.tsx',
@@ -148,6 +149,25 @@ test('discovers every presentational screen file under src/screens', () => {
       'src/screens/writeForm/WriteWorrySuccessScreen.tsx',
     ],
   );
+});
+
+test('answer-check deep module does not depend on legacy reply detail implementation', () => {
+  const answerCheckRoot = path.join(screenRoot, 'answerCheck');
+  for (const file of listFiles(answerCheckRoot).filter(item => /\.(ts|tsx)$/.test(item))) {
+    const source = fs.readFileSync(file, 'utf8');
+    for (const imported of staticImports(source, file)) {
+      assert.equal(
+        imported.resolvedPath?.includes('/src/screens/replyDetail/') ?? imported.source.includes('replyDetail'),
+        false,
+        `${relativeProjectPath(file)} imports legacy replyDetail through ${imported.source}`,
+      );
+    }
+    assert.equal(
+      source.includes('ReplyDetail'),
+      false,
+      `${relativeProjectPath(file)} references legacy ReplyDetail implementation`,
+    );
+  }
 });
 
 test('presentational screens do not import forbidden production, Firebase, server, or mutation modules', () => {
