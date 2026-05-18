@@ -22,6 +22,8 @@
   - 구현 diff, 테스트 결과, production PNG evidence 또는 명시된 수동 검증 근거가 있어야 체크할 수 있다.
   - 나중 phase 결과가 선행되어야 하는 항목은 체크하지 않는다.
   - completion note는 체크박스 아래에 한 줄로 남기되 별도 markdown/html/json 리포트 파일을 만들지 않는다.
+  - `TODO-P0.4`가 완료되기 전에는 Phase 1~12의 구현 체크박스를 시작하지 않는다. Phase 1~12 작업자는 먼저 06~20 Measurement Anchor 표가 모든 필수 항목을 채웠는지 확인한다.
+  - PRD와 구현 가능성이 충돌하면 해당 TODO를 체크하지 않는다. 체크박스 아래에 `PRD clarification required: ...` completion note를 남기고, 사용자 확인 전까지 다음 구현으로 진행하지 않는다.
 - 금지사항:
   - `docs/PRD.md`는 절대 수정하지 않는다. PRD 오류가 의심되면 사용자에게 정정을 요청한다.
   - 이번 전체 작업에서 운영정책, 앱처럼 사용하기 안내, 이용약관, 로그인 화면 정책/약관 링크를 MVP 기능으로 되살리지 않는다.
@@ -35,8 +37,10 @@
   - 기존 `tmp/onboarding-pixel-alignment/**-production.png` 패턴을 따른다.
   - 산출물 디렉터리에는 production 화면 캡처 PNG만 남긴다.
   - PNG 파일명은 route/screen/state를 알 수 있게 `*-production.png` suffix를 사용한다.
-  - PNG는 실제 production route/screen을 렌더링한 결과여야 하며, reference PNG 복사본이면 안 된다.
+  - PNG는 실제 production route/screen을 렌더링한 결과여야 한다.
+  - reference PNG 복사, `design/reference` preview 앱 캡처, `design/reference/src` component 캡처는 금지한다.
   - 캡처 자동화에 필요한 일시적 파일은 생성 후 제거한다.
+  - capture helper가 필요하면 임시 생성 후 제거하고, 최종 산출물은 `tmp/*-pixel-alignment/*-production.png`만 남긴다.
   - 모든 PNG는 393x852 reference PNG와 비교 가능한 production capture인지 확인한다.
 
 ## Fresh Measurement Anchors
@@ -74,27 +78,234 @@
 | 05 | previous CTA | `(24,752)-(120,808)` |
 | 05 | complete CTA | `(130,752)-(369,808)` |
 
-### 06~20 Initial PIL Anchor Summary
+### 06~20 Required Measurement Anchor Tables
 
-아래 표는 구현 시작 전에 직접 PIL로 재확인해야 하는 초기 요약값이다. 각 화면 phase의 첫 체크박스에서 dominant background color, non-bg bbox, 주요 element bbox, text/glyph bbox, 버튼 bbox, 하단바 bbox, safe-area/home-indicator 제거 여부를 다시 측정하고 완료 note로 보강한다.
+이 섹션은 Phase 1~12 구현의 gate다. `TODO-P0.4` 완료 전에는 아래 각 화면 표를 PIL 재측정값으로 검증하고, 필요한 경우 completion note로 수정한 뒤에만 구현 체크박스를 시작한다. 모든 bbox는 `design/reference/pngs/screens/*.png`를 393x852 canvas 기준으로 측정한 `(left,top)-(right,bottom)` 값이다. `none`은 해당 화면에 그 element가 없거나 production에서 구현하지 않아야 함을 뜻한다.
 
-| Screen | Size | Dominant colors | Non-bg bbox | Lower-area bbox from y>=650 |
-|---|---|---|---|---|
-| 06 | `393x852` | `#ffffff` 181468 px, `#ff8b3d` 54530 px, `#fff1d1` 35241 px | `(0,0)-(393,852)` | `(0,650)-(393,852)` |
-| 07 | `393x852` | `#fff5eb` 201042 px, `#fff1d1` 101783 px, `#ff8b3d` 17679 px | `(0,0)-(393,828)` | `(0,650)-(393,828)` |
-| 08 | `393x852` | `#ffffff` 195303 px, `#fff1d1` 75583 px, `#fff5eb` 12101 px | `(0,0)-(393,852)` | `(0,650)-(393,852)` |
-| 09 | `393x852` | `#ada48e` 96655 px, `#ada7a0` 76675 px, `#ffffff` 71853 px | `(0,21)-(393,852)` | `(0,650)-(393,852)` |
-| 10 | `393x852` | `#ffffff` 145916 px, `#ff8b0d` 129361 px, `#fff5eb` 18912 px | `(0,0)-(393,852)` | `(0,650)-(393,852)` |
-| 11 | 없음/미사용 | reference PNG 없음 | production route 매핑 금지 | screen-map 매핑 금지 |
-| 12 | `393x852` | `#fff7e3` 160903 px, `#ff8b0d` 92763 px, `#fff1d1` 56994 px | `(0,0)-(393,843)` | `(24,650)-(369,843)` |
-| 13 | `393x852` | `#ff8b0d` 173469 px, `#ffffff` 103655 px, `#fff5eb` 18586 px | `(0,21)-(393,852)` | `(0,751)-(393,852)` |
-| 14 | `393x852` | `#ffffff` 205773 px, `#ff8b0d` 82259 px, `#fff5eb` 18586 px | `(0,0)-(393,852)` | `(0,650)-(393,852)` |
-| 15 | `393x852` | `#adadad` 91956 px, `#ad5f09` 90140 px, `#ffffff` 59897 px | `(0,0)-(393,852)` | `(0,650)-(393,852)` |
-| 16 | `393x852` | `#adadad` 91956 px, `#ad5f09` 90140 px, `#ffffff` 59324 px | `(0,0)-(393,852)` | `(0,650)-(393,852)` |
-| 17 | `393x852` | `#fff5eb` 156619 px, `#fff1d1` 106351 px, `#ffffff` 32146 px | `(0,0)-(393,828)` | `(0,650)-(393,828)` |
-| 18 | `393x852` | `#ffffff` 161394 px, `#ada48e` 62959 px, `#adadad` 17319 px | `(0,0)-(393,852)` | `(0,650)-(393,852)` |
-| 19 | `393x852` | `#ada48e` 97421 px, `#ffffff` 71429 px, `#ada7a0` 43148 px | `(0,0)-(393,852)` | `(0,650)-(393,852)` |
-| 20 | `393x852` | `#fff1d1` 130921 px, `#ffffff` 110161 px, `#ff8b3d` 51555 px | `(0,0)-(393,852)` | `(0,714)-(393,852)` |
+#### Screen 06: received-worries
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#ffffff` 181468 px, `#ff8b3d` 54530 px, `#fff1d1` 35241 px |
+| non-bg bbox | `(0,0)-(393,852)` |
+| top header/icon/button bbox | full orange header `(0,0)-(393,121)`, right my-page icon/text cluster `(341,76)-(362,97)` |
+| primary card/input/modal bbox | worry cards approx `(12,129)-(381,272)`, `(12,278)-(381,421)`, `(12,427)-(381,570)`, `(12,576)-(381,719)` |
+| text/glyph bbox | card category chips `(34,150)-(78,174)`, `(34,299)-(78,323)`, `(34,448)-(79,471)`, `(34,597)-(78,621)`, summary text clusters `(52,200)-(279,215)`, `(82,349)-(212,364)`, `(82,498)-(354,513)`, `(52,647)-(267,662)` |
+| CTA bbox | skip buttons `(301,150)-(366,173)`, `(301,299)-(366,322)`, `(301,448)-(366,471)`, `(301,597)-(366,620)` |
+| bottom navigation bbox | `(0,746)-(393,852)` |
+| floating action bbox | none |
+| overlay bbox | none |
+
+#### Screen 07: question-write-a
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#fff5eb` 201042 px, `#fff1d1` 101783 px, `#ff8b3d` 17679 px |
+| non-bg bbox | `(0,0)-(393,828)` |
+| top header/icon/button bbox | top/back/title band `(0,0)-(393,121)`, title glyph cluster `(115,147)-(282,164)` |
+| primary card/input/modal bbox | write input panel approx `(24,183)-(369,650)` |
+| text/glyph bbox | placeholder/helper glyphs `(303,626)-(353,637)`, title line `(44,144)-(282,164)` |
+| CTA bbox | bottom left nav button `(16,792)-(132,828)`, bottom center eye `(149,764)-(244,823)`, bottom right nav button `(262,792)-(378,828)` |
+| bottom navigation bbox | `(0,764)-(393,828)` |
+| floating action bbox | none |
+| overlay bbox | none |
+
+#### Screen 08: answer-check
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#ffffff` 195303 px, `#fff1d1` 75583 px, `#fff5eb` 12101 px |
+| non-bg bbox | `(0,0)-(393,852)` |
+| top header/icon/button bbox | header band `(0,0)-(393,118)`, category chip `(34,138)-(79,161)` |
+| primary card/input/modal bbox | my worry card approx `(12,122)-(381,229)`, answer cards approx `(12,241)-(381,477)`, `(12,494)-(381,706)`, third visible start `(12,726)-(381,852)` |
+| text/glyph bbox | my worry text `(35,176)-(283,216)`, divider `(31,226)-(363,227)`, answer text clusters `(80,271)-(272,330)`, `(80,524)-(272,583)`, `(78,732)-(229,767)` |
+| CTA bbox | feedback button clusters inside cards around `(173,247)-(231,256)`, `(173,500)-(231,509)`, `(171,732)-(229,741)` |
+| bottom navigation bbox | none visible in cropped 08 reference; production route must still respect app shell bottom nav policy if PRD requires it |
+| floating action bbox | none |
+| overlay bbox | none |
+
+#### Screen 09: question-write-b
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#ada48e` 96655 px, `#ada7a0` 76675 px, `#ffffff` 71853 px |
+| non-bg bbox | `(0,21)-(393,852)` |
+| top header/icon/button bbox | status/header glyphs `(24,21)-(376,88)` |
+| primary card/input/modal bbox | success modal/card `(9,120)-(386,661)` |
+| text/glyph bbox | modal title/body cluster approx `(75,230)-(318,510)`, header title glyphs `(164,72)-(224,88)` |
+| CTA bbox | confirm CTA `(63,684)-(330,732)` |
+| bottom navigation bbox | dimmed bottom area `(0,755)-(393,852)` |
+| floating action bbox | none |
+| overlay bbox | dimmed overlay full canvas `(0,0)-(393,852)`, foreground modal `(9,120)-(386,661)` |
+
+#### Screen 10: my-page
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#ffffff` 145916 px, `#ff8b0d` 129361 px, `#fff5eb` 18912 px |
+| non-bg bbox | `(0,0)-(393,852)` |
+| top header/icon/button bbox | orange header `(0,0)-(393,121)`, profile motif `(37,147)-(101,211)`, right icon/text cluster `(276,160)-(339,171)` |
+| primary card/input/modal bbox | profile summary card approx `(24,132)-(369,254)`, my answers preview rows `(24,300)-(369,438)`, settings rows `(44,592)-(349,689)` |
+| text/glyph bbox | nickname/helped text `(121,158)-(317,175)`, preview row text `(38,318)-(293,366)`, answer preview text `(89,452)-(285,464)`, setting glyphs `(42,557)-(128,576)`, `(43,605)-(178,627)`, `(76,657)-(127,672)` |
+| CTA bbox | edit interests button approx `(244,184)-(349,219)`, all-view answer button approx `(308,553)-(359,584)` |
+| bottom navigation bbox | `(0,751)-(393,852)` |
+| floating action bbox | none |
+| overlay bbox | none |
+
+#### Screen 11: none/unused
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | none |
+| dominant colors | none |
+| non-bg bbox | none |
+| top header/icon/button bbox | none |
+| primary card/input/modal bbox | none |
+| text/glyph bbox | none |
+| CTA bbox | none |
+| bottom navigation bbox | none |
+| floating action bbox | none |
+| overlay bbox | none |
+
+#### Screen 12: edit-interests
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#fff7e3` 160903 px, `#ff8b0d` 92763 px, `#fff1d1` 56994 px |
+| non-bg bbox | `(0,0)-(393,843)` |
+| top header/icon/button bbox | orange header `(0,0)-(393,238)`, header title area approx `(24,70)-(369,175)` |
+| primary card/input/modal bbox | chip grid outer `(34,322)-(358,708)` |
+| text/glyph bbox | helper/subtitle approx `(24,260)-(295,292)`, chip text contained inside each `103x44` chip |
+| CTA bbox | save CTA `(24,752)-(369,808)` |
+| bottom navigation bbox | none; home indicator/reference bottom glyph `(129,838)-(264,843)` is not production UI |
+| floating action bbox | none |
+| overlay bbox | none |
+
+#### Screen 13: my-answers
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#ff8b0d` 173469 px, `#ffffff` 103655 px, `#fff5eb` 18586 px |
+| non-bg bbox | `(0,21)-(393,852)` |
+| top header/icon/button bbox | status/header glyphs `(24,21)-(376,88)`, title glyphs `(157,72)-(236,88)` |
+| primary card/input/modal bbox | answer cards `(12,127)-(381,303)`, `(11,314)-(380,490)` |
+| text/glyph bbox | card text clusters inside `(34,162)-(295,214)` and `(34,349)-(295,401)` |
+| CTA bbox | back button/icon `(24,70)-(33,85)` |
+| bottom navigation bbox | `(0,751)-(393,852)` |
+| floating action bbox | none |
+| overlay bbox | none |
+
+#### Screen 14: privacy-policy
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#ffffff` 205773 px, `#ff8b0d` 82259 px, `#fff5eb` 18586 px |
+| non-bg bbox | `(0,0)-(393,852)` |
+| top header/icon/button bbox | orange header `(0,0)-(393,121)`, back/title glyphs approx `(24,70)-(224,88)` |
+| primary card/input/modal bbox | policy content area approx `(24,139)-(369,714)` |
+| text/glyph bbox | policy title/body clusters `(34,162)-(295,214)`, `(54,262)-(299,354)` |
+| CTA bbox | back button/icon `(24,70)-(33,85)` |
+| bottom navigation bbox | `(0,751)-(393,852)` |
+| floating action bbox | none |
+| overlay bbox | none |
+
+#### Screen 15: logout
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#adadad` 91956 px, `#ad5f09` 90140 px, `#ffffff` 59897 px |
+| non-bg bbox | `(0,0)-(393,852)` |
+| top header/icon/button bbox | dimmed my-page header/profile remains `(0,0)-(393,254)`, profile motif `(37,147)-(101,211)` |
+| primary card/input/modal bbox | confirmation modal approx `(44,321)-(349,531)` |
+| text/glyph bbox | dimmed background setting glyphs `(42,557)-(178,720)`, modal title/body approx `(88,355)-(305,435)` |
+| CTA bbox | modal cancel/confirm buttons approx `(64,466)-(188,510)`, `(205,466)-(329,510)` |
+| bottom navigation bbox | dimmed `(0,751)-(393,852)` |
+| floating action bbox | none |
+| overlay bbox | full dim overlay `(0,0)-(393,852)`, foreground dialog approx `(44,321)-(349,531)` |
+
+#### Screen 16: account-deletion
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#adadad` 91956 px, `#ad5f09` 90140 px, `#ffffff` 59324 px |
+| non-bg bbox | `(0,0)-(393,852)` |
+| top header/icon/button bbox | dimmed my-page header/profile remains `(0,0)-(393,254)`, profile motif `(37,147)-(101,211)` |
+| primary card/input/modal bbox | confirmation modal approx `(44,310)-(349,543)` |
+| text/glyph bbox | dimmed background setting glyphs `(42,557)-(178,720)`, modal title/body approx `(80,346)-(313,444)` |
+| CTA bbox | modal cancel/confirm buttons approx `(64,478)-(188,522)`, `(205,478)-(329,522)` |
+| bottom navigation bbox | dimmed `(0,751)-(393,852)` |
+| floating action bbox | none |
+| overlay bbox | full dim overlay `(0,0)-(393,852)`, foreground dialog approx `(44,310)-(349,543)` |
+
+#### Screen 17: answer-write-1
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#fff5eb` 156619 px, `#fff1d1` 106351 px, `#ffffff` 32146 px |
+| non-bg bbox | `(0,0)-(393,828)` |
+| top header/icon/button bbox | top/back/title band `(0,0)-(393,121)`, title/category glyphs `(44,271)-(295,291)` |
+| primary card/input/modal bbox | worry summary card approx `(24,143)-(369,336)`, reply input panel approx `(24,371)-(369,670)` |
+| text/glyph bbox | worry summary text `(72,274)-(295,289)`, placeholder/helper glyphs `(303,646)-(353,657)` |
+| CTA bbox | bottom left nav button `(16,792)-(132,828)`, bottom center eye `(149,764)-(244,823)`, bottom right nav button `(262,792)-(378,828)` |
+| bottom navigation bbox | `(0,764)-(393,828)` |
+| floating action bbox | none |
+| overlay bbox | none |
+
+#### Screen 18: answer-write-2
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#ffffff` 161394 px, `#ada48e` 62959 px, `#adadad` 17319 px |
+| non-bg bbox | `(0,0)-(393,852)` |
+| top header/icon/button bbox | dimmed 17 header area `(0,0)-(393,121)`, overlay category chip `(16,256)-(61,279)` |
+| primary card/input/modal bbox | original worry overlay panel approx `(0,176)-(393,692)` |
+| text/glyph bbox | overlay title/content clusters `(60,293)-(365,308)`, `(16,387)-(363,493)`, `(195,217)-(221,230)` |
+| CTA bbox | close CTA `(65,617)-(327,669)` |
+| bottom navigation bbox | dimmed `(0,764)-(393,852)` |
+| floating action bbox | none |
+| overlay bbox | full dim overlay `(0,0)-(393,852)`, foreground overlay panel approx `(0,176)-(393,692)` |
+
+#### Screen 19: answer-write-3
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#ada48e` 97421 px, `#ffffff` 71429 px, `#ada7a0` 43148 px |
+| non-bg bbox | `(0,0)-(393,852)` |
+| top header/icon/button bbox | status/header glyphs `(24,21)-(376,88)` |
+| primary card/input/modal bbox | success modal/card `(9,127)-(386,661)` |
+| text/glyph bbox | header title glyphs `(164,72)-(224,88)`, modal title/body approx `(75,230)-(318,510)` |
+| CTA bbox | confirm CTA `(63,684)-(330,732)` |
+| bottom navigation bbox | dimmed/full canvas background `(0,751)-(393,852)` |
+| floating action bbox | none |
+| overlay bbox | dimmed overlay full canvas `(0,0)-(393,852)`, foreground modal `(9,127)-(386,661)` |
+
+#### Screen 20: my-worries
+
+| Item | PNG-measured bbox/value |
+|---|---|
+| canvas size | `393x852` |
+| dominant colors | `#fff1d1` 130921 px, `#ffffff` 110161 px, `#ff8b3d` 51555 px |
+| non-bg bbox | `(0,0)-(393,852)` |
+| top header/icon/button bbox | orange header `(0,0)-(393,149)` |
+| primary card/input/modal bbox | worry cards `(12,149)-(381,325)`, `(12,331)-(381,507)` |
+| text/glyph bbox | card text clusters inside first/second cards approx `(34,176)-(300,256)`, `(34,358)-(300,438)` |
+| CTA bbox | bottom navigation buttons in `(0,765)-(393,852)` |
+| bottom navigation bbox | `(0,765)-(393,852)` |
+| floating action bbox | write worry floating message button `(316,714)-(376,774)` |
+| overlay bbox | none |
 
 ## Screen Mapping Inventory
 
@@ -142,10 +353,10 @@
   - 완료 기준: 11번이 없음/미사용으로 명시되고 06~20 중 존재하는 reference PNG가 모두 phase에 배정된다.
   - 검증: `find design/reference/pngs/screens -maxdepth 1 -type f | sort`
   - production PNG evidence: 없음.
-- [ ] TODO-P0.4: 06~20 PNG를 PIL로 재측정해 size, dominant colors, non-bg bbox, 주요 element bbox, text/glyph bbox, 버튼 bbox, 하단바 bbox, safe-area/home-indicator 제외 여부를 completion note로 보강한다.
+- [ ] TODO-P0.4: Phase 1~12 구현 gate로 06~20 PNG Measurement Anchor 표를 PIL 재측정값으로 확정한다.
   - 대상 파일: `design/reference/pngs/screens/*.png`, `docs/TODO.md`
-  - 완료 기준: 이 파일의 06~20 Initial PIL Anchor Summary가 화면별 주요 element bbox까지 확장된다.
-  - 검증: PIL 기반 일회성 명령 또는 스크립트 출력값을 TODO completion note에 기록한다.
+  - 완료 기준: 각 화면 표가 canvas size, dominant colors, non-bg bbox, top header/icon/button bbox, primary card/input/modal bbox, text/glyph bbox, CTA bbox, bottom navigation bbox, floating action bbox, overlay bbox를 모두 포함한다. 이 체크박스가 완료되기 전 Phase 1~12 구현 체크박스를 시작하지 않는다.
+  - 검증: PIL 기반 일회성 명령 또는 스크립트 출력값을 TODO completion note에 기록하고, 표 좌표와 reference PNG를 수동 대조한다.
   - production PNG evidence: 없음.
 - [ ] TODO-P0.5: 03/04/05 Fresh Measurement Anchors를 온보딩 회귀 방지 기준으로 유지한다.
   - 대상 파일: `docs/TODO.md`, `design/reference/pngs/screens/03-onboarding-basic.png`, `04-onboarding-duplicate.png`, `05-onboarding-interests.png`
@@ -200,7 +411,7 @@
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/routeRenderingBoundary.ts`, `src/App.tsx`, appShell tests
   - 완료 기준: `operation_policy`, `app_install_guide`, `notification_settings`가 route 목록, subroute 목록, rendering boundary, settings dispatch에서 제거되거나 접근 불가 MVP 제외 상태로 고정된다.
   - 검증: `rg -n "operation_policy|app_install_guide|notification_settings" src/services/appShell src/App.tsx src/screens/myPage`
-  - production PNG evidence: Phase 8 `10-my-page-production.png`.
+  - production PNG evidence: Phase 8A `10-my-page-production.png`.
 - [ ] TODO-P1.6: 06~20 PNG에 없는 `App.tsx` 전역 fixed header를 제거하거나 screen-local header로 이전한다.
   - 대상 파일: `src/App.tsx`, 06~20 각 screen `*Screen.tsx`
   - 완료 기준: App shell은 route selection과 bottom navigation만 조립하고, 화면별 상단 좌측 눈/우측 마이페이지 버튼은 screen contract 또는 shared primitive로 소유권이 분리된다.
@@ -246,7 +457,7 @@
   - 대상 파일: `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.ts`, `packages/domain/src/index.ts`
   - 완료 기준: 카테고리 글자 수로 칩 폭이 달라지지 않고 3열 칩 화면에서도 안정적으로 맞는다.
   - 검증: shared rendering test와 12 화면 capture.
-  - production PNG evidence: Phase 8 `12-edit-interests-production.png`.
+  - production PNG evidence: Phase 8B `12-edit-interests-production.png`.
 - [ ] TODO-P2.4: 로컬 타임존 기준 display date formatter를 shared pure function으로 분리한다.
   - 대상 파일: `src/screens/shared/contract.ts` 또는 new shared mapping utility, mapping tests
   - 완료 기준: 1분 미만 `방금 전`, 1시간 미만 `n분 전`, 날짜가 바뀌기 전 `n시간 전`, 날짜가 바뀌면 `YYYY-MM-DD`가 테스트된다.
@@ -282,10 +493,10 @@
 허용 수정 범위: `src/screens/receivedWorries/**`, shared visual primitive only as needed.
 금지 수정 범위: `useHomeWorryFeed`, `passDeliveryViaApi`, `markDeliveryReadWithServer` 서비스 경계 변경.
 
-- [ ] TODO-P3.1: 06 PNG PIL anchor를 재측정해 주요 element bbox를 completion note로 보강한다.
+- [ ] TODO-P3.1: `TODO-P0.4`로 확정된 06 Measurement Anchor 표를 구현 시작 전에 확인한다.
   - 대상 파일: `design/reference/pngs/screens/06-received-worries.png`, `docs/TODO.md`
-  - 완료 기준: 상단 좌측 눈, 우측 마이페이지 버튼, 고민 카드, 건너뛰기 버튼, 하단바 bbox가 기록된다.
-  - 검증: PIL 측정 출력값을 completion note에 기록한다.
+  - 완료 기준: 상단 좌측 눈, 우측 마이페이지 버튼, 고민 카드, 건너뛰기 버튼, 하단바 bbox가 `TODO-P0.4` completion note와 일치한다.
+  - 검증: `TODO-P0.4` completion note 확인. 불일치하면 이 phase를 시작하지 않고 P0.4를 먼저 갱신한다.
   - production PNG evidence: 없음.
 - [ ] TODO-P3.2: `ReceivedWorriesScreen`을 06 구조로 재구성한다.
   - 대상 파일: `src/screens/receivedWorries/ReceivedWorriesScreen.tsx`, `src/screens/receivedWorries/contract.ts`
@@ -343,10 +554,10 @@
 허용 수정 범위: `src/screens/myPage/MyWorries*`, `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`, appShell route helpers/tests.
 금지 수정 범위: `src/services/myWorries/**` read model 변경. 필요하면 별도 테스트 근거를 먼저 추가한다.
 
-- [ ] TODO-P4.1: 20 PNG PIL anchor를 재측정해 주요 element bbox를 보강한다.
+- [ ] TODO-P4.1: `TODO-P0.4`로 확정된 20 Measurement Anchor 표를 구현 시작 전에 확인한다.
   - 대상 파일: `design/reference/pngs/screens/20-my-worries.png`, `docs/TODO.md`
-  - 완료 기준: 상단 눈, 마이페이지 버튼, 목록 카드, 우측 하단 메시지 버튼, 하단바 bbox가 기록된다.
-  - 검증: PIL 측정 출력값 completion note.
+  - 완료 기준: 상단 눈, 마이페이지 버튼, 목록 카드, 우측 하단 메시지 버튼, 하단바 bbox가 `TODO-P0.4` completion note와 일치한다.
+  - 검증: `TODO-P0.4` completion note 확인. 불일치하면 이 phase를 시작하지 않고 P0.4를 먼저 갱신한다.
   - production PNG evidence: 없음.
 - [ ] TODO-P4.2: `MyWorriesScreen`을 20 목록 화면으로 재구성하고 selected worry 아래 reply list 펼침 UI를 제거한다.
   - 대상 파일: `src/screens/myPage/MyWorriesScreen.tsx`, `src/screens/myPage/contract.ts`
@@ -398,10 +609,10 @@
 허용 수정 범위: `src/screens/writeForm/**`, appShell success route helpers/tests, draft/moderation container policy tests.
 금지 수정 범위: `publishWorryViaApi` 내부, server moderation/publication logic.
 
-- [ ] TODO-P5.1: 07/09 PNG PIL anchor를 재측정한다.
+- [ ] TODO-P5.1: `TODO-P0.4`로 확정된 07/09 Measurement Anchor 표를 구현 시작 전에 확인한다.
   - 대상 파일: `design/reference/pngs/screens/07-question-write-a.png`, `09-question-write-b.png`, `docs/TODO.md`
-  - 완료 기준: textarea, pencil placeholder, CTA, success dialog/card, 확인 버튼 bbox가 기록된다.
-  - 검증: PIL 측정 completion note.
+  - 완료 기준: textarea, pencil placeholder, CTA, success dialog/card, 확인 버튼 bbox가 `TODO-P0.4` completion note와 일치한다.
+  - 검증: `TODO-P0.4` completion note 확인. 불일치하면 이 phase를 시작하지 않고 P0.4를 먼저 갱신한다.
   - production PNG evidence: 없음.
 - [ ] TODO-P5.2: `WriteWorryContainer`는 API/draft/validation/moderation 경계를 유지하고 성공 route만 09로 바꾼다.
   - 대상 파일: `src/screens/writeForm/WriteWorryContainer.tsx`, `src/screens/writeForm/containerPolicy.ts`
@@ -453,10 +664,10 @@
 허용 수정 범위: `src/screens/writeForm/**`, appShell success route helpers/tests.
 금지 수정 범위: `publishReplyViaApi` 내부, reply publication server logic.
 
-- [ ] TODO-P6.1: 17/18/19 PNG PIL anchor를 재측정한다.
+- [ ] TODO-P6.1: `TODO-P0.4`로 확정된 17/18/19 Measurement Anchor 표를 구현 시작 전에 확인한다.
   - 대상 파일: `design/reference/pngs/screens/17-answer-write-1.png`, `18-answer-write-2.png`, `19-answer-write-3.png`
-  - 완료 기준: worry summary card, overlay panel, textarea, success screen, 확인 버튼 bbox가 기록된다.
-  - 검증: PIL 측정 completion note.
+  - 완료 기준: worry summary card, overlay panel, textarea, success screen, 확인 버튼 bbox가 `TODO-P0.4` completion note와 일치한다.
+  - 검증: `TODO-P0.4` completion note 확인. 불일치하면 이 phase를 시작하지 않고 P0.4를 먼저 갱신한다.
   - production PNG evidence: 없음.
 - [ ] TODO-P6.2: `WriteReplyContainer`는 API/draft/validation/moderation 경계를 유지하고 성공 route만 19로 바꾼다.
   - 대상 파일: `src/screens/writeForm/WriteReplyContainer.tsx`, `src/screens/writeForm/containerPolicy.ts`
@@ -513,47 +724,52 @@
 허용 수정 범위: 새 `src/screens/answerCheck/**` deep module, legacy `src/screens/replyDetail/**` route removal edits, relevant route helpers/tests, feedback container policy tests.
 금지 수정 범위: feedback server/API internals unless PRD 기능 정합성 테스트가 먼저 실패한다.
 
-- [ ] TODO-P7.1: 08 PNG PIL anchor를 재측정한다.
+- [ ] TODO-P7.1: `TODO-P0.4`로 확정된 08 Measurement Anchor 표를 구현 시작 전에 확인한다.
   - 대상 파일: `design/reference/pngs/screens/08-answer-check.png`, `docs/TODO.md`
-  - 완료 기준: 내 고민 박스, 답변 박스들, 좋아요/싫어요 버튼, 하단바 bbox가 기록된다.
-  - 검증: PIL 측정 completion note.
+  - 완료 기준: 내 고민 박스, 답변 박스들, 좋아요/싫어요 버튼, 하단바 bbox가 `TODO-P0.4` completion note와 일치한다.
+  - 검증: `TODO-P0.4` completion note 확인. 불일치하면 이 phase를 시작하지 않고 P0.4를 먼저 갱신한다.
   - production PNG evidence: 없음.
 - [ ] TODO-P7.2: 08을 `src/screens/answerCheck/**` 전용 deep module로 분리하고 `replyDetail` 단일 답변 상세 의존을 제거한다.
   - 대상 파일: `src/screens/answerCheck/AnswerCheckContainer.tsx`, `src/screens/answerCheck/AnswerCheckScreen.tsx`, `src/screens/answerCheck/contract.ts`, `src/screens/answerCheck/mapping.ts`, `src/screens/importBoundaries.test.ts`
   - 완료 기준: 08은 단일 답변 상세가 아니라 여러 답변 read model을 받는 screen contract를 갖고, `replyDetail`은 새 PRD route flow에서 호출되지 않는다.
   - 검증: import boundary test와 route rendering test.
   - production PNG evidence: `tmp/answer-check-pixel-alignment/08-answer-check-production.png`.
-- [ ] TODO-P7.3: 08 뒤로 가기는 20-my-worries로 이동한다.
+- [ ] TODO-P7.3: `answer_check` route state contract를 `worryId` 필수로 고정한다.
+  - 대상 파일: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/prdNavigationPolicy.test.ts`, `src/screens/answerCheck/AnswerCheckContainer.tsx`
+  - 완료 기준: `AppRouteState`에 `{ route: 'answer_check'; worryId: string }` 또는 동등한 필수 `worryId` route state가 있고, `AnswerCheckContainer`는 `selectedMyWorry` React state만으로 동작하지 않는다. 직접 복원을 지원하지 않는 경우 `worryId`로 read model 복원 실패 시 fallback route는 `my_worries`로 명시한다.
+  - 검증: route test에서 `answer_check` without `worryId`가 생성되지 않거나 `my_worries` fallback으로 정리됨을 확인한다.
+  - production PNG evidence: 없음.
+- [ ] TODO-P7.4: 08 뒤로 가기는 20-my-worries로 이동한다.
   - 대상 파일: appShell route helper, answer check container
   - 완료 기준: back route가 `my_worries`이고 06/13/기존 detail로 이동하지 않는다.
   - 검증: route test.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.4: 답변 0개 상태는 내 고민만 보이고 별도 empty 문구를 표시하지 않는다.
+- [ ] TODO-P7.5: 답변 0개 상태는 내 고민만 보이고 별도 empty 문구를 표시하지 않는다.
   - 대상 파일: answer check screen/contract
   - 완료 기준: replies array가 비어도 empty component가 렌더링되지 않는다.
   - 검증: screen state test.
   - production PNG evidence: Phase 10에서 캡처할 경우 `tmp/empty-loading-pixel-alignment/08-answer-check-empty-production.png`.
-- [ ] TODO-P7.5: 좋아요 클릭은 즉시 확정되고 helpedCount 증가와 코멘트 선택 입력을 분리한다.
+- [ ] TODO-P7.6: 좋아요 클릭은 즉시 확정되고 helpedCount 증가와 코멘트 선택 입력을 분리한다.
   - 대상 파일: answer check container, `src/services/replyFeedback/**` tests if existing API supports it
   - 완료 기준: like mutation 성공 후 답변 박스는 유지되고 comment dialog는 submit/skip 가능하다.
   - 검증: container/service policy tests.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.6: 싫어요 클릭은 즉시 확정하되 답변 숨김은 코멘트 창 종료 후 수행한다.
+- [ ] TODO-P7.7: 싫어요 클릭은 즉시 확정하되 답변 숨김은 코멘트 창 종료 후 수행한다.
   - 대상 파일: answer check container/screen
   - 완료 기준: dislike selected state와 comment dialog lifecycle이 테스트되고, dialog 종료 후 해당 answer card가 숨겨진다.
   - 검증: state interaction test.
   - production PNG evidence: 없음.
-- [ ] TODO-P7.7: 좋아요/싫어요 코멘트는 답변 하나당 1개만 허용하고 AI 필터링을 거친다.
+- [ ] TODO-P7.8: 좋아요/싫어요 코멘트는 답변 하나당 1개만 허용하고 AI 필터링을 거친다.
   - 대상 파일: answer check container, `src/services/replyFeedback/*`
   - 완료 기준: duplicate comment attempt와 moderation rejected case가 테스트된다.
   - 검증: `src/services/replyFeedback/*.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P7.8: 싫어요/싫어요 코멘트는 답변자에게 절대 노출되지 않는다.
+- [ ] TODO-P7.9: 싫어요/싫어요 코멘트는 답변자에게 절대 노출되지 않는다.
   - 대상 파일: `src/screens/myPage/mapping.ts`, `src/services/myWorries/prdPolicy.test.ts`, answer check tests
   - 완료 기준: my answers read model에서는 dislike가 피드백 없음처럼 보인다.
   - 검증: mapping/service tests.
-  - production PNG evidence: Phase 8 `13-my-answers-production.png`.
-- [ ] TODO-P7.9: 08 production PNG evidence를 생성한다.
+  - production PNG evidence: Phase 8C `13-my-answers-production.png`.
+- [ ] TODO-P7.10: 08 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/answer-check-pixel-alignment/08-answer-check-production.png`
   - 완료 기준: 393x852 production capture이며 PNG 외 파일이 없다.
   - 검증: PNG 크기와 anchor mismatch completion note.
@@ -568,62 +784,42 @@
 완료 보고 형식:
 - answer-check module decision, feedback state policy, privacy test 결과, evidence 경로를 보고한다.
 
-## Phase 8: 10/12/13/14 My-Page Subflows
+## Phase 8A: 10 My-Page
 
-목표: 마이페이지와 관심 분야 수정, 내가 쓴 답변 목록, 개인정보처리방침을 MVP 범위와 PNG에 맞춘다.
-허용 수정 범위: `src/screens/myPage/**`, `src/services/policyDocuments/**` only for privacy-only/empty message policy, relevant tests.
-금지 수정 범위: app install/PWA guide 기능 추가, operation policy route 유지.
+목표: 10-my-page를 MVP 범위와 PNG에 맞춘다.
+허용 수정 범위: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`, related tests.
+금지 수정 범위: app install/PWA guide 기능 추가, operation policy route 유지, 12/13/14 세부 pixel work.
 
-- [ ] TODO-P8.1: 10/12/13/14 PNG PIL anchor를 재측정한다.
-  - 대상 파일: `design/reference/pngs/screens/10-my-page.png`, `12-edit-interests.png`, `13-my-answers.png`, `14-privacy-policy.png`
-  - 완료 기준: profile summary, setting rows, chip grid, answer list cards, policy body area bbox가 기록된다.
-  - 검증: PIL 측정 completion note.
+- [ ] TODO-P8A.1: 10 PNG Measurement Anchor 표를 구현 시작 전 재확인한다.
+  - 대상 파일: `docs/TODO.md`, `design/reference/pngs/screens/10-my-page.png`
+  - 완료 기준: 10 표의 profile summary, setting rows, bottom nav bbox가 PIL 재측정값과 맞는다.
+  - 검증: `TODO-P0.4` completion note 확인.
   - production PNG evidence: 없음.
-- [ ] TODO-P8.2: `MyPageScreen`에서 앱처럼 사용하기 QR/공유 영역과 운영정책 항목을 제거한다.
+- [ ] TODO-P8A.2: `MyPageScreen`에서 앱처럼 사용하기 QR/공유 영역과 운영정책 항목을 제거한다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/contract.ts`
   - 완료 기준: 10 PNG 항목만 남고 `QrCode`, `Share2`, `QRCodeSVG`, `operation_policy`, `app_install_guide` UI가 없다.
   - 검증: `rg -n "QrCode|Share2|QRCodeSVG|operation_policy|app_install_guide" src/screens/myPage`
   - production PNG evidence: `tmp/my-page-pixel-alignment/10-my-page-production.png`.
-- [ ] TODO-P8.3: `MyPageContainer`/contract에서 MVP 제외 props와 route handling을 제거한다.
+- [ ] TODO-P8A.3: `MyPageContainer`/contract에서 MVP 제외 props와 route handling을 제거한다.
   - 대상 파일: `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/contract.ts`, tests
   - 완료 기준: operation policy/app install props와 dispatch가 사라지고 개인정보처리방침만 policy route로 남는다.
   - 검증: `src/screens/myPage/contract.test.ts`, `src/screens/myPage/importBoundary.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P8.4: 10 마이페이지 표시 항목을 PRD대로 맞춘다.
+- [ ] TODO-P8A.4: 10 마이페이지 표시 항목을 PRD대로 맞춘다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/mapping.ts`
   - 완료 기준: 닉네임, 받은 좋아요/하트 총합, 관심 분야 수정, 내가 쓴 답변 preview, 전체보기, 알림 토글, 개인정보처리방침, 로그아웃, 회원 탈퇴만 표시한다.
   - 검증: screen rendering test.
   - production PNG evidence: `tmp/my-page-pixel-alignment/10-my-page-production.png`.
-- [ ] TODO-P8.5: 알림 설정을 토글 UI와 브라우저 권한 제약 문구로 표현한다.
+- [ ] TODO-P8A.5: 알림 설정을 토글 UI와 브라우저 권한 제약 문구로 표현한다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`
   - 완료 기준: 별도 `notification_settings` route 없이 10 화면 안에서 토글 상태를 제어한다.
   - 검증: screen interaction test.
   - production PNG evidence: `tmp/my-page-pixel-alignment/10-my-page-production.png`.
-- [ ] TODO-P8.6: 12 관심 분야 수정 화면을 PRD대로 맞춘다.
-  - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/MyPageContainer.tsx`
-  - 완료 기준: 3열 고정 크기 칩, 0개 저장 시 `1개 이상의 관심 분야를 선택해주세요.`, 저장 성공 후 10 이동, 실패 시 기존 선택 유지.
-  - 검증: container/screen interaction tests.
-  - production PNG evidence: `tmp/my-page-pixel-alignment/12-edit-interests-production.png`.
-- [ ] TODO-P8.7: 13 내가 쓴 답변 목록을 PRD feedback visibility로 맞춘다.
-  - 대상 파일: `src/screens/myPage/MyAnswersScreen.tsx`, `src/screens/myPage/mapping.ts`, `src/screens/myPage/contract.ts`
-  - 완료 기준: 모든 답변 동일 형식, 좋아요는 하트만, 코멘트 있으면 1개 작은 폰트, 싫어요는 피드백 없음처럼 표시.
-  - 검증: mapping/screen tests.
-  - production PNG evidence: `tmp/my-page-pixel-alignment/13-my-answers-production.png`.
-- [ ] TODO-P8.8: 내가 쓴 답변 상세 route를 PRD대로 제거 또는 비활성화한다.
-  - 대상 파일: `src/screens/myPage/MyAnswersContainer.tsx`, appShell routes, replyDetail routes/tests
-  - 완료 기준: 새 PRD의 `내가 쓴 답변 상세 화면은 MVP에서 제공하지 않는다`에 맞춰 `my_answer_detail` 이동이 제거된다.
-  - 검증: `rg -n "my_answer_detail|routeToMyReplyDetail|read_my_reply" src`
-  - production PNG evidence: `tmp/my-page-pixel-alignment/13-my-answers-production.png`.
-- [ ] TODO-P8.9: 14 개인정보처리방침 source와 empty 문구를 PRD대로 맞춘다.
-  - 대상 파일: `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/MyPageScreen.tsx`, `src/services/policyDocuments/*`
-  - 완료 기준: `docs/privacy_policy.md`만 source of truth이고 빈 경우 `정책을 준비 중입니다.`를 표시한다.
-  - 검증: `src/services/policyDocuments/policyLoader.test.ts`, screen test.
-  - production PNG evidence: `tmp/my-page-pixel-alignment/14-privacy-policy-production.png`.
-- [ ] TODO-P8.10: 10/12/13/14 production PNG evidence를 생성한다.
-  - 대상 파일: `tmp/my-page-pixel-alignment/10-my-page-production.png`, `12-edit-interests-production.png`, `13-my-answers-production.png`, `14-privacy-policy-production.png`
-  - 완료 기준: 네 PNG가 393x852 production capture이고 PNG 외 파일이 없다.
+- [ ] TODO-P8A.6: 10 production PNG evidence를 생성한다.
+  - 대상 파일: `tmp/my-page-pixel-alignment/10-my-page-production.png`
+  - 완료 기준: 393x852 production capture이고 reference PNG 복사 또는 design/reference preview 캡처가 아니며 PNG 외 파일이 없다.
   - 검증: PNG 크기와 anchor mismatch completion note.
-  - production PNG evidence: listed files.
+  - production PNG evidence: `tmp/my-page-pixel-alignment/10-my-page-production.png`.
 
 검증 명령:
 - `npm test`
@@ -632,7 +828,103 @@
 - `npm run validate:design-reference`
 
 완료 보고 형식:
-- MVP 제외 항목 제거, helpedCount 문구, 12/13/14 정책, evidence 경로를 보고한다.
+- 10 MVP 제외 항목 제거, helpedCount 문구, 알림 토글, evidence 경로를 보고한다.
+
+## Phase 8B: 12 Edit-Interests
+
+목표: 12-edit-interests를 PRD 관심 분야 수정 정책과 PNG에 맞춘다.
+허용 수정 범위: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/contract.ts`, related tests.
+금지 수정 범위: 온보딩 관심 분야 flow 리팩터링, 10/13/14 pixel work.
+
+- [ ] TODO-P8B.1: 12 PNG Measurement Anchor 표를 구현 시작 전 재확인한다.
+  - 대상 파일: `docs/TODO.md`, `design/reference/pngs/screens/12-edit-interests.png`
+  - 완료 기준: chip grid outer, chip size/gap, CTA bbox가 PIL 재측정값과 맞는다.
+  - 검증: `TODO-P0.4` completion note 확인.
+  - production PNG evidence: 없음.
+- [ ] TODO-P8B.2: 12 관심 분야 수정 화면을 PRD대로 맞춘다.
+  - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/MyPageContainer.tsx`
+  - 완료 기준: 3열 고정 크기 칩, 0개 저장 시 `1개 이상의 관심 분야를 선택해주세요.`, 저장 성공 후 10 이동, 실패 시 기존 선택 유지.
+  - 검증: container/screen interaction tests.
+  - production PNG evidence: `tmp/my-page-pixel-alignment/12-edit-interests-production.png`.
+- [ ] TODO-P8B.3: 12 production PNG evidence를 생성한다.
+  - 대상 파일: `tmp/my-page-pixel-alignment/12-edit-interests-production.png`
+  - 완료 기준: 393x852 production capture이고 reference PNG 복사 또는 design/reference preview 캡처가 아니며 PNG 외 파일이 없다.
+  - 검증: PNG 크기와 anchor mismatch completion note.
+  - production PNG evidence: `tmp/my-page-pixel-alignment/12-edit-interests-production.png`.
+
+검증 명령:
+- `npm test`
+- `npm run lint`
+- `npm run build`
+
+완료 보고 형식:
+- 12 validation/save flow, fixed chip grid, evidence 경로를 보고한다.
+
+## Phase 8C: 13 My-Answers
+
+목표: 13-my-answers를 PRD feedback visibility와 PNG에 맞춘다.
+허용 수정 범위: `src/screens/myPage/MyAnswersScreen.tsx`, `src/screens/myPage/MyAnswersContainer.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`, appShell legacy detail route removal tests.
+금지 수정 범위: answerCheck feedback mutation implementation, 10/12/14 pixel work.
+
+- [ ] TODO-P8C.1: 13 PNG Measurement Anchor 표를 구현 시작 전 재확인한다.
+  - 대상 파일: `docs/TODO.md`, `design/reference/pngs/screens/13-my-answers.png`
+  - 완료 기준: answer cards, title, bottom nav bbox가 PIL 재측정값과 맞는다.
+  - 검증: `TODO-P0.4` completion note 확인.
+  - production PNG evidence: 없음.
+- [ ] TODO-P8C.2: 13 내가 쓴 답변 목록을 PRD feedback visibility로 맞춘다.
+  - 대상 파일: `src/screens/myPage/MyAnswersScreen.tsx`, `src/screens/myPage/mapping.ts`, `src/screens/myPage/contract.ts`
+  - 완료 기준: 모든 답변 동일 형식, 좋아요는 하트만, 코멘트 있으면 1개 작은 폰트, 싫어요는 피드백 없음처럼 표시.
+  - 검증: mapping/screen tests.
+  - production PNG evidence: `tmp/my-page-pixel-alignment/13-my-answers-production.png`.
+- [ ] TODO-P8C.3: 내가 쓴 답변 상세 route를 PRD대로 제거 또는 비활성화한다.
+  - 대상 파일: `src/screens/myPage/MyAnswersContainer.tsx`, appShell routes, replyDetail routes/tests
+  - 완료 기준: 새 PRD의 `내가 쓴 답변 상세 화면은 MVP에서 제공하지 않는다`에 맞춰 `my_answer_detail` 이동이 제거된다.
+  - 검증: `rg -n "my_answer_detail|routeToMyReplyDetail|read_my_reply" src`
+  - production PNG evidence: `tmp/my-page-pixel-alignment/13-my-answers-production.png`.
+- [ ] TODO-P8C.4: 13 production PNG evidence를 생성한다.
+  - 대상 파일: `tmp/my-page-pixel-alignment/13-my-answers-production.png`
+  - 완료 기준: 393x852 production capture이고 reference PNG 복사 또는 design/reference preview 캡처가 아니며 PNG 외 파일이 없다.
+  - 검증: PNG 크기와 anchor mismatch completion note.
+  - production PNG evidence: `tmp/my-page-pixel-alignment/13-my-answers-production.png`.
+
+검증 명령:
+- `npm test`
+- `npm run lint`
+- `npm run build`
+
+완료 보고 형식:
+- 13 feedback visibility, 상세 route 제거, evidence 경로를 보고한다.
+
+## Phase 8D: 14 Privacy-Policy
+
+목표: 14-privacy-policy를 개인정보처리방침 단일 정책 문서와 PNG에 맞춘다.
+허용 수정 범위: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/contract.ts`, `src/services/policyDocuments/**` privacy-only/empty message policy, related tests.
+금지 수정 범위: operation policy route 복원, 이용약관/앱 사용 안내 추가, 10/12/13 pixel work.
+
+- [ ] TODO-P8D.1: 14 PNG Measurement Anchor 표를 구현 시작 전 재확인한다.
+  - 대상 파일: `docs/TODO.md`, `design/reference/pngs/screens/14-privacy-policy.png`
+  - 완료 기준: policy content area, text/glyph, bottom nav bbox가 PIL 재측정값과 맞는다.
+  - 검증: `TODO-P0.4` completion note 확인.
+  - production PNG evidence: 없음.
+- [ ] TODO-P8D.2: 14 개인정보처리방침 source와 empty 문구를 PRD대로 맞춘다.
+  - 대상 파일: `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/MyPageScreen.tsx`, `src/services/policyDocuments/*`
+  - 완료 기준: `docs/privacy_policy.md`만 source of truth이고 빈 경우 `정책을 준비 중입니다.`를 표시한다.
+  - 검증: `src/services/policyDocuments/policyLoader.test.ts`, screen test.
+  - production PNG evidence: `tmp/my-page-pixel-alignment/14-privacy-policy-production.png`.
+- [ ] TODO-P8D.3: 14 production PNG evidence를 생성한다.
+  - 대상 파일: `tmp/my-page-pixel-alignment/14-privacy-policy-production.png`
+  - 완료 기준: 393x852 production capture이고 reference PNG 복사 또는 design/reference preview 캡처가 아니며 PNG 외 파일이 없다.
+  - 검증: PNG 크기와 anchor mismatch completion note.
+  - production PNG evidence: `tmp/my-page-pixel-alignment/14-privacy-policy-production.png`.
+
+검증 명령:
+- `npm test`
+- `npm run lint`
+- `npm run build`
+- `npm run validate:design-reference`
+
+완료 보고 형식:
+- 14 privacy-only policy, empty 문구, evidence 경로를 보고한다.
 
 ## Phase 9: 15/16 Logout/Account Deletion Overlays
 
@@ -640,10 +932,10 @@
 허용 수정 범위: `src/screens/myPage/**`, `src/services/userAccount/**` tests only if deletion policy requires.
 금지 수정 범위: DB 완전 삭제 정책 추가, 별도 full page route로 전환.
 
-- [ ] TODO-P9.1: 15/16 PNG PIL anchor를 재측정한다.
+- [ ] TODO-P9.1: `TODO-P0.4`로 확정된 15/16 Measurement Anchor 표를 구현 시작 전에 확인한다.
   - 대상 파일: `design/reference/pngs/screens/15-logout.png`, `16-account-deletion.png`
-  - 완료 기준: dimmed background, dialog card, 취소/확인 버튼 bbox가 기록된다.
-  - 검증: PIL 측정 completion note.
+  - 완료 기준: dimmed background, dialog card, 취소/확인 버튼 bbox가 `TODO-P0.4` completion note와 일치한다.
+  - 검증: `TODO-P0.4` completion note 확인. 불일치하면 이 phase를 시작하지 않고 P0.4를 먼저 갱신한다.
   - production PNG evidence: 없음.
 - [ ] TODO-P9.2: 로그아웃/탈퇴 확인을 마이페이지 위 overlay/dialog로 구현한다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/shared/ui.tsx`
