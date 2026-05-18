@@ -17,13 +17,21 @@ export type WriteDraftContract = {
   readonly submitDisabledReason?: SubmitDisabledReason;
 };
 
-export type WriteWorryFormProps = {
-  readonly kind: 'write-worry';
+export type WriteWorryScreenProps = {
   readonly draft: WriteDraftContract;
-  readonly category?: WorryCategory;
+  readonly onBack: () => void;
   readonly onDraftChange: (value: string) => void;
-  readonly onCategoryChange?: (value: WorryCategory) => void;
   readonly onPublish: () => void;
+};
+
+export type WriteWorryFormProps = WriteWorryScreenProps & {
+  readonly kind: 'write-worry';
+  readonly category?: WorryCategory;
+  readonly onCategoryChange?: (value: WorryCategory) => void;
+};
+
+export type WriteWorrySuccessScreenProps = {
+  readonly onConfirm: () => void;
 };
 
 export type OriginalWorrySummaryProps = {
@@ -42,4 +50,4 @@ export type WriteReplyFormProps = {
   readonly onPublish: (target: { readonly deliveryId: string; readonly worryId: string }) => void;
 };
 
-export type WriteFormScreenProps = WriteWorryFormProps | WriteReplyFormProps;
+export type WriteFormScreenProps = WriteReplyFormProps;

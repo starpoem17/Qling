@@ -1,6 +1,5 @@
 import { useState, type Dispatch, type SetStateAction } from 'react';
 import type { User } from 'firebase/auth';
-import { ArrowLeft } from 'lucide-react';
 import { publishWorryViaApi } from '../../services/worryPublication/apiClient';
 import {
   backRouteFromWriteWorry,
@@ -17,7 +16,7 @@ import { CONTENT_MAX_LENGTH, validateDraftContent } from '../../services/validat
 import type { ScreenModerationState } from '../shared/contract';
 import { resolveWorryPublicationResult } from './containerPolicy';
 import { buildWriteDraftContract } from './mapping';
-import { WriteFormScreen } from './WriteFormScreen';
+import { WriteWorryScreen } from './WriteWorryScreen';
 
 export type WriteWorryContainerProps = {
   readonly user: User | null;
@@ -81,34 +80,21 @@ export function WriteWorryContainer(props: WriteWorryContainerProps) {
   };
 
   return (
-    <div className="space-y-5 pb-4">
-      <button
-        onClick={() => props.setView(backRouteFromWriteWorry())}
-        className="flex items-center gap-2 text-sm font-bold text-[var(--qling-color-muted)] transition-colors hover:text-[var(--qling-color-text)]"
-        aria-label="나의 고민으로 돌아가기"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" /> 돌아가기
-      </button>
-      <header className="text-center">
-        <h2 className="text-lg font-extrabold text-[var(--qling-color-text)]">질문 작성</h2>
-      </header>
-
-      <WriteFormScreen
-        kind="write-worry"
-        draft={buildWriteDraftContract({
-          value: draft,
-          maxLength: CONTENT_MAX_LENGTH,
-          validation,
-          moderation,
-          isProcessing,
-        })}
-        onDraftChange={value => {
-          setDraft(value);
-          setStoredDraft(WRITE_WORRY_DRAFT_KEY, value);
-          setModeration({ status: 'idle' });
-        }}
-        onPublish={publish}
-      />
-    </div>
+    <WriteWorryScreen
+      draft={buildWriteDraftContract({
+        value: draft,
+        maxLength: CONTENT_MAX_LENGTH,
+        validation,
+        moderation,
+        isProcessing,
+      })}
+      onBack={() => props.setView(backRouteFromWriteWorry())}
+      onDraftChange={value => {
+        setDraft(value);
+        setStoredDraft(WRITE_WORRY_DRAFT_KEY, value);
+        setModeration({ status: 'idle' });
+      }}
+      onPublish={publish}
+    />
   );
 }

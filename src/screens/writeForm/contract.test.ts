@@ -6,6 +6,8 @@ import type {
   WriteFormScreenProps,
   WriteReplyFormProps,
   WriteWorryFormProps,
+  WriteWorryScreenProps,
+  WriteWorrySuccessScreenProps,
 } from './contract';
 
 const validDraft = {
@@ -27,6 +29,7 @@ test('write-worry form contract represents draft, category, validation, and publ
       submitDisabledReason: 'processing',
     },
     category: WORRY_CATEGORIES[0],
+    onBack: () => undefined,
     onDraftChange: () => undefined,
     onCategoryChange: () => undefined,
     onPublish: () => undefined,
@@ -41,7 +44,34 @@ test('write-worry form contract represents draft, category, validation, and publ
   assert.equal(props.draft.errorMessage, 'Submit failed');
   assert.equal(props.draft.isProcessing, false);
   assert.equal(typeof props.onDraftChange, 'function');
+  assert.equal(typeof props.onBack, 'function');
   assert.equal(typeof props.onPublish, 'function');
+});
+
+test('write-worry screen contract separates back, draft, and publish intents from route/API objects', () => {
+  const props = {
+    draft: validDraft,
+    onBack: () => undefined,
+    onDraftChange: () => undefined,
+    onPublish: () => undefined,
+  } satisfies WriteWorryScreenProps;
+
+  assert.equal(typeof props.onBack, 'function');
+  assert.equal(typeof props.onDraftChange, 'function');
+  assert.equal(typeof props.onPublish, 'function');
+  assert.equal(Object.hasOwn(props, 'setView'), false);
+  assert.equal(Object.hasOwn(props, 'publishWorryViaApi'), false);
+  assert.equal(Object.hasOwn(props, 'draftStorage'), false);
+});
+
+test('write-worry success screen contract exposes confirm only', () => {
+  const props = {
+    onConfirm: () => undefined,
+  } satisfies WriteWorrySuccessScreenProps;
+
+  assert.equal(typeof props.onConfirm, 'function');
+  assert.equal(Object.hasOwn(props, 'setView'), false);
+  assert.equal(Object.hasOwn(props, 'route'), false);
 });
 
 test('write-reply form contract carries original worry summary, selected delivery, and worry ids', () => {
@@ -76,7 +106,13 @@ test('write-reply form contract carries original worry summary, selected deliver
 
 test('write form union keeps publication as event props only', () => {
   const props: WriteFormScreenProps = {
-    kind: 'write-worry',
+    kind: 'write-reply',
+    originalWorry: {
+      deliveryId: 'delivery-1',
+      worryId: 'worry-1',
+      category: WORRY_CATEGORIES[0],
+      bodyText: 'Original',
+    },
     draft: {
       ...validDraft,
       validation: { status: 'invalid', message: 'Too long' },
@@ -113,6 +149,7 @@ test('write form contract covers empty, too-long, valid, processing, rejected, a
     const props = {
       kind: 'write-worry',
       draft,
+      onBack: () => undefined,
       onDraftChange: () => undefined,
       onPublish: () => undefined,
     } satisfies WriteWorryFormProps;

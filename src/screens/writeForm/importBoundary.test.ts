@@ -5,6 +5,8 @@ import path from 'node:path';
 
 const presentationalScreenFiles = [
   path.join(process.cwd(), 'src', 'screens', 'writeForm', 'WriteFormScreen.tsx'),
+  path.join(process.cwd(), 'src', 'screens', 'writeForm', 'WriteWorryScreen.tsx'),
+  path.join(process.cwd(), 'src', 'screens', 'writeForm', 'WriteWorrySuccessScreen.tsx'),
 ] as const;
 
 const forbiddenImportSources = [
@@ -45,9 +47,16 @@ test('write-form presentational screen files have no forbidden production import
 });
 
 test('write-form presentational screen emits draft and publish events only', () => {
-  const source = fs.readFileSync(presentationalScreenFiles[0], 'utf8');
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'writeForm', 'WriteWorryScreen.tsx'), 'utf8');
 
-  assert.match(source, /onChange=\{props\.onDraftChange\}/);
-  assert.match(source, /props\.onPublish\(/);
+  assert.match(source, /props\.onDraftChange/);
+  assert.match(source, /onClick=\{props\.onPublish\}/);
   assert.doesNotMatch(source, /validateDraftContent|publishWorryViaApi|publishReplyViaApi|setDraft|clearDraft/);
+});
+
+test('write-worry success screen exposes only confirm intent', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'writeForm', 'WriteWorrySuccessScreen.tsx'), 'utf8');
+
+  assert.match(source, /onClick=\{props\.onConfirm\}/);
+  assert.doesNotMatch(source, /setView|routeAfterWorrySuccessConfirmation|filterAlert|publishWorryViaApi/);
 });

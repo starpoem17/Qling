@@ -36,6 +36,7 @@ import {
   type SelectedReceivedWorry,
 } from './screens/receivedWorries/ReceivedWorriesContainer';
 import { WriteWorryContainer } from './screens/writeForm/WriteWorryContainer';
+import { WriteWorrySuccessContainer } from './screens/writeForm/WriteWorrySuccessContainer';
 import { WriteReplyContainer } from './screens/writeForm/WriteReplyContainer';
 import { MyPageContainer } from './screens/myPage/MyPageContainer';
 import { MyAnswersContainer } from './screens/myPage/MyAnswersContainer';
@@ -388,6 +389,12 @@ export default function App() {
                 clearSelectedMyWorry={() => setSelectedMyWorry(null)}
                 setFilterAlert={setFilterAlert}
               />
+            </motion.div>
+          )}
+
+          {currentRoute === 'write_worry_success' && (
+            <motion.div key="write_worry_success" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <WriteWorrySuccessContainer setView={setView} />
             </motion.div>
           )}
 

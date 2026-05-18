@@ -910,46 +910,118 @@ Onboarding 선례의 정확한 표현:
 허용 수정 범위: `src/screens/writeForm/**`, appShell success route helpers/tests, draft/moderation container policy tests.
 금지 수정 범위: `publishWorryViaApi` 내부, server moderation/publication logic.
 
-- [ ] TODO-P5.1: 07/09 PNG PIL anchor를 재측정한다.
+- [x] TODO-P5.1: 07/09 PNG PIL anchor를 재측정한다.
   - 대상 파일: `design/reference/pngs/screens/07-question-write-a.png`, `09-question-write-b.png`, `docs/TODO.md`
   - 완료 기준: textarea, pencil placeholder, CTA, success dialog/card, 확인 버튼 bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 completion note.
   - production PNG evidence: 없음.
-- [ ] TODO-P5.2: `WriteWorryContainer`는 API/draft/validation/moderation 경계를 유지하고 성공 route만 09로 바꾼다.
+  - completion note:
+    - changed files: `docs/TODO.md`
+    - test command/result: `python3` PIL 측정 성공; `npm test`, `npm run lint`, `npm run build`, `npm run validate:design-reference` 성공.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: `design/reference/pngs/screens/07-question-write-a.png`, `design/reference/pngs/screens/09-question-write-b.png`
+    - measured result: 07 reference size `393x852`, dominant `#fff5eb 201042`, `#fff1d1 101783`, `#ff8b3d 17679`, non-bg bbox `(0,0)-(393,828)`, top/title/back dark bbox `(24,71)-(224,87)`, textarea/card orange bbox `(20,120)-(373,661)`, pencil/placeholder region `(20,120)-(373,190)`, character/CTA orange bbox `(20,600)-(373,732)`, submit CTA orange bbox `(34,660)-(359,732)`, bottom bar dark/orange bbox `(204,783)-(233,801)`/`(79,730)-(333,823)`. 09 reference size `393x852`, dominant `#ada48e 96655`, `#ada7a0 76675`, `#ffffff 71853`, non-bg bbox `(0,21)-(393,852)`, success card white bbox `(42,251)-(352,539)`, title/text dark bbox `(99,349)-(293,365)`, confirm orange bbox `(66,452)-(328,504)`, bottom bar dark bbox `(204,783)-(233,801)`. status bar/home indicator는 production DOM 제외 대상.
+    - tolerated difference: reference static status bar/home indicator는 production DOM에서 제외.
+- [x] TODO-P5.2: `WriteWorryContainer`는 API/draft/validation/moderation 경계를 유지하고 성공 route만 09로 바꾼다.
   - 대상 파일: `src/screens/writeForm/WriteWorryContainer.tsx`, `src/screens/writeForm/containerPolicy.ts`
   - 완료 기준: `publishWorryViaApi`, draft storage, validation import 경계는 유지되고 success route는 09 confirmation이다.
   - 검증: `src/screens/writeForm/containerPolicy.test.ts`, import boundary test.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P5.8.
-- [ ] TODO-P5.3: 07 write-worry variant를 `WriteWorryScreen` 전용 presentational component로 분리한다.
+  - completion note:
+    - changed files: `src/screens/writeForm/WriteWorryContainer.tsx`, `src/screens/writeForm/importBoundary.test.ts`, `src/screens/writeForm/WriteWorryScreen.tsx`, `src/screens/writeForm/WriteWorryScreen.test.ts`
+    - test command/result: `npm test` 성공 672 pass/1 skip, `npm run lint` 성공, `npm run build` 성공, `rg -n "publishWorryViaApi|WRITE_WORRY_DRAFT_KEY|clearStoredDraft|setStoredDraft|routeAfterWorryPublish|write_worry_success|filterAlert" src/screens/writeForm src/App.tsx src/services/appShell` 확인.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `containerPolicy.test.ts` published route `{ route: 'write_worry_success' }`, rejected/failed `clearDraft: false`; `importBoundary.test.ts` presentational API/draft/service import 금지.
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P5.3: 07 write-worry variant를 `WriteWorryScreen` 전용 presentational component로 분리한다.
   - 대상 파일: `src/screens/writeForm/WriteFormScreen.tsx`, `src/screens/writeForm/WriteWorryScreen.tsx`, `src/screens/writeForm/contract.ts`
   - 완료 기준: 답변 작성 17과 고민 작성 07의 JSX/pixel work가 별도 screen component로 분리되고, container/draft 계약은 writeForm deep module 안에 유지된다.
   - 검증: import boundary tests.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P5.8.
-- [ ] TODO-P5.4: 07 textarea placeholder를 pencil graphic + `당신의 솔직한 이야기를 들려주세요`로 구현한다.
+  - completion note:
+    - changed files: `src/screens/writeForm/WriteWorryScreen.tsx`, `src/screens/writeForm/WriteWorryScreen.test.ts`, `src/screens/writeForm/WriteFormScreen.tsx`, `src/screens/writeForm/contract.ts`, `src/screens/importBoundaries.test.ts`
+    - test command/result: `npm test` 성공 672 pass/1 skip; `WriteWorryScreen.test.ts` empty/non-empty placeholder, event callbacks, validation/moderation copy 검증.
+    - production PNG path: `tmp/write-worry-pixel-alignment/07-question-write-a-production.png`
+    - capture type: harness component
+    - harness route/data verification: route/API는 `WriteWorryContainer` + `containerPolicy.test.ts`, write-reply compile은 `npm run lint`와 기존 `WriteReplyContainer` 경로로 검증.
+    - reference PNG path: `design/reference/pngs/screens/07-question-write-a.png`
+    - measured result: 07 production size `393x852`, dominant `#fff5eb 193146`, `#fff8ef 73198`, `#ffffff 18088`, non-bg bbox `(0,0)-(393,852)`, textarea/card orange bbox `(16,108)-(377,656)`, CTA region `(16,600)-(377,706)`, bottom bar bbox `(0,730)-(393,852)`.
+    - tolerated difference: reference static status/home indicator 제외로 non-bg bottom differs; CTA는 empty validation disabled 상태라 production color가 pale orange인 차이 허용.
+- [x] TODO-P5.4: 07 textarea placeholder를 pencil graphic + `당신의 솔직한 이야기를 들려주세요`로 구현한다.
   - 대상 파일: write worry screen file, `src/screens/writeForm/contract.ts`
   - 완료 기준: 입력 전에는 pencil과 문구가 보이고, 입력 시작 시 둘 다 숨는다.
   - 검증: screen interaction test.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P5.8.
-- [ ] TODO-P5.5: 필터링 실패 시 07에 남고 draft를 유지한다.
+  - completion note:
+    - changed files: `src/screens/writeForm/WriteWorryScreen.tsx`, `src/screens/writeForm/WriteWorryScreen.test.ts`, `src/screens/writeForm/contract.ts`
+    - test command/result: `npm test` 성공; `WriteWorryScreen.test.ts` visual placeholder 표시/숨김, textarea change handler, submit disabled 검증.
+    - production PNG path: `tmp/write-worry-pixel-alignment/07-question-write-a-production.png`
+    - capture type: harness component
+    - harness route/data verification: `WriteWorryContainer` draft 저장/검증 경계는 `npm run lint`, import boundary, source inspection으로 확인.
+    - reference PNG path: `design/reference/pngs/screens/07-question-write-a.png`
+    - measured result: reference placeholder region `(20,120)-(373,190)`, production placeholder region visual text/pencil rendered at top-left of textarea; native `placeholder=` attribute 없음.
+    - tolerated difference: pencil은 lucide icon이라 glyph pixel은 reference와 다르지만 bbox 비교 가능한 overlay 구조로 구현.
+- [x] TODO-P5.5: 필터링 실패 시 07에 남고 draft를 유지한다.
   - 대상 파일: `src/screens/writeForm/WriteWorryContainer.tsx`, `src/screens/writeForm/containerPolicy.ts`
   - 완료 기준: moderation rejected/failed는 09로 이동하지 않고 draft storage를 clear하지 않는다.
   - 검증: `src/screens/writeForm/containerPolicy.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P5.6: 성공 시 toast를 폐기하고 09 success screen을 표시한다.
+  - completion note:
+    - changed files: `src/screens/writeForm/WriteWorryContainer.tsx`, `src/screens/writeForm/WriteWorryScreen.tsx`, `src/screens/writeForm/WriteWorryScreen.test.ts`
+    - test command/result: `npm test` 성공; rejected/failed는 route 없음, `clearDraft: false`; published는 `clearDraft: true`, route `{ route: 'write_worry_success' }`.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `WriteWorryScreen.test.ts` rejected/failed 안내 문구 표시; `rg`로 `clearStoredDraft(WRITE_WORRY_DRAFT_KEY)`가 success policy branch 뒤에만 위치함을 확인.
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P5.6: 성공 시 toast를 폐기하고 09 success screen을 표시한다.
   - 대상 파일: `src/screens/writeForm/*`, `src/App.tsx`
   - 완료 기준: 09에서는 확인 버튼 외 상호작용이 없고 `filterAlert` success toast를 쓰지 않는다.
   - 검증: route/rendering test.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P5.8.
-- [ ] TODO-P5.7: 09 확인 버튼은 20-my-worries로 이동한다.
+  - completion note:
+    - changed files: `src/App.tsx`, `src/screens/writeForm/WriteWorrySuccessContainer.tsx`, `src/screens/writeForm/WriteWorrySuccessContainer.test.ts`, `src/screens/writeForm/WriteWorrySuccessScreen.tsx`, `src/screens/writeForm/WriteWorrySuccessScreen.test.ts`, `src/screens/writeForm/appBoundary.test.ts`
+    - test command/result: `npm test` 성공; success screen은 button 1개만 렌더링, App은 `write_worry_success` route에서 container 렌더링, source test로 성공 `filterAlert` toast 부재 검증.
+    - production PNG path: `tmp/write-worry-pixel-alignment/09-question-write-b-production.png`
+    - capture type: harness component
+    - harness route/data verification: `routeRenderingBoundary.test.ts` `write_worry_success` write worry group; `appBoundary.test.ts` App success route rendering; `WriteWorrySuccessContainer.test.ts` confirm route.
+    - reference PNG path: `design/reference/pngs/screens/09-question-write-b.png`
+    - measured result: 09 production size `393x852`, dominant `#ffffff 72545`, `#a6a19b 63557`, `#a69f99 50147`, non-bg bbox `(0,0)-(393,852)`, success card white bbox `(42,282)-(352,570)`, title/text dark bbox `(93,382)-(298,401)`, confirm orange bbox `(66,490)-(328,538)`, bottom bar dark bbox `(231,765)-(331,837)`.
+    - tolerated difference: production success modal is `+31px` lower than reference card top and confirm button is `+38px` lower; harness keeps production shell bottom nav and omits static mobile chrome.
+- [x] TODO-P5.7: 09 확인 버튼은 20-my-worries로 이동한다.
   - 대상 파일: success screen/container contract, `src/services/appShell/prdNavigationPolicy.ts`
   - 완료 기준: 확인 클릭 후 `my_worries` 또는 `나의 고민` route로 이동하고 작성 직후 답변 0개면 `아직 답변이 없어요.` 상태다.
   - 검증: route flow test 07→09→20.
   - production PNG evidence: 없음. Downstream visual confirmation only: 20 phase PNG는 이 체크박스의 완료 조건이 아니다.
-- [ ] TODO-P5.8: 07/09 production PNG evidence를 생성한다.
+  - completion note:
+    - changed files: `src/screens/writeForm/WriteWorrySuccessContainer.tsx`, `src/screens/writeForm/WriteWorrySuccessContainer.test.ts`
+    - test command/result: `npm test` 성공; `routeAfterWorrySuccessConfirmation()`은 `나의 고민`; `MyWorries` mapping test는 0개 답변 label `아직 답변이 없어요.` 유지.
+    - production PNG path: `tmp/write-worry-pixel-alignment/09-question-write-b-production.png`
+    - capture type: harness component
+    - harness route/data verification: `WriteWorrySuccessContainer.test.ts` 확인 클릭 시 `나의 고민`; `prdNavigationPolicy.test.ts` helper 반환; `src/screens/myPage/mapping.test.ts` 0 reply label.
+    - reference PNG path: `design/reference/pngs/screens/09-question-write-b.png`
+    - measured result: confirm button only interactive; screen HTML button count 1.
+    - tolerated difference: helper는 기존 PRD tab alias `나의 고민` 유지.
+- [x] TODO-P5.8: 07/09 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/write-worry-pixel-alignment/07-question-write-a-production.png`, `tmp/write-worry-pixel-alignment/09-question-write-b-production.png`
   - 완료 기준: 두 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: listed files.
+  - completion note:
+    - changed files: `tmp/write-worry-pixel-alignment/07-question-write-a-production.png`, `tmp/write-worry-pixel-alignment/09-question-write-b-production.png`, `tmp/write-worry-pixel-alignment/harness/index.html`, `tmp/write-worry-pixel-alignment/harness/src/main.tsx`, `docs/TODO.md`
+    - test command/result: `npm run build` 성공 후 Playwright screenshot 성공; PIL 측정 성공; `npm test`, `npm run lint`, `npm run build`, `npm run validate:design-reference` 모두 성공.
+    - production PNG path: `tmp/write-worry-pixel-alignment/07-question-write-a-production.png`, `tmp/write-worry-pixel-alignment/09-question-write-b-production.png`
+    - capture type: harness component
+    - harness route/data verification: production `WriteWorryScreen.tsx`, `WriteWorrySuccessScreen.tsx`, `MobileAppShell`, `BottomNavigation` import harness; route/container는 `WriteWorrySuccessContainer.test.ts`, `appBoundary.test.ts`, `containerPolicy.test.ts`, `routeRenderingBoundary.test.ts`로 검증.
+    - reference PNG path: `design/reference/pngs/screens/07-question-write-a.png`, `design/reference/pngs/screens/09-question-write-b.png`
+    - measured result: 07 production size `393x852`, dominant `#fff5eb 193146`, non-bg bbox `(0,0)-(393,852)`, textarea/card `(16,108)-(377,656)`, CTA `(16,600)-(377,706)`. 09 production size `393x852`, dominant `#ffffff 72545`, non-bg bbox `(0,0)-(393,852)`, success card `(42,282)-(352,570)`, confirm `(66,490)-(328,538)`.
+    - tolerated difference: static mobile status/home indicator excluded; 07 CTA disabled color reflects empty validation; 09 modal vertical offset within `38px` due production shell/font and overlay implementation.
 
 검증 명령:
 - `npm test`
