@@ -46,6 +46,29 @@
   - full route가 auth/Firebase/seed data 때문에 pixel 검증을 흐리면, production source의 `*Screen.tsx`를 직접 import하는 임시 Vite harness를 허용한다. 이 경우 보고 문구와 파일명/HTML note에 `harness component capture`임을 명시하고, route/Container 검증은 별도 테스트로 닫는다.
   - 캡처 자동화에 필요한 일시적 파일은 생성 후 제거한다. 단, 재현성을 위해 harness를 남길 때는 `tmp/*-pixel-alignment/harness/**` 아래에만 두고 production 코드와 분리한다.
   - 모든 PNG는 393x852 reference PNG와 비교 가능한 production capture인지 확인한다.
+  Visual evidence is not complete when production PNGs merely exist.
+
+  For every reference-backed screen, the agent must run a measurement loop:
+  reference PNG → production PNG → PIL measurement → pixel diff → mismatch classification → implementation patch → recapture.
+
+  Required evidence per screen:
+  - reference PNG path
+  - production PNG path
+  - reference dominant colors
+  - production dominant colors
+  - reference major bboxes
+  - production major bboxes
+  - pixel-diff changed-pixel ratio
+  - thresholded diff bbox
+  - patches made after first diff
+  - remaining mismatch and whether it is layout/style mismatch or rendering tolerance
+
+  The agent must not check the screen’s TODO if:
+  - no production PNG was generated,
+  - no diff was computed,
+  - the diff was computed but not interpreted,
+  - layout/style mismatches remain without a patch attempt,
+  - the production fixture state does not match the reference screen state.
 
 ## Completion Note Template
 
