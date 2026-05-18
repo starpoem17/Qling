@@ -19,7 +19,7 @@ test('shared primitive inventory covers every Phase 14 ownership item', () => {
     [
       'appShellMobileFrame',
       'bottomNavigation',
-      'centralWriteWorryAction',
+      'bottomNavigationCentralIndicator',
       'contentSheet',
       'orangeHeaderBand',
       'primaryCta',
@@ -36,7 +36,7 @@ test('shared primitive inventory covers every Phase 14 ownership item', () => {
   );
 });
 
-test('bottom navigation contract preserves PRD tabs and central write-worry action', () => {
+test('bottom navigation contract preserves PRD tabs and visual central indicator', () => {
   const props = {
     tabs: [
       { tab: '답변하기', label: '답변하기' },
@@ -44,21 +44,18 @@ test('bottom navigation contract preserves PRD tabs and central write-worry acti
       { tab: '마이페이지', label: '마이페이지' },
     ],
     activeTab: '답변하기',
-    centralAction: {
-      label: '고민 작성',
-      accessibleLabel: '고민 작성',
-      targetRoute: 'write_worry',
-      ownerTab: '나의 고민',
+    centralIndicator: {
+      accessibleLabel: '중앙 눈 인디케이터',
+      state: 'left',
     },
     onSelectTab: () => undefined,
-    onCentralAction: () => undefined,
   } satisfies BottomNavigationProps;
 
   assert.deepEqual(props.tabs.map(tab => tab.label), ['답변하기', '나의 고민', '마이페이지']);
   assert.equal(props.activeTab, '답변하기');
-  assert.equal(props.centralAction.label, '고민 작성');
-  assert.equal(props.centralAction.targetRoute, 'write_worry');
-  assert.equal(props.centralAction.ownerTab, '나의 고민');
+  assert.equal(props.centralIndicator.accessibleLabel, '중앙 눈 인디케이터');
+  assert.equal(props.centralIndicator.state, 'left');
+  assert.deepEqual(Object.keys(props), ['tabs', 'activeTab', 'centralIndicator', 'onSelectTab']);
 });
 
 test('profile motif remains visual-only without avatar data requirements', () => {

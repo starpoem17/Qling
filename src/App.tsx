@@ -17,19 +17,16 @@ import { onMessage } from 'firebase/messaging';
 import { auth, db, firebaseRuntimeConfig, googleProvider, isDevRuntime, messaging } from './firebase';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Radio,
   XCircle,
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { usePushRegistration } from './services/pushRegistration';
 import {
-  CENTRAL_BOTTOM_NAVIGATION_ACTION,
   PRD_APP_TABS,
   routeAfterAuthProfileLoad,
   routeAfterAccountDeletion,
   routeAfterOnboardingComplete,
   routeAfterProfileReadDenied,
-  routeToWriteWorry,
   type AppRouteViewState,
   type PrdAppTab,
 } from './services/appShell/prdNavigationPolicy';
@@ -106,9 +103,6 @@ export default function App() {
   const [loginError, setLoginError] = useState<string | null>(null);
 
   const {
-    notificationPermission,
-    pushRegistrationStatus,
-    requestNotificationPermission,
     resetPushRegistrationOnSignOut,
   } = usePushRegistration({ user, loading });
 
@@ -286,35 +280,23 @@ export default function App() {
 
   return (
     <MobileAppShell
-      header={routeBoundary.mountsAuthenticatedShell && (
-        <header className="fixed top-0 left-0 right-0 bg-[#FDFCF8]/80 backdrop-blur-md z-50 border-b border-[#E9EDC9]/50">
-          <div className="max-w-2xl mx-auto px-6 h-16 flex items-center justify-between">
-            <button onClick={() => setView('답변하기')} className="text-xl font-serif font-bold tracking-tight text-[#D4A373] flex items-center gap-2">
-              <Radio className="w-5 h-5" /> Qling
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E9EDC9]/50 rounded-full text-[10px] sm:text-xs font-bold text-[#A3B18A]">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A3B18A] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#A3B18A]"></span>
-                </span>
-                연결됨
-              </div>
-            </div>
-          </div>
-        </header>
-      )}
       bottomNavigation={routeBoundary.mountsBottomNavigation && routeBoundary.authenticatedTab && (
         <BottomNavigation
           tabs={PRD_APP_TABS.map(tab => ({ tab, label: tab }))}
           activeTab={routeBoundary.authenticatedTab}
-          centralAction={CENTRAL_BOTTOM_NAVIGATION_ACTION}
+          centralIndicator={{
+            accessibleLabel: '중앙 눈 인디케이터',
+            state: routeBoundary.authenticatedTab === '답변하기'
+              ? 'left'
+              : routeBoundary.authenticatedTab === '나의 고민'
+                ? 'right'
+                : 'center',
+          }}
           onSelectTab={(tab) => setView(tab)}
-          onCentralAction={() => setView(routeToWriteWorry())}
         />
       )}
       hasBottomNavigation={routeBoundary.mountsBottomNavigation}
-      mainClassName={cn(routeBoundary.routeGroup === 'onboarding flow' ? "pt-12" : "pt-24")}
+      mainClassName={cn(routeBoundary.routeGroup === 'onboarding flow' ? "pt-12" : "pt-6")}
     >
       <AnimatePresence>
         {filterAlert && (
@@ -374,11 +356,8 @@ export default function App() {
             || currentRoute === 'my_page'
             || currentRoute === 'edit_interests'
             || currentRoute === 'privacy_policy'
-            || currentRoute === 'operation_policy'
             || currentRoute === 'logout_confirmation'
             || currentRoute === 'account_deletion_confirmation'
-            || currentRoute === 'notification_settings'
-            || currentRoute === 'app_install_guide'
           ) && (
             <motion.div key="my_page_account" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
               <MyPageContainer
@@ -387,9 +366,6 @@ export default function App() {
                 profile={profile}
                 setView={setView}
                 setFilterAlert={setFilterAlert}
-                notificationPermission={notificationPermission}
-                pushRegistrationStatus={pushRegistrationStatus}
-                requestNotificationPermission={requestNotificationPermission}
                 resetPushRegistrationOnSignOut={resetPushRegistrationOnSignOut}
                 onAccountDeleted={handleAccountDeleted}
               />

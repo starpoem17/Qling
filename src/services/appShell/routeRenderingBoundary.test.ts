@@ -34,7 +34,9 @@ test('maps canonical route states to their Phase 3 route rendering boundaries', 
   assert.equal(routeRenderingGroupForRoute('답변하기'), 'received worries');
   assert.equal(routeRenderingGroupForRoute('received_worries'), 'received worries');
   assert.equal(routeRenderingGroupForRoute('write_worry'), 'write worry');
+  assert.equal(routeRenderingGroupForRoute('write_worry_success'), 'write worry');
   assert.equal(routeRenderingGroupForRoute('write_reply'), 'write reply');
+  assert.equal(routeRenderingGroupForRoute('write_reply_success'), 'write reply');
   assert.equal(routeRenderingGroupForRoute('나의 고민'), 'authenticated shell');
   assert.equal(routeRenderingGroupForRoute('answer_check'), 'reply details');
   assert.equal(routeRenderingGroupForRoute('received_answer_detail'), 'reply details');
@@ -44,7 +46,6 @@ test('maps canonical route states to their Phase 3 route rendering boundaries', 
   assert.equal(routeRenderingGroupForRoute('my_answers'), 'my-page/account');
   assert.equal(routeRenderingGroupForRoute('account_deletion_confirmation'), 'my-page/account');
   assert.equal(routeRenderingGroupForRoute('privacy_policy'), 'policy screens');
-  assert.equal(routeRenderingGroupForRoute('operation_policy'), 'policy screens');
 });
 
 test('identifies authenticated shell membership separately from route-specific groups', () => {
@@ -57,6 +58,13 @@ test('identifies authenticated shell membership separately from route-specific g
     currentRoute: 'write_reply',
     routeGroup: 'write reply',
     authenticatedTab: '답변하기',
+    mountsAuthenticatedShell: true,
+    mountsBottomNavigation: true,
+  });
+  assert.deepEqual(routeRenderingBoundaryForRoute({ route: 'write_worry_success', worryId: 'worry-1' }), {
+    currentRoute: 'write_worry_success',
+    routeGroup: 'write worry',
+    authenticatedTab: '나의 고민',
     mountsAuthenticatedShell: true,
     mountsBottomNavigation: true,
   });

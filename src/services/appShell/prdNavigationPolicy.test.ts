@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   ANSWER_FEED_ROUTE_ALIASES,
-  CENTRAL_BOTTOM_NAVIGATION_ACTION,
   DEFAULT_AUTHENTICATED_ROUTE,
   DEFAULT_AUTHENTICATED_TAB,
   DEPRECATED_MY_PAGE_MORE_ITEMS,
@@ -23,15 +22,18 @@ import {
   routeAfterOnboardingComplete,
   routeAfterPass,
   routeAfterReplyPublish,
+  routeAfterReplySuccessConfirmation,
   routeAfterWorryPublish,
+  routeAfterWorrySuccessConfirmation,
   routeName,
+  routeToAnswerCheck,
   routeToEditInterests,
   routeToMyAnswers,
   routeToMyReplyDetail,
   routeToMyWorries,
   routeToReceivedReplyDetail,
   routeToWriteReply,
-  routeToWriteWorry,
+  routeToWriteWorryFromMyWorriesFloatingButton,
   tabForRoute,
 } from './prdNavigationPolicy';
 
@@ -44,16 +46,15 @@ test('defines the canonical PRD app tabs and default authenticated tab', () => {
 
 test('defines the My Page More items required by the PRD shell without excluded MVP routes', () => {
   assert.deepEqual(MY_PAGE_MORE_ITEMS, [
-    'notification_settings',
-    'app_install_guide',
     'privacy_policy',
-    'operation_policy',
     'logout',
     'delete_account',
   ]);
   assert.deepEqual(DEPRECATED_MY_PAGE_MORE_ITEMS, ['usage_guide', 'policy']);
   assert.equal(MY_PAGE_MORE_ITEMS.includes('privacy_policy'), true);
-  assert.equal(MY_PAGE_MORE_ITEMS.includes('operation_policy'), true);
+  assert.equal((MY_PAGE_MORE_ITEMS as readonly string[]).includes('operation_policy'), false);
+  assert.equal((MY_PAGE_MORE_ITEMS as readonly string[]).includes('notification_settings'), false);
+  assert.equal((MY_PAGE_MORE_ITEMS as readonly string[]).includes('app_install_guide'), false);
   assert.equal((MY_PAGE_MORE_ITEMS as readonly string[]).includes('usage_guide'), false);
   assert.equal((MY_PAGE_MORE_ITEMS as readonly string[]).includes('policy'), false);
 });
@@ -70,6 +71,8 @@ test('covers every Phase 2 canonical route/state in the service policy', () => {
     'received_worries',
     'write_worry',
     'write_reply',
+    'write_worry_success',
+    'write_reply_success',
     'received_answer_detail',
     'my_answer_detail',
     'answer_check',
@@ -78,7 +81,6 @@ test('covers every Phase 2 canonical route/state in the service policy', () => {
     'my_answers',
     'my_worries',
     'privacy_policy',
-    'operation_policy',
     'logout_confirmation',
     'account_deletion_confirmation',
   ]);
@@ -103,9 +105,9 @@ test('routes profile read denial to safe onboarding recovery instead of login fa
   assert.equal(routeAfterProfileReadDenied(), 'onboarding');
 });
 
-test('routes publish success with created ids and has no standalone write success routes', () => {
+test('routes publish success with created ids to PRD success confirmation routes', () => {
   assert.deepEqual(routeAfterWorryPublish({ worryId: 'worry-created-1' }), {
-    route: 'my_worry_detail',
+    route: 'write_worry_success',
     worryId: 'worry-created-1',
   });
   assert.deepEqual(routeAfterReplyPublish({
@@ -113,13 +115,15 @@ test('routes publish success with created ids and has no standalone write succes
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
   }), {
-    route: 'my_answer_detail',
+    route: 'write_reply_success',
     replyId: 'reply-created-1',
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
   });
-  assert.equal((REQUIRED_PHASE_2_ROUTE_STATES as readonly string[]).includes('write_worry_success'), false);
-  assert.equal((REQUIRED_PHASE_2_ROUTE_STATES as readonly string[]).includes('write_reply_success'), false);
+  assert.equal((REQUIRED_PHASE_2_ROUTE_STATES as readonly string[]).includes('write_worry_success'), true);
+  assert.equal((REQUIRED_PHASE_2_ROUTE_STATES as readonly string[]).includes('write_reply_success'), true);
+  assert.equal(routeAfterWorrySuccessConfirmation(), 'my_worries');
+  assert.equal(routeAfterReplySuccessConfirmation(), 'received_worries');
 });
 
 test('preserves id-bearing route state when applying routes to App view state', () => {
@@ -131,11 +135,11 @@ test('preserves id-bearing route state when applying routes to App view state', 
   });
 
   assert.deepEqual(resolveAppRouteState('write_worry', worryPublishRoute), {
-    route: 'my_worry_detail',
+    route: 'write_worry_success',
     worryId: 'worry-created-1',
   });
   assert.deepEqual(resolveAppRouteState({ route: 'write_reply', deliveryId: 'delivery-1' }, replyPublishRoute), {
-    route: 'my_answer_detail',
+    route: 'write_reply_success',
     replyId: 'reply-created-1',
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
@@ -160,7 +164,7 @@ test('routes pass, feedback, write, detail, and my-page subroute targets', () =>
     route: 'my_answer_detail',
     replyId: 'reply-1',
   });
-  assert.equal(routeToWriteWorry(), 'write_worry');
+  assert.equal(routeToWriteWorryFromMyWorriesFloatingButton(), 'write_worry');
   assert.deepEqual(routeToWriteReply({ deliveryId: 'delivery-1', worryId: 'worry-1' }), {
     route: 'write_reply',
     deliveryId: 'delivery-1',
@@ -179,6 +183,10 @@ test('routes pass, feedback, write, detail, and my-page subroute targets', () =>
   });
   assert.equal(routeToMyAnswers(), 'my_answers');
   assert.equal(routeToMyWorries(), 'my_worries');
+  assert.deepEqual(routeToAnswerCheck({ worryId: 'worry-1' }), {
+    route: 'answer_check',
+    worryId: 'worry-1',
+  });
   assert.equal(routeToEditInterests(), 'edit_interests');
 });
 
@@ -192,12 +200,13 @@ test('defines every required back route in the service policy', () => {
   assert.equal(backRouteForRoute({ route: 'write_reply', deliveryId: 'delivery-1' }), '답변하기');
   assert.equal(backRouteForRoute({ route: 'received_answer_detail', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
   assert.equal(backRouteForRoute('answer_check'), '나의 고민');
+  assert.equal(backRouteForRoute({ route: 'write_worry_success', worryId: 'worry-1' }), 'my_worries');
+  assert.equal(backRouteForRoute({ route: 'write_reply_success', replyId: 'reply-1', deliveryId: 'delivery-1', worryId: 'worry-1' }), '답변하기');
   assert.equal(backRouteForRoute({ route: 'my_answer_detail', replyId: 'reply-1' }), 'my_answers');
   assert.equal(backRouteForRoute('edit_interests'), '마이페이지');
   assert.equal(backRouteForRoute('my_answers'), '마이페이지');
   assert.equal(backRouteForRoute('my_worries'), '나의 고민');
   assert.equal(backRouteForRoute('privacy_policy'), '마이페이지');
-  assert.equal(backRouteForRoute('operation_policy'), '마이페이지');
   assert.equal(backRouteForRoute('logout_confirmation'), '마이페이지');
   assert.equal(backRouteForRoute('account_deletion_confirmation'), '마이페이지');
 });
@@ -208,11 +217,8 @@ test('defines my-page subroutes including confirmations and policy routes', () =
     'my_answers',
     'my_worries',
     'privacy_policy',
-    'operation_policy',
     'logout_confirmation',
     'account_deletion_confirmation',
-    'notification_settings',
-    'app_install_guide',
   ]);
 });
 
@@ -224,6 +230,7 @@ test('maps detail, write, policy, and confirmation routes to their owning PRD ta
   assert.equal(tabForRoute('write_reply'), '답변하기');
   assert.equal(tabForRoute('write_worry'), '나의 고민');
   assert.equal(tabForRoute('my_worries'), '나의 고민');
+  assert.equal(tabForRoute({ route: 'write_worry_success', worryId: 'worry-1' }), '나의 고민');
   assert.equal(tabForRoute({ route: 'received_answer_detail', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
   assert.equal(tabForRoute('answer_check'), '나의 고민');
   assert.equal(tabForRoute({ route: 'my_worry_detail', worryId: 'worry-1' }), '나의 고민');
@@ -231,11 +238,9 @@ test('maps detail, write, policy, and confirmation routes to their owning PRD ta
   assert.equal(tabForRoute('my_answers'), '마이페이지');
   assert.equal(tabForRoute({ route: 'my_answer_detail', replyId: 'reply-1' }), '마이페이지');
   assert.equal(tabForRoute('privacy_policy'), '마이페이지');
-  assert.equal(tabForRoute('operation_policy'), '마이페이지');
   assert.equal(tabForRoute('logout_confirmation'), '마이페이지');
   assert.equal(tabForRoute('account_deletion_confirmation'), '마이페이지');
-  assert.equal(tabForRoute('notification_settings'), '마이페이지');
-  assert.equal(tabForRoute('app_install_guide'), '마이페이지');
+  assert.equal(tabForRoute({ route: 'write_reply_success', replyId: 'reply-1', deliveryId: 'delivery-1', worryId: 'worry-1' }), '답변하기');
   assert.equal(tabForRoute('login'), null);
   assert.equal(tabForRoute('loading'), null);
   assert.equal(tabForRoute('onboarding_interests'), null);
@@ -253,6 +258,8 @@ test('Phase 22 maps top-level bottom-tab routes to the expected active tab', () 
 test('Phase 22 maps nested bottom-tab routes to the expected active tab', () => {
   assert.equal(tabForRoute({ route: 'write_reply', deliveryId: 'delivery-1', worryId: 'worry-1' }), '답변하기');
   assert.equal(tabForRoute('write_worry'), '나의 고민');
+  assert.equal(tabForRoute({ route: 'write_worry_success', worryId: 'worry-1' }), '나의 고민');
+  assert.equal(tabForRoute({ route: 'write_reply_success', replyId: 'reply-1', deliveryId: 'delivery-1', worryId: 'worry-1' }), '답변하기');
   assert.equal(tabForRoute({ route: 'received_answer_detail', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
   assert.equal(tabForRoute({ route: 'read_received_reply', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
   assert.equal(tabForRoute('answer_check'), '나의 고민');
@@ -262,11 +269,8 @@ test('Phase 22 maps nested bottom-tab routes to the expected active tab', () => 
   assert.equal(tabForRoute('edit_interests'), '마이페이지');
   assert.equal(tabForRoute('my_answers'), '마이페이지');
   assert.equal(tabForRoute('privacy_policy'), '마이페이지');
-  assert.equal(tabForRoute('operation_policy'), '마이페이지');
   assert.equal(tabForRoute('logout_confirmation'), '마이페이지');
   assert.equal(tabForRoute('account_deletion_confirmation'), '마이페이지');
-  assert.equal(tabForRoute('notification_settings'), '마이페이지');
-  assert.equal(tabForRoute('app_install_guide'), '마이페이지');
 });
 
 test('Phase 10 my-page account routes include policy/settings/confirmation routes and exclude login policy links', () => {
@@ -276,11 +280,8 @@ test('Phase 10 my-page account routes include policy/settings/confirmation route
     'my_answers',
     'my_worries',
     'privacy_policy',
-    'operation_policy',
     'logout_confirmation',
     'account_deletion_confirmation',
-    'notification_settings',
-    'app_install_guide',
   ] as const) {
     assert.equal(tabForRoute(route), route === 'my_worries' ? '나의 고민' : '마이페이지');
   }
@@ -290,15 +291,39 @@ test('Phase 10 my-page account routes include policy/settings/confirmation route
   assert.equal(tabForRoute('login'), null);
 });
 
-test('defines the central bottom-navigation write-worry action contract', () => {
-  assert.deepEqual(CENTRAL_BOTTOM_NAVIGATION_ACTION, {
-    label: '고민 작성',
-    accessibleLabel: '고민 작성',
-    targetRoute: 'write_worry',
-    ownerTab: '나의 고민',
+test('keeps write-worry entry owned by the my-worries floating message button', () => {
+  assert.equal(routeToWriteWorryFromMyWorriesFloatingButton(), 'write_worry');
+  assert.equal(tabForRoute(routeToWriteWorryFromMyWorriesFloatingButton()), '나의 고민');
+});
+
+test('supports the Phase 1 PRD route flows without central write action or excluded routes', () => {
+  assert.deepEqual(routeAfterWorryPublish({ worryId: 'worry-1' }), {
+    route: 'write_worry_success',
+    worryId: 'worry-1',
   });
-  assert.equal(routeToWriteWorry(), CENTRAL_BOTTOM_NAVIGATION_ACTION.targetRoute);
-  assert.equal(tabForRoute(routeToWriteWorry()), CENTRAL_BOTTOM_NAVIGATION_ACTION.ownerTab);
+  assert.equal(routeAfterWorrySuccessConfirmation(), 'my_worries');
+
+  assert.deepEqual(routeAfterReplyPublish({
+    replyId: 'reply-1',
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+  }), {
+    route: 'write_reply_success',
+    replyId: 'reply-1',
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+  });
+  assert.equal(routeAfterReplySuccessConfirmation(), 'received_worries');
+
+  assert.deepEqual(routeToAnswerCheck({ worryId: 'worry-1' }), {
+    route: 'answer_check',
+    worryId: 'worry-1',
+  });
+  assert.equal(routeToEditInterests(), 'edit_interests');
+  assert.equal(routeToMyAnswers(), 'my_answers');
+  assert.equal(tabForRoute('privacy_policy'), '마이페이지');
+  assert.equal(backRouteForRoute('logout_confirmation'), '마이페이지');
+  assert.equal(backRouteForRoute('account_deletion_confirmation'), '마이페이지');
 });
 
 test('normalizes route states without moving policy into UI components', () => {

@@ -5,14 +5,12 @@ import {
   HELPED_COUNT_LABEL,
   MY_PAGE_POLICY_SETTING_ITEMS,
   MY_PAGE_SETTING_ITEMS,
-  PUSH_PERMISSION_STATUSES,
   type MyPageScreenProps,
   type MyAnswersScreenProps,
   type MyWorriesScreenProps,
   type PolicyScreenProps,
   type EditInterestsProps,
   type ConfirmationProps,
-  type AppInstallAccessProps,
 } from './contract';
 
 test('my-page summary limits nickname to profile summary and labels helpedCount as received hearts', () => {
@@ -29,17 +27,6 @@ test('my-page summary limits nickname to profile summary and labels helpedCount 
       },
     },
     settings: MY_PAGE_SETTING_ITEMS,
-    pushSettings: {
-      status: 'default',
-      onOpenSettings: () => undefined,
-    },
-    appInstall: {
-      canInstall: false,
-      canShare: true,
-      platformGuidance: 'share-url-or-qr',
-      shareUrl: 'https://qling.example',
-      onShare: () => undefined,
-    },
     logoutConfirmation: {
       isOpen: false,
       isProcessing: false,
@@ -75,46 +62,19 @@ test('my-page contract keeps profile motif visual-only with no avatar data field
 });
 
 test('settings contract includes required account rows and excludes non-MVP policy rows', () => {
-  assert.deepEqual(MY_PAGE_POLICY_SETTING_ITEMS, ['privacy_policy', 'operation_policy']);
+  assert.deepEqual(MY_PAGE_POLICY_SETTING_ITEMS, ['privacy_policy']);
   assert.deepEqual(MY_PAGE_SETTING_ITEMS, [
     'edit_interests',
     'my_answers',
     'my_worries',
     'privacy_policy',
-    'operation_policy',
-    'app_install_guide',
-    'push_notification_settings',
     'logout',
     'delete_account',
   ]);
 
-  for (const excluded of ['usage' + '_guide', 'generic' + ' ' + 'policy', 'ter' + 'ms']) {
+  for (const excluded of ['operation_policy', 'app_install_guide', 'push_notification_settings', 'usage_guide', 'generic policy', 'terms']) {
     assert.equal((MY_PAGE_SETTING_ITEMS as readonly string[]).includes(excluded), false);
   }
-});
-
-test('push and app-like usage access are UI states with callbacks', () => {
-  assert.deepEqual(PUSH_PERMISSION_STATUSES, [
-    'default',
-    'granted',
-    'denied',
-    'unsupported',
-    'registered',
-    'error',
-  ]);
-
-  const appInstallStates = [
-    'android-install',
-    'ios-share-to-home',
-    'share-url-or-qr',
-    'unsupported',
-  ] satisfies readonly AppInstallAccessProps['platformGuidance'][];
-  assert.deepEqual(appInstallStates, [
-    'android-install',
-    'ios-share-to-home',
-    'share-url-or-qr',
-    'unsupported',
-  ]);
 });
 
 test('my answers and my worries contracts expose list states and route callbacks without sample labels', () => {
@@ -183,12 +143,6 @@ test('policy screen contract carries title, body or unavailable state', () => {
     title: 'Privacy policy',
     state: { status: 'empty', message: 'Policy content unavailable' },
   } satisfies PolicyScreenProps;
-  const body = {
-    policy: 'operation_policy',
-    title: 'Operation policy',
-    body: '실제 운영정책 본문',
-    state: { status: 'ready' },
-  } satisfies PolicyScreenProps;
   const error = {
     policy: 'privacy_policy',
     title: 'Privacy policy',
@@ -197,7 +151,6 @@ test('policy screen contract carries title, body or unavailable state', () => {
 
   assert.equal(props.policy, 'privacy_policy');
   assert.equal(props.state.status, 'empty');
-  assert.equal(body.body, '실제 운영정책 본문');
   assert.equal(error.state.status, 'error');
 });
 
@@ -231,20 +184,4 @@ test('confirmation props require explicit destructive/account callbacks without 
   assert.equal(typeof confirmation.onCancel, 'function');
   assert.equal(typeof confirmation.onConfirm, 'function');
   assert.equal(confirmation.errorMessage, undefined);
-});
-
-test('PWA install/share props expose real browser capability states', () => {
-  const props = {
-    canInstall: true,
-    canShare: true,
-    platformGuidance: 'android-install',
-    shareUrl: 'https://qling.example',
-    onInstall: () => undefined,
-    onShare: () => undefined,
-  } satisfies AppInstallAccessProps;
-
-  assert.equal(props.canInstall, true);
-  assert.equal(props.canShare, true);
-  assert.equal(props.platformGuidance, 'android-install');
-  assert.equal(props.shareUrl, 'https://qling.example');
 });

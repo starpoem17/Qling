@@ -9,9 +9,9 @@ import {
   type ReplyReadModelItem,
 } from '../../services/myWorries';
 import {
-  routeToMyWorryDetail,
+  routeToAnswerCheck,
   routeToReceivedReplyDetail,
-  routeToWriteWorry,
+  routeToWriteWorryFromMyWorriesFloatingButton,
   type AppRouteViewState,
 } from '../../services/appShell/prdNavigationPolicy';
 import { MyWorriesScreen } from './MyWorriesScreen';
@@ -58,7 +58,7 @@ export function MyWorriesContainer(props: MyWorriesContainerProps) {
     if (!worry) return;
 
     props.setSelectedMyWorry(worry);
-    props.setView(routeToMyWorryDetail({ worryId: worry.id }));
+    props.setView(routeToAnswerCheck({ worryId: worry.id }));
   };
   const selectReply = (item: ReceivedReplyListItemProps) => {
     const reply = repliesWithWorryFallback.find(candidate => candidate.id === item.replyId);
@@ -96,7 +96,7 @@ export function MyWorriesContainer(props: MyWorriesContainerProps) {
               : { status: 'ready' },
         replies: repliesWithWorryFallback.map(mapReceivedReplyToListItem),
       } : undefined}
-      onWriteWorry={() => props.setView(routeToWriteWorry())}
+      onWriteWorry={() => props.setView(routeToWriteWorryFromMyWorriesFloatingButton())}
       onSelectWorry={selectWorry}
       onSelectReply={selectReply}
     />

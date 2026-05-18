@@ -96,3 +96,12 @@ test('App.tsx uses the route rendering boundary and preserves id-bearing route s
   assert.doesNotMatch(source, /routeAfterWorryPublish\([^)]*\)\.route/);
   assert.doesNotMatch(source, /routeAfterReplyPublish\([^)]*\)\.route/);
 });
+
+test('App.tsx does not own a global fixed Qling header or central write action', () => {
+  const source = fs.readFileSync('src/App.tsx', 'utf8');
+
+  assert.doesNotMatch(source, /header=\{/);
+  assert.doesNotMatch(source, /fixed top-0/);
+  assert.doesNotMatch(source, /CENTRAL_BOTTOM_NAVIGATION_ACTION/);
+  assert.doesNotMatch(source, /onCentralAction/);
+});

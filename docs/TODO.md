@@ -412,46 +412,54 @@
 허용 수정 범위: `src/services/appShell/**`, `src/screens/shared/uiContract.ts`, `src/screens/shared/ui.tsx`, `src/App.tsx`, 관련 appShell/shared tests.
 금지 수정 범위: 화면 pixel 세부 조정, `src/services/**` domain/API/server logic, `src/server/**`, `server.ts`, `firestore.rules`.
 
-- [ ] TODO-P1.1: `BottomNavigationCentralAction` 계약을 제거하고 중앙 눈 인디케이터 계약으로 대체한다.
+- [x] TODO-P1.1: `BottomNavigationCentralAction` 계약을 제거하고 중앙 눈 인디케이터 계약으로 대체한다.
   - 대상 파일: `src/screens/shared/uiContract.ts`, `src/screens/shared/uiContract.test.ts`
   - 완료 기준: `centralWriteWorryAction` primitive id가 제거 또는 indicator id로 대체되고, props에 `onCentralAction`/`targetRoute`가 없다.
   - 검증: `rg -n "BottomNavigationCentralAction|onCentralAction|centralWriteWorryAction|targetRoute" src/screens/shared`
   - production PNG evidence: `tmp/shared-pixel-alignment/bottom-navigation-production.png`.
-- [ ] TODO-P1.2: `BottomNavigation`에서 중앙 button/onClick을 제거하고 좌/우/마이페이지 특수 상태 indicator를 구현한다.
+  - Completion note: `src/screens/shared/uiContract.ts`에서 중앙 작성 action 계약을 `bottomNavigationCentralIndicator`로 교체했고 `src/screens/shared/uiContract.test.ts`, `src/screens/shared/ui.test.ts`로 props shape와 visual-only 계약을 검증했다. grep 결과 shared production/test 모두 잔여 항목 없음.
+- [x] TODO-P1.2: `BottomNavigation`에서 중앙 button/onClick을 제거하고 좌/우/마이페이지 특수 상태 indicator를 구현한다.
   - 대상 파일: `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.ts`
   - 완료 기준: 중앙 눈은 `button`이 아닌 visual element이고, 답변하기/나의 고민/마이페이지 상태별 하이라이트가 PRD 7.2와 일치한다.
   - 검증: shared UI rendering test에서 중앙 element가 click handler를 갖지 않음을 확인한다.
   - production PNG evidence: `tmp/shared-pixel-alignment/bottom-navigation-production.png` if captured.
-- [ ] TODO-P1.3: `App.tsx`에서 `onCentralAction={() => setView(routeToWriteWorry())}` 경로를 제거한다.
+  - Completion note: `src/screens/shared/ui.tsx`의 중앙 눈은 `div role="img"` indicator이며 click handler/route target이 없다. `src/screens/shared/ui.test.ts`에서 중앙 indicator가 button이 아니고 탭 button 3개만 `onSelectTab`을 호출함을 검증했다. Phase 1 route/contract phase라 shared production PNG는 생성하지 않았다.
+- [x] TODO-P1.3: `App.tsx`에서 `onCentralAction={() => setView(routeToWriteWorry())}` 경로를 제거한다.
   - 대상 파일: `src/App.tsx`
   - 완료 기준: 고민 작성 진입점은 `MyWorriesScreen` 우측 하단 메시지 버튼뿐이다.
   - 검증: `rg -n "onCentralAction|routeToWriteWorry\\(\\)" src/App.tsx src/screens`
   - production PNG evidence: `tmp/my-worries-pixel-alignment/20-my-worries-production.png` in Phase 4.
-- [ ] TODO-P1.4: 고민 제출 성공과 답변 제출 성공 route를 success confirmation route로 바꾼다.
+  - Completion note: `src/App.tsx`의 중앙 작성 dispatch와 fixed header를 제거했고, 작성 helper는 `routeToWriteWorryFromMyWorriesFloatingButton()`로 MyWorries 소유권을 명시했다. grep 결과 `src/App.tsx src/screens`에 중앙 작성 경로 없음.
+- [x] TODO-P1.4: 고민 제출 성공과 답변 제출 성공 route를 success confirmation route로 바꾼다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.ts`, `src/screens/writeForm/containerPolicy.ts`, 관련 tests
   - 완료 기준: 고민 성공은 09 success screen route, 답변 성공은 19 success screen route로 이동하고 기존 `my_worry_detail`/`my_answer_detail` 자동 이동이 사라진다.
   - 검증: `src/services/appShell/prdNavigationPolicy.test.ts`, `src/screens/writeForm/containerPolicy.test.ts`
   - production PNG evidence: Phase 5 `09-question-write-b-production.png`, Phase 6 `19-answer-write-3-production.png`.
-- [ ] TODO-P1.5: PRD 기준으로 MVP 제외 route/item을 제거한다.
+  - Completion note: `routeAfterWorryPublish()`는 `write_worry_success`, `routeAfterReplyPublish()`는 `write_reply_success`를 반환한다. `src/services/appShell/prdNavigationPolicy.test.ts`와 `src/screens/writeForm/containerPolicy.test.ts`가 approved/rejected/failed path와 09→20, 19→06 confirmation policy를 검증한다.
+- [x] TODO-P1.5: PRD 기준으로 MVP 제외 route/item을 제거한다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/routeRenderingBoundary.ts`, `src/App.tsx`, appShell tests
   - 완료 기준: `operation_policy`, `app_install_guide`, `notification_settings`가 route 목록, subroute 목록, rendering boundary, settings dispatch에서 제거되거나 접근 불가 MVP 제외 상태로 고정된다.
   - 검증: `rg -n "operation_policy|app_install_guide|notification_settings" src/services/appShell src/App.tsx src/screens/myPage`
   - production PNG evidence: Phase 8A `10-my-page-production.png`.
-- [ ] TODO-P1.6: 06~20 PNG에 없는 `App.tsx` 전역 fixed header를 제거하거나 screen-local header로 이전한다.
+  - Completion note: production route/subroute/rendering boundary/settings dispatch에서 MVP 제외 항목을 제거했고 개인정보처리방침만 유지했다. grep 잔여는 제거 상태를 검증하는 test assertion뿐이며 production 접근 경로는 없다.
+- [x] TODO-P1.6: 06~20 PNG에 없는 `App.tsx` 전역 fixed header를 제거하거나 screen-local header로 이전한다.
   - 대상 파일: `src/App.tsx`, 06~20 각 screen `*Screen.tsx`
   - 완료 기준: App shell은 route selection과 bottom navigation만 조립하고, 화면별 상단 좌측 눈/우측 마이페이지 버튼은 screen contract 또는 shared primitive로 소유권이 분리된다.
   - 검증: `src/services/appShell/appMonolithGuardrail.test.ts`, `src/services/appShell/appShellBoundary.test.ts`
   - production PNG evidence: 각 화면 phase의 production PNG.
-- [ ] TODO-P1.7: appShell contract/route tests를 PRD route flow로 갱신한다.
+  - Completion note: `src/App.tsx`의 전역 fixed Qling header와 `pt-24` 보정을 제거했고, `src/services/appShell/appShellBoundary.test.ts`가 header/central write action 부재를 검증한다. App은 route selection, auth/profile, global overlay, bottom navigation/container mounting 경계만 유지한다.
+- [x] TODO-P1.7: appShell contract/route tests를 PRD route flow로 갱신한다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.test.ts`, `src/services/appShell/routeRenderingBoundary.test.ts`, `src/services/appShell/appShellBoundary.test.ts`
   - 완료 기준: 중앙 눈 클릭 불가, 작성 진입점 단일화, 07→09→20, 17→19→06, 20→08, 10→12/13/14/15/16이 테스트로 검증된다.
   - 검증: `npm test -- src/services/appShell` 또는 전체 `npm test`
   - production PNG evidence: 없음.
-- [ ] TODO-P1.8: 이 phase에서 캡처가 필요하면 production PNG만 남긴다.
+  - Completion note: `src/services/appShell/prdNavigationPolicy.test.ts`, `src/services/appShell/routeRenderingBoundary.test.ts`, `src/services/appShell/appShellBoundary.test.ts`, `src/screens/shared/ui.test.ts`, `src/screens/writeForm/containerPolicy.test.ts`가 중앙 눈 비상호작용, MyWorries 작성 진입점, 07→09→20, 17→19→06, 20→08, 10→12/13/14/15/16, MVP 제외 route 접근 불가를 검증한다.
+- [x] TODO-P1.8: 이 phase에서 캡처가 필요하면 production PNG만 남긴다.
   - 대상 파일: `tmp/*-pixel-alignment/*-production.png`
   - 완료 기준: `tmp` 안에 PNG 외 phase 문서 파일이 없다.
   - 검증: `find tmp -path '*pixel-alignment*' -type f | sort`
   - production PNG evidence: 해당되는 `tmp/*-pixel-alignment/*-production.png`.
+  - Completion note: Phase 1에서 새 production PNG는 생성하지 않았다. 기존 `tmp/onboarding-pixel-alignment`의 PNG 외 보조 파일을 제거했고 `find tmp -path '*pixel-alignment*' -type f | sort` 결과 production PNG 3개만 남는다.
 
 검증 명령:
 - `npm test`

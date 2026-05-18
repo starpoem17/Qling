@@ -39,7 +39,7 @@ test('worry publication policy preserves failed drafts and routes successful pub
   assert.deepEqual(published, {
     moderation: { status: 'approved' },
     clearDraft: true,
-    route: { route: 'my_worry_detail', worryId: 'worry-created' },
+    route: { route: 'write_worry_success', worryId: 'worry-created' },
   });
 });
 
@@ -60,7 +60,7 @@ test('reply publication policy preserves rejected or failed drafts', () => {
   assert.deepEqual(failed.moderation, { status: 'failed', message: '답장 전송 실패' });
 });
 
-test('reply publication policy clears only after success and requests my-answer route with created ids', () => {
+test('reply publication policy clears only after success and requests reply success route with created ids', () => {
   const result = resolveReplyPublicationResult({
     status: 'published',
     replyId: 'reply-created',
@@ -73,7 +73,7 @@ test('reply publication policy clears only after success and requests my-answer 
     moderation: { status: 'approved' },
     clearDraft: true,
     route: {
-      route: 'my_answer_detail',
+      route: 'write_reply_success',
       replyId: 'reply-created',
       deliveryId: 'delivery-1',
       worryId: 'worry-1',

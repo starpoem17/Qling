@@ -7,7 +7,6 @@ import {
   Loader2,
   MessageSquare,
   Radio,
-  Send,
   UserRound,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -52,9 +51,8 @@ export function MobileAppShell({
 export function BottomNavigation({
   tabs,
   activeTab,
-  centralAction,
+  centralIndicator,
   onSelectTab,
-  onCentralAction,
 }: BottomNavigationProps) {
   const iconByTab: Record<BottomNavigationTab, ReactNode> = {
     답변하기: <MessageSquare className="h-5 w-5" aria-hidden="true" />,
@@ -68,20 +66,26 @@ export function BottomNavigation({
       className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--qling-color-border)] bg-[rgb(255_255_255/0.96)] shadow-[var(--qling-shadow-nav)] backdrop-blur-md"
       style={{ paddingBottom: 'var(--qling-space-safe-bottom)' }}
     >
-      <button
-        type="button"
-        aria-label={centralAction.accessibleLabel}
-        data-target-route={centralAction.targetRoute}
-        data-owner-tab={centralAction.ownerTab}
-        onClick={onCentralAction}
-        className="absolute left-1/2 top-0 flex h-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-2 rounded-[var(--qling-radius-pill)] bg-[var(--qling-color-primary-orange)] px-4 text-xs font-bold text-[var(--qling-color-text)] shadow-[var(--qling-shadow-card)] transition-transform hover:-translate-y-[55%] focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)] focus:ring-offset-2"
+      <div
+        aria-label={centralIndicator.accessibleLabel}
+        role="img"
+        data-indicator-state={centralIndicator.state}
+        className="absolute left-1/2 top-0 flex h-12 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[var(--qling-radius-pill)] bg-[var(--qling-color-primary-orange)] text-[var(--qling-color-text)] shadow-[var(--qling-shadow-card)]"
       >
-        <Send className="h-4 w-4" aria-hidden="true" />
-        {centralAction.label}
-      </button>
+        <span className="relative h-6 w-11 rounded-full bg-[var(--qling-color-surface)]" aria-hidden="true">
+          <span
+            className={cn(
+              'absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-[var(--qling-color-text)] transition-[left]',
+              centralIndicator.state === 'left' && 'left-1.5',
+              centralIndicator.state === 'center' && 'left-1/2 -translate-x-1/2',
+              centralIndicator.state === 'right' && 'left-[calc(100%-20px)]',
+            )}
+          />
+        </span>
+      </div>
       <div className="mx-auto grid h-[var(--qling-space-nav-height)] max-w-2xl grid-cols-3 gap-1 px-2 pt-3">
         {tabs.map(({ tab, label }) => {
-          const isActive = activeTab === tab;
+          const isActive = activeTab === tab || activeTab === '마이페이지';
           return (
             <button
               key={tab}
