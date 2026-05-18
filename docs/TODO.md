@@ -37,7 +37,7 @@
   - 계획 작성 검증: `git diff -- docs/TODO.md`, `npm run validate:design-reference`
   - 구현 phase 완료 검증: `npm test`, `npm run lint`, `npm run build`, `npm run test:rules`, `npm run validate:design-reference`
 - Phase별 production PNG evidence 규칙:
-  - 기존 `tmp/onboarding-pixel-alignment/**-production.png` 패턴을 따른다.
+  - production PNG evidence는 `tmp/*-pixel-alignment/*-production.png` 패턴을 따른다. 기존 온보딩 precedent는 `tmp/onboarding-pixel-alignment/**-production.png`다.
   - 산출물 디렉터리에는 production 화면 캡처 PNG를 반드시 남긴다.
   - 측정 결과나 판단 근거를 파일로 남겨야 할 때만 한국어 HTML 보고 파일을 함께 둘 수 있다.
   - PNG 파일명은 route/screen/state를 알 수 있게 `*-production.png` suffix를 사용한다.
@@ -189,46 +189,175 @@ Onboarding 선례의 정확한 표현:
 허용 수정 범위: `docs/TODO.md` completion notes only.
 금지 수정 범위: `src/**`, `packages/**`, `design/**`, `docs/PRD.md`.
 
-- [ ] TODO-P0.1: `docs/PRD.md`의 06~20 화면 요구사항, MVP 제외 범위, 제출 후 route, 중앙 눈 인디케이터, 정책 문서 범위를 TODO completion note 표로 확정한다.
+- [x] TODO-P0.1: `docs/PRD.md`의 06~20 화면 요구사항, MVP 제외 범위, 제출 후 route, 중앙 눈 인디케이터, 정책 문서 범위를 TODO completion note 표로 확정한다.
   - 대상 파일: `docs/PRD.md`, `docs/TODO.md`
   - 완료 기준: 06~20 각 화면이 어느 phase에서 닫히는지와 MVP 제외 항목이 문서 안에서 추적 가능하다.
   - 검증: `rg -n "중앙 눈|앱처럼 사용하기|운영정책|09-question|19-answer|정책을 준비" docs/PRD.md`
   - production PNG evidence: 없음.
-- [ ] TODO-P0.2: 현재 route 목록을 `src/services/appShell/prdNavigationPolicy.ts`와 `src/services/appShell/routeRenderingBoundary.ts`에서 추출하고 PRD route와 불일치하는 항목을 completion note에 기록한다.
+  - completion note:
+    - changed files: `docs/TODO.md`
+    - test command/result: `rg -n "중앙 눈|앱처럼 사용하기|운영정책|09-question|19-answer|정책을 준비|내가 쓴 답변 상세|하단 중앙|우측 하단 메시지|개인정보처리방침" docs/PRD.md` 성공. 관련 PRD 문구 확인.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - PRD trace table:
+      | Screen/Policy | PRD requirement | Owning phase/TODO |
+      |---|---|---|
+      | 06 received worries | 답변하기 탭, 좌상단 눈 기능 없음, 우상단 마이페이지 이동, 고민 박스 클릭 시 답변 작성, 건너뛰기는 확인 모달 없이 패스, empty `지금은 도착한 고민이 없어요.`, loading spinner. | Phase 3 / TODO-P3.1~P3.10 |
+      | 07 question write | 나의 고민 탭 우측 하단 메시지 버튼에서만 진입, 뒤로 가기는 나의 고민 탭, 제목 없는 본문, 빈/공백 제출 불가, 1000자 제한, pencil placeholder, 성공 시 09. | Phase 4 / TODO-P4.3, Phase 5 / TODO-P5.1~P5.8 |
+      | 08 answer check | 내 고민과 여러 답변 확인/피드백, 뒤로 가기는 나의 고민 탭, 답변 0개면 내 고민만 표시, 좋아요/싫어요/코멘트 정책 적용. | Phase 7 / TODO-P7.1~P7.11 |
+      | 09 question write success | 고민 제출 성공 후 `09-question-write-b.png` 기준 성공 확인 화면, 확인 버튼만 상호작용, 확인 후 나의 고민 탭. | Phase 1 / TODO-P1.4, Phase 5 / TODO-P5.6~P5.8 |
+      | 10 my page | 닉네임, 받은 좋아요/하트 총합(`helpedCount`), 관심 분야 수정, 내가 쓴 답변 preview/전체보기, 알림 설정, 개인정보처리방침, 로그아웃, 탈퇴. 성별/나이 수정 및 표시 제외. | Phase 8 / TODO-P8.1~P8.12 |
+      | 11 none/unused | reference PNG 없음. production route와 screen-map에 매핑하지 않음. | Phase 0 inventory, Phase 12 final audit |
+      | 12 edit interests | 온보딩과 동일한 관심 분야 3열, 버튼 크기 고정, 0개 저장 시 안내, 저장 성공 후 마이페이지, 실패 시 기존 선택 유지. | Phase 8 / TODO-P8.1, TODO-P8.6, TODO-P8.12 |
+      | 13 my answers | 내가 작성한 모든 답변 동일 형식, 좋아요는 하트, 코멘트는 1개 작은 폰트, 싫어요는 피드백 없음처럼 표시, 상세 화면 없음. | Phase 8 / TODO-P8.1, TODO-P8.7, TODO-P8.10, TODO-P8.12 |
+      | 14 privacy policy | `docs/privacy_policy.md`를 source of truth로 삼을 수 있어야 하며, 비어 있으면 `정책을 준비 중입니다.` 표시. | Phase 8 / TODO-P8.11, TODO-P8.12 |
+      | 15 logout overlay | 마이페이지 위 overlay/dialog, 취소 시 마이페이지 복귀, 로그아웃 시 02 로그인 이동, 배경 하단바 클릭 불가. | Phase 9 / TODO-P9.1~P9.6 |
+      | 16 account deletion overlay | 마이페이지 위 overlay/dialog, 취소 시 마이페이지 복귀, 탈퇴 시 계정 비활성화 후 02 로그인 이동, 배경 하단바 클릭 불가. | Phase 9 / TODO-P9.1~P9.6 |
+      | 17 answer write | 답변하기 탭 고민 선택으로 진입, 뒤로 가기는 답변하기 탭 및 draft 폐기, 요약/카테고리/생성시각/답변 입력 표시, 요약 박스 클릭 시 18 overlay. | Phase 6 / TODO-P6.1~P6.10 |
+      | 18 answer original overlay | 17 위 원문 확인 overlay, 닫기 시 17 복귀, 작성 중 답변 draft 유지. | Phase 6 / TODO-P6.1, TODO-P6.5, TODO-P6.10 |
+      | 19 answer write success | 답변 제출 성공 후 `19-answer-write-3.png` 기준 성공 확인 화면, 확인 후 답변하기 탭, 답변한 고민은 즉시 사라짐. | Phase 1 / TODO-P1.4, Phase 6 / TODO-P6.8, TODO-P6.10 |
+      | 20 my worries | 나의 고민 탭, 좌상단 눈 기능 없음, 우상단 마이페이지 이동, 고민 박스 클릭 시 답변 확인, 우측 하단 메시지 버튼만 고민 작성 진입점, empty `첫 고민을 남겨보세요.`. | Phase 4 / TODO-P4.1~P4.9 |
+      | central bottom eye | 전 화면 비상호작용 인디케이터. 하단 중앙 눈은 고민 작성 진입점이 아니며 버튼/액션/메뉴가 아님. | Phase 1 / TODO-P1.1~P1.3 |
+      | excluded MVP routes/policies | 운영정책, 이용약관, 이용 안내 전용 화면, 앱처럼 사용하기 안내, 로그인 화면 정책/약관 링크, 내가 쓴 답변 상세 화면 제외. | Phase 1 / TODO-P1.5, Phase 8 / TODO-P8.2, TODO-P8.10 |
+      | static mobile chrome | reference PNG의 status bar, network, battery, home indicator는 production UI에서 구현하지 않음. | Phase 2 / TODO-P2.2 and each pixel phase |
+- [x] TODO-P0.2: 현재 route 목록을 `src/services/appShell/prdNavigationPolicy.ts`와 `src/services/appShell/routeRenderingBoundary.ts`에서 추출하고 PRD route와 불일치하는 항목을 completion note에 기록한다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/routeRenderingBoundary.ts`
   - 완료 기준: `operation_policy`, `app_install_guide`, `notification_settings`, `my_answer_detail`, 중앙 액션, 성공 route 불일치가 누락 없이 기록된다.
   - 검증: `rg -n "operation_policy|app_install_guide|notification_settings|my_answer_detail|CENTRAL_BOTTOM_NAVIGATION_ACTION|routeAfterWorryPublish|routeAfterReplyPublish" src/services/appShell src/App.tsx`
   - production PNG evidence: 없음.
-- [ ] TODO-P0.3: `design/reference/pngs/screens`의 실제 파일 목록을 확인하고 01~20 존재/미존재/이미 구현/구현 필요 상태를 이 파일의 Screen Mapping Inventory와 대조한다.
+  - completion note:
+    - changed files: `docs/TODO.md`
+    - test command/result: `rg -n "operation_policy|app_install_guide|notification_settings|my_answer_detail|read_my_reply|CENTRAL_BOTTOM_NAVIGATION_ACTION|routeToWriteWorry|routeAfterWorryPublish|routeAfterReplyPublish|MY_PAGE_MORE_ITEMS|MY_PAGE_SUBROUTES" src/services/appShell src/App.tsx` 성공.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - route mismatch table:
+      | Current route/item | Current location | PRD status | Owning downstream TODO |
+      |---|---|---|---|
+      | `operation_policy` | `AppRoute`, `MY_PAGE_MORE_ITEMS`, `MY_PAGE_SUBROUTES`, `REQUIRED_PHASE_2_ROUTE_STATES`, `ROUTE_RENDERING_BOUNDARY`, `App.tsx` account route dispatch | MVP 제외: 운영정책 화면 제외, 접근 가능한 정책 문서는 개인정보처리방침 하나 | TODO-P1.5, TODO-P8.2, TODO-P8.3 |
+      | `app_install_guide` | `AppRoute`, `MY_PAGE_MORE_ITEMS`, `MY_PAGE_SUBROUTES`, `ROUTE_RENDERING_BOUNDARY`, `App.tsx` account route dispatch | MVP 제외: 앱처럼 사용하기 안내/별도 설치 안내 영역 제외 | TODO-P1.5, TODO-P8.2, TODO-P8.3 |
+      | `notification_settings` | `AppRoute`, `MY_PAGE_MORE_ITEMS`, `MY_PAGE_SUBROUTES`, `ROUTE_RENDERING_BOUNDARY`, `App.tsx` account route dispatch | PRD 10에는 푸시 알림 설정 기능이 있으나 TODO Phase 1은 route/item 제거 대상으로 둠. Phase 0 결정: 별도 route 불일치로 기록하고, 10 화면 내 토글 구현 여부는 Phase 8에서 확인 필요. | TODO-P1.5, TODO-P8.4, TODO-P8.5 |
+      | `my_answer_detail` | `AppRouteState`, `routeAfterReplyPublish`, `routeToMyReplyDetail`, `backRouteForRoute`, `tabForRoute`, `ROUTE_RENDERING_BOUNDARY`, `App.tsx` `ReplyDetailContainer` rendering | MVP 제외: 내가 쓴 답변 상세 화면 제공하지 않음. 답변 제출 성공은 19 success screen 필요. | TODO-P1.4, TODO-P8.10 |
+      | `read_my_reply` | `AppRouteState`, `backRouteForRoute`, `tabForRoute`, `ROUTE_RENDERING_BOUNDARY`, `App.tsx` `ReplyDetailContainer` rendering | `my_answer_detail` 계열 legacy/detail route로 보이며 MVP의 내가 쓴 답변 상세 미제공 정책과 긴장. | TODO-P8.10 |
+      | `CENTRAL_BOTTOM_NAVIGATION_ACTION` | `prdNavigationPolicy.ts` targetRoute `write_worry`; `App.tsx` `BottomNavigation`에 전달 | PRD 위반: 중앙 하단 눈은 전 화면 비상호작용 인디케이터이며 고민 작성 진입점 아님. | TODO-P1.1, TODO-P1.2 |
+      | `routeToWriteWorry` | `prdNavigationPolicy.ts`에서 중앙 액션 targetRoute 반환; `App.tsx` `onCentralAction={() => setView(routeToWriteWorry())}` | PRD 위반: 고민 작성 진입점은 20 나의 고민 탭 우측 하단 메시지 버튼. | TODO-P1.3, TODO-P4.3 |
+      | `routeAfterWorryPublish` | `prdNavigationPolicy.ts` returns `{ route: 'my_worry_detail', worryId }` | PRD 위반: 고민 제출 성공 후 09 success route, 확인 후 나의 고민 탭. 작성한 고민 상세 자동 이동 없음. | TODO-P1.4, TODO-P5.6, TODO-P5.7 |
+      | `routeAfterReplyPublish` | `prdNavigationPolicy.ts` returns `{ route: 'my_answer_detail', ... }` | PRD 위반: 답변 제출 성공 후 19 success route, 확인 후 답변하기 탭. 내가 쓴 답변 상세 없음. | TODO-P1.4, TODO-P6.8, TODO-P8.10 |
+      | `MY_PAGE_MORE_ITEMS` | includes `notification_settings`, `app_install_guide`, `privacy_policy`, `operation_policy`, `logout`, `delete_account` | 운영정책/앱 설치 안내는 제외. 알림 설정은 기능 요구와 별도 route 제거 계획 사이 확인 필요. | TODO-P1.5, TODO-P8.2, TODO-P8.5 |
+      | `MY_PAGE_SUBROUTES` | includes `operation_policy`, `notification_settings`, `app_install_guide` | 개인정보처리방침 외 정책/안내 route는 MVP 제외. 알림 설정 route는 화면 내 토글로 흡수될 가능성. | TODO-P1.5, TODO-P8.3, TODO-P8.5 |
+      | `ROUTE_RENDERING_BOUNDARY` | authenticated shell, my-page/account, policy screens include excluded/detail routes | MVP 제외 route가 rendering boundary에 남아 있음. | TODO-P1.5, TODO-P8.10 |
+      | App shell central action | `src/App.tsx` imports `CENTRAL_BOTTOM_NAVIGATION_ACTION`/`routeToWriteWorry`; passes `centralAction` and `onCentralAction` to `BottomNavigation` | PRD 위반: 중앙 눈 액션 금지. | TODO-P1.1~P1.3 |
+- [x] TODO-P0.3: `design/reference/pngs/screens`의 실제 파일 목록을 확인하고 01~20 존재/미존재/이미 구현/구현 필요 상태를 이 파일의 Screen Mapping Inventory와 대조한다.
   - 대상 파일: `design/reference/pngs/screens/*`, `docs/TODO.md`
   - 완료 기준: 11번이 없음/미사용으로 명시되고 06~20 중 존재하는 reference PNG가 모두 phase에 배정된다.
   - 검증: `find design/reference/pngs/screens -maxdepth 1 -type f | sort`
   - production PNG evidence: 없음.
-- [ ] TODO-P0.4: 06~20 PNG를 PIL로 재측정해 inventory 수준의 size, dominant colors, non-bg bbox, special state classification을 completion note로 보강한다.
+  - completion note:
+    - changed files: `docs/TODO.md`
+    - test command/result: `find design/reference/pngs/screens -maxdepth 1 -type f | sort` 성공. 01~10 존재, 11 없음, 12~20 존재 확인.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - screen mapping check:
+      | Screen | PNG exists? | Current TODO assignment | Phase 0 decision |
+      |---|---:|---|---|
+      | 01 | yes | regression only | 유지 |
+      | 02 | yes | regression only | 유지 |
+      | 03 | yes | regression only | 유지 |
+      | 04 | yes | regression only | 유지 |
+      | 05 | yes | regression only | 유지 |
+      | 06 | yes | implement PRD + pixel | Phase 3 유지 |
+      | 07 | yes | implement PRD + pixel | Phase 5 유지; 진입점은 Phase 4/1에서 정리 |
+      | 08 | yes | implement PRD + pixel | Phase 7 유지 |
+      | 09 | yes | implement success route + pixel | Phase 5 유지 |
+      | 10 | yes | implement PRD cleanup + pixel | Phase 8 유지 |
+      | 11 | no | 없음/미사용 | production route/screen-map 매핑 금지 |
+      | 12 | yes | implement PRD + pixel | Phase 8 유지 |
+      | 13 | yes | implement PRD + pixel | Phase 8 유지 |
+      | 14 | yes | implement PRD + pixel | Phase 8 유지 |
+      | 15 | yes | implement overlay + pixel | Phase 9 유지 |
+      | 16 | yes | implement overlay + pixel | Phase 9 유지 |
+      | 17 | yes | implement PRD + pixel | Phase 6 유지 |
+      | 18 | yes | implement overlay + pixel | Phase 6 유지 |
+      | 19 | yes | implement success route + pixel | Phase 6 유지 |
+      | 20 | yes | implement PRD + pixel | Phase 4 유지 |
+- [x] TODO-P0.4: 06~20 PNG를 PIL로 재측정해 inventory 수준의 size, dominant colors, non-bg bbox, special state classification을 completion note로 보강한다.
   - 대상 파일: `design/reference/pngs/screens/*.png`, `docs/TODO.md`
   - 완료 기준: 이 파일의 06~20 Initial PIL Anchor Summary가 size, dominant colors, non-bg bbox, phase assignment, special state classification을 포함한다.
   - 검증: PIL 기반 일회성 명령 또는 스크립트 출력값을 TODO completion note에 기록한다.
   - production PNG evidence: 없음.
-- [ ] TODO-P0.5: 03/04/05 Fresh Measurement Anchors를 온보딩 회귀 방지 기준으로 유지한다.
+  - completion note:
+    - changed files: `docs/TODO.md`
+    - test command/result: PIL one-off measurement 성공. 06~20 size/dominant colors/non-bg bbox/lower-area bbox 확인.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - measured result: `06~20 Initial PIL Anchor Summary`와 일치. 불일치 항목 없음.
+    - special state classification:
+      | Screen | Classification | Reason |
+      |---|---|---|
+      | 06 | base list screen | received worries |
+      | 07 | write form | worry write initial |
+      | 08 | answer check | publisher answer check |
+      | 09 | success screen | worry publish success |
+      | 10 | my page | settings/profile |
+      | 11 | none/unused | no reference PNG |
+      | 12 | edit interests | interests chip grid |
+      | 13 | my answers | answer history |
+      | 14 | policy screen | privacy policy |
+      | 15 | overlay/dialog | logout |
+      | 16 | overlay/dialog | account deletion |
+      | 17 | write form | reply write |
+      | 18 | overlay/dialog | original worry overlay |
+      | 19 | success screen | reply publish success |
+      | 20 | base list screen | my worries |
+- [x] TODO-P0.5: 03/04/05 Fresh Measurement Anchors를 온보딩 회귀 방지 기준으로 유지한다.
   - 대상 파일: `docs/TODO.md`, `design/reference/pngs/screens/03-onboarding-basic.png`, `04-onboarding-duplicate.png`, `05-onboarding-interests.png`
   - 완료 기준: 03/04/05 anchor values와 harness component capture classification이 문서에 남아 있고, 이 precedent가 full app route 검증이 아님을 문서가 명시한다.
   - 검증: `rg -n "Already Implemented Onboarding Regression Anchors|harness component capture|03 |04 |05 " docs/TODO.md`
   - production PNG evidence: 없음. Phase 0에서는 anchor/classification만 보존하고, onboarding regression PNG evidence 확인 또는 재생성은 TODO-P12.4에서 수행한다.
-- [ ] TODO-P0.6: phase별 production PNG evidence 경로 규칙을 고정한다.
+  - completion note:
+    - changed files: `docs/TODO.md`
+    - test command/result: `rg -n "Already Implemented Onboarding Regression Anchors|harness component capture|03 |04 |05 |duplicate|interests|TODO-P12.4" docs/TODO.md` 성공. `tmp/onboarding-pixel-alignment/**`는 선례 확인용으로만 읽었고 수정하지 않음.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - onboarding anchor preservation: 03/04/05 reference size `393x852`, dominant colors, non-bg bbox, 주요 bbox가 `Fresh Measurement Anchors`에 유지됨. `03-production.png`, `04-production.png`, `05-production.png`는 full app route가 아니라 production `OnboardingScreen.tsx`를 임시 harness에서 렌더링한 `harness component capture`로 명시됨. 04 duplicate는 harness prop `duplicateCheck.state = 'duplicate'`, 05 interests는 harness의 `관심사 선택으로 이동` 버튼 자동 클릭 상태로 명시됨. 온보딩 regression PNG evidence 확인/재생성은 Phase 0이 아니라 TODO-P12.4 소유로 유지.
+- [x] TODO-P0.6: phase별 production PNG evidence 경로 규칙을 고정한다.
   - 대상 파일: `docs/TODO.md`
   - 완료 기준: 각 phase에 `tmp/*-pixel-alignment/*-production.png` 경로가 명시되고, 추가 보고 산출물은 한국어 HTML만 허용됨이 명시된다.
   - 검증: `rg -n "production PNG evidence|한국어 HTML|\\*-production\\.png|harness component capture" docs/TODO.md`
   - production PNG evidence: 없음.
-- [ ] TODO-P0.7: harness capture와 full route capture의 역할 분리를 phase별 completion note 양식에 고정한다.
+  - completion note:
+    - changed files: `docs/TODO.md`
+    - test command/result: `rg -n "production PNG evidence|한국어 HTML|\\*-production\\.png|harness component capture|measurement\\.md|implementation-notes\\.md|verification\\.md|JSON" docs/TODO.md` 성공. Global Execution Rules에 `tmp/*-pixel-alignment/*-production.png` 패턴을 명시적으로 보강함.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - evidence rule lock: production PNG evidence는 `tmp/*-pixel-alignment/*-production.png` 패턴, route/screen/state 식별 가능한 `*-production.png` 파일명, reference PNG 복사본 불인정, full production route capture 우선, 필요 시 production `*Screen.tsx` import 임시 Vite harness 허용, 남기는 harness는 `tmp/*-pixel-alignment/harness/**` 한정, 추가 보고 파일은 실제 한국어 HTML 문서만 허용, `measurement.md`/`implementation-notes.md`/`verification.md`/JSON 리포트 금지로 확인.
+- [x] TODO-P0.7: harness capture와 full route capture의 역할 분리를 phase별 completion note 양식에 고정한다.
   - 대상 파일: `docs/TODO.md`
   - 완료 기준: 각 production PNG evidence note에는 `capture type: full route` 또는 `capture type: harness component`가 포함되고, harness component인 경우 route/Container 검증 테스트명이 함께 기록된다.
   - 검증: completion note review.
   - production PNG evidence: 없음.
-- [ ] TODO-P0.8: 계획 작성 커밋 또는 구현 시작 전 변경 파일이 의도대로 제한되어 있는지 확인한다.
+  - completion note:
+    - changed files: `docs/TODO.md`
+    - test command/result: completion note review 성공. `Completion Note Template`와 `Reproducible Pixel Evidence Workflow`에 필수 note fields가 이미 존재함을 확인.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - capture role lock: 각 evidence note에는 `capture type: full route` 또는 `capture type: harness component`, source route 또는 source screen/component, harness인 경우 route/Container verification method, reference PNG path, production PNG path, measured size, dominant colors, non-bg bbox, tolerated difference를 기록해야 함. `harness component capture`는 presentational pixel 검증에는 유효하지만 route/Auth/Firebase 검증을 대체하지 못하므로 route/Container 검증을 별도로 닫아야 함.
+- [x] TODO-P0.8: 계획 작성 커밋 또는 구현 시작 전 변경 파일이 의도대로 제한되어 있는지 확인한다.
   - 대상 파일: `docs/TODO.md`
   - 완료 기준: 계획 작성 단계에서는 `docs/TODO.md` 외 변경이 없다.
   - 검증: `git diff --name-only`
   - production PNG evidence: 없음.
+  - completion note:
+    - changed files: `docs/TODO.md` only
+    - test command/result:
+      - `git diff --name-only`: `docs/TODO.md` only
+      - `git diff -- docs/TODO.md`: Phase 0 completion notes/checkmarks and Global Execution Rules evidence path wording only
+      - `npm run validate:design-reference`: pass
+      - `npm test`: pass
+      - `npm run lint`: pass
+      - `npm run build`: pass
+      - `npm run test:rules`: skipped; Phase 0 문서 변경만 수행했고 Firestore rules/server 변경 없음
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
 
 검증 명령:
 - `git diff -- docs/TODO.md`
