@@ -15,16 +15,14 @@ export type MyPageProfileSummaryProps = {
   };
 };
 
-export const MY_PAGE_POLICY_SETTING_ITEMS = ['privacy_policy', 'operation_policy'] as const;
+export const MY_PAGE_POLICY_SETTING_ITEMS = ['privacy_policy'] as const;
 
 export const MY_PAGE_SETTING_ITEMS = [
   'edit_interests',
   'my_answers',
   'my_worries',
   'privacy_policy',
-  'operation_policy',
-  'app_install_guide',
-  'push_notification_settings',
+  'push_notifications',
   'logout',
   'delete_account',
 ] as const;
@@ -47,15 +45,6 @@ export type PushSettingsAccessProps = {
   readonly status: PushPermissionStatus;
   readonly message?: string;
   readonly onOpenSettings: () => void;
-};
-
-export type AppInstallAccessProps = {
-  readonly canInstall: boolean;
-  readonly canShare: boolean;
-  readonly platformGuidance: 'android-install' | 'ios-share-to-home' | 'share-url-or-qr' | 'unsupported';
-  readonly shareUrl?: string;
-  readonly onInstall?: () => void;
-  readonly onShare?: () => void;
 };
 
 export type ConfirmationProps = {
@@ -87,7 +76,6 @@ export type MyPageScreenProps = {
   readonly profile: MyPageProfileSummaryProps;
   readonly settings: readonly MyPageSettingItem[];
   readonly pushSettings: PushSettingsAccessProps;
-  readonly appInstall: AppInstallAccessProps;
   readonly logoutConfirmation: ConfirmationProps;
   readonly accountDeletionConfirmation: ConfirmationProps;
   readonly onSettingSelect: (item: MyPageSettingItem) => void;

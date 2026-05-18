@@ -7,7 +7,6 @@ import { confirmAccountDeletionWithCleanup, confirmLogoutWithCleanup } from '../
 import { deleteMyAccountViaApi } from '../../services/userAccount/client';
 import { updateMyInterestsViaApi } from '../../services/userProfile/apiClient';
 import { validateEditableInterests } from '../../services/userProfile/profileInterests';
-import { mapPwaInstallCapability } from '../../services/pwaInstall/policy';
 import { loadPolicyDocumentViaApi } from '../../services/policyDocuments/apiClient';
 import type { PolicyDocumentResult } from '../../services/policyDocuments/types';
 import {
@@ -45,25 +44,12 @@ export type MyPageContainerProps = {
 export const ACCOUNT_DELETION_SUCCESS_ROUTE = routeAfterAccountDeletion();
 
 export function MyPageContainer(props: MyPageContainerProps) {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<readonly WorryCategory[]>([]);
   const [interestsError, setInterestsError] = useState<string | undefined>();
   const [policyDocument, setPolicyDocument] = useState<PolicyDocumentResult | null>(null);
   const [logoutError, setLogoutError] = useState<string | undefined>();
   const [accountDeletionError, setAccountDeletionError] = useState<string | undefined>();
-
-  useEffect(() => {
-    const handler = (event: Event) => {
-      const promptEvent = event as BeforeInstallPromptEvent;
-      promptEvent.preventDefault();
-      setDeferredPrompt(promptEvent);
-      setIsInstallable(true);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
 
   const currentRoute = typeof props.route === 'string' ? props.route : props.route.route;
 
@@ -78,7 +64,7 @@ export function MyPageContainer(props: MyPageContainerProps) {
   }, [currentRoute]);
 
   useEffect(() => {
-    if (currentRoute !== 'privacy_policy' && currentRoute !== 'operation_policy') {
+    if (currentRoute !== 'privacy_policy') {
       setPolicyDocument(null);
       return;
     }
@@ -174,11 +160,11 @@ export function MyPageContainer(props: MyPageContainerProps) {
     }
   };
 
-  if (currentRoute === 'privacy_policy' || currentRoute === 'operation_policy') {
+  if (currentRoute === 'privacy_policy') {
     return (
       <PolicyScreen
         policy={currentRoute}
-        title={currentRoute === 'privacy_policy' ? '개인정보처리방침' : '운영정책'}
+        title="개인정보처리방침"
         body={policyDocument?.status === 'ready' ? policyDocument.body : undefined}
         state={policyDocument === null
           ? { status: 'loading', label: '정책 본문을 불러오는 중입니다.' }
@@ -213,15 +199,6 @@ export function MyPageContainer(props: MyPageContainerProps) {
     permission: props.notificationPermission,
     registrationStatus: props.pushRegistrationStatus,
   });
-  const installCapability = mapPwaInstallCapability({
-    hasBeforeInstallPrompt: isInstallable,
-    canShare: typeof navigator !== 'undefined' && typeof navigator.share === 'function',
-    canWriteClipboard: typeof navigator !== 'undefined' && Boolean(navigator.clipboard),
-    isIosSafari: typeof navigator !== 'undefined'
-      && /iP(hone|ad|od)/.test(navigator.userAgent)
-      && /Safari/.test(navigator.userAgent),
-  });
-
   return (
     <MyPageScreen
       profile={mapProfileToMyPageSummary(props.profile)}
@@ -229,30 +206,6 @@ export function MyPageContainer(props: MyPageContainerProps) {
       pushSettings={{
         ...pushStatus,
         onOpenSettings: props.requestNotificationPermission,
-      }}
-      appInstall={{
-        canInstall: installCapability.canInstall,
-        canShare: installCapability.canShare,
-        platformGuidance: installCapability.platformGuidance,
-        shareUrl: typeof window !== 'undefined' ? window.location.origin : undefined,
-        onInstall: async () => {
-          if (!deferredPrompt) return;
-          deferredPrompt.prompt();
-          const choice = await deferredPrompt.userChoice;
-          if (choice.outcome === 'accepted') {
-            setIsInstallable(false);
-            setDeferredPrompt(null);
-          }
-        },
-        onShare: async () => {
-          const url = window.location.origin;
-          if (navigator.share) {
-            await navigator.share({ title: 'Qling', text: '익명으로 고민을 나누고 답장을 주고받는 앱', url });
-            return;
-          }
-          await navigator.clipboard.writeText(url);
-          props.setFilterAlert('링크가 복사되었습니다.');
-        },
       }}
       logoutConfirmation={{
         isOpen: currentRoute === 'logout_confirmation',
@@ -273,17 +226,10 @@ export function MyPageContainer(props: MyPageContainerProps) {
         if (item === 'my_answers') props.setView(routeToMyAnswers());
         if (item === 'my_worries') props.setView(routeToMyWorries());
         if (item === 'privacy_policy') props.setView('privacy_policy');
-        if (item === 'operation_policy') props.setView('operation_policy');
-        if (item === 'push_notification_settings') props.setView('notification_settings');
-        if (item === 'app_install_guide') props.setView('app_install_guide');
+        if (item === 'push_notifications') props.requestNotificationPermission();
         if (item === 'logout') props.setView('logout_confirmation');
         if (item === 'delete_account') props.setView('account_deletion_confirmation');
       }}
     />
   );
 }
-
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-};

@@ -64,7 +64,7 @@ export const APP_TSX_RESPONSIBILITY_INVENTORY = [
       "currentRoute === 'login'",
       "currentRoute === 'onboarding'",
       "currentRoute === 'write_worry'",
-      "currentRoute === 'privacy_policy' || currentRoute === 'operation_policy'",
+      "currentRoute === 'privacy_policy'",
       'tabForRoute(view)',
     ],
     phase3Boundary: 'route rendering boundary',

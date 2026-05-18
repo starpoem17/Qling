@@ -14,11 +14,11 @@ export type AppRoute =
   | PrdAppTab
   | 'received_worries'
   | 'write_worry'
+  | 'write_worry_success'
   | 'write_reply'
+  | 'write_reply_success'
   | 'received_answer_detail'
   | 'read_received_reply'
-  | 'my_answer_detail'
-  | 'read_my_reply'
   | 'answer_check'
   | 'my_worries'
   | 'my_worry_detail'
@@ -26,17 +26,13 @@ export type AppRoute =
   | 'edit_interests'
   | 'my_answers'
   | 'privacy_policy'
-  | 'operation_policy'
   | 'logout_confirmation'
-  | 'account_deletion_confirmation'
-  | 'notification_settings'
-  | 'app_install_guide';
+  | 'account_deletion_confirmation';
 
 export type AppRouteState =
-  | { route: Exclude<AppRoute, 'write_reply' | 'received_answer_detail' | 'read_received_reply' | 'my_answer_detail' | 'read_my_reply' | 'my_worry_detail'> }
+  | { route: Exclude<AppRoute, 'write_reply' | 'received_answer_detail' | 'read_received_reply' | 'my_worry_detail'> }
   | { route: 'write_reply'; deliveryId: string; worryId?: string }
   | { route: 'received_answer_detail' | 'read_received_reply'; worryId: string; replyId: string }
-  | { route: 'my_answer_detail' | 'read_my_reply'; replyId: string; deliveryId?: string; worryId?: string }
   | { route: 'my_worry_detail'; worryId: string };
 
 export type AppRouteViewState = AppRoute | AppRouteState;
@@ -46,10 +42,7 @@ export const DEFAULT_AUTHENTICATED_ROUTE: AppRoute = 'received_worries';
 export const ANSWER_FEED_ROUTE_ALIASES = [DEFAULT_AUTHENTICATED_TAB, DEFAULT_AUTHENTICATED_ROUTE] as const;
 
 export const MY_PAGE_MORE_ITEMS = [
-  'notification_settings',
-  'app_install_guide',
   'privacy_policy',
-  'operation_policy',
   'logout',
   'delete_account',
 ] as const;
@@ -64,24 +57,9 @@ export const MY_PAGE_SUBROUTES = [
   'my_answers',
   'my_worries',
   'privacy_policy',
-  'operation_policy',
   'logout_confirmation',
   'account_deletion_confirmation',
-  'notification_settings',
-  'app_install_guide',
 ] as const satisfies readonly AppRoute[];
-
-export const CENTRAL_BOTTOM_NAVIGATION_ACTION = {
-  label: '고민 작성',
-  accessibleLabel: '고민 작성',
-  targetRoute: 'write_worry',
-  ownerTab: '나의 고민',
-} as const satisfies {
-  label: string;
-  accessibleLabel: string;
-  targetRoute: AppRoute;
-  ownerTab: PrdAppTab;
-};
 
 export const REQUIRED_PHASE_2_ROUTE_STATES = [
   'splash',
@@ -93,16 +71,16 @@ export const REQUIRED_PHASE_2_ROUTE_STATES = [
   'onboarding_interests',
   'received_worries',
   'write_worry',
+  'write_worry_success',
   'write_reply',
+  'write_reply_success',
   'received_answer_detail',
-  'my_answer_detail',
   'answer_check',
   'my_page',
   'edit_interests',
   'my_answers',
   'my_worries',
   'privacy_policy',
-  'operation_policy',
   'logout_confirmation',
   'account_deletion_confirmation',
 ] as const satisfies readonly AppRoute[];
@@ -138,8 +116,8 @@ export function routeAfterAccountDeletion(): AppRoute {
   return 'login';
 }
 
-export function routeAfterWorryPublish(params: { worryId: string }): AppRouteState {
-  return { route: 'my_worry_detail', worryId: params.worryId };
+export function routeAfterWorryPublish(_params: { worryId: string }): AppRouteState {
+  return { route: 'write_worry_success' };
 }
 
 export function routeAfterReplyPublish(params: {
@@ -147,12 +125,16 @@ export function routeAfterReplyPublish(params: {
   deliveryId?: string;
   worryId?: string;
 }): AppRouteState {
-  return {
-    route: 'my_answer_detail',
-    replyId: params.replyId,
-    deliveryId: params.deliveryId,
-    worryId: params.worryId,
-  };
+  void params;
+  return { route: 'write_reply_success' };
+}
+
+export function routeAfterWorrySuccessConfirmation(): AppRoute {
+  return '나의 고민';
+}
+
+export function routeAfterReplySuccessConfirmation(): AppRoute {
+  return DEFAULT_AUTHENTICATED_TAB;
 }
 
 export function routeAfterPass(): AppRoute {
@@ -164,7 +146,7 @@ export function routeAfterFeedbackPublish(currentRoute: AppRouteViewState): AppR
 }
 
 export function routeToWriteWorry(): AppRoute {
-  return CENTRAL_BOTTOM_NAVIGATION_ACTION.targetRoute;
+  return 'write_worry';
 }
 
 export function routeToWriteReply(params: { deliveryId: string; worryId?: string }): AppRouteState {
@@ -173,19 +155,6 @@ export function routeToWriteReply(params: { deliveryId: string; worryId?: string
 
 export function routeToReceivedReplyDetail(params: { worryId: string; replyId: string }): AppRouteState {
   return { route: 'received_answer_detail', worryId: params.worryId, replyId: params.replyId };
-}
-
-export function routeToMyReplyDetail(params: {
-  replyId: string;
-  deliveryId?: string;
-  worryId?: string;
-}): AppRouteState {
-  return {
-    route: 'my_answer_detail',
-    replyId: params.replyId,
-    deliveryId: params.deliveryId,
-    worryId: params.worryId,
-  };
 }
 
 export function routeToMyAnswers(): AppRoute {
@@ -206,10 +175,9 @@ export function routeToEditInterests(): AppRoute {
 
 export function backRouteForRoute(route: AppRouteViewState): AppRoute {
   const currentRoute = routeName(route);
-  if (currentRoute === 'write_worry' || currentRoute === 'my_worry_detail') return '나의 고민';
-  if (currentRoute === 'write_reply') return DEFAULT_AUTHENTICATED_TAB;
+  if (currentRoute === 'write_worry' || currentRoute === 'write_worry_success' || currentRoute === 'my_worry_detail') return '나의 고민';
+  if (currentRoute === 'write_reply' || currentRoute === 'write_reply_success') return DEFAULT_AUTHENTICATED_TAB;
   if (currentRoute === 'received_answer_detail' || currentRoute === 'read_received_reply' || currentRoute === 'answer_check') return '나의 고민';
-  if (currentRoute === 'my_answer_detail' || currentRoute === 'read_my_reply') return 'my_answers';
   if (currentRoute === 'my_worries') return '나의 고민';
   if (MY_PAGE_SUBROUTES.includes(currentRoute as (typeof MY_PAGE_SUBROUTES)[number])) return '마이페이지';
   return DEFAULT_AUTHENTICATED_TAB;
@@ -227,17 +195,14 @@ export function backRouteFromReceivedReplyDetail(): AppRoute {
   return backRouteForRoute('received_answer_detail');
 }
 
-export function backRouteFromMyReplyDetail(): AppRoute {
-  return backRouteForRoute('my_answer_detail');
-}
-
 export function tabForRoute(route: AppRouteViewState): PrdAppTab | null {
   const currentRoute = routeName(route);
   if (PRD_APP_TABS.includes(currentRoute as PrdAppTab)) return currentRoute as PrdAppTab;
-  if (currentRoute === 'received_worries' || currentRoute === 'write_reply') return '답변하기';
+  if (currentRoute === 'received_worries' || currentRoute === 'write_reply' || currentRoute === 'write_reply_success') return '답변하기';
   if (
     currentRoute === 'my_worries'
     || currentRoute === 'write_worry'
+    || currentRoute === 'write_worry_success'
     || currentRoute === 'received_answer_detail'
     || currentRoute === 'read_received_reply'
     || currentRoute === 'answer_check'
@@ -248,8 +213,6 @@ export function tabForRoute(route: AppRouteViewState): PrdAppTab | null {
   if (
     currentRoute === 'my_page'
     || currentRoute === 'my_answers'
-    || currentRoute === 'my_answer_detail'
-    || currentRoute === 'read_my_reply'
     || MY_PAGE_SUBROUTES.includes(currentRoute as (typeof MY_PAGE_SUBROUTES)[number])
   ) {
     return '마이페이지';

@@ -372,46 +372,118 @@ Onboarding 선례의 정확한 표현:
 허용 수정 범위: `src/services/appShell/**`, `src/screens/shared/uiContract.ts`, `src/screens/shared/ui.tsx`, `src/App.tsx`, 관련 appShell/shared tests.
 금지 수정 범위: 화면 pixel 세부 조정, `src/services/**` domain/API/server logic, `src/server/**`, `server.ts`, `firestore.rules`.
 
-- [ ] TODO-P1.1: `BottomNavigationCentralAction` 계약을 제거하고 중앙 눈 인디케이터 계약으로 대체한다.
+- [x] TODO-P1.1: `BottomNavigationCentralAction` 계약을 제거하고 중앙 눈 인디케이터 계약으로 대체한다.
   - 대상 파일: `src/screens/shared/uiContract.ts`, `src/screens/shared/uiContract.test.ts`
   - 완료 기준: `centralWriteWorryAction` primitive id가 제거 또는 indicator id로 대체되고, props에 `onCentralAction`/`targetRoute`가 없다.
   - 검증: `rg -n "BottomNavigationCentralAction|onCentralAction|centralWriteWorryAction|targetRoute" src/screens/shared`
   - production PNG evidence: 없음. Optional visual review only via TODO-P1.8; not a completion condition.
-- [ ] TODO-P1.2: `BottomNavigation`에서 중앙 button/onClick을 제거하고 좌/우/마이페이지 특수 상태 indicator를 구현한다.
+  - completion note:
+    - changed files: `src/screens/shared/uiContract.ts`, `src/screens/shared/uiContract.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `rg -n "BottomNavigationCentralAction|centralWriteWorryAction|onCentralAction|targetRoute|CENTRAL_BOTTOM_NAVIGATION_ACTION" src/screens/shared src/App.tsx src/services/appShell` found only negative assertion strings in `src/screens/shared/uiContract.test.ts`.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P1.2: `BottomNavigation`에서 중앙 button/onClick을 제거하고 좌/우/마이페이지 특수 상태 indicator를 구현한다.
   - 대상 파일: `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.ts`
   - 완료 기준: 중앙 눈은 `button`이 아닌 visual element이고, 답변하기/나의 고민/마이페이지 상태별 하이라이트가 PRD 7.2와 일치한다.
   - 검증: shared UI rendering test에서 중앙 element가 click handler를 갖지 않음을 확인한다.
   - production PNG evidence: 없음. Optional visual review only via TODO-P1.8; not a completion condition.
-- [ ] TODO-P1.3: `App.tsx`에서 `onCentralAction={() => setView(routeToWriteWorry())}` 경로를 제거한다.
+  - completion note:
+    - changed files: `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.ts`, `src/screens/shared/uiContract.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `src/screens/shared/uiContract.test.ts` verifies central indicator has `role="presentation"`, `aria-hidden="true"`, `pointer-events-none`, and no `<button>`, `onClick`, or `data-target-route`.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P1.3: `App.tsx`에서 `onCentralAction={() => setView(routeToWriteWorry())}` 경로를 제거한다.
   - 대상 파일: `src/App.tsx`
   - 완료 기준: App shell 중앙 눈에서 고민 작성으로 이동하는 경로가 제거되고, 작성 진입 route intent는 MyWorries 쪽 contract에서만 표현된다.
   - 검증: `rg -n "onCentralAction|routeToWriteWorry\\(\\)" src/App.tsx src/screens`
   - production PNG evidence: 없음. Downstream visual confirmation only: 20 phase에서 우측 하단 메시지 버튼을 확인하며, 이 체크박스의 완료 조건은 아니다.
-- [ ] TODO-P1.4: 고민 제출 성공과 답변 제출 성공 route를 success confirmation route로 바꾼다.
+  - completion note:
+    - changed files: `src/App.tsx`, `src/screens/myPage/MyWorriesContainer.tsx` 확인, `src/services/appShell/prdNavigationPolicy.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `rg -n "routeToWriteWorry\\(\\)" src/App.tsx src/screens src/services/appShell` shows no `src/App.tsx` usage and only `MyWorriesContainer` write intent plus appShell helper/test. Phase 4/5 entry remains MyWorries-owned.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P1.4: 고민 제출 성공과 답변 제출 성공 route를 success confirmation route로 바꾼다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.ts`, `src/screens/writeForm/containerPolicy.ts`, 관련 tests
   - 완료 기준: 고민 성공은 09 success screen route, 답변 성공은 19 success screen route로 이동하고 기존 `my_worry_detail`/`my_answer_detail` 자동 이동이 사라진다.
   - 검증: `src/services/appShell/prdNavigationPolicy.test.ts`, `src/screens/writeForm/containerPolicy.test.ts`
   - production PNG evidence: 없음. Downstream visual confirmation only: 09/19 화면 phase에서 success screen PNG를 확인하며, 이 체크박스의 완료 조건은 아니다.
-- [ ] TODO-P1.5: PRD 기준으로 MVP 제외 route/item을 제거한다.
+  - completion note:
+    - changed files: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/prdNavigationPolicy.test.ts`, `src/screens/writeForm/containerPolicy.test.ts`, `src/screens/writeForm/containerPolicy.ts` 확인
+    - test command/result: `npm test` pass; `npm run lint` pass; `routeAfterWorryPublish` returns `{ route: 'write_worry_success' }`, `routeAfterReplyPublish` returns `{ route: 'write_reply_success' }`, confirmation helpers route to `나의 고민` and `답변하기`.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P1.5: PRD 기준으로 MVP 제외 route/item을 제거한다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/routeRenderingBoundary.ts`, `src/App.tsx`, appShell tests
   - 완료 기준: `operation_policy`, `app_install_guide`, `notification_settings`가 route 목록, subroute 목록, rendering boundary, settings dispatch에서 제거되거나 접근 불가 MVP 제외 상태로 고정된다.
   - 검증: `rg -n "operation_policy|app_install_guide|notification_settings" src/services/appShell src/App.tsx src/screens/myPage`
   - production PNG evidence: 없음. Downstream visual confirmation only: 10 phase에서 설정 항목 PNG를 확인하며, 이 체크박스의 완료 조건은 아니다.
-- [ ] TODO-P1.6: `App.tsx`의 전역 fixed header 책임을 제거하거나 중립화하고 header 소유권을 boundary 수준에서 분리한다.
+  - completion note:
+    - changed files: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/routeRenderingBoundary.ts`, `src/services/appShell/*test.ts`, `src/App.tsx`, `src/screens/myPage/*`, `src/screens/replyDetail/*`, `src/screens/importBoundaries.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `rg -n "operation_policy|app_install_guide|notification_settings" src/services/appShell src/App.tsx src/screens/myPage` shows only negative assertion strings in tests. `privacy_policy` remains. 알림 요구는 삭제하지 않고 별도 route/item만 제거했으며, 10 마이페이지 내부 알림 영역은 Phase 8에서 토글/상태로 정리한다.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P1.6: `App.tsx`의 전역 fixed header 책임을 제거하거나 중립화하고 header 소유권을 boundary 수준에서 분리한다.
   - 대상 파일: `src/App.tsx`, shared/screen contract boundary files only as needed
   - 완료 기준: `App.tsx`는 route selection, 전역 shell 조립, bottom navigation만 담당하고 per-screen visual header를 렌더링하지 않는다. 화면별 상단 좌측 눈/우측 마이페이지 버튼의 실제 위치/pixel 구현은 각 화면 phase가 소유한다.
   - 검증: `src/services/appShell/appMonolithGuardrail.test.ts`, `src/services/appShell/appShellBoundary.test.ts`
   - production PNG evidence: 없음. Downstream visual confirmation only: 각 화면 phase의 production PNG는 Phase 1 완료 조건이 아니다.
-- [ ] TODO-P1.7: appShell contract/route tests를 PRD route flow로 갱신한다.
+  - completion note:
+    - changed files: `src/App.tsx`, `src/services/appShell/appShellBoundary.test.ts`, `src/services/appShell/appShellResponsibilityMap.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `src/services/appShell/appShellBoundary.test.ts` asserts no `header={routeBoundary.mountsAuthenticatedShell`, no `fixed top-0`, no App-level `Radio` header, no App-rendered `Qling` header button.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P1.7: appShell contract/route tests를 PRD route flow로 갱신한다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.test.ts`, `src/services/appShell/routeRenderingBoundary.test.ts`, `src/services/appShell/appShellBoundary.test.ts`
   - 완료 기준: 중앙 눈 클릭 불가, 작성 진입점 단일화, 07→09→20, 17→19→06, 20→08, 10→12/13/14/15/16이 테스트로 검증된다.
   - 검증: `npm test -- src/services/appShell` 또는 전체 `npm test`
   - production PNG evidence: 없음.
-- [ ] TODO-P1.8: 이 phase에서 캡처가 필요하면 production PNG 중심으로 evidence를 남긴다.
+  - completion note:
+    - changed files: `src/services/appShell/prdNavigationPolicy.test.ts`, `src/services/appShell/routeRenderingBoundary.test.ts`, `src/services/appShell/appShellBoundary.test.ts`, related appShell policy files
+    - test command/result: `npm test` pass. Exact `npm test -- src/services/appShell`, `npm test -- src/screens/shared`, `npm test -- src/screens/writeForm`, `npm test -- src/screens/myPage` fail in current npm script shape because `tsx --test "src/**/*.test.ts" <dir>` tries to import `<dir>/index.json`; full `npm test` covers and passes all repo tests.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P1.8: 이 phase에서 캡처가 필요하면 production PNG 중심으로 evidence를 남긴다.
   - 대상 파일: `tmp/*-pixel-alignment/*-production.png`
   - 완료 기준: 이 phase에서 visual confirmation을 수행한 경우 `tmp` 안에 production PNG가 남고, 추가 보고 파일이 필요하면 한국어 HTML만 남긴다. capture note 필수 필드를 기록한다.
   - 검증: `find tmp -path '*pixel-alignment*' -type f | sort`
   - production PNG evidence: 해당되는 `tmp/*-pixel-alignment/*-production.png`.
+  - completion note:
+    - changed files: `docs/TODO.md`
+    - test command/result: `find tmp -path '*pixel-alignment*' -type f | sort` shows only existing onboarding evidence files. `npm test`, `npm run lint`, `npm run build`, `npm run validate:design-reference`, `npm run test:rules` pass.
+    - production PNG path: 해당 없음. Phase 1은 route/appShell cleanup phase이므로 production PNG 생성 없음. Downstream Phase 2~9에서 화면별 PNG evidence 생성.
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
 
 검증 명령:
 - `npm test`

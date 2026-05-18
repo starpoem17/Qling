@@ -64,7 +64,7 @@ export function mapMyGivenReplyToListItem(reply: ReplyReadModelItem, selectedRep
     isUnread: reply.hasUnread,
     isSelected,
     accessibilityLabel: [
-      '내가 쓴 답변 상세로 이동',
+      '내가 쓴 답변',
       originalWorryPreview ? `원래 고민 ${originalWorryPreview}` : undefined,
       feedbackLabel ? `피드백 ${feedbackLabel}` : '피드백 없음',
       isSelected ? '현재 선택됨' : '선택되지 않음',

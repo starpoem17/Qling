@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { ArrowLeft, Bell, Heart, QrCode, Share2 } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import { ArrowLeft, Bell, Heart } from 'lucide-react';
 import {
   CategoryChip,
   ContentSheet,
@@ -15,7 +14,6 @@ import {
   SettingsRow,
 } from '../shared/ui';
 import type {
-  AppInstallAccessProps,
   ConfirmationProps,
   EditInterestsProps,
   MyPageScreenProps,
@@ -29,9 +27,7 @@ const settingLabels: Record<MyPageSettingItem, string> = {
   my_answers: '내가 쓴 답변',
   my_worries: '나의 고민',
   privacy_policy: '개인정보처리방침',
-  operation_policy: '운영정책',
-  app_install_guide: '앱처럼 사용하기',
-  push_notification_settings: '푸시 알림 설정',
+  push_notifications: '푸시 알림 설정',
   logout: '로그아웃',
   delete_account: '계정 삭제',
 };
@@ -41,9 +37,7 @@ const settingDescriptions: Partial<Record<MyPageSettingItem, string>> = {
   my_answers: '내가 작성한 답변을 확인합니다.',
   my_worries: '내가 작성한 고민과 받은 답장을 확인합니다.',
   privacy_policy: '개인정보 처리 기준을 확인합니다.',
-  operation_policy: '서비스 운영 기준을 확인합니다.',
-  app_install_guide: '설치, 공유, QR로 Qling을 다시 엽니다.',
-  push_notification_settings: '알림 권한과 등록 상태를 확인합니다.',
+  push_notifications: '알림 권한과 등록 상태를 확인합니다.',
   logout: '현재 기기에서 로그아웃합니다.',
   delete_account: '계정과 연결된 데이터를 삭제합니다.',
 };
@@ -55,13 +49,6 @@ const pushStatusLabels: Record<PushPermissionStatus, string> = {
   unsupported: '이 브라우저는 알림을 지원하지 않습니다.',
   registered: '알림 등록이 완료되었습니다.',
   error: '알림 등록에 실패했습니다.',
-};
-
-const platformGuidanceLabels: Record<AppInstallAccessProps['platformGuidance'], string> = {
-  'android-install': 'Android/Chrome에서는 설치 버튼으로 홈 화면에 추가할 수 있습니다.',
-  'ios-share-to-home': 'iOS Safari에서는 공유 버튼에서 홈 화면에 추가를 선택하세요.',
-  'share-url-or-qr': '현재 URL 공유 또는 QR로 다시 접속할 수 있습니다.',
-  unsupported: '이 브라우저에서는 설치가 제한되어 URL 공유를 사용할 수 있습니다.',
 };
 
 export function MyPageScreen(props: MyPageScreenProps) {
@@ -117,39 +104,6 @@ export function MyPageScreen(props: MyPageScreenProps) {
         <PrimaryCTA onClick={props.pushSettings.onOpenSettings} accessibilityLabel="푸시 알림 설정 열기">
           알림 설정 열기
         </PrimaryCTA>
-      </ContentSheet>
-
-      <ContentSheet className="space-y-4">
-        <SectionTitle icon={<QrCode className="h-5 w-5" aria-hidden="true" />} title="앱처럼 사용하기" />
-        <p className="text-sm leading-6 text-[var(--qling-color-muted)]">
-          {platformGuidanceLabels[props.appInstall.platformGuidance]}
-        </p>
-        {props.appInstall.shareUrl && (
-          <div className="mx-auto w-fit rounded-[var(--qling-radius-card)] bg-white p-4 shadow-[var(--qling-shadow-card)]" aria-label="Qling 공유 QR">
-            <QRCodeSVG value={props.appInstall.shareUrl} size={112} level="H" />
-          </div>
-        )}
-        <div className="grid gap-2 sm:grid-cols-2">
-          {props.appInstall.onInstall && (
-            <PrimaryCTA
-              onClick={props.appInstall.onInstall}
-              disabled={!props.appInstall.canInstall}
-              accessibilityLabel="Qling 앱 설치"
-            >
-              설치하기
-            </PrimaryCTA>
-          )}
-          {props.appInstall.onShare && (
-            <SecondaryCTA
-              onClick={props.appInstall.onShare}
-              disabled={!props.appInstall.canShare}
-              accessibilityLabel="Qling 링크 공유"
-            >
-              <Share2 className="h-4 w-4" aria-hidden="true" />
-              공유하기
-            </SecondaryCTA>
-          )}
-        </div>
       </ContentSheet>
 
       <ContentSheet>

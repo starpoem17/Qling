@@ -113,7 +113,6 @@ const forbiddenSourceIdentifiers = [
   'routeToWriteWorry',
   'routeToWriteReply',
   'routeToReceivedReplyDetail',
-  'routeToMyReplyDetail',
   'routeAfterAuthProfileLoad',
   'routeAfterOnboardingComplete',
   'routeAfterWorryPublish',

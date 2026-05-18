@@ -34,17 +34,32 @@ test('maps canonical route states to their Phase 3 route rendering boundaries', 
   assert.equal(routeRenderingGroupForRoute('답변하기'), 'received worries');
   assert.equal(routeRenderingGroupForRoute('received_worries'), 'received worries');
   assert.equal(routeRenderingGroupForRoute('write_worry'), 'write worry');
+  assert.equal(routeRenderingGroupForRoute('write_worry_success'), 'write worry');
   assert.equal(routeRenderingGroupForRoute('write_reply'), 'write reply');
+  assert.equal(routeRenderingGroupForRoute('write_reply_success'), 'write reply');
   assert.equal(routeRenderingGroupForRoute('나의 고민'), 'authenticated shell');
   assert.equal(routeRenderingGroupForRoute('answer_check'), 'reply details');
   assert.equal(routeRenderingGroupForRoute('received_answer_detail'), 'reply details');
-  assert.equal(routeRenderingGroupForRoute('my_answer_detail'), 'reply details');
   assert.equal(routeRenderingGroupForRoute('my_worry_detail'), 'reply details');
   assert.equal(routeRenderingGroupForRoute('마이페이지'), 'my-page/account');
   assert.equal(routeRenderingGroupForRoute('my_answers'), 'my-page/account');
   assert.equal(routeRenderingGroupForRoute('account_deletion_confirmation'), 'my-page/account');
   assert.equal(routeRenderingGroupForRoute('privacy_policy'), 'policy screens');
-  assert.equal(routeRenderingGroupForRoute('operation_policy'), 'policy screens');
+});
+
+test('keeps excluded MVP routes out of route rendering boundary groups', () => {
+  const allBoundaryRoutes = Object.values(ROUTE_RENDERING_BOUNDARY).flatMap(group => group.routes);
+
+  for (const excluded of [
+    'operation_policy',
+    'app_install_guide',
+    'notification_settings',
+    'my_answer_detail',
+    'read_my_reply',
+  ]) {
+    assert.equal((allBoundaryRoutes as readonly string[]).includes(excluded), false);
+  }
+  assert.equal((allBoundaryRoutes as readonly string[]).includes('privacy_policy'), true);
 });
 
 test('identifies authenticated shell membership separately from route-specific groups', () => {

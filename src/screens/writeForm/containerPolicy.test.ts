@@ -39,7 +39,7 @@ test('worry publication policy preserves failed drafts and routes successful pub
   assert.deepEqual(published, {
     moderation: { status: 'approved' },
     clearDraft: true,
-    route: { route: 'my_worry_detail', worryId: 'worry-created' },
+    route: { route: 'write_worry_success' },
   });
 });
 
@@ -72,11 +72,6 @@ test('reply publication policy clears only after success and requests my-answer 
   assert.deepEqual(result, {
     moderation: { status: 'approved' },
     clearDraft: true,
-    route: {
-      route: 'my_answer_detail',
-      replyId: 'reply-created',
-      deliveryId: 'delivery-1',
-      worryId: 'worry-1',
-    },
+    route: { route: 'write_reply_success' },
   });
 });

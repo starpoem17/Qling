@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 export type SharedPrimitiveId =
   | 'appShellMobileFrame'
   | 'bottomNavigation'
-  | 'centralWriteWorryAction'
+  | 'centralBottomNavigationIndicator'
   | 'contentSheet'
   | 'orangeHeaderBand'
   | 'primaryCta'
@@ -24,19 +24,10 @@ export type BottomNavigationItem = {
   readonly label: BottomNavigationTab;
 };
 
-export type BottomNavigationCentralAction = {
-  readonly label: '고민 작성';
-  readonly accessibleLabel: string;
-  readonly targetRoute: 'write_worry';
-  readonly ownerTab: '나의 고민';
-};
-
 export type BottomNavigationProps = {
   readonly tabs: readonly BottomNavigationItem[];
   readonly activeTab: BottomNavigationTab;
-  readonly centralAction: BottomNavigationCentralAction;
   readonly onSelectTab: (tab: BottomNavigationTab) => void;
-  readonly onCentralAction: () => void;
 };
 
 export type MobileAppShellProps = {
@@ -118,7 +109,7 @@ export type SettingsRowProps = {
 export const SHARED_UI_PRIMITIVE_OWNERSHIP = [
   { id: 'appShellMobileFrame', primitive: 'MobileAppShell' },
   { id: 'bottomNavigation', primitive: 'BottomNavigation' },
-  { id: 'centralWriteWorryAction', primitive: 'BottomNavigation' },
+  { id: 'centralBottomNavigationIndicator', primitive: 'BottomNavigation' },
   { id: 'contentSheet', primitive: 'ContentSheet' },
   { id: 'orangeHeaderBand', primitive: 'OrangeHeaderBand' },
   { id: 'primaryCta', primitive: 'PrimaryCTA' },

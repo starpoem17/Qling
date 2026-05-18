@@ -19,7 +19,7 @@ test('shared primitive inventory covers every Phase 14 ownership item', () => {
     [
       'appShellMobileFrame',
       'bottomNavigation',
-      'centralWriteWorryAction',
+      'centralBottomNavigationIndicator',
       'contentSheet',
       'orangeHeaderBand',
       'primaryCta',
@@ -36,7 +36,7 @@ test('shared primitive inventory covers every Phase 14 ownership item', () => {
   );
 });
 
-test('bottom navigation contract preserves PRD tabs and central write-worry action', () => {
+test('bottom navigation contract preserves PRD tabs without central route or action props', () => {
   const props = {
     tabs: [
       { tab: '답변하기', label: '답변하기' },
@@ -44,21 +44,29 @@ test('bottom navigation contract preserves PRD tabs and central write-worry acti
       { tab: '마이페이지', label: '마이페이지' },
     ],
     activeTab: '답변하기',
-    centralAction: {
-      label: '고민 작성',
-      accessibleLabel: '고민 작성',
-      targetRoute: 'write_worry',
-      ownerTab: '나의 고민',
-    },
     onSelectTab: () => undefined,
-    onCentralAction: () => undefined,
   } satisfies BottomNavigationProps;
 
   assert.deepEqual(props.tabs.map(tab => tab.label), ['답변하기', '나의 고민', '마이페이지']);
   assert.equal(props.activeTab, '답변하기');
-  assert.equal(props.centralAction.label, '고민 작성');
-  assert.equal(props.centralAction.targetRoute, 'write_worry');
-  assert.equal(props.centralAction.ownerTab, '나의 고민');
+  assert.equal(Object.hasOwn(props, 'centralAction'), false);
+  assert.equal(Object.hasOwn(props, 'onCentralAction'), false);
+  assert.equal(JSON.stringify(props).includes('write_worry'), false);
+});
+
+test('bottom navigation central eye renders as a non-interactive indicator', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+  const centralIndicatorBlock = source.slice(
+    source.indexOf('data-testid="bottom-navigation-central-indicator"') - 220,
+    source.indexOf('data-testid="bottom-navigation-central-indicator"') + 520,
+  );
+
+  assert.match(centralIndicatorBlock, /role="presentation"/);
+  assert.match(centralIndicatorBlock, /aria-hidden="true"/);
+  assert.match(centralIndicatorBlock, /pointer-events-none/);
+  assert.doesNotMatch(centralIndicatorBlock, /<button/);
+  assert.doesNotMatch(centralIndicatorBlock, /onClick/);
+  assert.doesNotMatch(centralIndicatorBlock, /data-target-route/);
 });
 
 test('profile motif remains visual-only without avatar data requirements', () => {
@@ -177,6 +185,9 @@ test('shared primitive module does not import Firebase, API, server, or service 
     'passDeliveryViaApi',
     'routeToWriteWorry',
     'tabForRoute',
+    'onCentralAction',
+    'centralWriteWorryAction',
+    'targetRoute',
   ];
 
   for (const pattern of forbidden) {

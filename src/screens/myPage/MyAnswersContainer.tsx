@@ -3,7 +3,6 @@ import type { User } from 'firebase/auth';
 import { useMyGivenReplies, type ReplyReadModelItem } from '../../services/myWorries';
 import {
   backRouteForRoute,
-  routeToMyReplyDetail,
   type AppRouteViewState,
 } from '../../services/appShell/prdNavigationPolicy';
 import { MyAnswersScreen } from './MyAnswersScreen';
@@ -25,11 +24,6 @@ export function MyAnswersContainer(props: MyAnswersContainerProps) {
     if (!reply) return;
 
     props.setSelectedReply(reply);
-    props.setView(routeToMyReplyDetail({
-      replyId: reply.id,
-      deliveryId: reply.deliveryId,
-      worryId: reply.worryId,
-    }));
   };
 
   return (

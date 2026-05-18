@@ -55,7 +55,7 @@ test('detail route selection uses production read model item for id-bearing rece
 
 test('detail route selection returns empty when id-bearing route is missing from loaded read model', () => {
   assert.equal(selectReplyForDetailRoute({
-    route: { route: 'my_answer_detail', replyId: 'hidden-reply' },
+    route: { route: 'received_answer_detail', worryId: 'worry-1', replyId: 'hidden-reply' },
     selectedReply: replyItem({ id: 'hidden-reply' }),
     productionReplies: [],
     isProductionReadModelLoading: false,
@@ -66,7 +66,7 @@ test('detail route selection can use selected reply only while production read m
   const selected = replyItem({ id: 'reply-1' });
 
   assert.equal(selectReplyForDetailRoute({
-    route: { route: 'my_answer_detail', replyId: 'reply-1' },
+    route: { route: 'received_answer_detail', worryId: 'worry-1', replyId: 'reply-1' },
     selectedReply: selected,
     productionReplies: [],
     isProductionReadModelLoading: true,

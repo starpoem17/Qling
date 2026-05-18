@@ -96,3 +96,12 @@ test('App.tsx uses the route rendering boundary and preserves id-bearing route s
   assert.doesNotMatch(source, /routeAfterWorryPublish\([^)]*\)\.route/);
   assert.doesNotMatch(source, /routeAfterReplyPublish\([^)]*\)\.route/);
 });
+
+test('App.tsx does not render per-screen fixed visual header chrome', () => {
+  const source = fs.readFileSync('src/App.tsx', 'utf8');
+
+  assert.doesNotMatch(source, /header=\{routeBoundary\.mountsAuthenticatedShell/);
+  assert.doesNotMatch(source, /fixed top-0/);
+  assert.doesNotMatch(source, /<Radio/);
+  assert.doesNotMatch(source, /Qling<\/button>/);
+});

@@ -16,7 +16,6 @@ import {
   type ReplyReadModelItem,
 } from '../../services/myWorries';
 import {
-  backRouteFromMyReplyDetail,
   backRouteFromReceivedReplyDetail,
   routeAfterFeedbackPublish,
   type AppRouteViewState,
@@ -161,7 +160,7 @@ export function ReplyDetailContainer(props: ReplyDetailContainerProps) {
       commentModeration={moderationMessage ? { status: 'rejected', reason: moderationMessage } : { status: 'approved' }}
       isFeedbackProcessing={isFeedbackProcessing}
       isCommentProcessing={isCommentProcessing}
-      onBack={() => props.setView(props.mode === 'my-answer' ? backRouteFromMyReplyDetail() : backRouteFromReceivedReplyDetail())}
+      onBack={() => props.setView(props.mode === 'my-answer' ? 'my_answers' : backRouteFromReceivedReplyDetail())}
       onFeedbackChange={(value) => {
         selectedFeedbackRef.current = value;
         setSelectedFeedback(value);
