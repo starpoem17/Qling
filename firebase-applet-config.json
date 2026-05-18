@@ -1,10 +1,10 @@
 {
   "projectId": "qling-hyu",
-  "appId": "TODO_COPY_FROM_FIREBASE_CONSOLE_WEB_APP_CONFIG",
-  "apiKey": "TODO_COPY_FROM_FIREBASE_CONSOLE_WEB_APP_CONFIG",
+  "appId": "1:576941881401:web:50232374b29f0d44c735e8",
+  "apiKey": "AIzaSyBmdlpPtjyKntCCjy52ItRzAU4f8FZHk-A",
   "authDomain": "qling-hyu.firebaseapp.com",
   "firestoreDatabaseId": "(default)",
   "storageBucket": "qling-hyu.firebasestorage.app",
-  "messagingSenderId": "TODO_COPY_FROM_FIREBASE_CONSOLE_WEB_APP_CONFIG",
-  "measurementId": "TODO_COPY_FROM_FIREBASE_CONSOLE_WEB_APP_CONFIG"
+  "messagingSenderId": "576941881401",
+  "measurementId": "G-8P1Z4PRBM4"
 }
