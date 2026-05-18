@@ -19,6 +19,7 @@ import type {
   PolicyTextContainerProps,
   ProfileMotifProps,
   QlingDialogProps,
+  LoadingSpinnerProps,
   QlingTextAreaProps,
   SettingsRowProps,
   StatusStateProps,
@@ -174,7 +175,7 @@ export function CategoryChip({ label, selected, disabled, onSelect, className }:
       aria-pressed={selected}
       onClick={onSelect}
       className={cn(
-        'min-w-0 rounded-[var(--qling-radius-pill)] border px-3 py-1.5 text-sm font-semibold leading-5 transition-colors disabled:cursor-not-allowed disabled:opacity-55',
+        'inline-flex h-[var(--qling-category-chip-height)] w-[var(--qling-category-chip-width)] min-w-[var(--qling-category-chip-width)] items-center justify-center rounded-[var(--qling-radius-pill)] border px-3 text-center text-sm font-semibold leading-5 transition-colors disabled:cursor-not-allowed disabled:opacity-55',
         selected
           ? 'border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-cream-soft)] text-[var(--qling-color-text)]'
           : 'border-[var(--qling-color-border)] bg-[var(--qling-color-surface)] text-[var(--qling-color-muted)]',
@@ -277,7 +278,7 @@ export function EmptyState(props: StatusStateProps) {
 }
 
 export function LoadingState({ title, message }: StatusStateProps) {
-  return <StatusState icon={<Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />} title={title} message={message} />;
+  return <StatusState icon={<LoadingSpinner />} title={title} message={message} />;
 }
 
 export function ErrorState(props: StatusStateProps) {
@@ -299,6 +300,10 @@ function StatusState({ icon, title, message, actionLabel, onAction, danger }: St
       )}
     </div>
   );
+}
+
+export function LoadingSpinner({ label = '불러오는 중' }: LoadingSpinnerProps) {
+  return <Loader2 className="h-6 w-6 animate-spin" aria-label={label} role="status" />;
 }
 
 export function ProfileMotif({ label = '프로필 모티프' }: ProfileMotifProps) {

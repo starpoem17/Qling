@@ -47,12 +47,13 @@ test('my-page mapping preserves canonical 워라밸 category value', () => {
 });
 
 test('reply and worry read models map to list props without example labels', () => {
+  const createdAt = Date.now() - 45 * 60 * 1000;
   const reply = {
     id: 'reply-1',
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
     content: 'raw',
-    createdAt: null,
+    createdAt: { toMillis: () => createdAt },
     source: 'prd_replies',
     senderId: 'sender',
     receiverId: 'receiver',
@@ -81,6 +82,7 @@ test('reply and worry read models map to list props without example labels', () 
   });
 
   assert.equal(answerItem.previewText, 'refined');
+  assert.equal(answerItem.dateLabel, '45분 전');
   assert.equal(answerItem.originalWorryPreview, 'original');
   assert.equal(answerItem.feedbackLabel, '받은 하트');
   assert.equal(answerItem.hasReceivedHeart, true);
@@ -96,4 +98,38 @@ test('reply and worry read models map to list props without example labels', () 
   assert.match(receivedItem.accessibilityLabel, /받은 답장 상세로 이동/);
   assert.match(receivedItem.accessibilityLabel, /읽지 않은 답장/);
   assert.equal(Object.hasOwn(answerItem, 'exampleLabel'), false);
+});
+
+test('my-page list date labels use shared local display formatter fallbacks', () => {
+  const missingDateReply = mapMyGivenReplyToListItem({
+    id: 'reply-1',
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+    content: 'raw',
+    createdAt: null,
+    source: 'prd_replies',
+    senderId: 'sender',
+    receiverId: 'receiver',
+    originalContent: 'original',
+    refinedContent: 'refined',
+    isRead: false,
+    hasUnread: false,
+  });
+  const oldDateReply = mapMyGivenReplyToListItem({
+    id: 'reply-2',
+    deliveryId: 'delivery-2',
+    worryId: 'worry-2',
+    content: 'raw',
+    createdAt: { toMillis: () => Date.UTC(2026, 0, 2, 0, 0, 0) },
+    source: 'prd_replies',
+    senderId: 'sender',
+    receiverId: 'receiver',
+    originalContent: 'original',
+    refinedContent: 'refined',
+    isRead: false,
+    hasUnread: false,
+  });
+
+  assert.equal(missingDateReply.dateLabel, undefined);
+  assert.equal(oldDateReply.dateLabel, '2026-01-02');
 });

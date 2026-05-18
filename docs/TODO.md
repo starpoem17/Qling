@@ -476,41 +476,48 @@
 허용 수정 범위: `src/screens/shared/**`, `src/index.css`, shared tests, appShell test-only capture entry.
 금지 수정 범위: domain/API/server/Firebase logic, 개별 화면 데이터 semantics.
 
-- [ ] TODO-P2.1: 393x852 reference canvas 기준 production preview/capture 방식을 구현한다.
+- [x] TODO-P2.1: 393x852 reference canvas 기준 production preview/capture 방식을 구현한다.
   - 대상 파일: `src/index.css`, `src/screens/shared/ui.tsx`, capture-only route/test helper
   - 완료 기준: production route를 393x852 viewport로 캡처할 때 reference PNG와 같은 비교 기준을 얻는다.
   - 검증: 06 또는 20 한 화면을 393x852 production PNG로 캡처해 크기를 확인한다.
   - production PNG evidence: `tmp/shared-pixel-alignment/canvas-frame-production.png` if captured.
-- [ ] TODO-P2.2: status bar/time/network/battery와 최하단 home indicator를 production UI에서 구현하지 않도록 검증한다.
+  - Completion note: 기존 393x852 production frame CSS를 유지하고 built production preview의 실제 login route를 `tmp/shared-pixel-alignment/canvas-frame-production.png`로 캡처했다. `identify -format '%w %h %m %f\n' tmp/shared-pixel-alignment/canvas-frame-production.png` 결과 `393 852 PNG canvas-frame-production.png`다.
+- [x] TODO-P2.2: status bar/time/network/battery와 최하단 home indicator를 production UI에서 구현하지 않도록 검증한다.
   - 대상 파일: `src/index.css`, `src/screens/shared/ui.tsx`, screen files
   - 완료 기준: capture PNG가 393x852이더라도 OS chrome fake element는 production DOM에 없다.
   - 검증: screen DOM test 또는 수동 DOM inspection note.
   - production PNG evidence: 각 phase production PNG.
-- [ ] TODO-P2.3: `CategoryChip` 고정 폭 정책을 관심 분야 최장 텍스트 기준으로 구현한다.
+  - Completion note: `src/screens/importBoundaries.test.ts`, `src/screens/shared/uiContract.test.ts`, `src/screens/shared/ui.test.ts`가 fake OS chrome/home indicator와 shared primitive 책임을 검사한다. production source grep `rg -n "statusBar|StatusBar|homeIndicator|HomeIndicator|battery|10:46|time/network|home indicator" src/screens src/index.css --glob '!*.test.ts'`는 결과 없음이며 `network` 잔여는 온보딩 네트워크 실패 상태명뿐이다.
+- [x] TODO-P2.3: `CategoryChip` 고정 폭 정책을 관심 분야 최장 텍스트 기준으로 구현한다.
   - 대상 파일: `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.ts`, `packages/domain/src/index.ts`
   - 완료 기준: 카테고리 글자 수로 칩 폭이 달라지지 않고 3열 칩 화면에서도 안정적으로 맞는다.
   - 검증: shared rendering test와 12 화면 capture.
   - production PNG evidence: Phase 8B `12-edit-interests-production.png`.
-- [ ] TODO-P2.4: 로컬 타임존 기준 display date formatter를 shared pure function으로 분리한다.
+  - Completion note: `--qling-category-chip-width: 103px`와 `--qling-category-chip-height: 44px` 토큰을 추가하고 `CategoryChip`이 고정 폭을 사용하게 했다. shared UI test가 짧은 라벨과 `워라밸` 모두 동일 fixed-width class를 갖는지 검증한다.
+- [x] TODO-P2.4: 로컬 타임존 기준 display date formatter를 shared pure function으로 분리한다.
   - 대상 파일: `src/screens/shared/contract.ts` 또는 new shared mapping utility, mapping tests
   - 완료 기준: 1분 미만 `방금 전`, 1시간 미만 `n분 전`, 날짜가 바뀌기 전 `n시간 전`, 날짜가 바뀌면 `YYYY-MM-DD`가 테스트된다.
   - 검증: `src/screens/receivedWorries/mapping.test.ts`, `src/screens/writeForm/mapping.test.ts`, `src/screens/myPage/mapping.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P2.5: spinner loading primitive와 PNG에 없는 empty/loading state 책임 범위를 분리한다.
+  - Completion note: `src/screens/shared/displayDate.ts`에 pure formatter를 추가하고 receivedWorries/writeForm/myPage mappings의 중복 inline formatter를 교체했다. shared formatter tests가 `방금 전`, `n분 전`, `n시간 전`, `YYYY-MM-DD`, timezone date boundary, invalid fallback을 검증한다.
+- [x] TODO-P2.5: spinner loading primitive와 PNG에 없는 empty/loading state 책임 범위를 분리한다.
   - 대상 파일: `src/screens/shared/ui.tsx`, screen `*Screen.tsx`
   - 완료 기준: PRD empty 문구는 screen별 contract에서 관리하고 loading은 shared spinner primitive로 통일된다.
   - 검증: shared UI tests와 screen state tests.
   - production PNG evidence: Phase 10 `tmp/empty-loading-pixel-alignment/*-production.png` if captured.
-- [ ] TODO-P2.6: shared primitive 변경이 presentational-only임을 테스트로 증명한다.
+  - Completion note: `LoadingSpinner` primitive를 추가하고 `LoadingState`가 이를 사용하게 했다. shared UI/contract tests가 spinner accessibility와 shared UI에 route-specific empty copy가 없음을 검증한다.
+- [x] TODO-P2.6: shared primitive 변경이 presentational-only임을 테스트로 증명한다.
   - 대상 파일: `src/screens/shared/uiContract.test.ts`, `src/screens/importBoundaries.test.ts`
   - 완료 기준: shared UI가 `src/services/**`를 import하지 않는다.
   - 검증: `npm test`
   - production PNG evidence: 없음.
-- [ ] TODO-P2.7: shared primitive evidence는 PNG만 생성한다.
+  - Completion note: shared primitive import guardrails를 `ui.tsx`, `uiContract.ts`, `contract.ts`, `displayDate.ts`까지 확장했고 presentational `*Screen.tsx` guardrails를 유지했다. `npm test`, `npm run lint`, `npm run build`, `npm run validate:design-reference`, `npm run test:rules` 모두 통과했다.
+- [x] TODO-P2.7: shared primitive evidence는 PNG만 생성한다.
   - 대상 파일: `tmp/shared-pixel-alignment/*-production.png`
   - 완료 기준: shared evidence 디렉터리에 PNG 외 파일이 없다.
   - 검증: `find tmp/shared-pixel-alignment -type f | sort`
   - production PNG evidence: `tmp/shared-pixel-alignment/*-production.png`.
+  - Completion note: `find tmp/shared-pixel-alignment -type f | sort` 결과는 `tmp/shared-pixel-alignment/canvas-frame-production.png` 하나이며 PNG 외 파일, temporary script, reference copy는 없다.
 
 검증 명령:
 - `npm test`

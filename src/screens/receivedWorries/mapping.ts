@@ -1,6 +1,6 @@
 import { WORRY_CATEGORIES, type WorryCategory } from '@midnight-radio/domain';
 import type { HomeWorryFeedLetter } from '../../services/homeWorryFeed';
-import type { DisplayDate } from '../shared/contract';
+import { formatLocalDisplayDate } from '../shared/displayDate';
 import type { ReceivedWorryFeedItem } from './contract';
 
 function isWorryCategory(value: string | undefined): value is WorryCategory {
@@ -10,21 +10,6 @@ function isWorryCategory(value: string | undefined): value is WorryCategory {
 function categoryForFeedItem(worry: HomeWorryFeedLetter): WorryCategory {
   const category = worry.category ?? worry.categories?.[0];
   return isWorryCategory(category) ? category : WORRY_CATEGORIES[0];
-}
-
-function displayDateFromTimestamp(createdAt: HomeWorryFeedLetter['createdAt']): DisplayDate {
-  const millis = createdAt?.toMillis?.();
-  if (typeof millis !== 'number' || Number.isNaN(millis)) {
-    return { label: '수신됨' };
-  }
-
-  return {
-    label: new Intl.DateTimeFormat('ko-KR', {
-      month: 'short',
-      day: 'numeric',
-    }).format(new Date(millis)),
-    isoValue: new Date(millis).toISOString(),
-  };
 }
 
 export function mapHomeWorryFeedLetterToReceivedWorryFeedItem(
@@ -43,7 +28,7 @@ export function mapHomeWorryFeedLetterToReceivedWorryFeedItem(
     category: categoryForFeedItem(worry),
     previewText: worry.refinedContent,
     bodyText: worry.refinedContent,
-    receivedAt: displayDateFromTimestamp(worry.createdAt),
+    receivedAt: formatLocalDisplayDate(worry.createdAt, { fallbackLabel: '수신됨' }),
     isUnread: worry.hasUnread === true,
   };
 }

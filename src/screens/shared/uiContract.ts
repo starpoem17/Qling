@@ -13,6 +13,7 @@ export type SharedPrimitiveId =
   | 'textArea'
   | 'modalDialog'
   | 'emptyLoadingErrorState'
+  | 'spinnerLoadingPrimitive'
   | 'profileMotif'
   | 'policyTextContainer'
   | 'settingsRow';
@@ -96,6 +97,10 @@ export type StatusStateProps = {
   readonly onAction?: () => void;
 };
 
+export type LoadingSpinnerProps = {
+  readonly label?: string;
+};
+
 export type ProfileMotifProps = {
   readonly label?: string;
 };
@@ -127,6 +132,7 @@ export const SHARED_UI_PRIMITIVE_OWNERSHIP = [
   { id: 'textArea', primitive: 'QlingTextArea' },
   { id: 'modalDialog', primitive: 'QlingDialog' },
   { id: 'emptyLoadingErrorState', primitive: 'EmptyState / LoadingState / ErrorState' },
+  { id: 'spinnerLoadingPrimitive', primitive: 'LoadingSpinner' },
   { id: 'profileMotif', primitive: 'ProfileMotif' },
   { id: 'policyTextContainer', primitive: 'PolicyTextContainer' },
   { id: 'settingsRow', primitive: 'SettingsRow' },

@@ -58,6 +58,8 @@
   --qling-space-safe-bottom: env(safe-area-inset-bottom, 0px);
   --qling-space-cta-gap: 0.75rem;
   --qling-space-scroll-bottom: calc(var(--qling-space-nav-height) + var(--qling-space-safe-bottom) + 2rem);
+  --qling-category-chip-width: 103px;
+  --qling-category-chip-height: 44px;
 
   --qling-ref-splash-bg: #ff8b3d;
   --qling-ref-splash-cream: #fff5eb;

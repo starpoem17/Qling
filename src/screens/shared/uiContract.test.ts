@@ -6,6 +6,7 @@ import {
   SHARED_UI_PRIMITIVE_OWNERSHIP,
   type BottomNavigationProps,
   type CategoryChipProps,
+  type LoadingSpinnerProps,
   type QlingDialogProps,
   type PolicyTextContainerProps,
   type ProfileMotifProps,
@@ -29,6 +30,7 @@ test('shared primitive inventory covers every Phase 14 ownership item', () => {
       'textArea',
       'modalDialog',
       'emptyLoadingErrorState',
+      'spinnerLoadingPrimitive',
       'profileMotif',
       'policyTextContainer',
       'settingsRow',
@@ -134,6 +136,16 @@ test('category chip contract allows layout classes without changing selection be
   assert.equal(chip.selected, true);
   assert.equal(chip.className?.includes('max-w-[103px]'), true);
   assert.equal(Object.hasOwn(chip, 'apiClient'), false);
+});
+
+test('loading spinner contract stays visual-only and copy-free', () => {
+  const spinner = {
+    label: '목록 로딩 중',
+  } satisfies LoadingSpinnerProps;
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+
+  assert.equal(spinner.label, '목록 로딩 중');
+  assert.doesNotMatch(source, /지금은 도착한 고민이 없어요|첫 고민을 남겨보세요/);
 });
 
 test('modal dialog contract preserves aria-capable confirmation and processing/error states', () => {

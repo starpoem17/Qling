@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { isValidElement, type ReactNode } from 'react';
-import { BottomNavigation } from './ui';
+import { BottomNavigation, CategoryChip, LoadingSpinner, LoadingState } from './ui';
 import type { BottomNavigationTab } from './uiContract';
 
 type ElementRecord = {
@@ -64,4 +64,27 @@ test('bottom navigation tab buttons still call onSelectTab', () => {
   (buttons[2].props.onClick as () => void)();
 
   assert.deepEqual(selectedTabs, ['답변하기', '나의 고민', '마이페이지']);
+});
+
+test('category chip uses fixed token width independent of label length and preserves 워라밸', () => {
+  const shortChip = collectElements(CategoryChip({ label: '취업', selected: false }));
+  const longChip = collectElements(CategoryChip({ label: '워라밸', selected: true }));
+  const shortButton = shortChip.find(element => element.type === 'button');
+  const longButton = longChip.find(element => element.type === 'button');
+
+  assert.ok(shortButton);
+  assert.ok(longButton);
+  assert.match(String(shortButton.props.className), /w-\[var\(--qling-category-chip-width\)\]/);
+  assert.match(String(longButton.props.className), /w-\[var\(--qling-category-chip-width\)\]/);
+  assert.match(String(longButton.props.children), /워라밸/);
+});
+
+test('loading spinner primitive is accessible and owns no route-specific empty copy', () => {
+  const spinnerElements = collectElements(LoadingSpinner({ label: '목록 로딩 중' }));
+  const spinner = spinnerElements[0];
+  const loadingStateSource = JSON.stringify(collectElements(LoadingState({ title: '불러오는 중' })));
+
+  assert.equal(spinner.props.role, 'status');
+  assert.equal(spinner.props['aria-label'], '목록 로딩 중');
+  assert.doesNotMatch(loadingStateSource, /지금은 도착한 고민이 없어요|첫 고민을 남겨보세요/);
 });

@@ -6,12 +6,13 @@ import type { SelectedReceivedWorry } from '../receivedWorries/ReceivedWorriesCo
 import { buildWriteDraftContract, mapSelectedWorryToOriginalWorrySummary } from './mapping';
 
 test('maps selected delivery data to original worry summary props', () => {
+  const createdAt = Date.now() - 30 * 1000;
   const summary = mapSelectedWorryToOriginalWorrySummary({
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
     category: WORRY_CATEGORIES[2],
     refinedContent: 'Original worry',
-    createdAt: { toMillis: () => Date.UTC(2026, 4, 16) },
+    createdAt: { toMillis: () => createdAt },
   } as SelectedReceivedWorry);
 
   assert.deepEqual(summary, {
@@ -20,10 +21,30 @@ test('maps selected delivery data to original worry summary props', () => {
     category: WORRY_CATEGORIES[2],
     bodyText: 'Original worry',
     receivedAt: {
-      label: '5월 16일',
-      isoValue: '2026-05-16T00:00:00.000Z',
+      label: '방금 전',
+      isoValue: new Date(createdAt).toISOString(),
     },
   });
+});
+
+test('maps missing and older selected worry timestamps through shared display formatter', () => {
+  const missing = mapSelectedWorryToOriginalWorrySummary({
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+    category: WORRY_CATEGORIES[2],
+    refinedContent: 'Original worry',
+    createdAt: null,
+  } as SelectedReceivedWorry);
+  const old = mapSelectedWorryToOriginalWorrySummary({
+    deliveryId: 'delivery-2',
+    worryId: 'worry-2',
+    category: WORRY_CATEGORIES[2],
+    refinedContent: 'Original worry',
+    createdAt: { toMillis: () => Date.UTC(2026, 0, 2, 0, 0, 0) },
+  } as SelectedReceivedWorry);
+
+  assert.deepEqual(missing?.receivedAt, { label: '수신됨' });
+  assert.equal(old?.receivedAt.label, '2026-01-02');
 });
 
 test('does not create reply summary props without delivery or worry id', () => {

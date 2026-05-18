@@ -177,3 +177,44 @@ test('presentational screens stay props/callback-only for route, domain, and mut
     assert.doesNotMatch(source, /\bgetDoc\b|\bsetDoc\b|\bupdateDoc\b|\bserverTimestamp\b|\bonAuthStateChanged\b|\bonMessage\b/);
   }
 });
+
+test('shared visual primitive sources remain presentational-only and free of fake OS chrome', () => {
+  const files = [
+    path.join(screenRoot, 'shared', 'ui.tsx'),
+    path.join(screenRoot, 'shared', 'uiContract.ts'),
+    path.join(screenRoot, 'shared', 'contract.ts'),
+    path.join(screenRoot, 'shared', 'displayDate.ts'),
+  ];
+  const forbiddenSource = [
+    'src/services/',
+    '../../services/',
+    'firebase/',
+    'firebase-admin/',
+    'apiClient',
+    'server.ts',
+    'routeToWriteWorry',
+    'routeAfterWorryPublish',
+    'passDeliveryViaApi',
+    'submitReplyFeedbackWithProductionAdapters',
+    'deleteMyAccountViaApi',
+  ];
+  const forbiddenChrome = [
+    'statusBar',
+    'StatusBar',
+    'homeIndicator',
+    'HomeIndicator',
+    'battery',
+    'network',
+    '10:46',
+  ];
+
+  for (const file of files) {
+    const source = fs.readFileSync(file, 'utf8');
+    for (const forbidden of forbiddenSource) {
+      assert.equal(source.includes(forbidden), false, `${relativeProjectPath(file)} contains ${forbidden}`);
+    }
+    for (const forbidden of forbiddenChrome) {
+      assert.equal(source.includes(forbidden), false, `${relativeProjectPath(file)} contains fake chrome marker ${forbidden}`);
+    }
+  }
+});

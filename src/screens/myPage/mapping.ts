@@ -8,6 +8,7 @@ import type {
 } from './contract';
 import { HELPED_COUNT_LABEL } from './contract';
 import type { MyWorryListItem, ReplyReadModelItem } from '../../services/myWorries';
+import { formatLocalDisplayDate } from '../shared/displayDate';
 
 export type MyPageProfileInput = {
   readonly nickname?: string;
@@ -43,8 +44,8 @@ export function mapPushStatus(params: {
 }
 
 function dateLabel(value: { toMillis?: () => number } | null | undefined): string | undefined {
-  if (!value?.toMillis) return undefined;
-  return new Date(value.toMillis()).toLocaleDateString('ko-KR');
+  const label = formatLocalDisplayDate(value, { fallbackLabel: '' }).label;
+  return label || undefined;
 }
 
 export function mapMyGivenReplyToListItem(reply: ReplyReadModelItem, selectedReplyId?: string): MyAnswerListItemProps {
