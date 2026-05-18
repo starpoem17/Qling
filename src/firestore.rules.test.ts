@@ -16,8 +16,8 @@ const clientConfig = JSON.parse(fs.readFileSync('firebase-applet-config.json', '
   projectId: string;
   firestoreDatabaseId: string;
 };
-const productionProjectId = 'ai-studio-applet-webapp-81285';
-const productionDatabaseId = 'ai-studio-5b923681-2d77-477b-ae6d-a04fc4c79fb2';
+const productionProjectId = 'qling-hyu';
+const productionDatabaseId = '(default)';
 
 const safeProfile = (uid: string) => ({
   uid,
@@ -151,7 +151,7 @@ after(async () => {
 });
 
 describe('profile and token transition', () => {
-  test('rules tests are pinned to the app Firebase project and named database config', () => {
+  test('rules tests are pinned to the app Firebase project and default database config', () => {
     assert.equal(clientConfig.projectId, productionProjectId);
     assert.equal(clientConfig.firestoreDatabaseId, productionDatabaseId);
   });

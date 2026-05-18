@@ -63,7 +63,7 @@ const messaging = getApps().length > 0 ? getMessaging() : null;
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json());
   registerVersionRoutes(app);

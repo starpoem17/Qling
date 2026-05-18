@@ -14,7 +14,7 @@
     "validate:design-reference": "node scripts/validateDesignReference.mjs",
     "lint": "tsc --noEmit",
     "test": "tsx --test \"src/**/*.test.ts\"",
-    "test:rules": "firebase emulators:exec --project ai-studio-applet-webapp-81285 --only firestore \"tsx --test \\\"src/**/*.rules.test.ts\\\"\"",
+    "test:rules": "firebase emulators:exec --project qling-hyu --only firestore \"tsx --test \\\"src/**/*.rules.test.ts\\\"\"",
     "start": "tsx server.ts"
   },
   "dependencies": {

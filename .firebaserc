@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "ai-studio-applet-webapp-81285"
-  }
+    "default": "qling-hyu"
+  },
+  "targets": {},
+  "etags": {}
 }

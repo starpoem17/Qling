@@ -3,12 +3,14 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compa
 
 // [Qling] FCM Service Worker Config
 firebase.initializeApp({
-  apiKey: "AIzaSyCle4jS1PzS585w1QR5-kessY2u6vrUcOM",
-  authDomain: "ai-studio-applet-webapp-81285.firebaseapp.com",
-  projectId: "ai-studio-applet-webapp-81285",
-  storageBucket: "ai-studio-applet-webapp-81285.firebasestorage.app",
-  messagingSenderId: "339422523002",
-  appId: "1:339422523002:web:3ba8ccd88914bee59755c3"
+  // TODO: Copy apiKey, messagingSenderId, and appId from
+  // Firebase Console -> Project settings -> General -> Web app config.
+  apiKey: "TODO_COPY_FROM_FIREBASE_CONSOLE_WEB_APP_CONFIG",
+  authDomain: "qling-hyu.firebaseapp.com",
+  projectId: "qling-hyu",
+  storageBucket: "qling-hyu.firebasestorage.app",
+  messagingSenderId: "TODO_COPY_FROM_FIREBASE_CONSOLE_WEB_APP_CONFIG",
+  appId: "TODO_COPY_FROM_FIREBASE_CONSOLE_WEB_APP_CONFIG"
 });
 
 const messaging = firebase.messaging();
