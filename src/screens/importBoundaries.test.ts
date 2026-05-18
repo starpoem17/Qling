@@ -30,6 +30,13 @@ function listPresentationalScreenFiles(): string[] {
     .sort();
 }
 
+function listSharedPrimitiveFiles(): string[] {
+  return listFiles(path.join(screenRoot, 'shared'))
+    .filter(file => /\.(ts|tsx)$/.test(file))
+    .filter(file => !file.endsWith('.test.ts'))
+    .sort();
+}
+
 function staticImports(source: string, fromFile: string): StaticImport[] {
   const imports = source.matchAll(/import\s+(?:type\s+)?[\s\S]*?\s+from\s+['"]([^'"]+)['"]/g);
   return Array.from(imports, match => {
@@ -174,5 +181,33 @@ test('presentational screens stay props/callback-only for route, domain, and mut
     }
     assert.doesNotMatch(source, /firebase\/(?:firestore|auth|messaging)/);
     assert.doesNotMatch(source, /\bgetDoc\b|\bsetDoc\b|\bupdateDoc\b|\bserverTimestamp\b|\bonAuthStateChanged\b|\bonMessage\b/);
+  }
+});
+
+test('shared primitives stay presentational-only without services, Firebase, server, or API imports', () => {
+  for (const file of listSharedPrimitiveFiles()) {
+    const source = fs.readFileSync(file, 'utf8');
+    for (const imported of staticImports(source, file)) {
+      for (const pattern of forbiddenPackageImports) {
+        assert.equal(
+          importMatches(imported, pattern),
+          false,
+          `${relativeProjectPath(file)} imports forbidden package pattern ${pattern} through ${imported.source}`,
+        );
+      }
+      for (const [label, matches] of forbiddenSrcImportChecks) {
+        assert.equal(
+          matches(imported),
+          false,
+          `${relativeProjectPath(file)} imports forbidden source ${label} through ${imported.source}`,
+        );
+      }
+      assert.equal(
+        imported.source.includes('/api') || imported.source === 'api',
+        false,
+        `${relativeProjectPath(file)} imports API-like boundary through ${imported.source}`,
+      );
+    }
+    assert.doesNotMatch(source, /fetch\(|firebase|serverTimestamp|apiClient|src\/services|\.\.\/\.\.\/services/);
   }
 });

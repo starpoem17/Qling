@@ -28,6 +28,7 @@ test('shared primitive inventory covers every Phase 14 ownership item', () => {
       'categoryChip',
       'textArea',
       'modalDialog',
+      'loadingSpinner',
       'emptyLoadingErrorState',
       'profileMotif',
       'policyTextContainer',
@@ -145,6 +146,44 @@ test('category chip contract allows layout classes without changing selection be
   assert.equal(chip.selected, true);
   assert.equal(chip.className?.includes('max-w-[103px]'), true);
   assert.equal(Object.hasOwn(chip, 'apiClient'), false);
+});
+
+test('category chip primitive computes a stable width from domain category labels', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+
+  assert.match(source, /WORRY_CATEGORIES/);
+  assert.match(source, /longestCategoryLabelLength/);
+  assert.match(source, /categoryChipWidth/);
+  assert.match(source, /style=\{\{ width: categoryChipWidth \}\}/);
+  assert.match(source, /whitespace-nowrap/);
+});
+
+test('loading state uses the shared spinner primitive without PRD empty text', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+  const loadingSpinnerBlock = source.slice(
+    source.indexOf('export function LoadingSpinner'),
+    source.indexOf('export function ErrorState'),
+  );
+
+  assert.match(loadingSpinnerBlock, /role="status"/);
+  assert.match(loadingSpinnerBlock, /animate-spin/);
+  assert.match(loadingSpinnerBlock, /sr-only/);
+  assert.doesNotMatch(source, /지금은 도착한 고민이 없어요|첫 고민을 남겨보세요/);
+});
+
+test('production shared primitives do not implement static mobile chrome', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+  const forbiddenChrome = [
+    'status bar',
+    'battery',
+    'network',
+    'home indicator',
+    '10:46',
+  ];
+
+  for (const pattern of forbiddenChrome) {
+    assert.equal(source.toLowerCase().includes(pattern), false, `shared UI includes fake OS chrome marker ${pattern}`);
+  }
 });
 
 test('modal dialog contract preserves aria-capable confirmation and processing/error states', () => {

@@ -12,6 +12,7 @@ export type SharedPrimitiveId =
   | 'categoryChip'
   | 'textArea'
   | 'modalDialog'
+  | 'loadingSpinner'
   | 'emptyLoadingErrorState'
   | 'profileMotif'
   | 'policyTextContainer'
@@ -54,6 +55,11 @@ export type CategoryChipProps = {
   readonly selected?: boolean;
   readonly disabled?: boolean;
   readonly onSelect?: () => void;
+  readonly className?: string;
+};
+
+export type LoadingSpinnerProps = {
+  readonly label?: string;
   readonly className?: string;
 };
 
@@ -118,6 +124,7 @@ export const SHARED_UI_PRIMITIVE_OWNERSHIP = [
   { id: 'categoryChip', primitive: 'CategoryChip' },
   { id: 'textArea', primitive: 'QlingTextArea' },
   { id: 'modalDialog', primitive: 'QlingDialog' },
+  { id: 'loadingSpinner', primitive: 'LoadingSpinner' },
   { id: 'emptyLoadingErrorState', primitive: 'EmptyState / LoadingState / ErrorState' },
   { id: 'profileMotif', primitive: 'ProfileMotif' },
   { id: 'policyTextContainer', primitive: 'PolicyTextContainer' },

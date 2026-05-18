@@ -500,41 +500,104 @@ Onboarding 선례의 정확한 표현:
 허용 수정 범위: `src/screens/shared/**`, `src/index.css`, shared tests, appShell test-only capture entry.
 금지 수정 범위: domain/API/server/Firebase logic, 개별 화면 데이터 semantics.
 
-- [ ] TODO-P2.1: 393x852 reference canvas 기준 production preview/capture 방식을 구현한다.
+- [x] TODO-P2.1: 393x852 reference canvas 기준 production preview/capture 방식을 구현한다.
   - 대상 파일: `src/index.css`, `src/screens/shared/ui.tsx`, capture-only route/test helper
   - 완료 기준: production route를 393x852 viewport로 캡처할 때 reference PNG와 같은 비교 기준을 얻는다.
   - 검증: 06 또는 20 한 화면을 393x852 production PNG로 캡처해 크기를 확인한다.
   - production PNG evidence: required in this checkbox: `tmp/shared-pixel-alignment/canvas-frame-production.png`.
-- [ ] TODO-P2.2: status bar/time/network/battery와 최하단 home indicator를 production UI에서 구현하지 않도록 검증한다.
+  - completion note:
+    - changed files: `src/index.css`, `src/screens/shared/ui.tsx`, `tmp/shared-pixel-alignment/harness/index.html`, `tmp/shared-pixel-alignment/harness/src/main.tsx`, `tmp/shared-pixel-alignment/canvas-frame-production.png`, `tmp/shared-pixel-alignment/measurements.html`
+    - test command/result: `npm test` pass (`640 pass`, `1 skipped` rules placeholder), `npm run lint` pass, `npm run build` pass, `npm run validate:design-reference` pass, `npm run test:rules` pass (`77 pass`), PNG size check pass.
+    - production PNG path: `tmp/shared-pixel-alignment/canvas-frame-production.png`
+    - capture type: `harness component`
+    - harness route/data verification: production `MobileAppShell`, `BottomNavigation`, `ReceivedWorriesScreen`, `CategoryChip`를 harness에서 렌더링했다. route/Auth/Firebase data path는 Phase 2 pixel frame 범위에서 제외하고 `src/screens/receivedWorries/mapping.test.ts`, `src/screens/writeForm/mapping.test.ts`, `src/screens/myPage/mapping.test.ts`, `src/screens/importBoundaries.test.ts`, `src/screens/shared/uiContract.test.ts`로 screen props 변환과 presentational-only 경계를 검증했다.
+    - reference PNG path: `design/reference/pngs/screens/06-received-worries.png`
+    - measured result: viewport `393x852`, deviceScaleFactor `1`, screenshot `fullPage:false`; reference size `(393, 852)`, production size `(393, 852)`; reference dominant `#ffffff 181468`, `#ff8b3d 54530`, `#fff1d1 35241`, `#fff5eb 16382`, `#2a2a2a 5007`; production dominant `#fff8ef 102526`, `#ffffff 91452`, `#fff3df 53968`, `#e07a5f 9271`, `#fef7ee 6730`; reference non-bg bbox `(0, 0, 393, 852)`, production non-bg bbox `(0, 22, 393, 852)`; reference SHA-256 `f430ba910b74b5814c933772c6cfae9a5ab30a59d73b1e88d0f7c891a526117f`, production SHA-256 `2442cc22b0ddc87806be4e7b72237e386fdf47e18e464770cbc9a9e860ff2fa6`.
+    - tolerated difference: Phase 2는 shared primitive와 capture frame 안정화가 목표이므로 06 화면의 최종 pixel match는 수행하지 않는다. reference의 OS chrome 영역은 production DOM에서 의도적으로 제외한다.
+- [x] TODO-P2.2: status bar/time/network/battery와 최하단 home indicator를 production UI에서 구현하지 않도록 검증한다.
   - 대상 파일: `src/index.css`, `src/screens/shared/ui.tsx`, screen files
   - 완료 기준: capture PNG가 393x852이더라도 OS chrome fake element는 production DOM에 없다.
   - 검증: screen DOM test 또는 수동 DOM inspection note.
   - production PNG evidence: 없음. Downstream visual confirmation only: 각 화면 phase의 production PNG는 이 체크박스의 완료 조건이 아니다.
-- [ ] TODO-P2.3: `CategoryChip` 고정 폭 정책을 관심 분야 최장 텍스트 기준으로 구현한다.
+  - completion note:
+    - changed files: `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.test.ts`, `src/screens/importBoundaries.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass. `src/screens/shared/uiContract.test.ts`의 `production shared primitives do not implement static mobile chrome`와 import boundary tests가 fake OS chrome 미구현을 검증한다.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: `design/reference/pngs/screens/06-received-worries.png`, `design/reference/pngs/screens/20-my-worries.png`
+    - measured result: source/static DOM 검증에서 `status bar`, `battery`, `network`, `home indicator`, `10:46` marker가 shared production primitive에 없음. `rg -n "status bar|network indicator|battery indicator|home indicator|10:46" src tmp/shared-pixel-alignment -g '!*.test.ts' -g '!measurements.html'` returned no matches.
+    - tolerated difference: `static mobile chrome is intentionally excluded`; reference PNG의 시간/네트워크/배터리/home indicator는 production UI에서 만들지 않는다.
+- [x] TODO-P2.3: `CategoryChip` 고정 폭 정책을 관심 분야 최장 텍스트 기준으로 구현한다.
   - 대상 파일: `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.ts`, `packages/domain/src/index.ts`
   - 완료 기준: 카테고리 글자 수로 칩 폭이 달라지지 않고 3열 칩 화면에서도 안정적으로 맞는다.
   - 검증: shared rendering test 또는 component-level DOM/style test.
   - production PNG evidence: 없음. Downstream visual confirmation only: 12 phase에서 chip grid PNG를 확인하며, 이 체크박스의 완료 조건은 아니다.
-- [ ] TODO-P2.4: 로컬 타임존 기준 display date formatter를 shared pure function으로 분리한다.
+  - completion note:
+    - changed files: `src/index.css`, `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.ts`, `src/screens/shared/uiContract.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: `design/reference/pngs/screens/12-edit-interests.png`
+    - measured result: `CategoryChip`은 `WORRY_CATEGORIES`를 읽어 `longestCategoryLabelLength`와 `categoryChipWidth`를 계산하고 inline width로 적용한다. `워라밸` domain value는 수정하지 않았고 `packages/domain/src/index.ts` diff 없음.
+    - tolerated difference: Phase 12 chip grid PNG는 downstream visual confirmation이며 Phase 2 완료 조건으로 사용하지 않았다.
+- [x] TODO-P2.4: 로컬 타임존 기준 display date formatter를 shared pure function으로 분리한다.
   - 대상 파일: `src/screens/shared/contract.ts` 또는 new shared mapping utility, mapping tests
   - 완료 기준: 1분 미만 `방금 전`, 1시간 미만 `n분 전`, 날짜가 바뀌기 전 `n시간 전`, 날짜가 바뀌면 `YYYY-MM-DD`가 테스트된다.
   - 검증: `src/screens/receivedWorries/mapping.test.ts`, `src/screens/writeForm/mapping.test.ts`, `src/screens/myPage/mapping.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P2.5: spinner loading primitive와 PNG에 없는 empty/loading state 책임 범위를 분리한다.
+  - completion note:
+    - changed files: `src/screens/shared/displayDate.ts`, `src/screens/receivedWorries/mapping.ts`, `src/screens/writeForm/mapping.ts`, `src/screens/myPage/mapping.ts`, `src/screens/receivedWorries/mapping.test.ts`, `src/screens/writeForm/mapping.test.ts`, `src/screens/myPage/mapping.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: mapping tests inject fixed `now` values and cover read model to screen prop conversion without route data mutation.
+    - reference PNG path: 해당 없음
+    - measured result: shared pure `formatDisplayDate` handles `Date`, millis number, and `{ toMillis(): number }`; tests cover `방금 전`, `n분 전`, `n시간 전`, and local-date-changed `YYYY-MM-DD` in received worries, write form, and my page mappings. Missing timestamp policy remains `수신됨` for received/write mappings and `undefined` for my-page reply date label.
+    - tolerated difference: 해당 없음
+- [x] TODO-P2.5: spinner loading primitive와 PNG에 없는 empty/loading state 책임 범위를 분리한다.
   - 대상 파일: `src/screens/shared/ui.tsx`, screen `*Screen.tsx`
   - 완료 기준: PRD empty 문구는 screen별 contract에서 관리하고 loading은 shared spinner primitive로 통일된다.
   - 검증: shared UI tests와 screen state tests.
   - production PNG evidence: 없음. Optional visual review only in Phase 10; not a completion condition.
-- [ ] TODO-P2.6: shared primitive 변경이 presentational-only임을 테스트로 증명한다.
+  - completion note:
+    - changed files: `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.ts`, `src/screens/shared/uiContract.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: `LoadingSpinner` primitive를 추가하고 `LoadingState`가 spinner를 사용하도록 통일했다. shared primitive source에는 PRD empty 문구를 하드코딩하지 않으며, empty/loading/error 문구는 screen props/contract 책임으로 유지된다.
+    - tolerated difference: Phase 10 visual review는 이 TODO 완료 조건이 아니다.
+- [x] TODO-P2.6: shared primitive 변경이 presentational-only임을 테스트로 증명한다.
   - 대상 파일: `src/screens/shared/uiContract.test.ts`, `src/screens/importBoundaries.test.ts`
   - 완료 기준: shared UI가 `src/services/**`를 import하지 않는다.
   - 검증: `npm test`
   - production PNG evidence: 없음.
-- [ ] TODO-P2.7: shared primitive evidence는 production PNG 중심으로 생성한다.
+  - completion note:
+    - changed files: `src/screens/shared/uiContract.test.ts`, `src/screens/importBoundaries.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass. `src/screens/importBoundaries.test.ts`가 `src/screens/shared/**`의 services/Firebase/server/API imports를 검증한다.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: `src/screens/shared/**`는 `src/services/**`, Firebase, server, API/client boundary를 import하지 않는다. `src/App.tsx`는 shared primitive internal detail을 새로 알지 않으며 이번 phase에서 수정하지 않았다.
+    - tolerated difference: 해당 없음
+- [x] TODO-P2.7: shared primitive evidence는 production PNG 중심으로 생성한다.
   - 대상 파일: `tmp/shared-pixel-alignment/*-production.png`
   - 완료 기준: shared evidence 디렉터리에 production PNG가 있고, 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
   - 검증: `find tmp/shared-pixel-alignment -type f | sort`
   - production PNG evidence: `tmp/shared-pixel-alignment/*-production.png`.
+  - completion note:
+    - changed files: `tmp/shared-pixel-alignment/canvas-frame-production.png`, `tmp/shared-pixel-alignment/measurements.html`, `tmp/shared-pixel-alignment/harness/index.html`, `tmp/shared-pixel-alignment/harness/src/main.tsx`
+    - test command/result: `find tmp/shared-pixel-alignment -type f | sort` returned `canvas-frame-production.png`, `harness/index.html`, `harness/src/main.tsx`, `measurements.html`; PNG size check pass; `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: `tmp/shared-pixel-alignment/canvas-frame-production.png`
+    - capture type: `harness component`
+    - harness route/data verification: `measurements.html`에 route/Container verification method 기록. production screen/component capture이며 JSON/Markdown evidence를 만들지 않았다.
+    - reference PNG path: `design/reference/pngs/screens/06-received-worries.png`
+    - measured result: `tmp/shared-pixel-alignment/measurements.html`에 capture type, source component, reference/production path, measured size, dominant colors, non-bg bbox, tolerated difference, copy check 기록. PNG size `(393, 852)` 확인.
+    - tolerated difference: Phase 2는 shared primitive/canvas frame evidence이므로 화면별 최종 pixel mismatch는 후속 화면 phase 소유. OS chrome은 production에서 제외.
 
 검증 명령:
 - `npm test`

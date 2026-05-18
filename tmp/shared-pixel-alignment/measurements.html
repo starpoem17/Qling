@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 2 shared primitive production evidence</title>
+  <style>
+    body { font-family: sans-serif; margin: 24px; line-height: 1.6; color: #25221f; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th, td { border: 1px solid #e7ded5; padding: 8px; text-align: left; vertical-align: top; }
+    th { background: #fff3df; }
+    code { background: #fff3df; padding: 2px 4px; }
+  </style>
+</head>
+<body>
+  <h1>Phase 2 공통 프리미티브 production evidence</h1>
+  <table>
+    <tbody>
+      <tr><th>capture type</th><td>harness component</td></tr>
+      <tr><th>source screen/component</th><td><code>MobileAppShell</code>, <code>BottomNavigation</code>, <code>ReceivedWorriesScreen</code>, <code>CategoryChip</code>, <code>LoadingSpinner</code></td></tr>
+      <tr><th>route/Container verification method</th><td><code>npm test</code>의 mapping/import boundary/shared primitive tests로 screen props 변환과 presentational-only 경계를 검증했다. Auth/Firebase full route는 Phase 2 pixel frame 검증 대상에서 제외했다.</td></tr>
+      <tr><th>reference PNG path</th><td><code>design/reference/pngs/screens/06-received-worries.png</code></td></tr>
+      <tr><th>production PNG path</th><td><code>tmp/shared-pixel-alignment/canvas-frame-production.png</code></td></tr>
+      <tr><th>measured size</th><td>reference <code>393x852</code>, production <code>393x852</code></td></tr>
+      <tr><th>dominant colors</th><td>reference: <code>#ffffff 181468</code>, <code>#ff8b3d 54530</code>, <code>#fff1d1 35241</code>, <code>#fff5eb 16382</code>, <code>#2a2a2a 5007</code><br />production: <code>#fff8ef 102526</code>, <code>#ffffff 91452</code>, <code>#fff3df 53968</code>, <code>#e07a5f 9271</code>, <code>#fef7ee 6730</code></td></tr>
+      <tr><th>non-bg bbox</th><td>reference <code>(0, 0, 393, 852)</code>, production <code>(0, 22, 393, 852)</code></td></tr>
+      <tr><th>known tolerated difference</th><td>Phase 2는 shared primitive와 capture frame 안정화가 목표이므로 06 화면의 최종 pixel match는 수행하지 않는다. reference의 status bar/time/network/battery/home indicator는 production DOM에서 의도적으로 제외했다.</td></tr>
+      <tr><th>copy check</th><td>reference SHA-256 <code>f430ba910b74b5814c933772c6cfae9a5ab30a59d73b1e88d0f7c891a526117f</code>, production SHA-256 <code>2442cc22b0ddc87806be4e7b72237e386fdf47e18e464770cbc9a9e860ff2fa6</code></td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

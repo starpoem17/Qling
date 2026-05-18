@@ -1,4 +1,5 @@
 import { useId, type ReactNode } from 'react';
+import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import {
   AlertCircle,
   CheckCircle2,
@@ -15,6 +16,7 @@ import type {
   BottomNavigationTab,
   CategoryChipProps,
   CtaProps,
+  LoadingSpinnerProps,
   MobileAppShellProps,
   PolicyTextContainerProps,
   ProfileMotifProps,
@@ -24,6 +26,9 @@ import type {
   StatusStateProps,
 } from './uiContract';
 
+const longestCategoryLabelLength = Math.max(...WORRY_CATEGORIES.map(category => category.length));
+const categoryChipWidth = `calc(${longestCategoryLabelLength}em + 2.75rem)`;
+
 export function MobileAppShell({
   children,
   header,
@@ -32,18 +37,20 @@ export function MobileAppShell({
   mainClassName,
 }: MobileAppShellProps) {
   return (
-    <div className="min-h-dvh overflow-x-hidden bg-[var(--qling-color-cream)] text-[var(--qling-color-text)] font-sans selection:bg-[var(--qling-color-cream-soft)]">
-      {header}
-      <main
-        className={cn(
-          'mx-auto w-full max-w-2xl px-[var(--qling-space-shell-x)]',
-          hasBottomNavigation ? 'pb-[var(--qling-space-scroll-bottom)]' : 'pb-12',
-          mainClassName,
-        )}
-      >
-        {children}
-      </main>
-      {bottomNavigation}
+    <div className="qling-production-root text-[var(--qling-color-text)] font-sans selection:bg-[var(--qling-color-cream-soft)]">
+      <div className="qling-production-frame">
+        {header}
+        <main
+          className={cn(
+            'mx-auto w-full px-[var(--qling-space-shell-x)]',
+            hasBottomNavigation ? 'pb-[var(--qling-space-scroll-bottom)]' : 'pb-12',
+            mainClassName,
+          )}
+        >
+          {children}
+        </main>
+        {bottomNavigation}
+      </div>
     </div>
   );
 }
@@ -68,7 +75,7 @@ export function BottomNavigation({
   return (
     <nav
       aria-label="주요 화면"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--qling-color-border)] bg-[rgb(255_255_255/0.96)] shadow-[var(--qling-shadow-nav)] backdrop-blur-md"
+      className="fixed bottom-0 left-1/2 z-50 w-full max-w-[var(--qling-mobile-canvas-width)] -translate-x-1/2 border-t border-[var(--qling-color-border)] bg-[rgb(255_255_255/0.96)] shadow-[var(--qling-shadow-nav)] backdrop-blur-md"
       style={{ paddingBottom: 'var(--qling-space-safe-bottom)' }}
     >
       <div
@@ -173,8 +180,9 @@ export function CategoryChip({ label, selected, disabled, onSelect, className }:
       disabled={disabled}
       aria-pressed={selected}
       onClick={onSelect}
+      style={{ width: categoryChipWidth }}
       className={cn(
-        'min-w-0 rounded-[var(--qling-radius-pill)] border px-3 py-1.5 text-sm font-semibold leading-5 transition-colors disabled:cursor-not-allowed disabled:opacity-55',
+        'inline-flex min-h-[var(--qling-category-chip-height)] max-w-full shrink-0 items-center justify-center whitespace-nowrap rounded-[var(--qling-radius-pill)] border px-3 py-1.5 text-center text-sm font-semibold leading-5 transition-colors disabled:cursor-not-allowed disabled:opacity-55',
         selected
           ? 'border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-cream-soft)] text-[var(--qling-color-text)]'
           : 'border-[var(--qling-color-border)] bg-[var(--qling-color-surface)] text-[var(--qling-color-muted)]',
@@ -183,6 +191,15 @@ export function CategoryChip({ label, selected, disabled, onSelect, className }:
     >
       {label}
     </button>
+  );
+}
+
+export function LoadingSpinner({ label = '로딩 중', className }: LoadingSpinnerProps) {
+  return (
+    <span role="status" aria-label={label} className={cn('inline-flex items-center justify-center text-[var(--qling-color-primary-orange)]', className)}>
+      <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+      <span className="sr-only">{label}</span>
+    </span>
   );
 }
 
@@ -277,7 +294,7 @@ export function EmptyState(props: StatusStateProps) {
 }
 
 export function LoadingState({ title, message }: StatusStateProps) {
-  return <StatusState icon={<Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />} title={title} message={message} />;
+  return <StatusState icon={<LoadingSpinner label={title} />} title={title} message={message} />;
 }
 
 export function ErrorState(props: StatusStateProps) {

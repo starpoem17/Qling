@@ -8,6 +8,7 @@ import type {
 } from './contract';
 import { HELPED_COUNT_LABEL } from './contract';
 import type { MyWorryListItem, ReplyReadModelItem } from '../../services/myWorries';
+import { formatDisplayDate, type DisplayDateOptions } from '../shared/displayDate';
 
 export type MyPageProfileInput = {
   readonly nickname?: string;
@@ -42,12 +43,12 @@ export function mapPushStatus(params: {
   return { status: 'default', message: '알림 권한 설정이 필요합니다.' };
 }
 
-function dateLabel(value: { toMillis?: () => number } | null | undefined): string | undefined {
+function dateLabel(value: { toMillis?: () => number } | null | undefined, options?: DisplayDateOptions): string | undefined {
   if (!value?.toMillis) return undefined;
-  return new Date(value.toMillis()).toLocaleDateString('ko-KR');
+  return formatDisplayDate(value, options).label;
 }
 
-export function mapMyGivenReplyToListItem(reply: ReplyReadModelItem, selectedReplyId?: string): MyAnswerListItemProps {
+export function mapMyGivenReplyToListItem(reply: ReplyReadModelItem, selectedReplyId?: string, options?: DisplayDateOptions): MyAnswerListItemProps {
   const feedbackLabel = reply.feedback === 'helpful' ? '받은 하트' : reply.feedback === 'not_helpful' ? '확인됨' : undefined;
   const isSelected = reply.id === selectedReplyId;
   const originalWorryPreview = reply.replyToContent ?? reply.originalContent;
@@ -58,7 +59,7 @@ export function mapMyGivenReplyToListItem(reply: ReplyReadModelItem, selectedRep
     worryId: reply.worryId,
     previewText: reply.refinedContent,
     originalWorryPreview,
-    dateLabel: dateLabel(reply.createdAt),
+    dateLabel: dateLabel(reply.createdAt, options),
     feedbackLabel,
     hasReceivedHeart: reply.feedback === 'helpful',
     isUnread: reply.hasUnread,

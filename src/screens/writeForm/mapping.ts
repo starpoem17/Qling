@@ -3,6 +3,7 @@ import type { ContentValidationResult } from '../../services/validation/content'
 import type { HomeWorryFeedTimestamp } from '../../services/homeWorryFeed/types';
 import type { SelectedReceivedWorry } from '../receivedWorries/ReceivedWorriesContainer';
 import type { DisplayDate, ScreenModerationState, SubmitDisabledReason } from '../shared/contract';
+import { formatDisplayDate, type DisplayDateOptions } from '../shared/displayDate';
 import type { OriginalWorrySummaryProps, WriteDraftContract } from './contract';
 
 export function buildWriteDraftContract(params: {
@@ -34,6 +35,7 @@ export function buildWriteDraftContract(params: {
 
 export function mapSelectedWorryToOriginalWorrySummary(
   worry: SelectedReceivedWorry,
+  options?: DisplayDateOptions,
 ): OriginalWorrySummaryProps | null {
   if (!worry.deliveryId || !worry.worryId) return null;
 
@@ -42,23 +44,12 @@ export function mapSelectedWorryToOriginalWorrySummary(
     worryId: worry.worryId,
     category: toWorryCategory(worry.category),
     bodyText: worry.refinedContent,
-    receivedAt: displayDateFromTimestamp(worry.createdAt),
+    receivedAt: displayDateFromTimestamp(worry.createdAt, options),
   };
 }
 
-function displayDateFromTimestamp(createdAt: HomeWorryFeedTimestamp | null | undefined): DisplayDate {
-  const millis = createdAt?.toMillis?.();
-  if (typeof millis !== 'number' || Number.isNaN(millis)) {
-    return { label: '수신됨' };
-  }
-
-  return {
-    label: new Intl.DateTimeFormat('ko-KR', {
-      month: 'short',
-      day: 'numeric',
-    }).format(new Date(millis)),
-    isoValue: new Date(millis).toISOString(),
-  };
+function displayDateFromTimestamp(createdAt: HomeWorryFeedTimestamp | null | undefined, options?: DisplayDateOptions): DisplayDate {
+  return formatDisplayDate(createdAt, options);
 }
 
 function resolveSubmitDisabledReason(params: {

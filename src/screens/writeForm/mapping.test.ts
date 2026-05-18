@@ -5,14 +5,16 @@ import { CONTENT_MAX_LENGTH, validateDraftContent } from '../../services/validat
 import type { SelectedReceivedWorry } from '../receivedWorries/ReceivedWorriesContainer';
 import { buildWriteDraftContract, mapSelectedWorryToOriginalWorrySummary } from './mapping';
 
+const now = new Date(2026, 4, 19, 12, 0, 0);
+
 test('maps selected delivery data to original worry summary props', () => {
   const summary = mapSelectedWorryToOriginalWorrySummary({
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
     category: WORRY_CATEGORIES[2],
     refinedContent: 'Original worry',
-    createdAt: { toMillis: () => Date.UTC(2026, 4, 16) },
-  } as SelectedReceivedWorry);
+    createdAt: { toMillis: () => new Date(2026, 4, 18, 23, 59, 0).getTime() },
+  } as SelectedReceivedWorry, { now });
 
   assert.deepEqual(summary, {
     deliveryId: 'delivery-1',
@@ -20,10 +22,36 @@ test('maps selected delivery data to original worry summary props', () => {
     category: WORRY_CATEGORIES[2],
     bodyText: 'Original worry',
     receivedAt: {
-      label: '5월 16일',
-      isoValue: '2026-05-16T00:00:00.000Z',
+      label: '2026-05-18',
+      isoValue: new Date(2026, 4, 18, 23, 59, 0).toISOString(),
     },
   });
+});
+
+test('reply summary uses shared local display date formatter', () => {
+  const base = {
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+    category: WORRY_CATEGORIES[2],
+    refinedContent: 'Original worry',
+  } as SelectedReceivedWorry;
+
+  assert.equal(mapSelectedWorryToOriginalWorrySummary({
+    ...base,
+    createdAt: { toMillis: () => new Date(2026, 4, 19, 11, 59, 45).getTime() },
+  }, { now })?.receivedAt?.label, '방금 전');
+  assert.equal(mapSelectedWorryToOriginalWorrySummary({
+    ...base,
+    createdAt: { toMillis: () => new Date(2026, 4, 19, 11, 10, 0).getTime() },
+  }, { now })?.receivedAt?.label, '50분 전');
+  assert.equal(mapSelectedWorryToOriginalWorrySummary({
+    ...base,
+    createdAt: { toMillis: () => new Date(2026, 4, 19, 1, 0, 0).getTime() },
+  }, { now })?.receivedAt?.label, '11시간 전');
+  assert.equal(mapSelectedWorryToOriginalWorrySummary({
+    ...base,
+    createdAt: { toMillis: () => new Date(2026, 4, 17, 12, 0, 0).getTime() },
+  }, { now })?.receivedAt?.label, '2026-05-17');
 });
 
 test('does not create reply summary props without delivery or worry id', () => {

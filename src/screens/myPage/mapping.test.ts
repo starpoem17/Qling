@@ -9,6 +9,8 @@ import {
   mapReceivedReplyToListItem,
 } from './mapping';
 
+const now = new Date(2026, 4, 19, 12, 0, 0);
+
 test('profile mapping uses safe helpedCount fallback and visual-only motif', () => {
   const summary = mapProfileToMyPageSummary({
     nickname: '나',
@@ -96,4 +98,39 @@ test('reply and worry read models map to list props without example labels', () 
   assert.match(receivedItem.accessibilityLabel, /받은 답장 상세로 이동/);
   assert.match(receivedItem.accessibilityLabel, /읽지 않은 답장/);
   assert.equal(Object.hasOwn(answerItem, 'exampleLabel'), false);
+});
+
+test('my answer date labels use the shared local display date formatter with injected now', () => {
+  const reply = {
+    id: 'reply-1',
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+    content: 'raw',
+    source: 'prd_replies',
+    senderId: 'sender',
+    receiverId: 'receiver',
+    originalContent: 'original',
+    refinedContent: 'refined',
+    isRead: false,
+    hasUnread: true,
+    feedback: undefined,
+    isExampleReply: false,
+  } as const;
+
+  assert.equal(mapMyGivenReplyToListItem({
+    ...reply,
+    createdAt: { toMillis: () => new Date(2026, 4, 19, 11, 59, 30).getTime() },
+  }, undefined, { now }).dateLabel, '방금 전');
+  assert.equal(mapMyGivenReplyToListItem({
+    ...reply,
+    createdAt: { toMillis: () => new Date(2026, 4, 19, 11, 1, 0).getTime() },
+  }, undefined, { now }).dateLabel, '59분 전');
+  assert.equal(mapMyGivenReplyToListItem({
+    ...reply,
+    createdAt: { toMillis: () => new Date(2026, 4, 19, 6, 0, 0).getTime() },
+  }, undefined, { now }).dateLabel, '6시간 전');
+  assert.equal(mapMyGivenReplyToListItem({
+    ...reply,
+    createdAt: { toMillis: () => new Date(2026, 4, 18, 23, 59, 0).getTime() },
+  }, undefined, { now }).dateLabel, '2026-05-18');
 });
