@@ -211,9 +211,9 @@ Onboarding 선례의 정확한 표현:
   - production PNG evidence: 없음.
 - [ ] TODO-P0.5: 03/04/05 Fresh Measurement Anchors를 온보딩 회귀 방지 기준으로 유지한다.
   - 대상 파일: `docs/TODO.md`, `design/reference/pngs/screens/03-onboarding-basic.png`, `04-onboarding-duplicate.png`, `05-onboarding-interests.png`
-  - 완료 기준: 03/04/05 harness component capture PNG evidence와 비교할 수 있는 기준값이 남아 있고, 이 evidence가 full app route 검증이 아님을 문서가 명시한다.
+  - 완료 기준: 03/04/05 anchor values와 harness component capture classification이 문서에 남아 있고, 이 precedent가 full app route 검증이 아님을 문서가 명시한다.
   - 검증: `rg -n "Already Implemented Onboarding Regression Anchors|harness component capture|03 |04 |05 " docs/TODO.md`
-  - production PNG evidence: existing `tmp/onboarding-pixel-alignment/*-production.png` if present; classification은 harness component capture.
+  - production PNG evidence: 없음. Phase 0에서는 anchor/classification만 보존하고, onboarding regression PNG evidence 확인 또는 재생성은 TODO-P12.4에서 수행한다.
 - [ ] TODO-P0.6: phase별 production PNG evidence 경로 규칙을 고정한다.
   - 대상 파일: `docs/TODO.md`
   - 완료 기준: 각 phase에 `tmp/*-pixel-alignment/*-production.png` 경로가 명시되고, 추가 보고 산출물은 한국어 HTML만 허용됨이 명시된다.
@@ -247,32 +247,32 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: `src/screens/shared/uiContract.ts`, `src/screens/shared/uiContract.test.ts`
   - 완료 기준: `centralWriteWorryAction` primitive id가 제거 또는 indicator id로 대체되고, props에 `onCentralAction`/`targetRoute`가 없다.
   - 검증: `rg -n "BottomNavigationCentralAction|onCentralAction|centralWriteWorryAction|targetRoute" src/screens/shared`
-  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P1.8 if captured.
+  - production PNG evidence: 없음. Optional visual review only via TODO-P1.8; not a completion condition.
 - [ ] TODO-P1.2: `BottomNavigation`에서 중앙 button/onClick을 제거하고 좌/우/마이페이지 특수 상태 indicator를 구현한다.
   - 대상 파일: `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.ts`
   - 완료 기준: 중앙 눈은 `button`이 아닌 visual element이고, 답변하기/나의 고민/마이페이지 상태별 하이라이트가 PRD 7.2와 일치한다.
   - 검증: shared UI rendering test에서 중앙 element가 click handler를 갖지 않음을 확인한다.
-  - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P1.8 if captured.
+  - production PNG evidence: 없음. Optional visual review only via TODO-P1.8; not a completion condition.
 - [ ] TODO-P1.3: `App.tsx`에서 `onCentralAction={() => setView(routeToWriteWorry())}` 경로를 제거한다.
   - 대상 파일: `src/App.tsx`
   - 완료 기준: App shell 중앙 눈에서 고민 작성으로 이동하는 경로가 제거되고, 작성 진입 route intent는 MyWorries 쪽 contract에서만 표현된다.
   - 검증: `rg -n "onCentralAction|routeToWriteWorry\\(\\)" src/App.tsx src/screens`
-  - production PNG evidence: 없음. Downstream visual confirmation: 20 phase에서 우측 하단 메시지 버튼을 확인한다.
+  - production PNG evidence: 없음. Downstream visual confirmation only: 20 phase에서 우측 하단 메시지 버튼을 확인하며, 이 체크박스의 완료 조건은 아니다.
 - [ ] TODO-P1.4: 고민 제출 성공과 답변 제출 성공 route를 success confirmation route로 바꾼다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.ts`, `src/screens/writeForm/containerPolicy.ts`, 관련 tests
   - 완료 기준: 고민 성공은 09 success screen route, 답변 성공은 19 success screen route로 이동하고 기존 `my_worry_detail`/`my_answer_detail` 자동 이동이 사라진다.
   - 검증: `src/services/appShell/prdNavigationPolicy.test.ts`, `src/screens/writeForm/containerPolicy.test.ts`
-  - production PNG evidence: 없음. Downstream visual confirmation: 09/19 화면 phase에서 success screen PNG를 확인한다.
+  - production PNG evidence: 없음. Downstream visual confirmation only: 09/19 화면 phase에서 success screen PNG를 확인하며, 이 체크박스의 완료 조건은 아니다.
 - [ ] TODO-P1.5: PRD 기준으로 MVP 제외 route/item을 제거한다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/routeRenderingBoundary.ts`, `src/App.tsx`, appShell tests
   - 완료 기준: `operation_policy`, `app_install_guide`, `notification_settings`가 route 목록, subroute 목록, rendering boundary, settings dispatch에서 제거되거나 접근 불가 MVP 제외 상태로 고정된다.
   - 검증: `rg -n "operation_policy|app_install_guide|notification_settings" src/services/appShell src/App.tsx src/screens/myPage`
-  - production PNG evidence: 없음. Downstream visual confirmation: 10 phase에서 설정 항목 PNG를 확인한다.
-- [ ] TODO-P1.6: 06~20 PNG에 없는 `App.tsx` 전역 fixed header를 제거하거나 screen-local header로 이전한다.
-  - 대상 파일: `src/App.tsx`, 06~20 각 screen `*Screen.tsx`
-  - 완료 기준: App shell은 route selection과 bottom navigation만 조립하고, 화면별 상단 좌측 눈/우측 마이페이지 버튼은 screen contract 또는 shared primitive로 소유권이 분리된다.
+  - production PNG evidence: 없음. Downstream visual confirmation only: 10 phase에서 설정 항목 PNG를 확인하며, 이 체크박스의 완료 조건은 아니다.
+- [ ] TODO-P1.6: `App.tsx`의 전역 fixed header 책임을 제거하거나 중립화하고 header 소유권을 boundary 수준에서 분리한다.
+  - 대상 파일: `src/App.tsx`, shared/screen contract boundary files only as needed
+  - 완료 기준: `App.tsx`는 route selection, 전역 shell 조립, bottom navigation만 담당하고 per-screen visual header를 렌더링하지 않는다. 화면별 상단 좌측 눈/우측 마이페이지 버튼의 실제 위치/pixel 구현은 각 화면 phase가 소유한다.
   - 검증: `src/services/appShell/appMonolithGuardrail.test.ts`, `src/services/appShell/appShellBoundary.test.ts`
-  - production PNG evidence: 없음. Downstream visual confirmation: 각 화면 phase의 production PNG.
+  - production PNG evidence: 없음. Downstream visual confirmation only: 각 화면 phase의 production PNG는 Phase 1 완료 조건이 아니다.
 - [ ] TODO-P1.7: appShell contract/route tests를 PRD route flow로 갱신한다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.test.ts`, `src/services/appShell/routeRenderingBoundary.test.ts`, `src/services/appShell/appShellBoundary.test.ts`
   - 완료 기준: 중앙 눈 클릭 불가, 작성 진입점 단일화, 07→09→20, 17→19→06, 20→08, 10→12/13/14/15/16이 테스트로 검증된다.
@@ -303,17 +303,17 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: `src/index.css`, `src/screens/shared/ui.tsx`, capture-only route/test helper
   - 완료 기준: production route를 393x852 viewport로 캡처할 때 reference PNG와 같은 비교 기준을 얻는다.
   - 검증: 06 또는 20 한 화면을 393x852 production PNG로 캡처해 크기를 확인한다.
-  - production PNG evidence: `tmp/shared-pixel-alignment/canvas-frame-production.png` if captured.
+  - production PNG evidence: required in this checkbox: `tmp/shared-pixel-alignment/canvas-frame-production.png`.
 - [ ] TODO-P2.2: status bar/time/network/battery와 최하단 home indicator를 production UI에서 구현하지 않도록 검증한다.
   - 대상 파일: `src/index.css`, `src/screens/shared/ui.tsx`, screen files
   - 완료 기준: capture PNG가 393x852이더라도 OS chrome fake element는 production DOM에 없다.
   - 검증: screen DOM test 또는 수동 DOM inspection note.
-  - production PNG evidence: 없음. Downstream visual confirmation: 각 화면 phase의 production PNG.
+  - production PNG evidence: 없음. Downstream visual confirmation only: 각 화면 phase의 production PNG는 이 체크박스의 완료 조건이 아니다.
 - [ ] TODO-P2.3: `CategoryChip` 고정 폭 정책을 관심 분야 최장 텍스트 기준으로 구현한다.
   - 대상 파일: `src/screens/shared/ui.tsx`, `src/screens/shared/uiContract.ts`, `packages/domain/src/index.ts`
   - 완료 기준: 카테고리 글자 수로 칩 폭이 달라지지 않고 3열 칩 화면에서도 안정적으로 맞는다.
   - 검증: shared rendering test 또는 component-level DOM/style test.
-  - production PNG evidence: 없음. Downstream visual confirmation: 12 phase에서 chip grid PNG를 확인한다.
+  - production PNG evidence: 없음. Downstream visual confirmation only: 12 phase에서 chip grid PNG를 확인하며, 이 체크박스의 완료 조건은 아니다.
 - [ ] TODO-P2.4: 로컬 타임존 기준 display date formatter를 shared pure function으로 분리한다.
   - 대상 파일: `src/screens/shared/contract.ts` 또는 new shared mapping utility, mapping tests
   - 완료 기준: 1분 미만 `방금 전`, 1시간 미만 `n분 전`, 날짜가 바뀌기 전 `n시간 전`, 날짜가 바뀌면 `YYYY-MM-DD`가 테스트된다.
@@ -323,7 +323,7 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: `src/screens/shared/ui.tsx`, screen `*Screen.tsx`
   - 완료 기준: PRD empty 문구는 screen별 contract에서 관리하고 loading은 shared spinner primitive로 통일된다.
   - 검증: shared UI tests와 screen state tests.
-  - production PNG evidence: 없음. Downstream visual confirmation: empty/loading phase에서 필요 시 캡처한다.
+  - production PNG evidence: 없음. Optional visual review only in Phase 10; not a completion condition.
 - [ ] TODO-P2.6: shared primitive 변경이 presentational-only임을 테스트로 증명한다.
   - 대상 파일: `src/screens/shared/uiContract.test.ts`, `src/screens/importBoundaries.test.ts`
   - 완료 기준: shared UI가 `src/services/**`를 import하지 않는다.
@@ -509,7 +509,7 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: success screen/container contract, `src/services/appShell/prdNavigationPolicy.ts`
   - 완료 기준: 확인 클릭 후 `my_worries` 또는 `나의 고민` route로 이동하고 작성 직후 답변 0개면 `아직 답변이 없어요.` 상태다.
   - 검증: route flow test 07→09→20.
-  - production PNG evidence: 없음. Downstream visual confirmation: 20 phase PNG if needed.
+  - production PNG evidence: 없음. Downstream visual confirmation only: 20 phase PNG는 이 체크박스의 완료 조건이 아니다.
 - [ ] TODO-P5.8: 07/09 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/write-worry-pixel-alignment/07-question-write-a-production.png`, `tmp/write-worry-pixel-alignment/09-question-write-b-production.png`
   - 완료 기준: 두 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
@@ -569,7 +569,7 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: success route/screen, `src/screens/receivedWorries/ReceivedWorriesContainer.tsx` if suppression state needed
   - 완료 기준: 17→19→06 route flow와 feed suppression/refresh가 테스트된다.
   - 검증: route flow/container policy test.
-  - production PNG evidence: 없음. Downstream visual confirmation: 06 phase PNG if needed.
+  - production PNG evidence: 없음. Downstream visual confirmation only: 06 phase PNG는 이 체크박스의 완료 조건이 아니다.
 - [ ] TODO-P6.9: 17/18 답변 작성 화면에서 고민 작성자의 개인정보가 노출되지 않음을 검증한다.
   - 대상 파일: `src/screens/writeForm/mapping.ts`, `src/screens/writeForm/contract.ts`, `src/screens/writeForm/WriteFormScreen.tsx`
   - 완료 기준: publisher nickname, gender, age, interests, profile metadata가 17 summary card와 18 원문 overlay props/DOM에 없고 PRD가 허용한 고민 내용/context만 표시된다.
@@ -636,7 +636,7 @@ Onboarding 선례의 정확한 표현:
   - 검증: `src/services/replyFeedback/*.test.ts`
   - production PNG evidence: 없음.
 - [ ] TODO-P7.9: 싫어요와 싫어요 코멘트가 답변자용 read model/API에 노출되지 않는 정책을 검증한다.
-  - 대상 파일: `src/services/replyFeedback/*`, answer check tests, read model policy tests if present
+  - 대상 파일: `src/services/replyFeedback/*`, answer check tests, existing read model policy tests when that layer owns the behavior
   - 완료 기준: dislike/comment는 answer-check 피드백 처리에는 저장되지만 답변자에게 반환되는 read model에는 포함되지 않는다. 13 화면 표시 검증은 Phase 8에서 수행한다.
   - 검증: service/read model policy tests.
   - production PNG evidence: 없음.
@@ -792,25 +792,25 @@ Onboarding 선례의 정확한 표현:
   - 대상 파일: `src/screens/receivedWorries/*`, `src/screens/myPage/*`, answer check module
   - 완료 기준: 별도 reference PNG가 없는 상태도 기존 색상/spacing/token을 쓰며 PRD 문구를 넘어서지 않는다.
   - 검증: screen state tests.
-  - production PNG evidence: 캡처 시 `tmp/empty-loading-pixel-alignment/*-production.png`.
+  - production PNG evidence: 없음. Optional Phase 10 PNGs are handled only by TODO-P10.5 and are not a completion condition for this checkbox.
 - [ ] TODO-P10.2: empty 문구를 screen state test로 검증한다.
   - 대상 파일: `src/screens/receivedWorries/*`, `src/screens/myPage/MyWorries*`
   - 완료 기준: 답변하기 empty는 `지금은 도착한 고민이 없어요.`, 나의 고민 empty는 `첫 고민을 남겨보세요.`.
   - 검증: screen state tests.
-  - production PNG evidence: 캡처 시 `tmp/empty-loading-pixel-alignment/*-production.png`.
+  - production PNG evidence: 없음. Optional Phase 10 PNGs are handled only by TODO-P10.5 and are not a completion condition for this checkbox.
 - [ ] TODO-P10.3: loading은 skeleton이 아니라 spinner로 통일한다.
   - 대상 파일: shared/screen files
   - 완료 기준: loading states use spinner primitive.
   - 검증: screen tests 또는 DOM inspection.
-  - production PNG evidence: 캡처 시 `tmp/empty-loading-pixel-alignment/*-production.png`.
+  - production PNG evidence: 없음. Optional Phase 10 PNGs are handled only by TODO-P10.5 and are not a completion condition for this checkbox.
 - [ ] TODO-P10.4: 네트워크 오류 상태를 PRD 제품 정책으로 확장하지 않는다.
   - 대상 파일: screen state files
   - 완료 기준: 오류 상태는 기존 구현 세부로 유지하고 새 PRD UI 요구로 과도하게 확장하지 않는다.
   - 검증: code review note.
   - production PNG evidence: 없음.
-- [ ] TODO-P10.5: empty/loading evidence가 필요하면 production PNG 중심으로 생성한다.
+- [ ] TODO-P10.5: Phase 10에서 empty/loading visual review를 의도적으로 수행한 경우 production PNG evidence를 모아 기록한다.
   - 대상 파일: `tmp/empty-loading-pixel-alignment/*-production.png`
-  - 완료 기준: production PNG가 있고, 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
+  - 완료 기준: Phase 10에서 empty/loading PNG를 만들었다면 production PNG가 있고, 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다. PNG를 만들지 않았다면 `production PNG evidence: 없음; visual review not performed`를 completion note에 기록한다.
   - 검증: `find tmp/empty-loading-pixel-alignment -type f | sort`
   - production PNG evidence: `tmp/empty-loading-pixel-alignment/*-production.png`.
 
