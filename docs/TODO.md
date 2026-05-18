@@ -21,23 +21,46 @@
   - 각 체크박스는 한 화면 또는 한 정책만 다룬다.
   - 구현 diff, 테스트 결과, production PNG evidence 또는 명시된 수동 검증 근거가 있어야 체크할 수 있다.
   - 나중 phase 결과가 선행되어야 하는 항목은 체크하지 않는다.
-  - completion note는 체크박스 아래에 한 줄로 남기되 별도 markdown/html/json 리포트 파일을 만들지 않는다.
+  - completion note는 체크박스 아래에 한 줄로 남긴다.
+  - 별도 보고 산출물이 꼭 필요하면 프로젝트 규칙에 따라 한국어 HTML만 사용한다. Markdown/JSON 보고 파일은 만들지 않는다.
 - 금지사항:
   - `docs/PRD.md`는 절대 수정하지 않는다. PRD 오류가 의심되면 사용자에게 정정을 요청한다.
   - 이번 전체 작업에서 운영정책, 앱처럼 사용하기 안내, 이용약관, 로그인 화면 정책/약관 링크를 MVP 기능으로 되살리지 않는다.
   - 중앙 하단 눈 인디케이터를 클릭 가능한 button/action으로 구현하지 않는다.
   - 고민 작성 진입점을 하단 중앙 눈 또는 답변하기 화면에 추가하지 않는다.
-  - pixel evidence 디렉터리에 `measurement.md`, `implementation-notes.md`, `verification.md`, `*.html`, JSON 리포트 등 부가 산출물을 남기지 않는다.
+  - pixel evidence 디렉터리에 `measurement.md`, `implementation-notes.md`, `verification.md`, JSON 리포트 등 Markdown/JSON 부가 산출물을 남기지 않는다.
+  - HTML 보고 파일을 남길 경우 파일 내용은 실제 HTML 문서여야 하며 한국어로 작성한다.
 - 공통 검증 명령:
   - 계획 작성 검증: `git diff -- docs/TODO.md`, `npm run validate:design-reference`
   - 구현 phase 완료 검증: `npm test`, `npm run lint`, `npm run build`, `npm run test:rules`, `npm run validate:design-reference`
 - Phase별 production PNG evidence 규칙:
   - 기존 `tmp/onboarding-pixel-alignment/**-production.png` 패턴을 따른다.
-  - 산출물 디렉터리에는 production 화면 캡처 PNG만 남긴다.
+  - 산출물 디렉터리에는 production 화면 캡처 PNG를 반드시 남긴다.
+  - 측정 결과나 판단 근거를 파일로 남겨야 할 때만 한국어 HTML 보고 파일을 함께 둘 수 있다.
   - PNG 파일명은 route/screen/state를 알 수 있게 `*-production.png` suffix를 사용한다.
-  - PNG는 실제 production route/screen을 렌더링한 결과여야 하며, reference PNG 복사본이면 안 된다.
-  - 캡처 자동화에 필요한 일시적 파일은 생성 후 제거한다.
+  - PNG는 reference PNG 복사본이면 안 된다.
+  - full production route 캡처를 우선한다.
+  - full route가 auth/Firebase/seed data 때문에 pixel 검증을 흐리면, production source의 `*Screen.tsx`를 직접 import하는 임시 Vite harness를 허용한다. 이 경우 보고 문구와 파일명/HTML note에 `harness component capture`임을 명시하고, route/Container 검증은 별도 테스트로 닫는다.
+  - 캡처 자동화에 필요한 일시적 파일은 생성 후 제거한다. 단, 재현성을 위해 harness를 남길 때는 `tmp/*-pixel-alignment/harness/**` 아래에만 두고 production 코드와 분리한다.
   - 모든 PNG는 393x852 reference PNG와 비교 가능한 production capture인지 확인한다.
+
+## Reproducible Pixel Evidence Workflow
+
+성공 사례인 `tmp/onboarding-pixel-alignment` 방식은 엄밀한 pixel-by-pixel diff가 아니라, PNG-measured coordinate alignment와 manual visual review를 위한 evidence workflow다. 이후 phase도 이 수준을 기본으로 삼고, 더 엄밀한 diff가 필요하면 별도 체크박스로 추가한다.
+
+1. `npm run build`로 production CSS를 만든다.
+2. harness를 쓰는 경우 `dist/assets/index-*.css`의 현재 hash를 확인하고 harness import를 맞춘다.
+3. `npx vite tmp/<screen>-pixel-alignment/harness --host 127.0.0.1 --port <free-port>`로 임시 앱을 띄운다.
+4. Playwright 또는 동등한 브라우저 자동화로 viewport `393x852`, `deviceScaleFactor: 1`, `fullPage: false` 캡처를 만든다.
+5. PIL로 reference PNG와 production PNG의 size, dominant colors, non-bg bbox, 주요 element bbox를 측정한다.
+6. 결과는 체크박스 completion note에 요약한다. 파일 보고가 필요하면 한국어 HTML table/report로 작성한다.
+
+Onboarding 선례의 정확한 표현:
+
+- `03-production.png`, `04-production.png`, `05-production.png`는 full app route가 아니라 production `OnboardingScreen.tsx`를 임시 harness에서 렌더링한 component capture다.
+- 04 duplicate 상태는 harness가 `duplicateCheck.state = 'duplicate'`와 기존 message prop을 주입해 만든다.
+- 05 interests 상태는 harness가 기본정보 화면에서 `관심사 선택으로 이동` 버튼을 자동 클릭해 만든다.
+- 따라서 온보딩 evidence는 route/Auth/Firebase 검증이 아니라 presentational component pixel 검증이다.
 
 ## Fresh Measurement Anchors
 
@@ -47,32 +70,38 @@
 |---|---|---|
 | 03 | size | `393x852` |
 | 03 | dominant colors | `#fff7e3` 226111 px, `#ff8b0d` 92531 px |
-| 03 | non-dominant bbox | `(0,0)-(393,843)` |
-| 03 | status/time | `(30,21)-(74,34)` |
-| 03 | header title | `(165,73)-(222,89)` |
-| 03 | question badge | `(30,132)-(118,141)` |
-| 03 | main title | `(28,140)-(253,175)` |
+| 03 | non-bg bbox | `(0,21)-(393,843)`; harness production observed `(0,20)-(393,843)` |
+| 03 | status/time | `(30,18)-(74,34)` |
+| 03 | header title | `(165,70)-(222,87)` |
+| 03 | question badge | `(30,127)-(118,147)` |
+| 03 | main title | `(28,141)-(253,175)` |
 | 03 | progress | `(24,235)-(369,241)` |
-| 03 | subtitle | `(24,260)-(292,272)` |
+| 03 | subtitle | `(24,258)-(350,277)` |
 | 03 | nickname input | `(22,339)-(367,399)` |
 | 03 | gender boxes | `(22,452)-(367,512)` |
 | 03 | age input | `(22,580)-(367,640)` |
 | 03 | CTA | `(24,752)-(369,808)` |
+| 03 | harness production dominant colors | `#fff7e3` 227032 px, `#ff8b0d` 92271 px, `#ffffff` 2517 px, `#d4be91` 1149 px |
 | 04 | size | `393x852` |
 | 04 | dominant colors | `#fff7e3` 224562 px, `#ff8b0d` 92531 px |
-| 04 | duplicate message | `(89,311)-(365,323)` |
-| 04 | red error/input bbox | `(22,312)-(367,399)` |
+| 04 | non-bg bbox | `(0,21)-(393,843)`; harness production observed `(0,20)-(393,843)` |
+| 04 | duplicate message | `(89,308)-(365,323)` |
+| 04 | red error/input bbox | `(22,308)-(367,399)` |
 | 04 | other major boxes | same as 03 |
+| 04 | harness production dominant colors | `#fff7e3` 224658 px, `#ff8b0d` 73956 px, `#ffbb6d` 18316 px, `#ffffff` 2517 px |
 | 05 | size | `393x852` |
 | 05 | dominant colors | `#fff7e3` 163556 px, `#ff8b0d` 88103 px, `#fff1d1` 57070 px |
-| 05 | header title | `(171,73)-(228,89)` |
-| 05 | question badge | `(30,132)-(120,141)` |
-| 05 | main title | `(28,140)-(287,175)` |
-| 05 | subtitle/helper | `(24,260)-(295,292)` |
+| 05 | non-bg bbox | `(0,21)-(393,843)`; harness production observed `(0,20)-(393,843)` |
+| 05 | header title | `(171,70)-(228,87)` |
+| 05 | question badge | `(30,127)-(120,147)` |
+| 05 | main title | `(28,141)-(287,175)` |
+| 05 | subtitle/helper | `(24,258)-(365,296)` |
 | 05 | chip grid outer | `(34,322)-(358,708)` |
-| 05 | chip size/gap | each `103x44`; rows at `322,379,436,493,550,607,664`; columns mostly `35/145/255`, lower rows `34/144/254` |
+| 05 | chip size/gap | each `103x44`; gap-x `7`, gap-y `13` |
 | 05 | previous CTA | `(24,752)-(120,808)` |
 | 05 | complete CTA | `(130,752)-(369,808)` |
+| 05 | harness production dominant colors | `#fff7e3` 162335 px, `#ff8b0d` 87536 px, `#fff1d1` 56157 px, `#d4be91` 6438 px |
+| 05 | label exception | domain value `워라밸` 유지, display label만 reference PNG에 맞춰 `워라벨` |
 
 ### 06~20 Initial PIL Anchor Summary
 
@@ -149,15 +178,20 @@
   - production PNG evidence: 없음.
 - [ ] TODO-P0.5: 03/04/05 Fresh Measurement Anchors를 온보딩 회귀 방지 기준으로 유지한다.
   - 대상 파일: `docs/TODO.md`, `design/reference/pngs/screens/03-onboarding-basic.png`, `04-onboarding-duplicate.png`, `05-onboarding-interests.png`
-  - 완료 기준: Phase 12에서 03/04/05 production PNG evidence와 비교할 수 있는 기준값이 남아 있다.
-  - 검증: `rg -n "Already Implemented Onboarding Regression Anchors|03 |04 |05 " docs/TODO.md`
-  - production PNG evidence: Phase 12에서 `tmp/onboarding-pixel-alignment/*-production.png`.
+  - 완료 기준: Phase 12에서 03/04/05 harness component capture PNG evidence와 비교할 수 있는 기준값이 남아 있고, 이 evidence가 full app route 검증이 아님을 문서가 명시한다.
+  - 검증: `rg -n "Already Implemented Onboarding Regression Anchors|harness component capture|03 |04 |05 " docs/TODO.md`
+  - production PNG evidence: Phase 12에서 `tmp/onboarding-pixel-alignment/*-production.png`; classification은 harness component capture.
 - [ ] TODO-P0.6: phase별 production PNG evidence 경로 규칙을 고정한다.
   - 대상 파일: `docs/TODO.md`
-  - 완료 기준: 각 phase에 `tmp/*-pixel-alignment/*-production.png` 경로와 PNG 외 부가 산출물 금지가 명시된다.
-  - 검증: `rg -n "production PNG evidence|PNG 외 부가 산출물|\\*-production\\.png" docs/TODO.md`
+  - 완료 기준: 각 phase에 `tmp/*-pixel-alignment/*-production.png` 경로가 명시되고, 추가 보고 산출물은 한국어 HTML만 허용됨이 명시된다.
+  - 검증: `rg -n "production PNG evidence|한국어 HTML|\\*-production\\.png|harness component capture" docs/TODO.md`
   - production PNG evidence: 없음.
-- [ ] TODO-P0.7: 계획 작성 커밋 또는 구현 시작 전 변경 파일이 의도대로 제한되어 있는지 확인한다.
+- [ ] TODO-P0.7: harness capture와 full route capture의 역할 분리를 phase별 completion note 양식에 고정한다.
+  - 대상 파일: `docs/TODO.md`
+  - 완료 기준: 각 production PNG evidence note에는 `capture type: full route` 또는 `capture type: harness component`가 포함되고, harness component인 경우 route/Container 검증 테스트명이 함께 기록된다.
+  - 검증: completion note review.
+  - production PNG evidence: 없음.
+- [ ] TODO-P0.8: 계획 작성 커밋 또는 구현 시작 전 변경 파일이 의도대로 제한되어 있는지 확인한다.
   - 대상 파일: `docs/TODO.md`
   - 완료 기준: 계획 작성 단계에서는 `docs/TODO.md` 외 변경이 없다.
   - 검증: `git diff --name-only`
@@ -211,9 +245,9 @@
   - 완료 기준: 중앙 눈 클릭 불가, 작성 진입점 단일화, 07→09→20, 17→19→06, 20→08, 10→12/13/14/15/16이 테스트로 검증된다.
   - 검증: `npm test -- src/services/appShell` 또는 전체 `npm test`
   - production PNG evidence: 없음.
-- [ ] TODO-P1.8: 이 phase에서 캡처가 필요하면 production PNG만 남긴다.
+- [ ] TODO-P1.8: 이 phase에서 캡처가 필요하면 production PNG 중심으로 evidence를 남긴다.
   - 대상 파일: `tmp/*-pixel-alignment/*-production.png`
-  - 완료 기준: `tmp` 안에 PNG 외 phase 문서 파일이 없다.
+  - 완료 기준: `tmp` 안에 production PNG가 남고, 추가 보고 파일이 필요하면 한국어 HTML만 남긴다.
   - 검증: `find tmp -path '*pixel-alignment*' -type f | sort`
   - production PNG evidence: 해당되는 `tmp/*-pixel-alignment/*-production.png`.
 
@@ -262,9 +296,9 @@
   - 완료 기준: shared UI가 `src/services/**`를 import하지 않는다.
   - 검증: `npm test`
   - production PNG evidence: 없음.
-- [ ] TODO-P2.7: shared primitive evidence는 PNG만 생성한다.
+- [ ] TODO-P2.7: shared primitive evidence는 production PNG 중심으로 생성한다.
   - 대상 파일: `tmp/shared-pixel-alignment/*-production.png`
-  - 완료 기준: shared evidence 디렉터리에 PNG 외 파일이 없다.
+  - 완료 기준: shared evidence 디렉터리에 production PNG가 있고, 추가 보고 파일이 필요하면 한국어 HTML만 있다.
   - 검증: `find tmp/shared-pixel-alignment -type f | sort`
   - production PNG evidence: `tmp/shared-pixel-alignment/*-production.png`.
 
@@ -380,7 +414,7 @@
   - production PNG evidence: Phase 10 if captured.
 - [ ] TODO-P4.8: 20 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`
-  - 완료 기준: 393x852 production capture이며 PNG 외 부가 산출물이 없다.
+  - 완료 기준: 393x852 production capture이며 추가 보고 파일이 필요하면 한국어 HTML만 있다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`
 
@@ -435,7 +469,7 @@
   - production PNG evidence: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`.
 - [ ] TODO-P5.8: 07/09 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/write-worry-pixel-alignment/07-question-write-a-production.png`, `tmp/write-worry-pixel-alignment/09-question-write-b-production.png`
-  - 완료 기준: 두 PNG가 393x852 production capture이고 PNG 외 파일이 없다.
+  - 완료 기준: 두 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: listed files.
 
@@ -495,7 +529,7 @@
   - production PNG evidence: `tmp/received-worries-pixel-alignment/06-received-worries-production.png`.
 - [ ] TODO-P6.9: 17/18/19 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/write-reply-pixel-alignment/17-answer-write-1-production.png`, `18-answer-write-2-production.png`, `19-answer-write-3-production.png`
-  - 완료 기준: 세 PNG가 393x852 production capture이고 PNG 외 파일이 없다.
+  - 완료 기준: 세 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: listed files.
 
@@ -555,7 +589,7 @@
   - production PNG evidence: Phase 8 `13-my-answers-production.png`.
 - [ ] TODO-P7.9: 08 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/answer-check-pixel-alignment/08-answer-check-production.png`
-  - 완료 기준: 393x852 production capture이며 PNG 외 파일이 없다.
+  - 완료 기준: 393x852 production capture이며 추가 보고 파일이 필요하면 한국어 HTML만 있다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: `tmp/answer-check-pixel-alignment/08-answer-check-production.png`.
 
@@ -621,7 +655,7 @@
   - production PNG evidence: `tmp/my-page-pixel-alignment/14-privacy-policy-production.png`.
 - [ ] TODO-P8.10: 10/12/13/14 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/my-page-pixel-alignment/10-my-page-production.png`, `12-edit-interests-production.png`, `13-my-answers-production.png`, `14-privacy-policy-production.png`
-  - 완료 기준: 네 PNG가 393x852 production capture이고 PNG 외 파일이 없다.
+  - 완료 기준: 네 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: listed files.
 
@@ -667,7 +701,7 @@
   - production PNG evidence: 없음.
 - [ ] TODO-P9.6: 15/16 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/account-overlays-pixel-alignment/15-logout-production.png`, `tmp/account-overlays-pixel-alignment/16-account-deletion-production.png`
-  - 완료 기준: 두 PNG가 393x852 production capture이고 PNG 외 파일이 없다.
+  - 완료 기준: 두 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: listed files.
 
@@ -706,9 +740,9 @@
   - 완료 기준: 오류 상태는 기존 구현 세부로 유지하고 새 PRD UI 요구로 과도하게 확장하지 않는다.
   - 검증: code review note.
   - production PNG evidence: 없음.
-- [ ] TODO-P10.5: empty/loading evidence가 필요하면 PNG만 생성한다.
+- [ ] TODO-P10.5: empty/loading evidence가 필요하면 production PNG 중심으로 생성한다.
   - 대상 파일: `tmp/empty-loading-pixel-alignment/*-production.png`
-  - 완료 기준: PNG 외 부가 산출물이 없다.
+  - 완료 기준: production PNG가 있고, 추가 보고 파일이 필요하면 한국어 HTML만 있다.
   - 검증: `find tmp/empty-loading-pixel-alignment -type f | sort`
   - production PNG evidence: `tmp/empty-loading-pixel-alignment/*-production.png`.
 
@@ -763,7 +797,7 @@
 
 목표: 모든 PRD 요구사항, route flow, screen-map, production PNG evidence를 최종 점검한다.
 허용 수정 범위: 누락된 tests/evidence generation only, final audit fixes in already-owned modules.
-금지 수정 범위: 새 기능 추가, PRD 수정, PNG 외 부가 audit 문서 산출물.
+금지 수정 범위: 새 기능 추가, PRD 수정, Markdown/JSON 부가 audit 문서 산출물.
 
 - [ ] TODO-P12.1: `docs/PRD.md`의 모든 화면 요구사항을 01~20 screen/file/test/evidence에 매핑한다.
   - 대상 파일: `docs/TODO.md` completion notes only, production files/tests as evidence
@@ -785,9 +819,9 @@
   - 완료 기준: 06, 07, 08, 09, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20 및 01~05 regression capture가 존재한다.
   - 검증: `find tmp -path '*pixel-alignment*/*-production.png' -type f | sort`
   - production PNG evidence: all listed PNG files.
-- [ ] TODO-P12.5: final audit 산출물이 필요하면 PNG만 생성한다.
+- [ ] TODO-P12.5: final audit 산출물이 필요하면 production PNG 중심으로 생성한다.
   - 대상 파일: `tmp/final-prd-design-audit/*-production.png`
-  - 완료 기준: final audit 디렉터리에 production PNG 외 파일이 없다.
+  - 완료 기준: final audit 디렉터리에 production PNG가 있고, 추가 보고 파일이 필요하면 한국어 HTML만 있다.
   - 검증: `find tmp/final-prd-design-audit -type f | sort`
   - production PNG evidence: `tmp/final-prd-design-audit/*-production.png`.
 - [ ] TODO-P12.6: 최종 검증 명령을 모두 통과해야 체크한다.
@@ -796,8 +830,8 @@
   - 검증: listed commands.
   - production PNG evidence: 없음.
 - [ ] TODO-P12.7: 최종 보고서에는 완료/미완료 TODO ID와 잔여 mismatch를 포함한다.
-  - 대상 파일: final chat/report only
-  - 완료 기준: 체크 완료/미완료 TODO ID, 미완료 사유, PRD 불일치 잔여 항목, pixel mismatch 잔여 항목, 수동 확인 필요 화면이 보고된다.
+  - 대상 파일: final chat/report only; 파일 보고가 필요하면 한국어 HTML
+  - 완료 기준: 체크 완료/미완료 TODO ID, 미완료 사유, PRD 불일치 잔여 항목, pixel mismatch 잔여 항목, 수동 확인 필요 화면, 각 PNG의 `capture type`이 보고된다.
   - 검증: final review.
   - production PNG evidence: 없음.
 
