@@ -345,41 +345,59 @@
 허용 수정 범위: `docs/TODO.md` completion notes only.
 금지 수정 범위: `src/**`, `packages/**`, `design/**`, `docs/PRD.md`.
 
-- [ ] TODO-P0.1: `docs/PRD.md`의 06~20 화면 요구사항, MVP 제외 범위, 제출 후 route, 중앙 눈 인디케이터, 정책 문서 범위를 TODO completion note 표로 확정한다.
+- [x] TODO-P0.1: `docs/PRD.md`의 06~20 화면 요구사항, MVP 제외 범위, 제출 후 route, 중앙 눈 인디케이터, 정책 문서 범위를 TODO completion note 표로 확정한다.
   - 대상 파일: `docs/PRD.md`, `docs/TODO.md`
   - 완료 기준: 06~20 각 화면이 어느 phase에서 닫히는지와 MVP 제외 항목이 문서 안에서 추적 가능하다.
   - 검증: `rg -n "중앙 눈|앱처럼 사용하기|운영정책|09-question|19-answer|정책을 준비" docs/PRD.md`
   - production PNG evidence: 없음.
-- [ ] TODO-P0.2: 현재 route 목록을 `src/services/appShell/prdNavigationPolicy.ts`와 `src/services/appShell/routeRenderingBoundary.ts`에서 추출하고 PRD route와 불일치하는 항목을 completion note에 기록한다.
+  - Completion note: `docs/PRD.md` 4.1, 7.2~7.6, 12, 15, 17.1~18과 검증 명령을 확인했다. PRD 정책 고정값은 다음과 같다.
+
+    | Policy | PRD-confirmed result | Follow-up phase |
+    |---|---|---|
+    | 중앙 하단 눈 인디케이터 | 전 화면에서 비상호작용 visual indicator이며 고민 작성/탭 전환/메뉴 열기 액션이 없다. | Phase 1 |
+    | 고민 작성 진입점 | 나의 고민 탭 우측 하단 메시지 버튼 하나다. | Phase 1, Phase 4, Phase 5 |
+    | 고민 제출 성공 후 route | 09 success confirmation으로 이동하고 확인 버튼 후 나의 고민 탭으로 이동한다. | Phase 1, Phase 5 |
+    | 답변 제출 성공 후 route | 19 success confirmation으로 이동하고 확인 버튼 후 답변하기 탭으로 이동한다. | Phase 1, Phase 6 |
+    | MVP 제외 화면/링크 | 운영정책, 이용 안내 전용 화면, 이용약관, 앱처럼 사용하기 안내, 로그인 화면의 정책/약관 링크는 MVP 제외다. | Phase 1, Phase 8A, Phase 11, Phase 12 |
+    | MVP 접근 가능 정책 문서 | 개인정보처리방침 하나이며 빈 경우 `정책을 준비 중입니다.`를 표시한다. | Phase 8D, Phase 11, Phase 12 |
+    | 06~20 closure | 06=P3, 07/09=P5, 08=P7, 10=P8A, 11=none/unused, 12=P8B, 13=P8C, 14=P8D, 15/16=P9, 17/18/19=P6, 20=P4로 후속 phase가 추적 가능하다. | Phase 3~9 |
+
+- [x] TODO-P0.2: 현재 route 목록을 `src/services/appShell/prdNavigationPolicy.ts`와 `src/services/appShell/routeRenderingBoundary.ts`에서 추출하고 PRD route와 불일치하는 항목을 completion note에 기록한다.
   - 대상 파일: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/routeRenderingBoundary.ts`
   - 완료 기준: `operation_policy`, `app_install_guide`, `notification_settings`, `my_answer_detail`, 중앙 액션, 성공 route 불일치가 누락 없이 기록된다.
   - 검증: `rg -n "operation_policy|app_install_guide|notification_settings|my_answer_detail|CENTRAL_BOTTOM_NAVIGATION_ACTION|routeAfterWorryPublish|routeAfterReplyPublish" src/services/appShell src/App.tsx`
   - production PNG evidence: 없음.
-- [ ] TODO-P0.3: `design/reference/pngs/screens`의 실제 파일 목록을 확인하고 01~20 존재/미존재/이미 구현/구현 필요 상태를 이 파일의 Screen Mapping Inventory와 대조한다.
+  - Completion note: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/routeRenderingBoundary.ts`, `src/App.tsx`와 검증 명령을 확인했다. PRD 불일치 route/item은 `operation_policy`, `app_install_guide`, `notification_settings`, `my_answer_detail`/`read_my_reply`, `CENTRAL_BOTTOM_NAVIGATION_ACTION` 및 `routeToWriteWorry()` 중앙 write-worry 경로, `routeAfterWorryPublish()`의 `my_worry_detail` 이동, `routeAfterReplyPublish()`의 `my_answer_detail` 이동, 09/19 success confirmation route 부재다. 이번 phase에서는 route 코드를 수정하지 않았고 Phase 1, Phase 5, Phase 6, Phase 8A, Phase 8C, Phase 12에서 닫는다.
+- [x] TODO-P0.3: `design/reference/pngs/screens`의 실제 파일 목록을 확인하고 01~20 존재/미존재/이미 구현/구현 필요 상태를 이 파일의 Screen Mapping Inventory와 대조한다.
   - 대상 파일: `design/reference/pngs/screens/*`, `docs/TODO.md`
   - 완료 기준: 11번이 없음/미사용으로 명시되고 06~20 중 존재하는 reference PNG가 모두 phase에 배정된다.
   - 검증: `find design/reference/pngs/screens -maxdepth 1 -type f | sort`
   - production PNG evidence: 없음.
-- [ ] TODO-P0.4: Phase 1~12 구현 gate로 06~20 PNG Measurement Anchor 표를 PIL 재측정값으로 확정한다.
+  - Completion note: `find design/reference/pngs/screens -maxdepth 1 -type f | sort` 결과 01~10, 12~20 PNG가 존재하고 11 PNG는 없다. Screen Mapping Inventory는 01~05 implemented/regression, 06~10/12~20 implement-needed, 11 none/unused/no production route로 실제 파일 목록과 일치한다. 06~20 중 존재하는 PNG는 모두 Phase 3~9에 배정되어 체크 가능하다.
+- [x] TODO-P0.4: Phase 1~12 구현 gate로 06~20 PNG Measurement Anchor 표를 PIL 재측정값으로 확정한다.
   - 대상 파일: `design/reference/pngs/screens/*.png`, `docs/TODO.md`
   - 완료 기준: 각 화면 표가 canvas size, dominant colors, non-bg bbox, top header/icon/button bbox, primary card/input/modal bbox, text/glyph bbox, CTA bbox, bottom navigation bbox, floating action bbox, overlay bbox를 모두 포함한다. 이 체크박스가 완료되기 전 Phase 1~12 구현 체크박스를 시작하지 않는다.
   - 검증: PIL 기반 일회성 명령 또는 스크립트 출력값을 TODO completion note에 기록하고, 표 좌표와 reference PNG를 수동 대조한다.
   - production PNG evidence: 없음.
-- [ ] TODO-P0.5: 03/04/05 Fresh Measurement Anchors를 온보딩 회귀 방지 기준으로 유지한다.
+  - Completion note: PIL 일회성 스크립트로 `design/reference/pngs/screens/06-*.png`~`20-*.png`를 직접 열어 canvas size, 상위 dominant colors, dominant-color 제외 bbox, 주요 색상 mask bbox를 재측정했다. 06~20 표는 필수 10개 항목(canvas size, dominant colors, non-bg bbox, top header/icon/button bbox, primary card/input/modal bbox, text/glyph bbox, CTA bbox, bottom navigation bbox, floating action bbox, overlay bbox)을 모두 포함한다. 재측정된 canvas는 모두 `393x852`이고 dominant colors/counts는 표와 일치했다. `08`의 bottom navigation은 reference crop보다 PRD route shell 정책을 우선하는 override로 이미 표에 명시되어 있고, `11`은 reference PNG가 없어 전 항목 `none`이다. 근사값/빈 값/PNG와 충돌하는 anchor를 발견하지 않아 anchor 표 수정은 하지 않았다.
+- [x] TODO-P0.5: 03/04/05 Fresh Measurement Anchors를 온보딩 회귀 방지 기준으로 유지한다.
   - 대상 파일: `docs/TODO.md`, `design/reference/pngs/screens/03-onboarding-basic.png`, `04-onboarding-duplicate.png`, `05-onboarding-interests.png`
   - 완료 기준: Phase 12에서 03/04/05 production PNG evidence와 비교할 수 있는 기준값이 남아 있다.
   - 검증: `rg -n "Already Implemented Onboarding Regression Anchors|03 |04 |05 " docs/TODO.md`
   - production PNG evidence: Phase 12에서 `tmp/onboarding-pixel-alignment/*-production.png`.
-- [ ] TODO-P0.6: phase별 production PNG evidence 경로 규칙을 고정한다.
+  - Completion note: `rg -n "Already Implemented Onboarding Regression Anchors|03 |04 |05 " docs/TODO.md`로 03/04/05 size, dominant colors, 주요 bbox, CTA 기준값이 유지되는 것을 확인했다. Phase 12에서 `tmp/onboarding-pixel-alignment/*-production.png`와 비교 가능한 기준이 남아 있고 삭제/약화하지 않았다.
+- [x] TODO-P0.6: phase별 production PNG evidence 경로 규칙을 고정한다.
   - 대상 파일: `docs/TODO.md`
   - 완료 기준: 각 phase에 `tmp/*-pixel-alignment/*-production.png` 경로와 PNG 외 부가 산출물 금지가 명시된다.
   - 검증: `rg -n "production PNG evidence|PNG 외 부가 산출물|\\*-production\\.png" docs/TODO.md`
   - production PNG evidence: 없음.
-- [ ] TODO-P0.7: 계획 작성 커밋 또는 구현 시작 전 변경 파일이 의도대로 제한되어 있는지 확인한다.
+  - Completion note: 전역 Phase별 production PNG evidence 규칙은 `tmp/*-pixel-alignment/*-production.png`만 최종 산출물로 남기고 PNG 외 부가 산출물을 금지한다. 검증 명령으로 Phase 1~10과 Phase 12의 concrete evidence 경로를 확인했다. Phase 11은 validator/screen-map hardening만 수행하므로 production PNG evidence가 `없음`인 예외 phase이며, 새 production PNG를 만들지 않는 설계로 확인했다. 이번 Phase 0에서는 production PNG를 생성하지 않았다.
+- [x] TODO-P0.7: 계획 작성 커밋 또는 구현 시작 전 변경 파일이 의도대로 제한되어 있는지 확인한다.
   - 대상 파일: `docs/TODO.md`
   - 완료 기준: 계획 작성 단계에서는 `docs/TODO.md` 외 변경이 없다.
   - 검증: `git diff --name-only`
   - production PNG evidence: 없음.
+  - Completion note: 최종 검증 기준으로 의도한 수정은 이 Phase 0 completion note/checkbox 갱신뿐이다. `git diff --name-only`와 `git diff -- docs/TODO.md`로 최종 diff 범위를 확인하고, `src/**`, `packages/**`, `design/**`, `docs/PRD.md`, 임시 측정 스크립트가 diff에 남지 않아 체크 가능하다.
 
 검증 명령:
 - `git diff -- docs/TODO.md`
