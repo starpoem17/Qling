@@ -47,7 +47,7 @@
   - layout bbox: reference anchor 대비 `±1px`.
   - text/glyph bbox: reference anchor 대비 `±2px`.
   - dominant background color: exact hex match를 우선한다. anti-aliasing으로 인한 소수 픽셀 차이는 bbox 판정에 포함하지 않되 dominant color hex 자체는 바꾸지 않는다.
-  - status bar/time/network/battery와 home indicator: production DOM 구현 금지. reference PNG에 있어도 production capture에는 DOM으로 만들지 않는다.
+  - status/time/network/battery와 home indicator bbox는 reference 분석용 anchor로만 유지한다. production pixel mismatch 판정 대상에서는 제외하며, production DOM에 해당 요소를 구현해서 맞추는 것은 금지한다.
   - 06~20 Measurement Anchor 표에 근사 표기가 남아 있으면 `TODO-P0.4`를 체크하지 않는다.
 
 ## Fresh Measurement Anchors
