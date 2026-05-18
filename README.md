@@ -1,6 +1,6 @@
 # Qling
 
-https://qling-hyu-hangyeol.onrender.com/
+https://qling-hangyeol-hyu.onrender.com/
 
 Qling is an Express/Vite/Firebase PWA for anonymous worry publication, human replies, feedback, rematching, and internal operational jobs.
 
@@ -23,11 +23,13 @@ npm run test:rules
 ## Firebase/Render Deployment Configuration
 
 - Firebase project ID: `qling-hyu`.
+- Production URL: `https://qling-hangyeol-hyu.onrender.com`.
 - Deploy Firestore rules with `npx firebase deploy --only firestore:rules`.
-- Render must define `FIREBASE_SERVICE_ACCOUNT` as the full service account JSON string.
-- Render must define `OPENAI_API_KEY` for the current moderation and AI fallback paths.
-- Firebase Auth authorized domains must include the final Render domain.
-- Copy `apiKey`, `appId`, `messagingSenderId`, and `measurementId` from Firebase Console -> Project settings -> General -> Web app config into `firebase-applet-config.json` and `public/firebase-messaging-sw.js` before production deployment.
+- Firebase Auth authorized domains must include `qling-hangyeol-hyu.onrender.com`.
+- Render service type: Web Service, not Static Site.
+- Render build command: `npm install && npm run build`.
+- Render start command: `npm start`.
+- Required Render environment variables: `NODE_ENV=production`, `NODE_VERSION=22`, `FIREBASE_SERVICE_ACCOUNT=<full Firebase service account JSON string>`, `OPENAI_API_KEY=<server-side API key>`.
 - Do not commit any service account JSON file or private credentials.
 
 Operational setup, environment variables, emulator details, deployment notes, and scheduled-job examples are documented in `docs/ops.md`.
