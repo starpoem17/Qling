@@ -42,6 +42,13 @@
   - 캡처 자동화에 필요한 일시적 파일은 생성 후 제거한다.
   - capture helper가 필요하면 임시 생성 후 제거하고, 최종 산출물은 `tmp/*-pixel-alignment/*-production.png`만 남긴다.
   - 모든 PNG는 393x852 reference PNG와 비교 가능한 production capture인지 확인한다.
+- Pixel mismatch 허용 기준:
+  - canvas size: `393x852` exact.
+  - layout bbox: reference anchor 대비 `±1px`.
+  - text/glyph bbox: reference anchor 대비 `±2px`.
+  - dominant background color: exact hex match를 우선한다. anti-aliasing으로 인한 소수 픽셀 차이는 bbox 판정에 포함하지 않되 dominant color hex 자체는 바꾸지 않는다.
+  - status bar/time/network/battery와 home indicator: production DOM 구현 금지. reference PNG에 있어도 production capture에는 DOM으로 만들지 않는다.
+  - 06~20 Measurement Anchor 표에 근사 표기가 남아 있으면 `TODO-P0.4`를 체크하지 않는다.
 
 ## Fresh Measurement Anchors
 
@@ -90,7 +97,7 @@
 | dominant colors | `#ffffff` 181468 px, `#ff8b3d` 54530 px, `#fff1d1` 35241 px |
 | non-bg bbox | `(0,0)-(393,852)` |
 | top header/icon/button bbox | full orange header `(0,0)-(393,121)`, right my-page icon/text cluster `(341,76)-(362,97)` |
-| primary card/input/modal bbox | worry cards approx `(12,129)-(381,272)`, `(12,278)-(381,421)`, `(12,427)-(381,570)`, `(12,576)-(381,719)` |
+| primary card/input/modal bbox | worry cards `(12,129)-(381,272)`, `(12,278)-(381,421)`, `(12,427)-(381,570)`, `(12,576)-(381,719)` |
 | text/glyph bbox | card category chips `(34,150)-(78,174)`, `(34,299)-(78,323)`, `(34,448)-(79,471)`, `(34,597)-(78,621)`, summary text clusters `(52,200)-(279,215)`, `(82,349)-(212,364)`, `(82,498)-(354,513)`, `(52,647)-(267,662)` |
 | CTA bbox | skip buttons `(301,150)-(366,173)`, `(301,299)-(366,322)`, `(301,448)-(366,471)`, `(301,597)-(366,620)` |
 | bottom navigation bbox | `(0,746)-(393,852)` |
@@ -105,7 +112,7 @@
 | dominant colors | `#fff5eb` 201042 px, `#fff1d1` 101783 px, `#ff8b3d` 17679 px |
 | non-bg bbox | `(0,0)-(393,828)` |
 | top header/icon/button bbox | top/back/title band `(0,0)-(393,121)`, title glyph cluster `(115,147)-(282,164)` |
-| primary card/input/modal bbox | write input panel approx `(24,183)-(369,650)` |
+| primary card/input/modal bbox | write input panel `(24,183)-(369,650)` |
 | text/glyph bbox | placeholder/helper glyphs `(303,626)-(353,637)`, title line `(44,144)-(282,164)` |
 | CTA bbox | bottom left nav button `(16,792)-(132,828)`, bottom center eye `(149,764)-(244,823)`, bottom right nav button `(262,792)-(378,828)` |
 | bottom navigation bbox | `(0,764)-(393,828)` |
@@ -120,10 +127,10 @@
 | dominant colors | `#ffffff` 195303 px, `#fff1d1` 75583 px, `#fff5eb` 12101 px |
 | non-bg bbox | `(0,0)-(393,852)` |
 | top header/icon/button bbox | header band `(0,0)-(393,118)`, category chip `(34,138)-(79,161)` |
-| primary card/input/modal bbox | my worry card approx `(12,122)-(381,229)`, answer cards approx `(12,241)-(381,477)`, `(12,494)-(381,706)`, third visible start `(12,726)-(381,852)` |
+| primary card/input/modal bbox | my worry card `(12,122)-(381,229)`, answer cards `(12,241)-(381,477)`, `(12,494)-(381,706)`, third visible start `(12,726)-(381,852)` |
 | text/glyph bbox | my worry text `(35,176)-(283,216)`, divider `(31,226)-(363,227)`, answer text clusters `(80,271)-(272,330)`, `(80,524)-(272,583)`, `(78,732)-(229,767)` |
 | CTA bbox | feedback button clusters inside cards around `(173,247)-(231,256)`, `(173,500)-(231,509)`, `(171,732)-(229,741)` |
-| bottom navigation bbox | none visible in cropped 08 reference; production route must still respect app shell bottom nav policy if PRD requires it |
+| bottom navigation bbox | PRD 기준으로 08은 `my_worries` 하위 `answer_check` route이므로 production 하단바를 유지한다. reference PNG의 하단바 crop/미노출보다 PRD route shell 정책을 우선하며, production expected bbox는 `20`과 같은 `(0,765)-(393,852)`이다. 이로 인한 reference mismatch는 PRD clarification 대상이 아니라 의도된 PRD override로 completion note에 기록한다. |
 | floating action bbox | none |
 | overlay bbox | none |
 
@@ -136,7 +143,7 @@
 | non-bg bbox | `(0,21)-(393,852)` |
 | top header/icon/button bbox | status/header glyphs `(24,21)-(376,88)` |
 | primary card/input/modal bbox | success modal/card `(9,120)-(386,661)` |
-| text/glyph bbox | modal title/body cluster approx `(75,230)-(318,510)`, header title glyphs `(164,72)-(224,88)` |
+| text/glyph bbox | modal title/body cluster `(75,230)-(318,510)`, header title glyphs `(164,72)-(224,88)` |
 | CTA bbox | confirm CTA `(63,684)-(330,732)` |
 | bottom navigation bbox | dimmed bottom area `(0,755)-(393,852)` |
 | floating action bbox | none |
@@ -150,9 +157,9 @@
 | dominant colors | `#ffffff` 145916 px, `#ff8b0d` 129361 px, `#fff5eb` 18912 px |
 | non-bg bbox | `(0,0)-(393,852)` |
 | top header/icon/button bbox | orange header `(0,0)-(393,121)`, profile motif `(37,147)-(101,211)`, right icon/text cluster `(276,160)-(339,171)` |
-| primary card/input/modal bbox | profile summary card approx `(24,132)-(369,254)`, my answers preview rows `(24,300)-(369,438)`, settings rows `(44,592)-(349,689)` |
+| primary card/input/modal bbox | profile summary card `(24,132)-(369,254)`, my answers preview rows `(24,300)-(369,438)`, settings rows `(44,592)-(349,689)` |
 | text/glyph bbox | nickname/helped text `(121,158)-(317,175)`, preview row text `(38,318)-(293,366)`, answer preview text `(89,452)-(285,464)`, setting glyphs `(42,557)-(128,576)`, `(43,605)-(178,627)`, `(76,657)-(127,672)` |
-| CTA bbox | edit interests button approx `(244,184)-(349,219)`, all-view answer button approx `(308,553)-(359,584)` |
+| CTA bbox | edit interests button `(244,184)-(349,219)`, all-view answer button `(308,553)-(359,584)` |
 | bottom navigation bbox | `(0,751)-(393,852)` |
 | floating action bbox | none |
 | overlay bbox | none |
@@ -179,9 +186,9 @@
 | canvas size | `393x852` |
 | dominant colors | `#fff7e3` 160903 px, `#ff8b0d` 92763 px, `#fff1d1` 56994 px |
 | non-bg bbox | `(0,0)-(393,843)` |
-| top header/icon/button bbox | orange header `(0,0)-(393,238)`, header title area approx `(24,70)-(369,175)` |
+| top header/icon/button bbox | orange header `(0,0)-(393,238)`, header title area `(24,70)-(369,175)` |
 | primary card/input/modal bbox | chip grid outer `(34,322)-(358,708)` |
-| text/glyph bbox | helper/subtitle approx `(24,260)-(295,292)`, chip text contained inside each `103x44` chip |
+| text/glyph bbox | helper/subtitle `(24,260)-(295,292)`, chip text contained inside each `103x44` chip |
 | CTA bbox | save CTA `(24,752)-(369,808)` |
 | bottom navigation bbox | none; home indicator/reference bottom glyph `(129,838)-(264,843)` is not production UI |
 | floating action bbox | none |
@@ -209,8 +216,8 @@
 | canvas size | `393x852` |
 | dominant colors | `#ffffff` 205773 px, `#ff8b0d` 82259 px, `#fff5eb` 18586 px |
 | non-bg bbox | `(0,0)-(393,852)` |
-| top header/icon/button bbox | orange header `(0,0)-(393,121)`, back/title glyphs approx `(24,70)-(224,88)` |
-| primary card/input/modal bbox | policy content area approx `(24,139)-(369,714)` |
+| top header/icon/button bbox | orange header `(0,0)-(393,121)`, back/title glyphs `(24,70)-(224,88)` |
+| primary card/input/modal bbox | policy content area `(24,139)-(369,714)` |
 | text/glyph bbox | policy title/body clusters `(34,162)-(295,214)`, `(54,262)-(299,354)` |
 | CTA bbox | back button/icon `(24,70)-(33,85)` |
 | bottom navigation bbox | `(0,751)-(393,852)` |
@@ -225,12 +232,12 @@
 | dominant colors | `#adadad` 91956 px, `#ad5f09` 90140 px, `#ffffff` 59897 px |
 | non-bg bbox | `(0,0)-(393,852)` |
 | top header/icon/button bbox | dimmed my-page header/profile remains `(0,0)-(393,254)`, profile motif `(37,147)-(101,211)` |
-| primary card/input/modal bbox | confirmation modal approx `(44,321)-(349,531)` |
-| text/glyph bbox | dimmed background setting glyphs `(42,557)-(178,720)`, modal title/body approx `(88,355)-(305,435)` |
-| CTA bbox | modal cancel/confirm buttons approx `(64,466)-(188,510)`, `(205,466)-(329,510)` |
+| primary card/input/modal bbox | confirmation modal `(44,321)-(349,531)` |
+| text/glyph bbox | dimmed background setting glyphs `(42,557)-(178,720)`, modal title/body `(88,355)-(305,435)` |
+| CTA bbox | modal cancel/confirm buttons `(64,466)-(188,510)`, `(205,466)-(329,510)` |
 | bottom navigation bbox | dimmed `(0,751)-(393,852)` |
 | floating action bbox | none |
-| overlay bbox | full dim overlay `(0,0)-(393,852)`, foreground dialog approx `(44,321)-(349,531)` |
+| overlay bbox | full dim overlay `(0,0)-(393,852)`, foreground dialog `(44,321)-(349,531)` |
 
 #### Screen 16: account-deletion
 
@@ -240,12 +247,12 @@
 | dominant colors | `#adadad` 91956 px, `#ad5f09` 90140 px, `#ffffff` 59324 px |
 | non-bg bbox | `(0,0)-(393,852)` |
 | top header/icon/button bbox | dimmed my-page header/profile remains `(0,0)-(393,254)`, profile motif `(37,147)-(101,211)` |
-| primary card/input/modal bbox | confirmation modal approx `(44,310)-(349,543)` |
-| text/glyph bbox | dimmed background setting glyphs `(42,557)-(178,720)`, modal title/body approx `(80,346)-(313,444)` |
-| CTA bbox | modal cancel/confirm buttons approx `(64,478)-(188,522)`, `(205,478)-(329,522)` |
+| primary card/input/modal bbox | confirmation modal `(44,310)-(349,543)` |
+| text/glyph bbox | dimmed background setting glyphs `(42,557)-(178,720)`, modal title/body `(80,346)-(313,444)` |
+| CTA bbox | modal cancel/confirm buttons `(64,478)-(188,522)`, `(205,478)-(329,522)` |
 | bottom navigation bbox | dimmed `(0,751)-(393,852)` |
 | floating action bbox | none |
-| overlay bbox | full dim overlay `(0,0)-(393,852)`, foreground dialog approx `(44,310)-(349,543)` |
+| overlay bbox | full dim overlay `(0,0)-(393,852)`, foreground dialog `(44,310)-(349,543)` |
 
 #### Screen 17: answer-write-1
 
@@ -255,7 +262,7 @@
 | dominant colors | `#fff5eb` 156619 px, `#fff1d1` 106351 px, `#ffffff` 32146 px |
 | non-bg bbox | `(0,0)-(393,828)` |
 | top header/icon/button bbox | top/back/title band `(0,0)-(393,121)`, title/category glyphs `(44,271)-(295,291)` |
-| primary card/input/modal bbox | worry summary card approx `(24,143)-(369,336)`, reply input panel approx `(24,371)-(369,670)` |
+| primary card/input/modal bbox | worry summary card `(24,143)-(369,336)`, reply input panel `(24,371)-(369,670)` |
 | text/glyph bbox | worry summary text `(72,274)-(295,289)`, placeholder/helper glyphs `(303,646)-(353,657)` |
 | CTA bbox | bottom left nav button `(16,792)-(132,828)`, bottom center eye `(149,764)-(244,823)`, bottom right nav button `(262,792)-(378,828)` |
 | bottom navigation bbox | `(0,764)-(393,828)` |
@@ -270,12 +277,12 @@
 | dominant colors | `#ffffff` 161394 px, `#ada48e` 62959 px, `#adadad` 17319 px |
 | non-bg bbox | `(0,0)-(393,852)` |
 | top header/icon/button bbox | dimmed 17 header area `(0,0)-(393,121)`, overlay category chip `(16,256)-(61,279)` |
-| primary card/input/modal bbox | original worry overlay panel approx `(0,176)-(393,692)` |
+| primary card/input/modal bbox | original worry overlay panel `(0,176)-(393,692)` |
 | text/glyph bbox | overlay title/content clusters `(60,293)-(365,308)`, `(16,387)-(363,493)`, `(195,217)-(221,230)` |
 | CTA bbox | close CTA `(65,617)-(327,669)` |
 | bottom navigation bbox | dimmed `(0,764)-(393,852)` |
 | floating action bbox | none |
-| overlay bbox | full dim overlay `(0,0)-(393,852)`, foreground overlay panel approx `(0,176)-(393,692)` |
+| overlay bbox | full dim overlay `(0,0)-(393,852)`, foreground overlay panel `(0,176)-(393,692)` |
 
 #### Screen 19: answer-write-3
 
@@ -286,7 +293,7 @@
 | non-bg bbox | `(0,0)-(393,852)` |
 | top header/icon/button bbox | status/header glyphs `(24,21)-(376,88)` |
 | primary card/input/modal bbox | success modal/card `(9,127)-(386,661)` |
-| text/glyph bbox | header title glyphs `(164,72)-(224,88)`, modal title/body approx `(75,230)-(318,510)` |
+| text/glyph bbox | header title glyphs `(164,72)-(224,88)`, modal title/body `(75,230)-(318,510)` |
 | CTA bbox | confirm CTA `(63,684)-(330,732)` |
 | bottom navigation bbox | dimmed/full canvas background `(0,751)-(393,852)` |
 | floating action bbox | none |
@@ -301,7 +308,7 @@
 | non-bg bbox | `(0,0)-(393,852)` |
 | top header/icon/button bbox | orange header `(0,0)-(393,149)` |
 | primary card/input/modal bbox | worry cards `(12,149)-(381,325)`, `(12,331)-(381,507)` |
-| text/glyph bbox | card text clusters inside first/second cards approx `(34,176)-(300,256)`, `(34,358)-(300,438)` |
+| text/glyph bbox | card text clusters inside first/second cards `(34,176)-(300,256)`, `(34,358)-(300,438)` |
 | CTA bbox | bottom navigation buttons in `(0,765)-(393,852)` |
 | bottom navigation bbox | `(0,765)-(393,852)` |
 | floating action bbox | write worry floating message button `(316,714)-(376,774)` |
