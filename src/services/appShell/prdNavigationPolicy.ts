@@ -30,9 +30,10 @@ export type AppRoute =
   | 'account_deletion_confirmation';
 
 export type AppRouteState =
-  | { route: Exclude<AppRoute, 'write_reply' | 'received_answer_detail' | 'read_received_reply' | 'my_worry_detail'> }
+  | { route: Exclude<AppRoute, 'write_reply' | 'received_answer_detail' | 'read_received_reply' | 'my_worry_detail' | 'answer_check'> }
   | { route: 'write_reply'; deliveryId: string; worryId: string }
   | { route: 'received_answer_detail' | 'read_received_reply'; worryId: string; replyId: string }
+  | { route: 'answer_check'; worryId: string }
   | { route: 'my_worry_detail'; worryId: string };
 
 export type AppRouteViewState = AppRoute | AppRouteState;
@@ -155,6 +156,10 @@ export function routeToWriteReply(params: { deliveryId: string; worryId: string 
 
 export function routeToReceivedReplyDetail(params: { worryId: string; replyId: string }): AppRouteState {
   return { route: 'received_answer_detail', worryId: params.worryId, replyId: params.replyId };
+}
+
+export function routeToAnswerCheck(params: { worryId: string }): AppRouteState {
+  return { route: 'answer_check', worryId: params.worryId };
 }
 
 export function routeToMyAnswers(): AppRoute {

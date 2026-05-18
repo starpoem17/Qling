@@ -75,6 +75,13 @@ test('identifies authenticated shell membership separately from route-specific g
     mountsAuthenticatedShell: true,
     mountsBottomNavigation: true,
   });
+  assert.deepEqual(routeRenderingBoundaryForRoute({ route: 'answer_check', worryId: 'worry-1' }), {
+    currentRoute: 'answer_check',
+    routeGroup: 'reply details',
+    authenticatedTab: '나의 고민',
+    mountsAuthenticatedShell: true,
+    mountsBottomNavigation: true,
+  });
   assert.deepEqual(routeRenderingBoundaryForRoute('onboarding_interests'), {
     currentRoute: 'onboarding_interests',
     routeGroup: 'onboarding flow',

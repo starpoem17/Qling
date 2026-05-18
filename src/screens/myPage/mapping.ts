@@ -1,10 +1,9 @@
-import type { WorryCategory } from '@midnight-radio/domain';
+import { WORRY_CATEGORIES, type WorryCategory } from '@midnight-radio/domain';
 import type {
   MyAnswerListItemProps,
   MyPageProfileSummaryProps,
   MyWorryListItemProps,
   PushPermissionStatus,
-  ReceivedReplyListItemProps,
 } from './contract';
 import { HELPED_COUNT_LABEL } from './contract';
 import type { MyWorryListItem, ReplyReadModelItem } from '../../services/myWorries';
@@ -75,37 +74,40 @@ export function mapMyGivenReplyToListItem(reply: ReplyReadModelItem, selectedRep
 
 export function mapMyWorryToListItem(params: {
   readonly worry: MyWorryListItem;
-  readonly selectedWorryId?: string;
+  readonly options?: DisplayDateOptions;
 }): MyWorryListItemProps {
   const replyCount = params.worry.humanReplyCount ?? 0;
-  const categoryLabel = params.worry.categories.join(', ') || '기타';
-  const isSelected = params.worry.id === params.selectedWorryId;
+  const categoryLabel = firstUserFacingCategory(params.worry.categories);
+  const summaryText = fallbackSummary(params.worry.content);
+  const createdAtLabel = dateLabel(params.worry.createdAt, params.options);
+  const replyCountLabel = replyCountLabelForCount(replyCount);
+
   return {
     worryId: params.worry.id,
-    contentPreview: params.worry.content,
+    summaryText,
     categoryLabel,
-    replyCount,
+    createdAtLabel,
+    replyCountLabel,
     hasUnreadReplies: params.worry.hasUnreadReplies,
-    isSelected,
     accessibilityLabel: [
-      `나의 고민 상세로 이동`,
+      '답변 확인으로 이동',
       `카테고리 ${categoryLabel}`,
-      `답장 ${replyCount}개`,
+      createdAtLabel ? `작성일 ${createdAtLabel}` : undefined,
+      replyCountLabel,
       params.worry.hasUnreadReplies ? '읽지 않은 답장 있음' : '읽지 않은 답장 없음',
-      isSelected ? '현재 선택됨' : '선택되지 않음',
-    ].join(', '),
+    ].filter(Boolean).join(', '),
   };
 }
 
-export function mapReceivedReplyToListItem(reply: ReplyReadModelItem): ReceivedReplyListItemProps {
-  return {
-    replyId: reply.id,
-    worryId: reply.worryId,
-    previewText: reply.refinedContent,
-    hasUnread: reply.hasUnread === true,
-    accessibilityLabel: [
-      '받은 답장 상세로 이동',
-      reply.hasUnread === true ? '읽지 않은 답장' : '읽은 답장',
-    ].join(', '),
-  };
+export function replyCountLabelForCount(replyCount: number): string {
+  return replyCount <= 0 ? '아직 답변이 없어요.' : `${replyCount}명이 답변했어요`;
+}
+
+function firstUserFacingCategory(categories: readonly string[]): WorryCategory {
+  const firstValid = categories.find((category): category is WorryCategory => WORRY_CATEGORIES.includes(category as WorryCategory));
+  return firstValid ?? '잡담';
+}
+
+function fallbackSummary(content: string): string {
+  return `${Array.from(content).slice(0, 20).join('')}...`;
 }

@@ -1,128 +1,117 @@
-import { FileText, Headphones, Send, Signal } from 'lucide-react';
+import { Heart, Send, UserRound } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
   CategoryChip,
-  ContentSheet,
   EmptyState,
   ErrorState,
   LoadingState,
   QlingCard,
-  SecondaryCTA,
 } from '../shared/ui';
 import type { MyWorriesScreenProps } from './contract';
 
 export function MyWorriesScreen(props: MyWorriesScreenProps) {
-  return (
-    <div className="space-y-5 pb-4">
-      <ContentSheet className="bg-[var(--qling-color-primary-orange)] text-[var(--qling-color-text)] shadow-none">
-        <div className="flex items-center justify-between gap-4">
-          <div className="min-w-0">
-            <div className="mb-3 flex h-11 w-14 items-center justify-center rounded-full bg-[var(--qling-color-cream-soft)] text-[var(--qling-color-primary-orange)]">
-              <FileText className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <h2 className="text-2xl font-extrabold tracking-normal">나의 고민</h2>
-            <p className="mt-1 text-sm font-semibold leading-6 text-[var(--qling-color-text)]">내가 작성한 고민과 도착한 답장을 확인합니다.</p>
-          </div>
-          <div className="w-32 shrink-0">
-            <SecondaryCTA onClick={props.onWriteWorry} accessibilityLabel="고민 작성 화면으로 이동">
-              <Send className="h-4 w-4" aria-hidden="true" />
-              고민 쓰기
-            </SecondaryCTA>
-          </div>
+  const header = (
+    <header className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[120px] bg-[#ff8b3d] px-8 pt-[68px]">
+      <div className="flex items-start justify-between">
+        <div
+          role="presentation"
+          aria-hidden="true"
+          data-testid="my-worries-top-left-eye"
+          className="flex h-10 items-center gap-1"
+        >
+          <span className="block h-9 w-6 rounded-full bg-white shadow-[inset_-8px_0_0_#2a2a2a]" />
+          <span className="block h-9 w-6 rounded-full bg-white shadow-[inset_-8px_0_0_#2a2a2a]" />
         </div>
-      </ContentSheet>
+        <button
+          type="button"
+          aria-label="마이페이지 열기"
+          onClick={props.onOpenMyPage}
+          className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          <UserRound className="h-7 w-7" aria-hidden="true" />
+        </button>
+      </div>
+    </header>
+  );
+
+  const writeButton = (
+    <button
+      type="button"
+      aria-label="고민 작성 화면으로 이동"
+      onClick={props.onWriteWorry}
+      className="fixed bottom-[calc(var(--qling-space-nav-height)+1.25rem)] left-1/2 z-40 ml-[122px] flex h-[60px] w-[60px] items-center justify-center rounded-full bg-[#ff8b3d] text-white shadow-[0_8px_18px_rgb(42_42_42/0.20)] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-white"
+    >
+      <Send className="h-7 w-7" aria-hidden="true" />
+    </button>
+  );
+
+  return (
+    <div>
+      {header}
 
       {props.state.status === 'loading' ? (
-        <LoadingState title="나의 고민을 불러오는 중" message={props.state.label} />
+        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px)] rounded-t-[28px] bg-[#fff1d1] px-4 pt-7">
+          <LoadingState title="나의 고민을 불러오는 중" message={props.state.label} />
+        </section>
       ) : props.state.status === 'error' ? (
-        <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
+        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px)] rounded-t-[28px] bg-[#fff1d1] px-4 pt-7">
+          <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
+        </section>
       ) : props.state.status === 'empty' ? (
-        <EmptyState title="아직 작성한 고민이 없어요" message={props.state.message} actionLabel="고민 쓰기" onAction={props.onWriteWorry} />
+        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px)] rounded-t-[28px] bg-[#fff1d1] px-4 pt-7">
+          <EmptyState title={props.state.message} />
+        </section>
       ) : (
-        <div className="grid gap-4">
+        <section
+          className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px)] rounded-t-[28px] bg-[#fff1d1] px-4 pb-28 pt-7"
+          aria-label="나의 고민 목록"
+        >
+          <div className="grid gap-4">
           {props.items.map(worry => (
             <button
               key={worry.worryId}
               type="button"
               aria-label={worry.accessibilityLabel}
-              aria-current={worry.isSelected ? 'true' : undefined}
-              onClick={() => props.onSelectWorry(worry)}
-              className={cn(
-                'w-full rounded-[var(--qling-radius-card)] text-left transition-transform focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)] focus:ring-offset-2',
-                worry.isSelected ? 'scale-[1.01]' : 'hover:-translate-y-0.5',
-              )}
+              onClick={() => props.onSelectWorryForAnswers(worry)}
+              className="w-full rounded-2xl text-left transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
             >
               <QlingCard className={cn(
-                'space-y-5 border-transparent',
-                worry.isSelected && 'border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-cream-soft)]',
-                worry.hasUnreadReplies && !worry.isSelected && 'border-[var(--qling-color-primary-orange)] bg-[rgb(255_245_235/0.86)]',
+                'space-y-5 rounded-2xl border-0 bg-white px-5 pb-5 pt-3 shadow-[0_5px_9px_rgb(42_42_42/0.24)]',
+                worry.hasUnreadReplies && 'ring-2 ring-[#ff8b3d]',
               )}>
-                <div className="flex flex-wrap items-center gap-2">
-                  <CategoryChip label={worry.categoryLabel} selected disabled className="pointer-events-none px-3 py-1 text-[11px] disabled:opacity-100" />
+                <div className="flex min-w-0 items-center gap-3">
+                  <CategoryChip
+                    label={worry.categoryLabel}
+                    selected
+                    disabled
+                    className="pointer-events-none min-h-0 w-auto px-3 py-1 text-[12px] leading-4 text-[#ff8b3d] disabled:opacity-100"
+                  />
+                  {worry.createdAtLabel && (
+                    <time className="text-[12px] font-medium text-[#b8b8b8]">
+                      {worry.createdAtLabel}
+                    </time>
+                  )}
                   {worry.hasUnreadReplies && (
-                    <span className="rounded-[var(--qling-radius-pill)] bg-[var(--qling-color-primary-orange)] px-2.5 py-1 text-[11px] font-extrabold text-[var(--qling-color-text)]">
+                    <span className="ml-auto rounded-[var(--qling-radius-pill)] bg-[#ff8b3d] px-2.5 py-1 text-[11px] font-extrabold text-white">
                       새 답장
                     </span>
                   )}
-                  {worry.isSelected && (
-                    <span className="rounded-[var(--qling-radius-pill)] bg-[var(--qling-color-text)] px-2.5 py-1 text-[11px] font-extrabold text-white">
-                      선택됨
-                    </span>
-                  )}
                 </div>
-                <p className="whitespace-pre-wrap break-words text-base font-extrabold leading-7 text-[var(--qling-color-text)]">
-                  {worry.contentPreview}
+                <p className="whitespace-pre-wrap break-words text-[16px] font-extrabold leading-7 text-[#2a2a2a]">
+                  {worry.summaryText}
                 </p>
-                <div className="flex items-center gap-2 text-xs font-bold text-[var(--qling-color-muted)]">
-                  <Signal className="h-4 w-4 text-[var(--qling-color-primary-orange)]" aria-hidden="true" />
-                  <span>{worry.replyCount}명이 답변했어요</span>
+                <div className="flex items-center gap-2 text-[12px] font-medium text-[#77716b]">
+                  <Heart className="h-3.5 w-3.5 fill-[#ff8b3d] text-[#ff8b3d]" aria-hidden="true" />
+                  <span>{worry.replyCountLabel}</span>
                 </div>
               </QlingCard>
             </button>
           ))}
-        </div>
+          </div>
+        </section>
       )}
 
-      {props.selectedWorry && (
-        <div className="grid gap-4">
-          <ContentSheet className="space-y-3 bg-[var(--qling-color-cream-soft)] shadow-none">
-            <div className="text-xs font-extrabold text-[var(--qling-color-primary-orange)]">선택한 고민</div>
-            <p className="whitespace-pre-wrap break-words text-sm font-semibold leading-6 text-[var(--qling-color-text)]">{props.selectedWorry.content}</p>
-          </ContentSheet>
-          <div className="text-sm font-extrabold text-[var(--qling-color-text)]">도착한 답장 ({props.selectedWorry.replies.length})</div>
-          {props.selectedWorry.repliesState.status === 'loading' ? (
-            <LoadingState title="답장을 불러오는 중" message={props.selectedWorry.repliesState.label} />
-          ) : props.selectedWorry.repliesState.status === 'error' ? (
-            <ErrorState title="답장을 불러오지 못했어요" message={props.selectedWorry.repliesState.message} />
-          ) : props.selectedWorry.repliesState.status === 'empty' ? (
-            <EmptyState title="아직 도착한 답장이 없어요" message={props.selectedWorry.repliesState.message} />
-          ) : props.selectedWorry.replies.map(reply => (
-            <button
-              key={reply.replyId}
-              type="button"
-              aria-label={reply.accessibilityLabel}
-              onClick={() => props.onSelectReply(reply)}
-              className="w-full rounded-[var(--qling-radius-card)] text-left transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)] focus:ring-offset-2"
-            >
-              <QlingCard className={cn(
-                'space-y-3',
-                reply.hasUnread && 'border-[var(--qling-color-primary-orange)] bg-[rgb(255_245_235/0.86)]',
-              )}>
-                <div className="flex items-center gap-2">
-                  <Headphones className="h-4 w-4 text-[var(--qling-color-primary-orange)]" aria-hidden="true" />
-                  <span className="text-xs font-bold text-[var(--qling-color-muted)]">누군가의 따뜻한 답장</span>
-                  {reply.hasUnread && (
-                    <span className="ml-auto rounded-[var(--qling-radius-pill)] bg-[var(--qling-color-primary-orange)] px-2.5 py-1 text-[11px] font-extrabold text-[var(--qling-color-text)]">
-                      새 답장
-                    </span>
-                  )}
-                </div>
-                <p className="whitespace-pre-wrap break-words text-sm font-semibold leading-6 text-[var(--qling-color-text)]">{reply.previewText}</p>
-              </QlingCard>
-            </button>
-          ))}
-        </div>
-      )}
+      {writeButton}
     </div>
   );
 }

@@ -410,9 +410,7 @@ export default function App() {
             <motion.div key="my_worries" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
               <MyWorriesContainer
                 user={user}
-                selectedMyWorry={selectedMyWorry}
                 setSelectedMyWorry={setSelectedMyWorry}
-                setSelectedReply={setSelectedReply}
                 setView={setView}
               />
             </motion.div>

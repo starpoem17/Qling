@@ -125,42 +125,59 @@ test('my answers and my worries contracts expose list states and route callbacks
     state: { status: 'ready' },
     items: [{
       worryId: 'worry-1',
-      contentPreview: '고민 내용',
+      summaryText: '고민 요약...',
       categoryLabel: WORRY_CATEGORIES[0],
-      replyCount: 1,
+      createdAtLabel: '방금 전',
+      replyCountLabel: '1명이 답변했어요',
       hasUnreadReplies: true,
-      isSelected: false,
-      accessibilityLabel: '나의 고민 상세로 이동, 카테고리 취업, 답장 1개, 읽지 않은 답장 있음, 선택되지 않음',
-    }],
-    selectedWorry: {
-      worryId: 'worry-1',
-      content: '고민 내용',
-      repliesState: { status: 'ready' },
-      replies: [{
-        replyId: 'reply-1',
-        worryId: 'worry-1',
-        previewText: '받은 답장',
-        hasUnread: true,
-        accessibilityLabel: '받은 답장 상세로 이동, 읽지 않은 답장',
-      }],
+      accessibilityLabel: '답변 확인으로 이동, 카테고리 취업, 작성일 방금 전, 1명이 답변했어요, 읽지 않은 답장 있음',
     },
+    ],
     onWriteWorry: () => undefined,
-    onSelectWorry: () => undefined,
-    onSelectReply: () => undefined,
+    onOpenMyPage: () => undefined,
+    onSelectWorryForAnswers: () => undefined,
   } satisfies MyWorriesScreenProps;
 
   assert.equal(answers.items[0].previewText, '답장 내용');
   assert.equal(typeof answers.onSelect, 'function');
   assert.match(answers.items[0].accessibilityLabel, /내가 쓴 답변/);
   assert.match(answers.items[0].accessibilityLabel, /피드백 없음/);
-  assert.equal(worries.selectedWorry?.replies[0].hasUnread, true);
-  assert.match(worries.items[0].accessibilityLabel, /답장 1개/);
+  assert.equal(worries.items[0].replyCountLabel, '1명이 답변했어요');
+  assert.match(worries.items[0].accessibilityLabel, /1명이 답변했어요/);
   assert.match(worries.items[0].accessibilityLabel, /읽지 않은 답장 있음/);
-  assert.match(worries.items[0].accessibilityLabel, /상세로 이동/);
+  assert.match(worries.items[0].accessibilityLabel, /답변 확인으로 이동/);
   for (const item of [...answers.items, ...worries.items]) {
     assert.equal(Object.hasOwn(item, 'exampleLabel'), false);
     assert.equal(Object.hasOwn(item, 'fakeLabel'), false);
     assert.equal(Object.hasOwn(item, 'sampleLabel'), false);
+  }
+});
+
+test('my worries contract is list-only and excludes answer-writer privacy fields', () => {
+  const itemKeys = Object.keys({
+    worryId: 'worry-1',
+    summaryText: '요약...',
+    categoryLabel: WORRY_CATEGORIES[0],
+    createdAtLabel: '2026-05-19',
+    replyCountLabel: '아직 답변이 없어요.',
+    hasUnreadReplies: false,
+    accessibilityLabel: '답변 확인으로 이동',
+  } satisfies MyWorriesScreenProps['items'][number]);
+
+  for (const forbidden of [
+    'selectedWorry',
+    'contentPreview',
+    'replyCount',
+    'replyPreview',
+    'answerWriterNickname',
+    'nickname',
+    'gender',
+    'age',
+    'interests',
+    'profileMetadata',
+    'replierUid',
+  ]) {
+    assert.equal(itemKeys.includes(forbidden), false);
   }
 });
 

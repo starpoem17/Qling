@@ -769,51 +769,132 @@ Onboarding 선례의 정확한 표현:
 허용 수정 범위: `src/screens/myPage/MyWorries*`, `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`, appShell route helpers/tests.
 금지 수정 범위: `src/services/myWorries/**` read model 변경. 필요하면 별도 테스트 근거를 먼저 추가한다.
 
-- [ ] TODO-P4.1: 20 PNG PIL anchor를 재측정해 주요 element bbox를 보강한다.
+- [x] TODO-P4.1: 20 PNG PIL anchor를 재측정해 주요 element bbox를 보강한다.
   - 대상 파일: `design/reference/pngs/screens/20-my-worries.png`, `docs/TODO.md`
   - 완료 기준: 상단 눈, 마이페이지 버튼, 목록 카드, 우측 하단 메시지 버튼, 하단바 bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 출력값 completion note.
   - production PNG evidence: 없음.
-- [ ] TODO-P4.2: `MyWorriesScreen`을 20 목록 화면으로 재구성하고 selected worry 아래 reply list 펼침 UI를 제거한다.
+  - completion note:
+    - changed files: `docs/TODO.md`, `src/screens/myPage/MyWorriesScreen.tsx`
+    - test command/result: PIL one-off measurement 성공; `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: `design/reference/pngs/screens/20-my-worries.png`
+    - measured result: reference size `393x852`; dominant `#fff1d1 130921`, `#ffffff 110161`, `#ff8b3d 51555`, `#fff5eb 13345`; non-bg bbox `(0,0,393,852)`. 주요 bbox: status `(30,21,379,34)`, 좌상단 눈 `(2,68,120,140)`, 우상단 마이페이지 `(275,74,393,145)`, 1번 카드 `(0,140,393,324)`, 1번 카드 내용 `(16,149,377,316)`, chip `(34,160,79,183)`, date glyph `(96,169,157,179)`, summary glyph `(35,209,348,250)`, reply count `(35,281,137,292)`, 2번 카드 `(13,331,380,506)`, 메시지 버튼 `(316,714,376,774)`, 하단바 `(0,790,393,838)`, home indicator `(120,830,275,838)`.
+    - tolerated difference: reference의 status bar/time/network/battery와 home indicator는 production DOM에서 제외되는 OS chrome으로 기록.
+- [x] TODO-P4.2: `MyWorriesScreen`을 20 목록 화면으로 재구성하고 selected worry 아래 reply list 펼침 UI를 제거한다.
   - 대상 파일: `src/screens/myPage/MyWorriesScreen.tsx`, `src/screens/myPage/contract.ts`
   - 완료 기준: 목록 화면에서 reply list가 inline으로 펼쳐지지 않고 고민 박스 클릭은 `onSelectWorryForAnswers(worryId)` 같은 intent callback만 발생시킨다. 08 screen/module 존재는 요구하지 않는다.
   - 검증: screen test에서 selected reply panel DOM 부재와 intent callback 호출 확인.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P4.9.
-- [ ] TODO-P4.3: 20 화면 좌상단/우상단/우측 하단 action을 PRD대로 구현한다.
+  - completion note:
+    - changed files: `src/screens/myPage/MyWorriesScreen.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/MyWorriesScreen.test.ts`, `src/screens/myPage/contract.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; screen tests `my worries screen is a list-only screen without inline received-reply panel`, `my worries card click invokes answer-check intent with the selected worry item` pass.
+    - production PNG path: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`
+    - capture type: `harness component`
+    - harness route/data verification: `my worries container routes selected item to answer_check and stores selected worry`
+    - reference PNG path: `design/reference/pngs/screens/20-my-worries.png`
+    - measured result: production size `393x852`; production 주요 bbox: first card `(0,130,393,330)`, summary `(35,220,348,265)`, reply count `(36,293,139,305)`.
+    - tolerated difference: status/home indicator 제외, screen 내부 bottom nav 중복 없음; 하단바는 shared shell이 렌더링.
+- [x] TODO-P4.3: 20 화면 좌상단/우상단/우측 하단 action을 PRD대로 구현한다.
   - 대상 파일: `src/screens/myPage/MyWorriesScreen.tsx`, `src/screens/myPage/contract.ts`
   - 완료 기준: 좌상단 눈은 기능 없음, 우상단은 마이페이지 이동, 우측 하단 메시지 버튼만 `write_worry` 진입점이다.
   - 검증: click/role test.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P4.9.
-- [ ] TODO-P4.4: `answer_check` route object/helper intent를 도입하되 08 rendering 구현은 요구하지 않는다.
+  - completion note:
+    - changed files: `src/screens/myPage/MyWorriesScreen.tsx`, `src/screens/myPage/MyWorriesScreen.test.ts`, `src/screens/myPage/contract.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; tests verify top-left eye is `div` with no click handler, my-page button calls `onOpenMyPage`, floating message button calls `onWriteWorry`, empty state has no separate CTA.
+    - production PNG path: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`; empty `tmp/my-worries-pixel-alignment/20-empty-production.png`
+    - capture type: `harness component`
+    - harness route/data verification: `my worries screen actions match PRD entry points`, `my worries empty state uses PRD copy without a separate empty CTA`
+    - reference PNG path: `design/reference/pngs/screens/20-my-worries.png`
+    - measured result: production message button bbox `(290,688,390,770)`, reference message button bbox `(316,714,376,774)`.
+    - tolerated difference: production excludes fake OS chrome and uses shared bottom nav center indicator from Phase 2; floating button remains the only write entry in this screen.
+- [x] TODO-P4.4: `answer_check` route object/helper intent를 도입하되 08 rendering 구현은 요구하지 않는다.
   - 대상 파일: `src/screens/myPage/MyWorriesContainer.tsx`, `src/services/appShell/prdNavigationPolicy.ts`
   - 완료 기준: `routeToAnswerCheck({ worryId })` 또는 동등한 route state 생성이 테스트되고, MyWorriesContainer는 선택 intent를 해당 route object로 변환한다. `src/screens/answerCheck/**`와 route rendering은 Phase 7에서 구현한다.
   - 검증: route helper/container policy test. 08 route rendering test는 Phase 7에서 수행한다.
   - production PNG evidence: 없음.
-- [ ] TODO-P4.5: `MyWorryListItemProps`를 20 표시 정보로 갱신한다.
+  - completion note:
+    - changed files: `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/prdNavigationPolicy.test.ts`, `src/services/appShell/routeRenderingBoundary.test.ts`, `src/screens/myPage/MyWorriesContainer.tsx`, `src/screens/myPage/MyWorriesContainerPolicy.ts`, `src/screens/myPage/MyWorriesContainerPolicy.test.ts`, `src/App.tsx`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; route tests verify `routeToAnswerCheck({ worryId }) -> { route: 'answer_check', worryId }`, `backRouteForRoute` and `tabForRoute` return `나의 고민`.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `my worries container routes selected item to answer_check and stores selected worry`
+    - reference PNG path: 해당 없음
+    - measured result: `answer_check` route state is id-bearing; `src/screens/answerCheck/**` 신규 구현 없음.
+    - tolerated difference: `App.tsx`의 기존 legacy detail rendering은 Phase 7 소유로 남김; 이번 Phase는 route object/helper intent와 container selection만 닫음.
+- [x] TODO-P4.5: `MyWorryListItemProps`를 20 표시 정보로 갱신한다.
   - 대상 파일: `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`
   - 완료 기준: createdAt display date, LLM summary text, first valid category, visible reply count label을 포함한다.
   - 검증: `src/screens/myPage/contract.test.ts`, `src/screens/myPage/mapping.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P4.6: reply count read model/mapping 정책을 검증한다.
+  - completion note:
+    - changed files: `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`, `src/screens/myPage/contract.test.ts`, `src/screens/myPage/mapping.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; mapping tests cover shared display date, first valid category, `잡담` fallback, 원문 20자+`...` summary fallback, privacy-free accessibility label.
+    - production PNG path: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`
+    - capture type: `harness component`
+    - harness route/data verification: mapping/contract pure tests; container route test listed in TODO-P4.4.
+    - reference PNG path: `design/reference/pngs/screens/20-my-worries.png`
+    - measured result: `MyWorryListItemProps` fields are `worryId`, `summaryText`, `categoryLabel`, `createdAtLabel`, `replyCountLabel`, `hasUnreadReplies`, `accessibilityLabel`.
+    - tolerated difference: service read model has no summary field in current type, so mapping uses PRD fallback `content` first 20 chars + `...` without expanding `src/services/myWorries/**` implementation.
+- [x] TODO-P4.6: reply count read model/mapping 정책을 검증한다.
   - 대상 파일: `src/screens/myPage/mapping.ts`, `src/services/myWorries/prdPolicy.test.ts` if service policy already owns count
   - 완료 기준: AI 포함, 싫어요 숨김/운영자 숨김 제외, 0개면 `아직 답변이 없어요.` 표시.
   - 검증: mapping/service policy tests.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P4.9에서 count label을 확인한다.
-- [ ] TODO-P4.7: 20 나의 고민 화면에서 답변 작성자의 개인정보가 노출되지 않음을 검증한다.
+  - completion note:
+    - changed files: `src/screens/myPage/mapping.ts`, `src/screens/myPage/mapping.test.ts`, `src/services/myWorries/prdPolicy.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; mapping tests cover `0 -> 아직 답변이 없어요.`, `1 -> 1명이 답변했어요`, `n -> n명이 답변했어요`; service policy test `author-visible reply read model includes AI replies and excludes disliked or hidden replies` pass.
+    - production PNG path: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`
+    - capture type: `harness component`
+    - harness route/data verification: mapping/service policy tests only; service implementation untouched.
+    - reference PNG path: `design/reference/pngs/screens/20-my-worries.png`
+    - measured result: production reply count labels appear at `(36,293,139,305)` for first card; reference first reply label `(35,281,137,292)`.
+    - tolerated difference: current `MyWorryListItem` exposes `humanReplyCount` only, not an explicit visible human+AI count. Mapping safely formats the available count and service tests verify visible reply selection includes AI and excludes disliked/admin-hidden replies; exact list count read model remains a documented service-layer limitation for a future allowed service phase.
+- [x] TODO-P4.7: 20 나의 고민 화면에서 답변 작성자의 개인정보가 노출되지 않음을 검증한다.
   - 대상 파일: `src/screens/myPage/mapping.ts`, `src/screens/myPage/contract.ts`, `src/screens/myPage/MyWorriesScreen.tsx`
   - 완료 기준: answer writer nickname, gender, age, interests, profile metadata가 목록 props와 DOM에 없고 PRD가 허용한 답변 수/상태 정보만 표시된다.
   - 검증: mapping/screen test 또는 completion note의 수동 DOM verification.
   - production PNG evidence: 없음.
-- [ ] TODO-P4.8: 나의 고민 empty 문구를 PRD대로 맞춘다.
+  - completion note:
+    - changed files: `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`, `src/screens/myPage/MyWorriesScreen.tsx`, `src/screens/myPage/contract.test.ts`, `src/screens/myPage/mapping.test.ts`, `src/screens/myPage/MyWorriesScreen.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; contract/mapping/screen tests assert forbidden writer fields are absent from props, mapping output, accessibility label, and DOM.
+    - production PNG path: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`
+    - capture type: `harness component`
+    - harness route/data verification: `my worries DOM does not render answer writer private data`
+    - reference PNG path: `design/reference/pngs/screens/20-my-worries.png`
+    - measured result: DOM renders category/date/summary/reply count only; no answer writer nickname, gender, age, interests, profile metadata, replierUid, or reply body preview.
+    - tolerated difference: 해당 없음
+- [x] TODO-P4.8: 나의 고민 empty 문구를 PRD대로 맞춘다.
   - 대상 파일: `src/screens/myPage/MyWorriesContainer.tsx`, `src/screens/myPage/MyWorriesScreen.tsx`
   - 완료 기준: empty 문구가 `첫 고민을 남겨보세요.`이고 CTA는 우측 하단 메시지 버튼 정책과 충돌하지 않는다.
   - 검증: screen state test.
   - production PNG evidence: 없음. 같은 phase에서 empty visual을 캡처하면 `tmp/my-worries-pixel-alignment/20-empty-production.png`를 기록한다.
-- [ ] TODO-P4.9: 20 production PNG evidence를 생성한다.
+  - completion note:
+    - changed files: `src/screens/myPage/MyWorriesContainer.tsx`, `src/screens/myPage/MyWorriesContainerPolicy.ts`, `src/screens/myPage/MyWorriesScreen.tsx`, `src/screens/myPage/MyWorriesScreen.test.ts`, `tmp/my-worries-pixel-alignment/20-empty-production.png`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; empty screen test confirms `첫 고민을 남겨보세요.` and no separate empty CTA.
+    - production PNG path: `tmp/my-worries-pixel-alignment/20-empty-production.png`
+    - capture type: `harness component`
+    - harness route/data verification: `my worries container policy maps loading error empty and ready states`, `my worries empty state uses PRD copy without a separate empty CTA`
+    - reference PNG path: 해당 없음
+    - measured result: empty production size `393x852`; dominant `#fff1d1 167907`, `#ffffff 65531`, `#ff8b3d 47117`; non-bg bbox `(0,0,393,852)`.
+    - tolerated difference: empty state는 별도 reference PNG 없음; same-tone harness capture만 남김.
+- [x] TODO-P4.9: 20 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`
   - 완료 기준: 393x852 production capture이며 추가 보고 파일이 필요하면 한국어 HTML만 있고 capture note 필수 필드가 기록된다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`
+  - completion note:
+    - changed files: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`, `tmp/my-worries-pixel-alignment/20-empty-production.png`, `tmp/my-worries-pixel-alignment/harness/index.html`, `tmp/my-worries-pixel-alignment/harness/src/main.tsx`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; PNG size check pass; reference copy check `False`.
+    - production PNG path: `tmp/my-worries-pixel-alignment/20-my-worries-production.png`
+    - capture type: `harness component`
+    - harness route/data verification: production `MyWorriesScreen.tsx` imported by harness; route/Container covered by `my worries container routes selected item to answer_check and stores selected worry`, appShell `routeToAnswerCheck` tests, and screen action tests.
+    - reference PNG path: `design/reference/pngs/screens/20-my-worries.png`
+    - measured result: production size `393x852`; dominant `#ffffff 104133`, `#fff1d1 84019`, `#ff8b3d 47268`, `#fffffd 18092`, `#fff3df 12765`; production non-bg exact with dominant white `(0,0,393,852)`, cream-body comparison bboxes: top-left eye `(0,70,120,130)`, my-page `(280,74,380,125)`, first card `(0,130,393,330)`, category `(36,160,145,194)`, date `(125,168,206,186)`, summary `(35,220,348,265)`, reply count `(36,293,139,305)`, message button `(290,688,390,770)`, bottom bar `(0,760,393,852)`. Reference key bboxes: top-left eye `(2,68,120,140)`, my-page `(275,74,393,145)`, first card `(0,140,393,324)`, category `(34,160,79,183)`, date `(96,169,157,179)`, summary `(35,209,348,250)`, reply count `(35,281,137,292)`, message button `(316,714,376,774)`, bottom bar `(0,790,393,838)`.
+    - tolerated difference: reference includes fake status/home indicator; production excludes them. Shared `CategoryChip` keeps fixed domain chip width, so chip/date x positions differ. Shared bottom nav from Phase 2 is taller and starts at y~760 instead of reference y~790. Floating write button is within about 26px vertical of reference and remains the only write entry.
 
 검증 명령:
 - `npm test`

@@ -104,32 +104,18 @@ export type MyAnswersScreenProps = {
 
 export type MyWorryListItemProps = {
   readonly worryId: string;
-  readonly contentPreview: string;
+  readonly summaryText: string;
   readonly categoryLabel: string;
-  readonly replyCount: number;
+  readonly createdAtLabel?: string;
+  readonly replyCountLabel: string;
   readonly hasUnreadReplies: boolean;
-  readonly isSelected: boolean;
-  readonly accessibilityLabel: string;
-};
-
-export type ReceivedReplyListItemProps = {
-  readonly replyId: string;
-  readonly worryId?: string;
-  readonly previewText: string;
-  readonly hasUnread: boolean;
   readonly accessibilityLabel: string;
 };
 
 export type MyWorriesScreenProps = {
   readonly state: ScreenAsyncState;
   readonly items: readonly MyWorryListItemProps[];
-  readonly selectedWorry?: {
-    readonly worryId: string;
-    readonly content: string;
-    readonly repliesState: ScreenAsyncState;
-    readonly replies: readonly ReceivedReplyListItemProps[];
-  };
   readonly onWriteWorry: () => void;
-  readonly onSelectWorry: (item: MyWorryListItemProps) => void;
-  readonly onSelectReply: (item: ReceivedReplyListItemProps) => void;
+  readonly onOpenMyPage: () => void;
+  readonly onSelectWorryForAnswers: (item: MyWorryListItemProps) => void;
 };

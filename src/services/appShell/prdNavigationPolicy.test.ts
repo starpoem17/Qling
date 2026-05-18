@@ -26,6 +26,7 @@ import {
   routeAfterWorrySuccessConfirmation,
   routeName,
   routeToEditInterests,
+  routeToAnswerCheck,
   routeToMyAnswers,
   routeToMyWorries,
   routeToReceivedReplyDetail,
@@ -155,6 +156,10 @@ test('routes pass, feedback, write, detail, and my-page subroute targets', () =>
     worryId: 'worry-1',
     replyId: 'reply-1',
   });
+  assert.deepEqual(routeToAnswerCheck({ worryId: 'worry-1' }), {
+    route: 'answer_check',
+    worryId: 'worry-1',
+  });
   assert.equal(routeToMyAnswers(), 'my_answers');
   assert.equal(routeToMyWorries(), 'my_worries');
   assert.equal(routeToEditInterests(), 'edit_interests');
@@ -182,7 +187,7 @@ test('defines every required back route in the service policy', () => {
   assert.equal(backRouteForRoute({ route: 'write_reply', deliveryId: 'delivery-1', worryId: 'worry-1' }), '답변하기');
   assert.equal(backRouteForRoute('write_reply_success'), '답변하기');
   assert.equal(backRouteForRoute({ route: 'received_answer_detail', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
-  assert.equal(backRouteForRoute('answer_check'), '나의 고민');
+  assert.equal(backRouteForRoute({ route: 'answer_check', worryId: 'worry-1' }), '나의 고민');
   assert.equal(backRouteForRoute('edit_interests'), '마이페이지');
   assert.equal(backRouteForRoute('my_answers'), '마이페이지');
   assert.equal(backRouteForRoute('my_worries'), '나의 고민');
@@ -213,7 +218,7 @@ test('maps detail, write, policy, and confirmation routes to their owning PRD ta
   assert.equal(tabForRoute('write_worry_success'), '나의 고민');
   assert.equal(tabForRoute('my_worries'), '나의 고민');
   assert.equal(tabForRoute({ route: 'received_answer_detail', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
-  assert.equal(tabForRoute('answer_check'), '나의 고민');
+  assert.equal(tabForRoute({ route: 'answer_check', worryId: 'worry-1' }), '나의 고민');
   assert.equal(tabForRoute({ route: 'my_worry_detail', worryId: 'worry-1' }), '나의 고민');
   assert.equal(tabForRoute('edit_interests'), '마이페이지');
   assert.equal(tabForRoute('my_answers'), '마이페이지');
@@ -241,7 +246,7 @@ test('Phase 22 maps nested bottom-tab routes to the expected active tab', () => 
   assert.equal(tabForRoute('write_worry_success'), '나의 고민');
   assert.equal(tabForRoute({ route: 'received_answer_detail', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
   assert.equal(tabForRoute({ route: 'read_received_reply', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
-  assert.equal(tabForRoute('answer_check'), '나의 고민');
+  assert.equal(tabForRoute({ route: 'answer_check', worryId: 'worry-1' }), '나의 고민');
   assert.equal(tabForRoute({ route: 'my_worry_detail', worryId: 'worry-1' }), '나의 고민');
   assert.equal(tabForRoute('edit_interests'), '마이페이지');
   assert.equal(tabForRoute('my_answers'), '마이페이지');

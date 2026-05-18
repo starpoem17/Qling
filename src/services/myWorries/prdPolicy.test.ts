@@ -282,6 +282,31 @@ test('AI reply appears to author as a normal reply without visible label', () =>
   assert.equal('aiLabel' in selected[0], false);
 });
 
+test('author-visible reply read model includes AI replies and excludes disliked or hidden replies', () => {
+  const human = prdReply({ id: 'human-visible', worryId: 'w1', authorUid: 'author', replierUid: 'human-1' });
+  const aiReply = prdReply({
+    id: 'ai-visible',
+    deliveryId: 'ai:w1',
+    worryId: 'w1',
+    authorUid: 'author',
+    replierUid: 'ai_fallback',
+    isAiGenerated: true,
+  });
+  const disliked = prdReply({ id: 'disliked', worryId: 'w1', authorUid: 'author', replierUid: 'human-2' });
+  const hidden = prdReply({ id: 'admin-hidden', worryId: 'w1', authorUid: 'author', replierUid: 'human-3', status: 'hidden' });
+  const feedbacksByReplyId = new Map([['disliked', { id: 'disliked', type: 'dislike' as const }]]);
+
+  const selected = selectRepliesForWorry({
+    replies: [human, aiReply, disliked, hidden],
+    userUid: 'author',
+    worryId: 'w1',
+    feedbacksByReplyId,
+  });
+
+  assert.deepEqual(selected.map(reply => reply.id).sort(), ['ai-visible', 'human-visible']);
+  assert.equal(selected.some(reply => reply.isAiGenerated), true);
+});
+
 test('AI reply is not shown in a real user given-replies path', () => {
   const aiReply = prdReply({
     id: 'w1_ai',
