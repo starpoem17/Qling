@@ -19,8 +19,6 @@ export type MyPageProfileInput = {
 export function mapProfileToMyPageSummary(profile: MyPageProfileInput | null): MyPageProfileSummaryProps {
   return {
     nickname: profile?.nickname?.trim() || '나',
-    interests: (profile?.interests ?? []) as readonly WorryCategory[],
-    ageLabel: typeof profile?.age === 'number' ? `${profile.age}세` : undefined,
     helpedCount: Math.max(0, profile?.helpedCount ?? 0),
     helpedCountLabel: HELPED_COUNT_LABEL,
     profileMotif: {
@@ -33,13 +31,13 @@ export function mapProfileToMyPageSummary(profile: MyPageProfileInput | null): M
 export function mapPushStatus(params: {
   readonly permission?: NotificationPermission | 'unsupported';
   readonly registrationStatus?: string;
-}): { status: PushPermissionStatus; message?: string } {
-  if (params.permission === 'unsupported') return { status: 'unsupported', message: '이 브라우저는 알림을 지원하지 않습니다.' };
-  if (params.registrationStatus === 'registered') return { status: 'registered', message: '알림 등록이 완료되었습니다.' };
-  if (params.registrationStatus === 'error') return { status: 'error', message: '알림 등록에 실패했습니다.' };
-  if (params.permission === 'granted') return { status: 'granted', message: '알림 권한이 허용되었습니다.' };
-  if (params.permission === 'denied') return { status: 'denied', message: '브라우저 설정에서 알림 권한을 허용해 주세요.' };
-  return { status: 'default', message: '알림 권한 설정이 필요합니다.' };
+}): { status: PushPermissionStatus; enabled: boolean; message?: string } {
+  if (params.permission === 'unsupported') return { status: 'unsupported', enabled: false, message: '이 브라우저는 알림을 지원하지 않습니다.' };
+  if (params.registrationStatus === 'registered') return { status: 'registered', enabled: true, message: '브라우저 또는 OS 권한은 앱에서 직접 회수할 수 없어요.' };
+  if (params.registrationStatus === 'error') return { status: 'error', enabled: false, message: '알림 등록에 실패했습니다. 다시 켜서 등록을 시도할 수 있어요.' };
+  if (params.permission === 'granted') return { status: 'granted', enabled: true, message: '브라우저 또는 OS 권한은 앱에서 직접 회수할 수 없어요.' };
+  if (params.permission === 'denied') return { status: 'denied', enabled: false, message: '브라우저 설정에서 알림 권한을 허용해 주세요.' };
+  return { status: 'default', enabled: false, message: '켜면 브라우저 알림 권한 요청과 푸시 등록을 시도합니다.' };
 }
 
 function dateLabel(value: { toMillis?: () => number } | null | undefined, options?: DisplayDateOptions): string | undefined {
@@ -47,10 +45,16 @@ function dateLabel(value: { toMillis?: () => number } | null | undefined, option
   return formatDisplayDate(value, options).label;
 }
 
-export function mapMyGivenReplyToListItem(reply: ReplyReadModelItem, selectedReplyId?: string, options?: DisplayDateOptions): MyAnswerListItemProps {
-  const feedbackLabel = reply.feedback === 'helpful' ? '받은 하트' : reply.feedback === 'not_helpful' ? '확인됨' : undefined;
-  const isSelected = reply.id === selectedReplyId;
+export function mapMyGivenReplyToListItem(reply: ReplyReadModelItem, _selectedReplyId?: string, options?: DisplayDateOptions): MyAnswerListItemProps {
+  const feedbackLabel = reply.feedback === 'helpful' ? '받은 하트' : undefined;
+  const feedbackComment = reply.feedback === 'helpful' ? reply.publisherComment?.trim() : undefined;
   const originalWorryPreview = reply.replyToContent ?? reply.originalContent;
+  const categoryLabel = firstUserFacingCategory((reply as ReplyReadModelItem & {
+    readonly categories?: readonly string[];
+    readonly validCategories?: readonly string[];
+  }).validCategories ?? (reply as ReplyReadModelItem & {
+    readonly categories?: readonly string[];
+  }).categories ?? []);
 
   return {
     replyId: reply.id,
@@ -58,16 +62,18 @@ export function mapMyGivenReplyToListItem(reply: ReplyReadModelItem, selectedRep
     worryId: reply.worryId,
     previewText: reply.refinedContent,
     originalWorryPreview,
+    categoryLabel,
     dateLabel: dateLabel(reply.createdAt, options),
     feedbackLabel,
+    feedbackComment: feedbackComment || undefined,
     hasReceivedHeart: reply.feedback === 'helpful',
     isUnread: reply.hasUnread,
-    isSelected,
     accessibilityLabel: [
       '내가 쓴 답변',
+      `카테고리 ${categoryLabel}`,
       originalWorryPreview ? `원래 고민 ${originalWorryPreview}` : undefined,
       feedbackLabel ? `피드백 ${feedbackLabel}` : '피드백 없음',
-      isSelected ? '현재 선택됨' : '선택되지 않음',
+      feedbackComment ? '코멘트 있음' : undefined,
     ].filter(Boolean).join(', '),
   };
 }

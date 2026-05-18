@@ -1353,66 +1353,163 @@ Onboarding 선례의 정확한 표현:
 허용 수정 범위: `src/screens/myPage/**`, `src/services/policyDocuments/**` only for privacy-only/empty message policy, relevant tests.
 금지 수정 범위: app install/PWA guide 기능 추가, operation policy route 유지.
 
-- [ ] TODO-P8.1: 10/12/13/14 PNG PIL anchor를 재측정한다.
+- [x] TODO-P8.1: 10/12/13/14 PNG PIL anchor를 재측정한다.
   - 대상 파일: `design/reference/pngs/screens/10-my-page.png`, `12-edit-interests.png`, `13-my-answers.png`, `14-privacy-policy.png`
   - 완료 기준: profile summary, setting rows, chip grid, answer list cards, policy body area bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 completion note.
   - production PNG evidence: 없음.
-- [ ] TODO-P8.2: `MyPageScreen`에서 앱처럼 사용하기 QR/공유 영역과 운영정책 항목을 제거한다.
+  - completion note:
+    - changed files: `tmp/my-page-pixel-alignment/measurements.html`, `docs/TODO.md`
+    - test command/result: PIL 측정 성공; `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - reference PNG path: `design/reference/pngs/screens/10-my-page.png`, `12-edit-interests.png`, `13-my-answers.png`, `14-privacy-policy.png`
+    - measured result: 10 `393x852`, dominant `#ffffff 145916px, #ff8b0d 129361px`, profile `(20,132)-(373,225)`, answer preview `(20,302)-(373,486)`, settings `(20,544)-(373,736)`; 12 `393x852`, chip grid `(34,322)-(358,708)`, chip `103x44`, gap-x `6-8px`, gap-y `13px`, CTA `(24,752)-(369,808)`; 13 `393x852`, cards `(16,127)-(377,295)` and `(15,314)-(376,482)`, heart `(340,327)-(356,340)`; 14 `393x852`, title `(142,69)-(259,84)`, body `(16,127)-(377,716)`.
+    - tolerated difference: static status bar/home indicator/bottom nav chrome는 reference-only 영역으로 기록.
+- [x] TODO-P8.2: `MyPageScreen`에서 앱처럼 사용하기 QR/공유 영역과 운영정책 항목을 제거한다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/contract.ts`
   - 완료 기준: 10 PNG 항목만 남고 `QrCode`, `Share2`, `QRCodeSVG`, `operation_policy`, `app_install_guide` UI가 없다.
   - 검증: `rg -n "QrCode|Share2|QRCodeSVG|operation_policy|app_install_guide" src/screens/myPage`
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
-- [ ] TODO-P8.3: `MyPageContainer`/contract에서 MVP 제외 props와 route handling을 제거한다.
+  - completion note:
+    - changed files: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/contract.test.ts`, `src/screens/myPage/MyPageScreen.test.ts`, `docs/TODO.md`
+    - test command/result: `rg -n "QrCode|Share2|QRCodeSVG|operation_policy|app_install_guide" src/screens/myPage` 결과는 `contract.test.ts`의 negative assertion 문자열 2건뿐. `npm test`/`lint`/`build`/`validate:design-reference`/`test:rules` pass.
+    - production PNG path: `tmp/my-page-pixel-alignment/10-my-page-production.png`
+    - capture type: harness component
+    - reference PNG path: `design/reference/pngs/screens/10-my-page.png`
+    - measured result: `10-my-page-production.png` size `393x852`
+    - tolerated difference: shared production tokens와 auth-free harness 차이 허용.
+- [x] TODO-P8.3: `MyPageContainer`/contract에서 MVP 제외 props와 route handling을 제거한다.
   - 대상 파일: `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/contract.ts`, tests
   - 완료 기준: operation policy/app install props와 dispatch가 사라지고 개인정보처리방침만 policy route로 남는다.
   - 검증: `src/screens/myPage/contract.test.ts`, `src/screens/myPage/importBoundary.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P8.4: 10 마이페이지 표시 항목을 PRD대로 맞춘다.
+  - completion note:
+    - changed files: `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/contract.test.ts`, `src/services/policyDocuments/*`, `src/server/policyRoutes.ts`, `docs/TODO.md`
+    - test command/result: `npm test` pass includes `settings contract includes required account rows and excludes non-MVP policy rows`, `my-page presentational screens do not import production services`, appShell excluded route tests; `lint`/`build`/`validate:design-reference`/`test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: `MY_PAGE_POLICY_SETTING_ITEMS === ['privacy_policy']`; settings are `push_notifications`, `privacy_policy`, `logout`, `delete_account`; excluded route strings remain only in negative assertions.
+    - tolerated difference: `src/server/policyRoutes.ts`도 privacy-only kind를 맞추기 위해 최소 수정.
+- [x] TODO-P8.4: 10 마이페이지 표시 항목을 PRD대로 맞춘다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/mapping.ts`
   - 완료 기준: 닉네임, 받은 좋아요/하트 총합, 관심 분야 수정, 내가 쓴 답변 preview, 전체보기, 알림 토글, 개인정보처리방침, 로그아웃, 회원 탈퇴만 표시한다.
   - 검증: screen rendering test.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
-- [ ] TODO-P8.5: 알림 설정을 토글 UI와 브라우저 권한 제약 문구로 표현한다.
+  - completion note:
+    - changed files: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`, `src/screens/myPage/MyPageScreen.test.ts`, `src/screens/myPage/mapping.test.ts`, `docs/TODO.md`
+    - test command/result: `my-page screen renders only PRD my-page items and excludes non-MVP rows`, `profile mapping uses safe helpedCount fallback and visual-only motif`; `npm test`/`lint`/`build`/`validate:design-reference`/`test:rules` pass.
+    - production PNG path: `tmp/my-page-pixel-alignment/10-my-page-production.png`
+    - capture type: harness component
+    - reference PNG path: `design/reference/pngs/screens/10-my-page.png`
+    - measured result: profile summary exposes nickname/helpedCount only; 10 production PNG `393x852`.
+    - tolerated difference: profile 관심 분야 목록은 10에서 제거하고 12 선택 상태에만 남김.
+- [x] TODO-P8.5: 알림 설정을 토글 UI와 브라우저 권한 제약 문구로 표현한다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`
   - 완료 기준: 별도 `notification_settings` route 없이 10 화면 안에서 토글 상태를 제어한다.
   - 검증: screen interaction test.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
-- [ ] TODO-P8.6: 12 관심 분야 수정 화면을 PRD대로 맞춘다.
+  - completion note:
+    - changed files: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`, `src/screens/myPage/MyPageScreen.test.ts`, `src/screens/myPage/mapping.test.ts`, `docs/TODO.md`
+    - test command/result: `push access stays inside my-page props without a standalone notification route`, `my-page forwards edit interests, my answers, push toggle, and policy actions`, `push mapping distinguishes browser permission states`; `rg -n "operation_policy|app_install_guide|notification_settings" src/services/appShell src/App.tsx src/screens/myPage` 결과는 negative assertions뿐. Full commands pass.
+    - production PNG path: `tmp/my-page-pixel-alignment/10-my-page-production.png`
+    - capture type: harness component
+    - reference PNG path: `design/reference/pngs/screens/10-my-page.png`
+    - measured result: screen switch uses `role="switch"` and browser/OS permission limitation copy.
+    - tolerated difference: 기존 push lifecycle에 연결 가능한 on-state는 `requestNotificationPermission`, off-state는 existing cleanup callback까지만 사용; 새 FCM 구현 추가 없음.
+- [x] TODO-P8.6: 12 관심 분야 수정 화면을 PRD대로 맞춘다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/MyPageContainer.tsx`
   - 완료 기준: 3열 고정 크기 칩, 0개 저장 시 `1개 이상의 관심 분야를 선택해주세요.`, 저장 성공 후 10 이동, 실패 시 기존 선택 유지.
   - 검증: container/screen interaction tests.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
-- [ ] TODO-P8.7: 13 내가 쓴 답변 목록을 PRD feedback visibility로 맞춘다.
+  - completion note:
+    - changed files: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/MyPageScreen.test.ts`, `docs/TODO.md`
+    - test command/result: `edit interests screen renders fixed three-column chip grid and exact zero-selection validation`, `edit interests screen forwards chip toggle and submit interactions`, userProfile editable interests tests; full commands pass.
+    - production PNG path: `tmp/my-page-pixel-alignment/12-edit-interests-production.png`
+    - capture type: harness component
+    - reference PNG path: `design/reference/pngs/screens/12-edit-interests.png`
+    - measured result: reference chip grid `(34,322)-(358,708)`, chip `103x44`; production PNG size `393x852`; validation copy exact.
+    - tolerated difference: success/failure persistence is container/API boundary verified by tests; production capture uses selected fixture.
+- [x] TODO-P8.7: 13 내가 쓴 답변 목록을 PRD feedback visibility로 맞춘다.
   - 대상 파일: `src/screens/myPage/MyAnswersScreen.tsx`, `src/screens/myPage/mapping.ts`, `src/screens/myPage/contract.ts`
   - 완료 기준: 모든 답변 동일 형식, 좋아요는 하트만, 코멘트 있으면 1개 작은 폰트, 싫어요는 피드백 없음처럼 표시.
   - 검증: mapping/screen tests.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
-- [ ] TODO-P8.8: 13 내가 쓴 답변 목록에서 고민 작성자의 개인정보가 노출되지 않음을 검증한다.
+  - completion note:
+    - changed files: `src/screens/myPage/MyAnswersScreen.tsx`, `src/screens/myPage/MyAnswersContainer.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`, `src/screens/myPage/MyAnswersScreen.test.ts`, `src/screens/myPage/mapping.test.ts`, `docs/TODO.md`
+    - test command/result: `my answer feedback visibility follows PRD for like dislike and comments`, `my answers screen renders same card format with heart and one small comment`, Phase 7 `dislike comment remains hidden from replier read model even when stored`; full commands pass.
+    - production PNG path: `tmp/my-page-pixel-alignment/13-my-answers-production.png`
+    - capture type: harness component
+    - reference PNG path: `design/reference/pngs/screens/13-my-answers.png`
+    - measured result: reference cards `(16,127)-(377,295)` and `(15,314)-(376,482)`; production PNG size `393x852`; dislike/comment hidden in mapping and DOM tests.
+    - tolerated difference: reference PNG has no visible like-comment example; PRD comment path verified by fixture.
+- [x] TODO-P8.8: 13 내가 쓴 답변 목록에서 고민 작성자의 개인정보가 노출되지 않음을 검증한다.
   - 대상 파일: `src/screens/myPage/mapping.ts`, `src/screens/myPage/contract.ts`, `src/screens/myPage/MyAnswersScreen.tsx`
   - 완료 기준: worry publisher nickname, gender, age, interests, profile metadata가 my answers props/DOM에 없고 PRD가 허용한 고민 context/답변/피드백만 표시된다.
   - 검증: mapping/screen test 또는 completion note의 수동 DOM verification.
   - production PNG evidence: 없음.
-- [ ] TODO-P8.9: 마이페이지 profile summary가 PRD가 허용한 현재 사용자 본인 nickname만 표시하는지 검증한다.
+  - completion note:
+    - changed files: `src/screens/myPage/MyAnswersScreen.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`, `src/screens/myPage/MyAnswersScreen.test.ts`, `src/screens/myPage/mapping.test.ts`, `docs/TODO.md`
+    - test command/result: `my answer mapping excludes worry publisher privacy fields from output`, `my answers screen hides dislike feedback and publisher private data from DOM`; full commands pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: fixture strings `게시자닉네임`, `여성`, `33`, `취업`, `profileMetadata`, `publisher-uid-secret`, dislike comment do not appear in mapped JSON/DOM.
+    - tolerated difference: `deliveryId`/`worryId` remain as route/read-model identifiers, not publisher internal uid.
+- [x] TODO-P8.9: 마이페이지 profile summary가 PRD가 허용한 현재 사용자 본인 nickname만 표시하는지 검증한다.
   - 대상 파일: `src/screens/myPage/mapping.ts`, `src/screens/myPage/contract.ts`, `src/screens/myPage/MyPageScreen.tsx`
   - 완료 기준: 현재 사용자 본인 nickname 외 gender, age, profile metadata가 profile summary에 노출되지 않는다. 관심 분야는 PRD가 허용한 수정 화면/선택 상태에서만 표시된다.
   - 검증: mapping/screen test 또는 completion note의 수동 DOM verification.
   - production PNG evidence: 없음.
-- [ ] TODO-P8.10: 내가 쓴 답변 상세 route를 PRD대로 제거 또는 비활성화한다.
+  - completion note:
+    - changed files: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/contract.ts`, `src/screens/myPage/mapping.ts`, `src/screens/myPage/MyPageScreen.test.ts`, `src/screens/myPage/mapping.test.ts`, `docs/TODO.md`
+    - test command/result: `my-page profile summary does not render private profile fields or interests`, `profile mapping uses safe helpedCount fallback and visual-only motif`, `edit interests screen renders fixed three-column chip grid`; full commands pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: mapping output has no `ageLabel`/`interests`; 10 DOM hides fixture gender/age/profile metadata/interests; 12 renders interest selection only.
+    - tolerated difference: none.
+- [x] TODO-P8.10: 내가 쓴 답변 상세 route를 PRD대로 제거 또는 비활성화한다.
   - 대상 파일: `src/screens/myPage/MyAnswersContainer.tsx`, appShell routes, replyDetail routes/tests
   - 완료 기준: 새 PRD의 `내가 쓴 답변 상세 화면은 MVP에서 제공하지 않는다`에 맞춰 `my_answer_detail` 이동이 제거된다.
   - 검증: `rg -n "my_answer_detail|routeToMyReplyDetail|read_my_reply" src`
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
-- [ ] TODO-P8.11: 14 개인정보처리방침 source와 empty 문구를 PRD대로 맞춘다.
+  - completion note:
+    - changed files: `src/screens/myPage/MyAnswersScreen.tsx`, `src/screens/myPage/MyAnswersContainer.tsx`, `src/screens/myPage/contract.ts`, `src/App.tsx`, `src/screens/myPage/MyAnswersScreen.test.ts`, `docs/TODO.md`
+    - test command/result: `my answers screen does not make item cards navigate to detail routes`; `rg -n "my_answer_detail|routeToMyReplyDetail|read_my_reply" src` 결과는 appShell/myPage negative assertion tests뿐. Full commands pass.
+    - production PNG path: `tmp/my-page-pixel-alignment/13-my-answers-production.png`
+    - capture type: harness component
+    - reference PNG path: `design/reference/pngs/screens/13-my-answers.png`
+    - measured result: cards are non-button `<article>` items; `MyAnswersContainer` no longer stores selected reply for detail navigation.
+    - tolerated difference: legacy received reply detail route remains for answer-check/my-worry flows, not my-answer detail.
+- [x] TODO-P8.11: 14 개인정보처리방침 source와 empty 문구를 PRD대로 맞춘다.
   - 대상 파일: `src/screens/myPage/MyPageContainer.tsx`, `src/screens/myPage/MyPageScreen.tsx`, `src/services/policyDocuments/*`
   - 완료 기준: `docs/privacy_policy.md`만 source of truth이고 빈 경우 `정책을 준비 중입니다.`를 표시한다.
   - 검증: `src/services/policyDocuments/policyLoader.test.ts`, screen test.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P8.12.
-- [ ] TODO-P8.12: 10/12/13/14 production PNG evidence를 생성한다.
+  - completion note:
+    - changed files: `src/services/policyDocuments/types.ts`, `src/services/policyDocuments/policyLoader.ts`, `src/services/policyDocuments/policyLoader.test.ts`, `src/server/policyRoutes.ts`, `src/screens/myPage/MyPageScreen.tsx`, `src/screens/myPage/MyPageScreen.test.ts`, `docs/TODO.md`
+    - test command/result: `policy loader returns production-safe empty state when source is missing/blank`, `privacy policy screen uses exact PRD empty copy`; `docs/privacy_policy.md` is currently missing, loader returns empty copy; full commands pass.
+    - production PNG path: `tmp/my-page-pixel-alignment/14-privacy-policy-production.png`
+    - capture type: harness component
+    - reference PNG path: `design/reference/pngs/screens/14-privacy-policy.png`
+    - measured result: `POLICY_EMPTY_STATE_MESSAGE === '정책을 준비 중입니다.'`; `PolicyDocumentKind` is privacy-only; 14 production PNG size `393x852`.
+    - tolerated difference: full deployment still serves via `/api/policies/privacy_policy`; source file absence intentionally resolves to empty state.
+- [x] TODO-P8.12: 10/12/13/14 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/my-page-pixel-alignment/10-my-page-production.png`, `12-edit-interests-production.png`, `13-my-answers-production.png`, `14-privacy-policy-production.png`
   - 완료 기준: 네 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: listed files.
+  - completion note:
+    - changed files: `tmp/my-page-pixel-alignment/10-my-page-production.png`, `12-edit-interests-production.png`, `13-my-answers-production.png`, `14-privacy-policy-production.png`, `tmp/my-page-pixel-alignment/measurements.html`, `tmp/my-page-pixel-alignment/harness/**`, `docs/TODO.md`
+    - test command/result: `npm run build` pass; Playwright capture via `node tmp/my-page-pixel-alignment/harness/capture.mjs` pass; PIL size verification pass; `npm test`/`lint`/`validate:design-reference`/`test:rules` pass.
+    - production PNG path: `tmp/my-page-pixel-alignment/10-my-page-production.png`, `12-edit-interests-production.png`, `13-my-answers-production.png`, `14-privacy-policy-production.png`
+    - capture type: harness component
+    - harness route/data verification: route/container verified by `MyPageScreen.test.ts`, `MyAnswersScreen.test.ts`, `mapping.test.ts`, `contract.test.ts`, `prdNavigationPolicy.test.ts`, `routeRenderingBoundary.test.ts`.
+    - reference PNG path: `design/reference/pngs/screens/10-my-page.png`, `12-edit-interests.png`, `13-my-answers.png`, `14-privacy-policy.png`
+    - measured result: all production PNGs are `393x852`; dominant/non-bg details recorded in `tmp/my-page-pixel-alignment/measurements.html`.
+    - tolerated difference: harness component capture uses production components/contracts but not Firebase/auth seed; shared production design tokens and omitted static mobile chrome cause dominant color and bbox differences.
 
 검증 명령:
 - `npm test`

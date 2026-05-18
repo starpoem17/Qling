@@ -343,7 +343,6 @@ export default function App() {
               <MyAnswersContainer
                 user={user}
                 setView={setView}
-                setSelectedReply={setSelectedReply}
               />
             </motion.div>
           )}

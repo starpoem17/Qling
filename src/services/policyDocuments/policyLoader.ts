@@ -4,7 +4,6 @@ import { POLICY_EMPTY_STATE_MESSAGE, type PolicyDocumentKind, type PolicyDocumen
 
 const POLICY_FILE_BY_KIND: Record<PolicyDocumentKind, string> = {
   privacy_policy: 'docs/privacy_policy.md',
-  operation_policy: 'docs/operation_policy.md',
 };
 
 export function loadPolicyDocument(params: {

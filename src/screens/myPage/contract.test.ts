@@ -18,8 +18,6 @@ test('my-page summary limits nickname to profile summary and labels helpedCount 
   const props = {
     profile: {
       nickname: 'Profile user',
-      interests: [WORRY_CATEGORIES[0], WORRY_CATEGORIES[1]],
-      ageLabel: '20s',
       helpedCount: 7,
       helpedCountLabel: HELPED_COUNT_LABEL,
       profileMotif: {
@@ -27,10 +25,12 @@ test('my-page summary limits nickname to profile summary and labels helpedCount 
         label: 'Profile motif',
       },
     },
+    answerPreviewItems: [],
     settings: MY_PAGE_SETTING_ITEMS,
     pushSettings: {
       status: 'default',
-      onOpenSettings: () => undefined,
+      enabled: false,
+      onToggle: () => undefined,
     },
     logoutConfirmation: {
       isOpen: false,
@@ -44,18 +44,21 @@ test('my-page summary limits nickname to profile summary and labels helpedCount 
       onCancel: () => undefined,
       onConfirm: () => undefined,
     },
+    onEditInterests: () => undefined,
+    onOpenMyAnswers: () => undefined,
     onSettingSelect: () => undefined,
   } satisfies MyPageScreenProps;
 
   assert.equal(props.profile.helpedCountLabel, '받은 하트');
   assert.equal(props.profile.helpedCount, 7);
   assert.equal(Object.hasOwn(props, 'nickname'), false);
+  assert.equal(Object.hasOwn(props.profile, 'ageLabel'), false);
+  assert.equal(Object.hasOwn(props.profile, 'interests'), false);
 });
 
 test('my-page contract keeps profile motif visual-only with no avatar data field', () => {
   const profileKeys = Object.keys({
     nickname: 'Profile user',
-    interests: [WORRY_CATEGORIES[0]],
     helpedCount: 0,
     helpedCountLabel: HELPED_COUNT_LABEL,
     profileMotif: { kind: 'visual-only', label: 'Profile motif' },
@@ -69,11 +72,8 @@ test('my-page contract keeps profile motif visual-only with no avatar data field
 test('settings contract includes required account rows and excludes non-MVP policy rows', () => {
   assert.deepEqual(MY_PAGE_POLICY_SETTING_ITEMS, ['privacy_policy']);
   assert.deepEqual(MY_PAGE_SETTING_ITEMS, [
-    'edit_interests',
-    'my_answers',
-    'my_worries',
-    'privacy_policy',
     'push_notifications',
+    'privacy_policy',
     'logout',
     'delete_account',
   ]);
@@ -85,6 +85,8 @@ test('settings contract includes required account rows and excludes non-MVP poli
     'operation_policy',
     'app_install_guide',
     'notification_settings',
+    'my_answers',
+    'my_worries',
   ]) {
     assert.equal((MY_PAGE_SETTING_ITEMS as readonly string[]).includes(excluded), false);
   }
@@ -113,13 +115,12 @@ test('my answers and my worries contracts expose list states and route callbacks
       worryId: 'worry-1',
       previewText: '답장 내용',
       originalWorryPreview: '원래 고민',
+      categoryLabel: WORRY_CATEGORIES[0],
       dateLabel: '2026. 5. 17.',
       hasReceivedHeart: false,
-      isSelected: false,
       accessibilityLabel: '내가 쓴 답변, 원래 고민 원래 고민, 피드백 없음, 선택되지 않음',
     }],
     onBack: () => undefined,
-    onSelect: () => undefined,
   } satisfies MyAnswersScreenProps;
   const worries = {
     state: { status: 'ready' },
@@ -139,7 +140,6 @@ test('my answers and my worries contracts expose list states and route callbacks
   } satisfies MyWorriesScreenProps;
 
   assert.equal(answers.items[0].previewText, '답장 내용');
-  assert.equal(typeof answers.onSelect, 'function');
   assert.match(answers.items[0].accessibilityLabel, /내가 쓴 답변/);
   assert.match(answers.items[0].accessibilityLabel, /피드백 없음/);
   assert.equal(worries.items[0].replyCountLabel, '1명이 답변했어요');

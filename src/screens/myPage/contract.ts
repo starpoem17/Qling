@@ -5,8 +5,6 @@ export const HELPED_COUNT_LABEL = '받은 하트' as const;
 
 export type MyPageProfileSummaryProps = {
   readonly nickname: string;
-  readonly interests: readonly WorryCategory[];
-  readonly ageLabel?: string;
   readonly helpedCount: number;
   readonly helpedCountLabel: typeof HELPED_COUNT_LABEL;
   readonly profileMotif: {
@@ -18,11 +16,8 @@ export type MyPageProfileSummaryProps = {
 export const MY_PAGE_POLICY_SETTING_ITEMS = ['privacy_policy'] as const;
 
 export const MY_PAGE_SETTING_ITEMS = [
-  'edit_interests',
-  'my_answers',
-  'my_worries',
-  'privacy_policy',
   'push_notifications',
+  'privacy_policy',
   'logout',
   'delete_account',
 ] as const;
@@ -43,8 +38,9 @@ export type PushPermissionStatus = (typeof PUSH_PERMISSION_STATUSES)[number];
 
 export type PushSettingsAccessProps = {
   readonly status: PushPermissionStatus;
+  readonly enabled: boolean;
   readonly message?: string;
-  readonly onOpenSettings: () => void;
+  readonly onToggle: (enabled: boolean) => void | Promise<void>;
 };
 
 export type ConfirmationProps = {
@@ -74,10 +70,13 @@ export type EditInterestsProps = {
 
 export type MyPageScreenProps = {
   readonly profile: MyPageProfileSummaryProps;
+  readonly answerPreviewItems: readonly MyAnswerListItemProps[];
   readonly settings: readonly MyPageSettingItem[];
   readonly pushSettings: PushSettingsAccessProps;
   readonly logoutConfirmation: ConfirmationProps;
   readonly accountDeletionConfirmation: ConfirmationProps;
+  readonly onEditInterests: () => void;
+  readonly onOpenMyAnswers: () => void;
   readonly onSettingSelect: (item: MyPageSettingItem) => void;
 };
 
@@ -87,11 +86,12 @@ export type MyAnswerListItemProps = {
   readonly worryId?: string;
   readonly previewText: string;
   readonly originalWorryPreview: string;
+  readonly categoryLabel?: string;
   readonly dateLabel?: string;
   readonly feedbackLabel?: string;
+  readonly feedbackComment?: string;
   readonly hasReceivedHeart: boolean;
   readonly isUnread?: boolean;
-  readonly isSelected: boolean;
   readonly accessibilityLabel: string;
 };
 
@@ -99,7 +99,6 @@ export type MyAnswersScreenProps = {
   readonly state: ScreenAsyncState;
   readonly items: readonly MyAnswerListItemProps[];
   readonly onBack: () => void;
-  readonly onSelect: (item: MyAnswerListItemProps) => void;
 };
 
 export type MyWorryListItemProps = {

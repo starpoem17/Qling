@@ -3,6 +3,7 @@ import type { User } from 'firebase/auth';
 import { signOut } from 'firebase/auth';
 import { WORRY_CATEGORIES, type WorryCategory } from '@midnight-radio/domain';
 import { auth } from '../../firebase';
+import { useMyGivenReplies } from '../../services/myWorries';
 import { confirmAccountDeletionWithCleanup, confirmLogoutWithCleanup } from '../../services/userAccount/accountSession';
 import { deleteMyAccountViaApi } from '../../services/userAccount/client';
 import { updateMyInterestsViaApi } from '../../services/userProfile/apiClient';
@@ -14,12 +15,11 @@ import {
   routeAfterAccountDeletion,
   routeToEditInterests,
   routeToMyAnswers,
-  routeToMyWorries,
   type AppRouteViewState,
 } from '../../services/appShell/prdNavigationPolicy';
 import { MY_PAGE_SETTING_ITEMS, type MyPageSettingItem } from './contract';
 import { EditInterestsScreen, MyPageScreen, PolicyScreen } from './MyPageScreen';
-import { mapProfileToMyPageSummary, mapPushStatus } from './mapping';
+import { mapMyGivenReplyToListItem, mapProfileToMyPageSummary, mapPushStatus } from './mapping';
 
 type MyPageProfile = {
   readonly nickname?: string;
@@ -44,6 +44,7 @@ export type MyPageContainerProps = {
 export const ACCOUNT_DELETION_SUCCESS_ROUTE = routeAfterAccountDeletion();
 
 export function MyPageContainer(props: MyPageContainerProps) {
+  const { myGivenReplies } = useMyGivenReplies({ user: props.user });
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<readonly WorryCategory[]>([]);
   const [interestsError, setInterestsError] = useState<string | undefined>();
@@ -202,10 +203,17 @@ export function MyPageContainer(props: MyPageContainerProps) {
   return (
     <MyPageScreen
       profile={mapProfileToMyPageSummary(props.profile)}
+      answerPreviewItems={myGivenReplies.slice(0, 2).map(reply => mapMyGivenReplyToListItem(reply))}
       settings={MY_PAGE_SETTING_ITEMS}
       pushSettings={{
         ...pushStatus,
-        onOpenSettings: props.requestNotificationPermission,
+        onToggle: async enabled => {
+          if (enabled) {
+            await props.requestNotificationPermission();
+            return;
+          }
+          await props.resetPushRegistrationOnSignOut();
+        },
       }}
       logoutConfirmation={{
         isOpen: currentRoute === 'logout_confirmation',
@@ -221,12 +229,10 @@ export function MyPageContainer(props: MyPageContainerProps) {
         onCancel: closeConfirmation,
         onConfirm: deleteAccount,
       }}
+      onEditInterests={() => props.setView(routeToEditInterests())}
+      onOpenMyAnswers={() => props.setView(routeToMyAnswers())}
       onSettingSelect={(item: MyPageSettingItem) => {
-        if (item === 'edit_interests') props.setView(routeToEditInterests());
-        if (item === 'my_answers') props.setView(routeToMyAnswers());
-        if (item === 'my_worries') props.setView(routeToMyWorries());
         if (item === 'privacy_policy') props.setView('privacy_policy');
-        if (item === 'push_notifications') props.requestNotificationPermission();
         if (item === 'logout') props.setView('logout_confirmation');
         if (item === 'delete_account') props.setView('account_deletion_confirmation');
       }}

@@ -25,11 +25,15 @@ test('profile mapping uses safe helpedCount fallback and visual-only motif', () 
   assert.equal(missing.nickname, '나');
   assert.equal(negative.helpedCount, 0);
   assert.equal(Object.hasOwn(summary, 'avatarUrl'), false);
+  assert.equal(Object.hasOwn(summary, 'ageLabel'), false);
+  assert.equal(Object.hasOwn(summary, 'interests'), false);
 });
 
 test('push mapping distinguishes browser permission states', () => {
   assert.equal(mapPushStatus({ permission: 'granted' }).status, 'granted');
+  assert.equal(mapPushStatus({ permission: 'granted' }).enabled, true);
   assert.equal(mapPushStatus({ permission: 'denied' }).status, 'denied');
+  assert.equal(mapPushStatus({ permission: 'denied' }).enabled, false);
   assert.equal(mapPushStatus({ permission: 'default' }).status, 'default');
   assert.equal(mapPushStatus({ permission: 'unsupported' }).status, 'unsupported');
   assert.equal(mapPushStatus({ permission: 'granted', registrationStatus: 'registered' }).status, 'registered');
@@ -38,14 +42,25 @@ test('push mapping distinguishes browser permission states', () => {
 });
 
 test('my-page mapping preserves canonical 워라밸 category value', () => {
-  const summary = mapProfileToMyPageSummary({
-    nickname: '관심사용자',
-    interests: ['워라밸'],
-  });
+  const answerItem = mapMyGivenReplyToListItem({
+    id: 'reply-워라밸',
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+    content: 'raw',
+    createdAt: null,
+    source: 'prd_replies',
+    senderId: 'sender',
+    receiverId: 'receiver',
+    originalContent: 'original',
+    refinedContent: 'refined',
+    isRead: false,
+    feedback: undefined,
+    categories: ['워라밸'],
+  } as never);
 
   assert.equal(WORRY_CATEGORIES.includes('워라밸'), true);
-  assert.equal(summary.interests.includes('워라밸'), true);
-  assert.equal(summary.interests.includes('워라벨' as never), false);
+  assert.equal(answerItem.categoryLabel, '워라밸');
+  assert.equal(answerItem.accessibilityLabel.includes('워라벨'), false);
 });
 
 test('reply and worry read models map to list props without example labels', () => {
@@ -63,8 +78,10 @@ test('reply and worry read models map to list props without example labels', () 
     isRead: false,
     hasUnread: true,
     feedback: 'helpful',
+    publisherComment: '고마워요',
+    categories: ['자존감'],
     isExampleReply: true,
-  } as const;
+  } as never;
   const answerItem = mapMyGivenReplyToListItem(reply);
   const worryItem = mapMyWorryToListItem({
     worry: {
@@ -83,8 +100,9 @@ test('reply and worry read models map to list props without example labels', () 
   assert.equal(answerItem.previewText, 'refined');
   assert.equal(answerItem.originalWorryPreview, 'original');
   assert.equal(answerItem.feedbackLabel, '받은 하트');
+  assert.equal(answerItem.feedbackComment, '고마워요');
   assert.equal(answerItem.hasReceivedHeart, true);
-  assert.equal(answerItem.isSelected, false);
+  assert.equal(answerItem.categoryLabel, '자존감');
   assert.match(answerItem.accessibilityLabel, /내가 쓴 답변/);
   assert.match(answerItem.accessibilityLabel, /피드백 받은 하트/);
   assert.equal(worryItem.summaryText, '01234567890123456789...');
@@ -95,6 +113,69 @@ test('reply and worry read models map to list props without example labels', () 
   assert.match(worryItem.accessibilityLabel, /읽지 않은 답장 있음/);
   assert.doesNotMatch(worryItem.accessibilityLabel, /현재 선택됨/);
   assert.equal(Object.hasOwn(answerItem, 'exampleLabel'), false);
+});
+
+test('my answer feedback visibility follows PRD for like dislike and comments', () => {
+  const baseReply = {
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+    content: 'raw',
+    createdAt: null,
+    source: 'prd_replies',
+    senderId: 'sender',
+    receiverId: 'receiver',
+    originalContent: 'original worry',
+    refinedContent: 'my answer',
+    isRead: true,
+    hasUnread: false,
+    categories: ['잡담'],
+  } as const;
+
+  const likeOnly = mapMyGivenReplyToListItem({ ...baseReply, id: 'like-only', feedback: 'helpful' } as never);
+  const likeComment = mapMyGivenReplyToListItem({ ...baseReply, id: 'like-comment', feedback: 'helpful', publisherComment: '힘이 됐어요' } as never);
+  const dislikeOnly = mapMyGivenReplyToListItem({ ...baseReply, id: 'dislike-only', feedback: 'not_helpful' } as never);
+  const dislikeComment = mapMyGivenReplyToListItem({ ...baseReply, id: 'dislike-comment', feedback: 'not_helpful', publisherComment: '숨겨야 하는 싫어요 코멘트' } as never);
+  const noFeedback = mapMyGivenReplyToListItem({ ...baseReply, id: 'none', feedback: undefined } as never);
+
+  assert.equal(likeOnly.hasReceivedHeart, true);
+  assert.equal(likeOnly.feedbackComment, undefined);
+  assert.equal(likeComment.hasReceivedHeart, true);
+  assert.equal(likeComment.feedbackComment, '힘이 됐어요');
+  assert.equal(dislikeOnly.hasReceivedHeart, false);
+  assert.equal(dislikeOnly.feedbackLabel, undefined);
+  assert.equal(dislikeOnly.feedbackComment, undefined);
+  assert.equal(dislikeComment.hasReceivedHeart, false);
+  assert.equal(JSON.stringify(dislikeComment).includes('숨겨야 하는 싫어요 코멘트'), false);
+  assert.equal(noFeedback.hasReceivedHeart, false);
+  assert.equal(noFeedback.feedbackLabel, undefined);
+});
+
+test('my answer mapping excludes worry publisher privacy fields from output', () => {
+  const item = mapMyGivenReplyToListItem({
+    id: 'privacy-reply',
+    deliveryId: 'delivery-sensitive',
+    worryId: 'worry-sensitive',
+    content: 'raw',
+    createdAt: null,
+    source: 'prd_replies',
+    senderId: 'sender',
+    receiverId: 'receiver',
+    originalContent: '허용된 고민 context',
+    refinedContent: '내 답변',
+    isRead: true,
+    feedback: undefined,
+    publisherNickname: '게시자닉네임',
+    gender: '여성',
+    age: 33,
+    interests: ['취업'],
+    profileMetadata: { hidden: true },
+    uid: 'publisher-uid-secret',
+  } as never);
+
+  const serialized = JSON.stringify(item);
+  for (const forbidden of ['게시자닉네임', '여성', '33', '취업', 'profileMetadata', 'publisher-uid-secret']) {
+    assert.equal(serialized.includes(forbidden), false);
+  }
 });
 
 test('my worry mapping uses shared display date, first valid category, fallback summary, and reply-count labels', () => {

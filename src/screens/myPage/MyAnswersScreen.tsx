@@ -1,4 +1,4 @@
-import { ArrowLeft, Heart, Send } from 'lucide-react';
+import { ArrowLeft, Heart } from 'lucide-react';
 import { EmptyState, ErrorState, LoadingState, OrangeHeaderBand, QlingCard, SuccessBadge } from '../shared/ui';
 import type { MyAnswersScreenProps } from './contract';
 
@@ -29,19 +29,19 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
           <EmptyState title="아직 내가 보낸 위로가 없어요." message={props.state.message} />
         )}
         {props.state.status === 'ready' && props.items.map(reply => (
-          <button
+          <article
             key={reply.replyId}
-            type="button"
-            onClick={() => props.onSelect(reply)}
             aria-label={reply.accessibilityLabel}
-            aria-current={reply.isSelected ? 'page' : undefined}
-            className="block w-full rounded-[var(--qling-radius-card)] text-left transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)] focus:ring-offset-2"
+            className="block w-full rounded-[18px] text-left"
           >
-            <QlingCard className="space-y-3">
+            <QlingCard className="space-y-3 rounded-[18px]">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2">
-                  <Send className="h-4 w-4 shrink-0 text-[var(--qling-color-primary-orange)]" aria-hidden="true" />
-                  <span className="text-xs font-extrabold text-[var(--qling-color-primary-orange)]">내가 쓴 답변</span>
+                  {reply.categoryLabel && (
+                    <span className="rounded-[var(--qling-radius-pill)] bg-[#ffe4cc] px-3 py-1 text-xs font-extrabold text-[var(--qling-color-primary-orange)]">
+                      {reply.categoryLabel}
+                    </span>
+                  )}
                   {reply.isUnread && <SuccessBadge label="새 반응" />}
                 </div>
                 {reply.hasReceivedHeart && <Heart className="h-5 w-5 shrink-0 fill-[var(--qling-color-danger)] text-[var(--qling-color-danger)]" aria-hidden="true" />}
@@ -57,9 +57,14 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
                 <p className="whitespace-pre-wrap break-words text-sm font-semibold leading-6 text-[var(--qling-color-muted)]">
                   {reply.previewText}
                 </p>
+                {reply.feedbackComment && (
+                  <p className="whitespace-pre-wrap break-words border-t border-[var(--qling-color-border)] pt-2 text-xs font-semibold leading-5 text-[var(--qling-color-muted)]">
+                    {reply.feedbackComment}
+                  </p>
+                )}
               </div>
             </QlingCard>
-          </button>
+          </article>
         ))}
       </div>
     </div>
