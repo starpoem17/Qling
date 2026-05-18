@@ -5,6 +5,7 @@ import path from 'node:path';
 
 const presentationalScreenFiles = [
   path.join(process.cwd(), 'src', 'screens', 'writeForm', 'WriteFormScreen.tsx'),
+  path.join(process.cwd(), 'src', 'screens', 'writeForm', 'WriteReplySuccessScreen.tsx'),
   path.join(process.cwd(), 'src', 'screens', 'writeForm', 'WriteWorryScreen.tsx'),
   path.join(process.cwd(), 'src', 'screens', 'writeForm', 'WriteWorrySuccessScreen.tsx'),
 ] as const;
@@ -59,4 +60,11 @@ test('write-worry success screen exposes only confirm intent', () => {
 
   assert.match(source, /onClick=\{props\.onConfirm\}/);
   assert.doesNotMatch(source, /setView|routeAfterWorrySuccessConfirmation|filterAlert|publishWorryViaApi/);
+});
+
+test('write-reply success screen exposes only confirm intent', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'writeForm', 'WriteReplySuccessScreen.tsx'), 'utf8');
+
+  assert.match(source, /onClick=\{props\.onConfirm\}/);
+  assert.doesNotMatch(source, /setView|routeAfterReplySuccessConfirmation|filterAlert|publishReplyViaApi/);
 });

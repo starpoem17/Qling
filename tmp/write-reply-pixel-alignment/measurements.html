@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>Phase 6 답변 작성 플로우 측정 보고</title>
+    <style>
+      body { font-family: system-ui, sans-serif; line-height: 1.5; margin: 24px; color: #222; }
+      table { border-collapse: collapse; width: 100%; margin: 16px 0 28px; font-size: 13px; }
+      th, td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
+      th { background: #fff3df; }
+      code { background: #f6f6f6; padding: 1px 4px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <h1>Phase 6 답변 작성 플로우 측정 보고</h1>
+    <p>캡처 방식은 production <code>WriteFormScreen</code>, <code>WriteReplySuccessScreen</code>, shared shell을 직접 import한 harness component capture다. Firebase 인증 route는 사용하지 않았고, route/data 흐름은 테스트로 검증했다.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>화면</th>
+          <th>reference PNG path</th>
+          <th>production PNG path</th>
+          <th>PNG size</th>
+          <th>reference 주요 anchor</th>
+          <th>production 주요 anchor</th>
+          <th>판단</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>17 답변 작성</td>
+          <td><code>design/reference/pngs/screens/17-answer-write-1.png</code></td>
+          <td><code>tmp/write-reply-pixel-alignment/17-answer-write-1-production.png</code></td>
+          <td>reference 393x852, production 393x852</td>
+          <td>dominant <code>#fff5eb 156619</code>, <code>#fff1d1 106351</code>; non-bg <code>(0,0)-(393,828)</code>; summary card white bbox <code>(16,127)-(377,230)</code>; input orange vertical edges <code>x=20/372, y=264-644</code>; CTA orange bbox <code>(63,684)-(330,732)</code>.</td>
+          <td>dominant <code>#fff5eb 152199</code>, <code>#fff8ef 57621</code>, <code>#ffffff 47676</code>; non-bg <code>(0,0)-(393,852)</code>; summary card white bbox <code>(16,100)-(377,246)</code>.</td>
+          <td>production은 static status bar/home indicator를 구현하지 않아 reference 대비 주요 content가 약 27px 위에 있다. PRD가 static mobile chrome 제외를 요구하므로 허용한다. 기본 카드는 summary만 표시하고 원문은 DOM에 없다.</td>
+        </tr>
+        <tr>
+          <td>18 원문 overlay</td>
+          <td><code>design/reference/pngs/screens/18-answer-write-2.png</code></td>
+          <td><code>tmp/write-reply-pixel-alignment/18-answer-write-2-production.png</code></td>
+          <td>reference 393x852, production 393x852</td>
+          <td>dominant <code>#ffffff 161394</code>, <code>#ada48e 62959</code>; non-bg <code>(0,0)-(393,852)</code>; overlay dim full viewport; white panel components <code>(7,201)-(384,245)</code>, <code>(7,246)-(384,705)</code>; original text region starts near y=356; close control near top-right.</td>
+          <td>dominant <code>#ffffff 188899</code>, dimmed shell colors; non-bg <code>(0,0)-(393,852)</code>; overlay panel white bbox <code>(0,201)-(393,705)</code>.</td>
+          <td>초기 캡처에서 panel y=604로 측정되어 bottom-sheet 오차였고, 구현을 top-fixed overlay로 보정했다. 현재 y anchor는 reference와 일치한다. x 폭은 production shell full width를 사용해 reference보다 좌우 7-9px 넓다.</td>
+        </tr>
+        <tr>
+          <td>19 답변 성공</td>
+          <td><code>design/reference/pngs/screens/19-answer-write-3.png</code></td>
+          <td><code>tmp/write-reply-pixel-alignment/19-answer-write-3-production.png</code></td>
+          <td>reference 393x852, production 393x852</td>
+          <td>dominant <code>#ada48e 97421</code>, <code>#ffffff 71429</code>; modal white bbox <code>(42,251)-(352,539)</code>; 확인 버튼 orange bbox <code>(66,452)-(328,504)</code>.</td>
+          <td>dominant <code>#ffffff 73639</code>, dimmed shell colors, <code>#e07a5f 12097</code>; modal white bbox <code>(42,251)-(352,544)</code>; 확인 버튼 orange bbox <code>(66,464)-(328,512)</code>.</td>
+          <td>modal top/width는 reference에 맞췄다. 확인 버튼은 production CTA padding/line-height 때문에 y가 +12/+8px 낮다. 이전 09 modal에서 보였던 31-38px center 배치 오차는 이번 19에서 top anchor 지정으로 해소했다.</td>
+        </tr>
+      </tbody>
+    </table>
+    <h2>검증 방식</h2>
+    <p>route 검증은 <code>prdNavigationPolicy.test.ts</code>, <code>WriteReplySuccessContainer.test.ts</code>, <code>WriteFormScreen.test.ts</code>, <code>mapping.test.ts</code>로 수행했다. 18은 별도 route가 아니라 <code>isOriginalOverlayOpen</code> state로 같은 write_reply 화면 위에 렌더링한다. 19 확인 후 delivery suppression은 App의 최소 state와 <code>ReceivedWorriesContainer</code> suppression 입력으로 보장한다.</p>
+    <h2>미해결 시각 리스크</h2>
+    <p>production shared tokens가 reference export의 순수 색상과 다르므로 exact dominant color는 다르다. 17은 static status bar를 제외한 production shell 기준으로 reference보다 위에 배치된다. 18 panel 좌우 폭은 production shell full width로 reference보다 약간 넓다.</p>
+  </body>
+</html>

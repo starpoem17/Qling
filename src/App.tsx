@@ -38,6 +38,7 @@ import {
 import { WriteWorryContainer } from './screens/writeForm/WriteWorryContainer';
 import { WriteWorrySuccessContainer } from './screens/writeForm/WriteWorrySuccessContainer';
 import { WriteReplyContainer } from './screens/writeForm/WriteReplyContainer';
+import { WriteReplySuccessContainer } from './screens/writeForm/WriteReplySuccessContainer';
 import { MyPageContainer } from './screens/myPage/MyPageContainer';
 import { MyAnswersContainer } from './screens/myPage/MyAnswersContainer';
 import {
@@ -96,6 +97,7 @@ export default function App() {
   const [view, setView] = useState<AppRouteViewState>('login');
   
   const [selectedWorry, setSelectedWorry] = useState<SelectedReceivedWorry | null>(null);
+  const [answeredDeliveryIds, setAnsweredDeliveryIds] = useState<Set<string>>(() => new Set());
   const [selectedMyWorry, setSelectedMyWorry] = useState<SelectedMyWorry | null>(null);
   const [selectedReply, setSelectedReply] = useState<SelectedMyReply | null>(null);
   
@@ -181,6 +183,7 @@ export default function App() {
           }
           setUser(null);
           setProfile(null);
+          setAnsweredDeliveryIds(new Set());
           setView('login');
           void resetPushRegistrationOnSignOut();
         }
@@ -226,6 +229,7 @@ export default function App() {
     setUser(null);
     setProfile(null);
     setSelectedWorry(null);
+    setAnsweredDeliveryIds(new Set());
     setSelectedMyWorry(null);
     setSelectedReply(null);
     setLoginError(null);
@@ -254,6 +258,8 @@ export default function App() {
 
   const routeBoundary = routeRenderingBoundaryForRoute(view);
   const currentRoute = routeBoundary.currentRoute;
+  const currentWriteReplyRoute = typeof view === 'object' && view.route === 'write_reply' ? view : null;
+  const currentWriteReplySuccessRoute = typeof view === 'object' && view.route === 'write_reply_success' ? view : null;
 
   if (loading) {
     return (
@@ -375,6 +381,7 @@ export default function App() {
                 selectedWorry={selectedWorry}
                 setSelectedWorry={setSelectedWorry}
                 setFilterAlert={setFilterAlert}
+                answeredDeliveryIds={answeredDeliveryIds}
               />
             </motion.div>
           )}
@@ -399,7 +406,7 @@ export default function App() {
           )}
 
           {/* 4. Write Reply View */}
-          {currentRoute === 'write_reply' && selectedWorry && (
+          {currentRoute === 'write_reply' && currentWriteReplyRoute && selectedWorry?.deliveryId === currentWriteReplyRoute.deliveryId && selectedWorry.worryId === currentWriteReplyRoute.worryId && (
             <motion.div key="write_reply" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
               <WriteReplyContainer
                 user={user}
@@ -408,6 +415,18 @@ export default function App() {
                 clearSelectedWorry={() => setSelectedWorry(null)}
                 clearSelectedReply={() => setSelectedReply(null)}
                 setFilterAlert={setFilterAlert}
+              />
+            </motion.div>
+          )}
+
+          {currentRoute === 'write_reply_success' && (
+            <motion.div key="write_reply_success" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <WriteReplySuccessContainer
+                deliveryId={currentWriteReplySuccessRoute?.deliveryId}
+                setView={setView}
+                onConfirmAnsweredDelivery={deliveryId => {
+                  setAnsweredDeliveryIds(prev => new Set(prev).add(deliveryId));
+                }}
               />
             </motion.div>
           )}

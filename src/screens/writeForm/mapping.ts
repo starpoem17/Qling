@@ -38,14 +38,28 @@ export function mapSelectedWorryToOriginalWorrySummary(
   options?: DisplayDateOptions,
 ): OriginalWorrySummaryProps | null {
   if (!worry.deliveryId || !worry.worryId) return null;
+  const originalBodyText = worry.originalContent || worry.refinedContent;
 
   return {
     deliveryId: worry.deliveryId,
     worryId: worry.worryId,
-    category: toWorryCategory(worry.category),
-    bodyText: worry.refinedContent,
+    category: firstValidCategory(worry.categories, worry.category),
+    summaryText: buildUserFacingSummary({
+      summaryText: worry.refinedContent,
+      originalBodyText,
+    }),
+    originalBodyText,
     receivedAt: displayDateFromTimestamp(worry.createdAt, options),
   };
+}
+
+export function buildUserFacingSummary(params: {
+  readonly summaryText?: string;
+  readonly originalBodyText: string;
+}): string {
+  const trimmedSummary = params.summaryText?.trim();
+  if (trimmedSummary) return trimmedSummary;
+  return `${params.originalBodyText.slice(0, 20)}...`;
 }
 
 function displayDateFromTimestamp(createdAt: HomeWorryFeedTimestamp | null | undefined, options?: DisplayDateOptions): DisplayDate {
@@ -65,8 +79,14 @@ function resolveSubmitDisabledReason(params: {
   return 'invalid';
 }
 
-function toWorryCategory(category: string | undefined): WorryCategory {
-  return WORRY_CATEGORIES.includes(category as WorryCategory)
-    ? category as WorryCategory
-    : WORRY_CATEGORIES[0];
+function firstValidCategory(categories: readonly string[] | undefined, fallbackCategory: string | undefined): WorryCategory {
+  const validCategory = categories?.find(isWorryCategory);
+  if (validCategory) return validCategory;
+  if (fallbackCategory === '잡담') return '잡담';
+  if (isWorryCategory(fallbackCategory)) return fallbackCategory;
+  return WORRY_CATEGORIES[0];
+}
+
+function isWorryCategory(category: string | undefined): category is WorryCategory {
+  return WORRY_CATEGORIES.includes(category as WorryCategory);
 }

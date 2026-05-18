@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import { CONTENT_MAX_LENGTH, validateDraftContent } from '../../services/validation/content';
 import type { SelectedReceivedWorry } from '../receivedWorries/ReceivedWorriesContainer';
-import { buildWriteDraftContract, mapSelectedWorryToOriginalWorrySummary } from './mapping';
+import { buildUserFacingSummary, buildWriteDraftContract, mapSelectedWorryToOriginalWorrySummary } from './mapping';
 
 const now = new Date(2026, 4, 19, 12, 0, 0);
 
@@ -12,15 +12,18 @@ test('maps selected delivery data to original worry summary props', () => {
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
     category: WORRY_CATEGORIES[2],
-    refinedContent: 'Original worry',
+    categories: ['invalid-category', WORRY_CATEGORIES[3]],
+    originalContent: 'Original worry body',
+    refinedContent: 'LLM summary',
     createdAt: { toMillis: () => new Date(2026, 4, 18, 23, 59, 0).getTime() },
   } as SelectedReceivedWorry, { now });
 
   assert.deepEqual(summary, {
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
-    category: WORRY_CATEGORIES[2],
-    bodyText: 'Original worry',
+    category: WORRY_CATEGORIES[3],
+    summaryText: 'LLM summary',
+    originalBodyText: 'Original worry body',
     receivedAt: {
       label: '2026-05-18',
       isoValue: new Date(2026, 4, 18, 23, 59, 0).toISOString(),
@@ -33,6 +36,7 @@ test('reply summary uses shared local display date formatter', () => {
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
     category: WORRY_CATEGORIES[2],
+    originalContent: 'Original worry',
     refinedContent: 'Original worry',
   } as SelectedReceivedWorry;
 
@@ -52,6 +56,57 @@ test('reply summary uses shared local display date formatter', () => {
     ...base,
     createdAt: { toMillis: () => new Date(2026, 4, 17, 12, 0, 0).getTime() },
   }, { now })?.receivedAt?.label, '2026-05-17');
+});
+
+test('reply summary fallback uses original first 20 characters plus ellipsis', () => {
+  assert.equal(buildUserFacingSummary({
+    summaryText: '',
+    originalBodyText: '01234567890123456789extra',
+  }), '01234567890123456789...');
+  assert.equal(buildUserFacingSummary({
+    summaryText: '   ',
+    originalBodyText: '짧은 원문',
+  }), '짧은 원문...');
+  assert.equal(buildUserFacingSummary({
+    originalBodyText: '',
+  }), '...');
+});
+
+test('reply summary mapping keeps original body out of the default summary field', () => {
+  const summary = mapSelectedWorryToOriginalWorrySummary({
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+    category: WORRY_CATEGORIES[0],
+    originalContent: '원문 전체에는 화면 기본 카드에 노출되면 안 되는 긴 고민 내용이 들어 있습니다.',
+    refinedContent: '',
+    createdAt: null,
+  } as SelectedReceivedWorry);
+
+  assert.equal(summary?.summaryText, '원문 전체에는 화면 기본 카드에 노출...');
+  assert.equal(summary?.originalBodyText, '원문 전체에는 화면 기본 카드에 노출되면 안 되는 긴 고민 내용이 들어 있습니다.');
+});
+
+test('reply summary mapping exposes only PRD-allowed worry context fields', () => {
+  const summary = mapSelectedWorryToOriginalWorrySummary({
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+    category: WORRY_CATEGORIES[0],
+    originalContent: 'Original body',
+    refinedContent: 'Summary',
+    senderId: 'publisher-uid',
+    authorUid: 'author-uid',
+  } as SelectedReceivedWorry);
+
+  assert.deepEqual(Object.keys(summary ?? {}).sort(), [
+    'category',
+    'deliveryId',
+    'originalBodyText',
+    'receivedAt',
+    'summaryText',
+    'worryId',
+  ]);
+  assert.equal(JSON.stringify(summary).includes('publisher-uid'), false);
+  assert.equal(JSON.stringify(summary).includes('author-uid'), false);
 });
 
 test('does not create reply summary props without delivery or worry id', () => {

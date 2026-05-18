@@ -30,8 +30,9 @@ export type AppRoute =
   | 'account_deletion_confirmation';
 
 export type AppRouteState =
-  | { route: Exclude<AppRoute, 'write_reply' | 'received_answer_detail' | 'read_received_reply' | 'my_worry_detail' | 'answer_check'> }
+  | { route: Exclude<AppRoute, 'write_reply' | 'write_reply_success' | 'received_answer_detail' | 'read_received_reply' | 'my_worry_detail' | 'answer_check'> }
   | { route: 'write_reply'; deliveryId: string; worryId: string }
+  | { route: 'write_reply_success'; deliveryId: string; worryId: string }
   | { route: 'received_answer_detail' | 'read_received_reply'; worryId: string; replyId: string }
   | { route: 'answer_check'; worryId: string }
   | { route: 'my_worry_detail'; worryId: string };
@@ -123,11 +124,10 @@ export function routeAfterWorryPublish(_params: { worryId: string }): AppRouteSt
 
 export function routeAfterReplyPublish(params: {
   replyId: string;
-  deliveryId?: string;
-  worryId?: string;
+  deliveryId: string;
+  worryId: string;
 }): AppRouteState {
-  void params;
-  return { route: 'write_reply_success' };
+  return { route: 'write_reply_success', deliveryId: params.deliveryId, worryId: params.worryId };
 }
 
 export function routeAfterWorrySuccessConfirmation(): AppRoute {

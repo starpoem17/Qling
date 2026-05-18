@@ -5,6 +5,7 @@ import type {
   WriteDraftContract,
   WriteFormScreenProps,
   WriteReplyFormProps,
+  WriteReplySuccessScreenProps,
   WriteWorryFormProps,
   WriteWorryScreenProps,
   WriteWorrySuccessScreenProps,
@@ -74,6 +75,16 @@ test('write-worry success screen contract exposes confirm only', () => {
   assert.equal(Object.hasOwn(props, 'route'), false);
 });
 
+test('write-reply success screen contract exposes confirm only', () => {
+  const props = {
+    onConfirm: () => undefined,
+  } satisfies WriteReplySuccessScreenProps;
+
+  assert.equal(typeof props.onConfirm, 'function');
+  assert.equal(Object.hasOwn(props, 'setView'), false);
+  assert.equal(Object.hasOwn(props, 'route'), false);
+});
+
 test('write-reply form contract carries original worry summary, selected delivery, and worry ids', () => {
   const props = {
     kind: 'write-reply',
@@ -81,7 +92,8 @@ test('write-reply form contract carries original worry summary, selected deliver
       deliveryId: 'delivery-1',
       worryId: 'worry-1',
       category: WORRY_CATEGORIES[1],
-      bodyText: 'Original worry body',
+      summaryText: 'LLM summary',
+      originalBodyText: 'Original worry body',
       receivedAt: { label: 'Today' },
     },
     draft: {
@@ -90,17 +102,25 @@ test('write-reply form contract carries original worry summary, selected deliver
       errorMessage: 'Submit failed',
       submitDisabledReason: 'moderation-pending',
     },
+    isOriginalOverlayOpen: false,
+    onBack: () => undefined,
     onDraftChange: () => undefined,
+    onOpenOriginal: () => undefined,
+    onCloseOriginal: () => undefined,
     onPublish: () => undefined,
   } satisfies WriteReplyFormProps;
 
   assert.equal(props.originalWorry.deliveryId, 'delivery-1');
   assert.equal(props.originalWorry.worryId, 'worry-1');
-  assert.equal(props.originalWorry.bodyText, 'Original worry body');
+  assert.equal(props.originalWorry.summaryText, 'LLM summary');
+  assert.equal(props.originalWorry.originalBodyText, 'Original worry body');
   assert.equal(props.draft.value, 'Draft text');
   assert.equal(props.draft.moderation.status, 'rejected');
   assert.equal(props.draft.submitDisabledReason, 'moderation-pending');
   assert.equal(typeof props.onDraftChange, 'function');
+  assert.equal(typeof props.onBack, 'function');
+  assert.equal(typeof props.onOpenOriginal, 'function');
+  assert.equal(typeof props.onCloseOriginal, 'function');
   assert.equal(typeof props.onPublish, 'function');
 });
 
@@ -111,14 +131,19 @@ test('write form union keeps publication as event props only', () => {
       deliveryId: 'delivery-1',
       worryId: 'worry-1',
       category: WORRY_CATEGORIES[0],
-      bodyText: 'Original',
+      summaryText: 'Summary',
+      originalBodyText: 'Original',
     },
     draft: {
       ...validDraft,
       validation: { status: 'invalid', message: 'Too long' },
       submitDisabledReason: 'too-long',
     },
+    isOriginalOverlayOpen: false,
+    onBack: () => undefined,
     onDraftChange: () => undefined,
+    onOpenOriginal: () => undefined,
+    onCloseOriginal: () => undefined,
     onPublish: () => undefined,
   };
 
@@ -167,17 +192,25 @@ test('write form callbacks stay pure events for publish, draft clearing, and rou
       deliveryId: 'delivery-1',
       worryId: 'worry-1',
       category: WORRY_CATEGORIES[0],
-      bodyText: 'Original',
+      summaryText: 'Summary',
+      originalBodyText: 'Original',
     },
     draft: validDraft,
+    isOriginalOverlayOpen: false,
+    onBack: () => events.push('back'),
     onDraftChange: value => events.push(`draft:${value}`),
+    onOpenOriginal: () => events.push('open-original'),
+    onCloseOriginal: () => events.push('close-original'),
     onPublish: target => events.push(`publish:${target.deliveryId}:${target.worryId}`),
   } satisfies WriteReplyFormProps;
 
+  props.onBack();
   props.onDraftChange('updated');
+  props.onOpenOriginal();
+  props.onCloseOriginal();
   props.onPublish({ deliveryId: props.originalWorry.deliveryId, worryId: props.originalWorry.worryId });
 
-  assert.deepEqual(events, ['draft:updated', 'publish:delivery-1:worry-1']);
+  assert.deepEqual(events, ['back', 'draft:updated', 'open-original', 'close-original', 'publish:delivery-1:worry-1']);
   assert.equal(Object.hasOwn(props, 'clearDraft'), false);
   assert.equal(Object.hasOwn(props, 'setView'), false);
   assert.equal(Object.hasOwn(props, 'routeAfterReplyPublish'), false);

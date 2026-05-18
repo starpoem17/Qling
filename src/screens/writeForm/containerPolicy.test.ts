@@ -72,6 +72,6 @@ test('reply publication policy clears only after success and requests my-answer 
   assert.deepEqual(result, {
     moderation: { status: 'approved' },
     clearDraft: true,
-    route: { route: 'write_reply_success' },
+    route: { route: 'write_reply_success', deliveryId: 'delivery-1', worryId: 'worry-1' },
   });
 });

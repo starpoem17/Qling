@@ -1037,56 +1037,137 @@ Onboarding 선례의 정확한 표현:
 허용 수정 범위: `src/screens/writeForm/**`, appShell success route helpers/tests.
 금지 수정 범위: `publishReplyViaApi` 내부, reply publication server logic.
 
-- [ ] TODO-P6.1: 17/18/19 PNG PIL anchor를 재측정한다.
+- [x] TODO-P6.1: 17/18/19 PNG PIL anchor를 재측정한다.
   - 대상 파일: `design/reference/pngs/screens/17-answer-write-1.png`, `18-answer-write-2.png`, `19-answer-write-3.png`
   - 완료 기준: worry summary card, overlay panel, textarea, success screen, 확인 버튼 bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 completion note.
   - production PNG evidence: 없음.
-- [ ] TODO-P6.2: `WriteReplyContainer`는 API/draft/validation/moderation 경계를 유지하고 성공 route만 19로 바꾼다.
+  - completion note:
+    - changed files: `tmp/write-reply-pixel-alignment/measurements.html`
+    - test command/result: PIL 측정 성공. 17/18/19 reference와 production 모두 `393x852` 확인.
+    - production PNG path: 해당 없음
+    - capture type: reference PIL measurement
+    - reference PNG path: `design/reference/pngs/screens/17-answer-write-1.png`, `18-answer-write-2.png`, `19-answer-write-3.png`
+    - measured result: 17 summary card bbox `(16,127)-(377,230)`, 18 overlay panel white bbox `(7,201)-(384,705)`, 19 success modal bbox `(42,251)-(352,539)`, 19 확인 버튼 bbox `(66,452)-(328,504)`.
+    - tolerated difference: static status bar/home indicator는 PRD에 따라 production 구현에서 제외한다.
+- [x] TODO-P6.2: `WriteReplyContainer`는 API/draft/validation/moderation 경계를 유지하고 성공 route만 19로 바꾼다.
   - 대상 파일: `src/screens/writeForm/WriteReplyContainer.tsx`, `src/screens/writeForm/containerPolicy.ts`
   - 완료 기준: success route가 19 confirmation이며 draft clear는 성공 시에만 수행된다.
   - 검증: `src/screens/writeForm/containerPolicy.test.ts`
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P6.10.
-- [ ] TODO-P6.3: 17 화면 props에 LLM summary, first valid category, createdAt display date, 답변 입력 영역을 명시한다.
+  - completion note:
+    - changed files: `src/screens/writeForm/WriteReplyContainer.tsx`, `src/screens/writeForm/containerPolicy.ts`, `src/screens/writeForm/containerPolicy.test.ts`, `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/prdNavigationPolicy.test.ts`
+    - test command/result: `npm test -- src/screens/writeForm/*.test.ts` pass; `npm test -- src/services/appShell/*.test.ts` pass; full `npm test` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `resolveReplyPublicationResult` success returns `{ route: 'write_reply_success', deliveryId, worryId }`; rejected/failed keep `clearDraft: false`; container clears stored draft only after success.
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P6.3: 17 화면 props에 LLM summary, first valid category, createdAt display date, 답변 입력 영역을 명시한다.
   - 대상 파일: `src/screens/writeForm/contract.ts`, `src/screens/writeForm/mapping.ts`, `src/screens/writeForm/WriteFormScreen.tsx`
   - 완료 기준: 원문 대신 summary가 기본 카드에 표시되고 원문은 18 overlay에서만 보인다.
   - 검증: mapping/screen tests.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P6.10.
-- [ ] TODO-P6.4: summary 생성 실패 fallback을 mapping/service boundary에 명시한다.
+  - completion note:
+    - changed files: `src/screens/writeForm/contract.ts`, `src/screens/writeForm/mapping.ts`, `src/screens/writeForm/WriteFormScreen.tsx`, `src/screens/writeForm/WriteFormScreen.test.ts`, `src/screens/writeForm/mapping.test.ts`
+    - test command/result: `WriteFormScreen.test.ts` and `mapping.test.ts` pass through full `npm test`.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: screen test verifies summary appears on base card and original body appears only when overlay state is open.
+    - measured result: 17 production summary card white bbox `(16,100)-(377,246)`; static status chrome 제외로 reference y보다 위.
+    - tolerated difference: static status bar 제외에 따른 vertical shift는 허용.
+- [x] TODO-P6.4: summary 생성 실패 fallback을 mapping/service boundary에 명시한다.
   - 대상 파일: `src/screens/writeForm/mapping.ts`, service policy test if summary is read model owned
   - 완료 기준: 원문 앞 20자 + `...` fallback이 사용자-facing summary로 표시된다.
   - 검증: mapping test.
   - production PNG evidence: 없음.
-- [ ] TODO-P6.5: 18은 별도 full route가 아니라 17 위 overlay로 구현한다.
+  - completion note:
+    - changed files: `src/screens/writeForm/mapping.ts`, `src/screens/writeForm/mapping.test.ts`
+    - test command/result: `mapping.test.ts` pass through full `npm test`.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `buildUserFacingSummary` returns trimmed LLM summary when present; missing/blank summary returns original first 20 characters plus `...`; 20자 이하도 원문 전체 plus `...`; empty original returns `...`.
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P6.5: 18은 별도 full route가 아니라 17 위 overlay로 구현한다.
   - 대상 파일: `src/screens/writeForm/WriteFormScreen.tsx`, `src/screens/writeForm/contract.ts`
   - 완료 기준: overlay 열기/닫기 후 reply draft가 유지되고 URL route는 17 write_reply 상태다.
   - 검증: state interaction test.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P6.10.
-- [ ] TODO-P6.6: 17 뒤로 가기는 06으로 이동하고 draft를 폐기한다.
+  - completion note:
+    - changed files: `src/screens/writeForm/contract.ts`, `src/screens/writeForm/WriteFormScreen.tsx`, `src/screens/writeForm/WriteFormScreen.test.ts`, `src/screens/writeForm/WriteReplyContainer.tsx`
+    - test command/result: `WriteFormScreen.test.ts` pass through full `npm test`.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 18 overlay is controlled by write reply state (`isOriginalOverlayOpen`) and no `AppRoute` is added; screen callbacks open/close overlay while draft callback remains independent.
+    - measured result: 18 production overlay panel white bbox `(0,201)-(393,705)` after correcting initial bottom-sheet offset.
+    - tolerated difference: production panel width uses full shell width, about 7-9px wider than reference.
+- [x] TODO-P6.6: 17 뒤로 가기는 06으로 이동하고 draft를 폐기한다.
   - 대상 파일: `src/screens/writeForm/WriteReplyContainer.tsx`, `src/services/appShell/prdNavigationPolicy.ts`
   - 완료 기준: back click이 `received_worries`로 이동하고 해당 delivery draft key를 clear한다.
   - 검증: container interaction test.
   - production PNG evidence: 없음.
-- [ ] TODO-P6.7: 17 답변 입력 placeholder를 pencil icon + `고민자에게 따뜻한 말을 전달해주세요!`로 구현한다.
+  - completion note:
+    - changed files: `src/screens/writeForm/WriteReplyContainer.tsx`, `src/screens/writeForm/WriteFormScreen.tsx`, `src/services/appShell/prdNavigationPolicy.ts`, `src/screens/writeForm/WriteFormScreen.test.ts`
+    - test command/result: `WriteFormScreen.test.ts`, `prdNavigationPolicy.test.ts` pass through full `npm test`.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: back intent routes through `backRouteFromWriteReply()` to `답변하기`; container clears `replyDraftKey(deliveryId)` and selected reply/worry state on back.
+    - measured result: 해당 없음
+    - tolerated difference: TODO text says `received_worries`; policy canonical tab alias remains `답변하기`, which renders the 06 answer feed route.
+- [x] TODO-P6.7: 17 답변 입력 placeholder를 pencil icon + `고민자에게 따뜻한 말을 전달해주세요!`로 구현한다.
   - 대상 파일: write reply screen file, `src/screens/writeForm/contract.ts`
   - 완료 기준: icon과 문구가 겹치지 않고 입력 시작 시 둘 다 숨는다.
   - 검증: screen interaction test.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P6.10.
-- [ ] TODO-P6.8: 19 확인 버튼은 06으로 이동하고 방금 답변한 고민은 목록에서 사라진다.
+  - completion note:
+    - changed files: `src/screens/writeForm/WriteFormScreen.tsx`, `src/screens/writeForm/WriteFormScreen.test.ts`
+    - test command/result: `WriteFormScreen.test.ts` pass through full `npm test`.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: native placeholder attribute is absent; empty draft renders pencil visual placeholder and copy; non-empty draft hides both.
+    - measured result: 17 reference placeholder icon/text bbox is inside input area `(20,227)-(373,661)`; production placeholder is inside textarea and does not overlap typed text because it is hidden when `draft.value !== ''`.
+    - tolerated difference: exact icon path differs because production uses lucide `Pencil`.
+- [x] TODO-P6.8: 19 확인 버튼은 06으로 이동하고 방금 답변한 고민은 목록에서 사라진다.
   - 대상 파일: success route/screen, `src/screens/receivedWorries/ReceivedWorriesContainer.tsx` if suppression state needed
   - 완료 기준: 17→19→06 route flow와 feed suppression/refresh가 테스트된다.
   - 검증: route flow/container policy test.
   - production PNG evidence: 없음. Downstream visual confirmation only: 06 phase PNG는 이 체크박스의 완료 조건이 아니다.
-- [ ] TODO-P6.9: 17/18 답변 작성 화면에서 고민 작성자의 개인정보가 노출되지 않음을 검증한다.
+  - completion note:
+    - changed files: `src/screens/writeForm/WriteReplySuccessScreen.tsx`, `src/screens/writeForm/WriteReplySuccessContainer.tsx`, `src/screens/writeForm/WriteReplySuccessScreen.test.ts`, `src/screens/writeForm/WriteReplySuccessContainer.test.ts`, `src/App.tsx`, `src/screens/receivedWorries/ReceivedWorriesContainer.tsx`, `src/services/appShell/prdNavigationPolicy.ts`
+    - test command/result: `WriteReplySuccessContainer.test.ts`, `prdNavigationPolicy.test.ts`, `src/services/homeWorryFeed/serverAnswerFeed.test.ts` pass through full `npm test`.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: success route keeps `deliveryId/worryId`; confirm calls `routeAfterReplySuccessConfirmation()` -> `답변하기`; App records answered delivery id and passes it to `ReceivedWorriesContainer`, which suppresses it in addition to server refresh/read model exclusion.
+    - measured result: 19 production modal bbox `(42,251)-(352,544)`, 확인 button bbox `(66,464)-(328,512)`.
+    - tolerated difference: 확인 button y is +12/+8px vs reference due production CTA typography/padding.
+- [x] TODO-P6.9: 17/18 답변 작성 화면에서 고민 작성자의 개인정보가 노출되지 않음을 검증한다.
   - 대상 파일: `src/screens/writeForm/mapping.ts`, `src/screens/writeForm/contract.ts`, `src/screens/writeForm/WriteFormScreen.tsx`
   - 완료 기준: publisher nickname, gender, age, interests, profile metadata가 17 summary card와 18 원문 overlay props/DOM에 없고 PRD가 허용한 고민 내용/context만 표시된다.
   - 검증: mapping/screen test 또는 completion note의 수동 DOM verification.
   - production PNG evidence: 없음.
-- [ ] TODO-P6.10: 17/18/19 production PNG evidence를 생성한다.
+  - completion note:
+    - changed files: `src/screens/writeForm/contract.ts`, `src/screens/writeForm/mapping.ts`, `src/screens/writeForm/WriteFormScreen.tsx`, `src/screens/writeForm/WriteFormScreen.test.ts`, `src/screens/writeForm/mapping.test.ts`
+    - test command/result: `WriteFormScreen.test.ts` and `mapping.test.ts` pass through full `npm test`.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: mapping output keys are limited to `deliveryId`, `worryId`, `category`, `summaryText`, `originalBodyText`, `receivedAt`; test fixtures containing `senderId/authorUid` do not leak into output; screen DOM does not contain publisher nickname/gender/age/interests/profile metadata/internal uid strings.
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P6.10: 17/18/19 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/write-reply-pixel-alignment/17-answer-write-1-production.png`, `18-answer-write-2-production.png`, `19-answer-write-3-production.png`
   - 완료 기준: 세 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: listed files.
+  - completion note:
+    - changed files: `tmp/write-reply-pixel-alignment/17-answer-write-1-production.png`, `tmp/write-reply-pixel-alignment/18-answer-write-2-production.png`, `tmp/write-reply-pixel-alignment/19-answer-write-3-production.png`, `tmp/write-reply-pixel-alignment/harness/index.html`, `tmp/write-reply-pixel-alignment/harness/src/main.tsx`, `tmp/write-reply-pixel-alignment/measurements.html`
+    - test command/result: Playwright/Chrome capture success; PIL size verification success; `npm test` pass; `npm run lint` pass; `npm run build` pass.
+    - production PNG path: `tmp/write-reply-pixel-alignment/17-answer-write-1-production.png`, `18-answer-write-2-production.png`, `19-answer-write-3-production.png`
+    - capture type: harness component
+    - harness route/data verification: production screen/container contracts are imported in harness; actual route flow is verified by `prdNavigationPolicy.test.ts`, `WriteReplySuccessContainer.test.ts`, `WriteFormScreen.test.ts`, and `containerPolicy.test.ts`.
+    - reference PNG path: `design/reference/pngs/screens/17-answer-write-1.png`, `18-answer-write-2.png`, `19-answer-write-3.png`
+    - measured result: all production PNGs are `393x852`; 18 overlay panel corrected from initial bottom-sheet y=604 to `(0,201)-(393,705)`; 19 modal `(42,251)-(352,544)`.
+    - tolerated difference: production design tokens differ from exact reference colors; 17 omits static status bar/home indicator; 18 panel full shell width is wider than reference; 19 CTA y differs by about 8-12px.
 
 검증 명령:
 - `npm test`

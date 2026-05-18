@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { User } from 'firebase/auth';
 import { passDeliveryViaApi } from '../../services/deliveries/apiClient';
@@ -23,7 +23,7 @@ import { mapHomeWorryFeedLetterToReceivedWorryFeedItem } from './mapping';
 
 export type SelectedReceivedWorry = Pick<
   HomeWorryFeedLetter,
-  'deliveryId' | 'worryId' | 'category' | 'refinedContent' | 'source' | 'createdAt'
+  'deliveryId' | 'worryId' | 'category' | 'categories' | 'originalContent' | 'refinedContent' | 'source' | 'createdAt'
 >;
 
 export type ReceivedWorriesContainerProps = {
@@ -33,6 +33,7 @@ export type ReceivedWorriesContainerProps = {
   readonly selectedWorry: SelectedReceivedWorry | null;
   readonly setSelectedWorry: Dispatch<SetStateAction<SelectedReceivedWorry | null>>;
   readonly setFilterAlert: (message: string) => void;
+  readonly answeredDeliveryIds?: ReadonlySet<string>;
 };
 
 export function ReceivedWorriesContainer(props: ReceivedWorriesContainerProps) {
@@ -45,6 +46,15 @@ export function ReceivedWorriesContainer(props: ReceivedWorriesContainerProps) {
   const [suppressedDeliveryIds, setSuppressedDeliveryIds] = useState<Set<string>>(() => new Set());
   const [passingDeliveryIds, setPassingDeliveryIds] = useState<Set<string>>(() => new Set());
   const passingDeliveryIdsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!props.answeredDeliveryIds?.size) return;
+    setSuppressedDeliveryIds(prev => {
+      const next = new Set(prev);
+      for (const deliveryId of props.answeredDeliveryIds ?? []) next.add(deliveryId);
+      return next;
+    });
+  }, [props.answeredDeliveryIds]);
 
   const visibleFeedWorries = filterSuppressedFeedWorries({ feedWorries, suppressedDeliveryIds });
   const items = visibleFeedWorries.flatMap(worry => {

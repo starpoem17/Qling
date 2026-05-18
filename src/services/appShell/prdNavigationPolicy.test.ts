@@ -110,6 +110,8 @@ test('routes publish success to PRD success confirmation routes', () => {
     worryId: 'worry-1',
   }), {
     route: 'write_reply_success',
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
   });
   assert.equal(routeAfterWorrySuccessConfirmation(), '나의 고민');
   assert.equal(routeAfterReplySuccessConfirmation(), '답변하기');
@@ -128,6 +130,8 @@ test('preserves id-bearing route state when applying routes to App view state', 
   });
   assert.deepEqual(resolveAppRouteState({ route: 'write_reply', deliveryId: 'delivery-1', worryId: 'worry-1' }, replyPublishRoute), {
     route: 'write_reply_success',
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
   });
   assert.notEqual(resolveAppRouteState('write_worry', worryPublishRoute), worryPublishRoute.route);
   assert.notEqual(resolveAppRouteState('write_reply', replyPublishRoute), replyPublishRoute.route);
@@ -185,6 +189,7 @@ test('defines every required back route in the service policy', () => {
   assert.equal(backRouteForRoute('write_worry_success'), '나의 고민');
   assert.equal(backRouteForRoute({ route: 'my_worry_detail', worryId: 'worry-1' }), '나의 고민');
   assert.equal(backRouteForRoute({ route: 'write_reply', deliveryId: 'delivery-1', worryId: 'worry-1' }), '답변하기');
+  assert.equal(backRouteForRoute({ route: 'write_reply_success', deliveryId: 'delivery-1', worryId: 'worry-1' }), '답변하기');
   assert.equal(backRouteForRoute('write_reply_success'), '답변하기');
   assert.equal(backRouteForRoute({ route: 'received_answer_detail', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
   assert.equal(backRouteForRoute({ route: 'answer_check', worryId: 'worry-1' }), '나의 고민');
