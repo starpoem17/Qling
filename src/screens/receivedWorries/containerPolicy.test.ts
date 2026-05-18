@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import {
   canStartPassMutation,
+  shouldMarkReceivedWorryRead,
   stateForReceivedWorries,
 } from './containerPolicy';
 import type { ReceivedWorryFeedItem } from './contract';
@@ -33,13 +34,19 @@ test('received-worries container policy maps loading error empty and ready state
     feedStatus: 'ready',
     feedError: null,
     items: [],
-  }), { status: 'empty', message: '아직 답변할 고민이 없어요.' });
+  }), { status: 'empty', message: '지금은 도착한 고민이 없어요.' });
 
   assert.deepEqual(stateForReceivedWorries({
     feedStatus: 'ready',
     feedError: null,
     items: [item],
   }), { status: 'ready' });
+});
+
+test('received-worries read marker policy only allows authenticated PRD deliveries', () => {
+  assert.equal(shouldMarkReceivedWorryRead({ hasUser: true, source: 'prd_delivery' }), true);
+  assert.equal(shouldMarkReceivedWorryRead({ hasUser: false, source: 'prd_delivery' }), false);
+  assert.equal(shouldMarkReceivedWorryRead({ hasUser: true, source: undefined }), false);
 });
 
 test('received-worries pass mutation starts only once per delivery id', () => {

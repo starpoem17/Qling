@@ -76,11 +76,93 @@ test('falls back to a valid category and stable date label for incomplete feed d
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
     hasUnread: false,
-  } as HomeWorryFeedLetter);
+  });
 
   assert.equal(item?.category, WORRY_CATEGORIES[0]);
   assert.deepEqual(item?.receivedAt, { label: '수신됨' });
   assert.equal(item?.isUnread, false);
+});
+
+test('uses the first valid category from feed categories before single category fallback', () => {
+  const item = mapHomeWorryFeedLetterToReceivedWorryFeedItem({
+    id: 'delivery-categories',
+    senderId: 'author-1',
+    receiverId: 'recipient-1',
+    originalContent: 'Original worry',
+    refinedContent: 'Visible worry body',
+    categories: ['not-valid', WORRY_CATEGORIES[5], WORRY_CATEGORIES[2]],
+    category: WORRY_CATEGORIES[1],
+    deliveryId: 'delivery-categories',
+    worryId: 'worry-categories',
+  });
+
+  assert.equal(item?.category, WORRY_CATEGORIES[5]);
+});
+
+test('uses chat fallback before generic valid single category fallback', () => {
+  const chatFallback = mapHomeWorryFeedLetterToReceivedWorryFeedItem({
+    id: 'delivery-chat',
+    senderId: 'author-1',
+    receiverId: 'recipient-1',
+    originalContent: 'Original worry',
+    refinedContent: 'Visible worry body',
+    categories: [],
+    category: '잡담',
+    deliveryId: 'delivery-chat',
+    worryId: 'worry-chat',
+  });
+  const validSingleCategory = mapHomeWorryFeedLetterToReceivedWorryFeedItem({
+    id: 'delivery-single',
+    senderId: 'author-1',
+    receiverId: 'recipient-1',
+    originalContent: 'Original worry',
+    refinedContent: 'Visible worry body',
+    categories: [],
+    category: WORRY_CATEGORIES[3],
+    deliveryId: 'delivery-single',
+    worryId: 'worry-single',
+  });
+
+  assert.equal(chatFallback?.category, '잡담');
+  assert.equal(validSingleCategory?.category, WORRY_CATEGORIES[3]);
+});
+
+test('does not expose invalid category or publisher privacy fields in screen item', () => {
+  const source = {
+    id: 'delivery-private',
+    senderId: 'author-1',
+    receiverId: 'recipient-1',
+    originalContent: 'Original worry',
+    refinedContent: 'Visible worry body',
+    categories: ['invalid-category'],
+    category: 'also-invalid',
+    deliveryId: 'delivery-private',
+    worryId: 'worry-private',
+    authorUid: 'author-uid',
+    recipientUid: 'recipient-uid',
+    publisherNickname: '닉네임',
+    senderNickname: '보낸사람',
+    gender: '여성',
+    age: 27,
+    interests: ['학업'],
+    profileMetadata: { any: true },
+  } satisfies HomeWorryFeedLetter & {
+    readonly publisherNickname: string;
+    readonly senderNickname: string;
+    readonly gender: string;
+    readonly age: number;
+    readonly interests: readonly string[];
+    readonly profileMetadata: Record<string, boolean>;
+  };
+
+  const item = mapHomeWorryFeedLetterToReceivedWorryFeedItem(source);
+  const serialized = JSON.stringify(item);
+
+  assert.notEqual(item?.category, 'invalid-category');
+  assert.notEqual(item?.category, 'also-invalid');
+  for (const forbidden of ['닉네임', '보낸사람', '여성', 'author-uid', 'recipient-uid', 'interests', 'profileMetadata']) {
+    assert.equal(serialized.includes(forbidden), false);
+  }
 });
 
 test('formats received worry dates from the local timezone with injected now', () => {

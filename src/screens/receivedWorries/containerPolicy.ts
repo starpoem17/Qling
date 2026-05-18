@@ -21,10 +21,17 @@ export function stateForReceivedWorries(params: {
   }
 
   if (params.items.length === 0) {
-    return { status: 'empty', message: '아직 답변할 고민이 없어요.' };
+    return { status: 'empty', message: '지금은 도착한 고민이 없어요.' };
   }
 
   return { status: 'ready' };
+}
+
+export function shouldMarkReceivedWorryRead(params: {
+  readonly hasUser: boolean;
+  readonly source?: 'prd_delivery';
+}): boolean {
+  return params.hasUser && params.source === 'prd_delivery';
 }
 
 export function canStartPassMutation(params: {

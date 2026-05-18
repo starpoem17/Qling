@@ -53,21 +53,17 @@ export function ReceivedWorriesContainer(props: ReceivedWorriesContainerProps) {
   });
   const state = stateForReceivedWorries({ feedStatus, feedError, items });
 
-  const openWorryForReply = (deliveryId: string) => {
-    const worry = visibleFeedWorries.find(item => item.deliveryId === deliveryId);
+  const openWorryForReply = (target: { readonly deliveryId: string; readonly worryId: string }) => {
+    const worry = visibleFeedWorries.find(item => item.deliveryId === target.deliveryId && item.worryId === target.worryId);
     if (!worry) return;
 
     props.setSelectedWorry(worry);
-    if (worry.deliveryId) {
-      props.setView(routeToWriteReply({ deliveryId: worry.deliveryId, worryId: worry.worryId }));
-    } else {
-      props.setView('write_reply');
-    }
+    props.setView(routeToWriteReply({ deliveryId: target.deliveryId, worryId: target.worryId }));
 
-    if (!props.user || !worry.deliveryId || worry.source !== 'prd_delivery') return;
+    if (!props.user || worry.source !== 'prd_delivery') return;
     void markDeliveryReadWithServer({
       user: props.user,
-      deliveryId: worry.deliveryId,
+      deliveryId: target.deliveryId,
     }).then(result => {
       if (result.status === 'failed') {
         console.error('Failed to mark delivery read:', result.reason);
@@ -125,8 +121,8 @@ export function ReceivedWorriesContainer(props: ReceivedWorriesContainerProps) {
       items={items}
       passingDeliveryIds={[...passingDeliveryIds]}
       onPass={passWorry}
-      onOpen={({ deliveryId }) => openWorryForReply(deliveryId)}
-      onReply={({ deliveryId }) => openWorryForReply(deliveryId)}
+      onOpen={openWorryForReply}
+      onOpenMyPage={() => props.setView('마이페이지')}
     />
   );
 }

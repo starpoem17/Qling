@@ -9,8 +9,11 @@ function isWorryCategory(value: string | undefined): value is WorryCategory {
 }
 
 function categoryForFeedItem(worry: HomeWorryFeedLetter): WorryCategory {
-  const category = worry.category ?? worry.categories?.[0];
-  return isWorryCategory(category) ? category : WORRY_CATEGORIES[0];
+  const firstValidCategory = worry.categories?.find(isWorryCategory);
+  if (firstValidCategory) return firstValidCategory;
+  if (worry.category === '잡담') return '잡담';
+  if (isWorryCategory(worry.category)) return worry.category;
+  return WORRY_CATEGORIES[0];
 }
 
 function displayDateFromTimestamp(createdAt: HomeWorryFeedLetter['createdAt'], options?: DisplayDateOptions): DisplayDate {

@@ -125,7 +125,7 @@ test('preserves id-bearing route state when applying routes to App view state', 
   assert.deepEqual(resolveAppRouteState('write_worry', worryPublishRoute), {
     route: 'write_worry_success',
   });
-  assert.deepEqual(resolveAppRouteState({ route: 'write_reply', deliveryId: 'delivery-1' }, replyPublishRoute), {
+  assert.deepEqual(resolveAppRouteState({ route: 'write_reply', deliveryId: 'delivery-1', worryId: 'worry-1' }, replyPublishRoute), {
     route: 'write_reply_success',
   });
   assert.notEqual(resolveAppRouteState('write_worry', worryPublishRoute), worryPublishRoute.route);
@@ -160,6 +160,18 @@ test('routes pass, feedback, write, detail, and my-page subroute targets', () =>
   assert.equal(routeToEditInterests(), 'edit_interests');
 });
 
+test('keeps write-reply route state recoverable with delivery and worry ids', () => {
+  const route = routeToWriteReply({ deliveryId: 'delivery-1', worryId: 'worry-1' });
+
+  assert.deepEqual(route, {
+    route: 'write_reply',
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+  });
+  assert.equal(tabForRoute(route), '답변하기');
+  assert.equal(backRouteForRoute(route), '답변하기');
+});
+
 test('defines every required back route in the service policy', () => {
   assert.equal(backRouteFromWriteWorry(), '나의 고민');
   assert.equal(backRouteFromWriteReply(), '답변하기');
@@ -167,7 +179,7 @@ test('defines every required back route in the service policy', () => {
   assert.equal(backRouteForRoute('write_worry'), '나의 고민');
   assert.equal(backRouteForRoute('write_worry_success'), '나의 고민');
   assert.equal(backRouteForRoute({ route: 'my_worry_detail', worryId: 'worry-1' }), '나의 고민');
-  assert.equal(backRouteForRoute({ route: 'write_reply', deliveryId: 'delivery-1' }), '답변하기');
+  assert.equal(backRouteForRoute({ route: 'write_reply', deliveryId: 'delivery-1', worryId: 'worry-1' }), '답변하기');
   assert.equal(backRouteForRoute('write_reply_success'), '답변하기');
   assert.equal(backRouteForRoute({ route: 'received_answer_detail', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
   assert.equal(backRouteForRoute('answer_check'), '나의 고민');

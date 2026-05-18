@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import type { ReceivedWorriesScreenProps } from './contract';
 
-test('received-worries feed item includes ids needed for pass, open, and reply events', () => {
+test('received-worries feed item includes ids needed for pass and open events', () => {
   const props = {
     state: { status: 'ready' },
     items: [{
@@ -18,7 +18,7 @@ test('received-worries feed item includes ids needed for pass, open, and reply e
     passingDeliveryIds: ['delivery-1'],
     onPass: () => undefined,
     onOpen: () => undefined,
-    onReply: () => undefined,
+    onOpenMyPage: () => undefined,
   } satisfies ReceivedWorriesScreenProps;
 
   assert.equal(props.items[0].deliveryId, 'delivery-1');
@@ -57,4 +57,15 @@ test('received-worries pass callback accepts delivery id without a DOM event', (
   const deliveryId: PassCallbackParameter = 'delivery-1';
 
   assert.equal(deliveryId, 'delivery-1');
+});
+
+test('received-worries contract exposes my-page intent without reply duplicate intent', () => {
+  const callbacks = {
+    onPass: () => undefined,
+    onOpen: () => undefined,
+    onOpenMyPage: () => undefined,
+  } satisfies Pick<ReceivedWorriesScreenProps, 'onPass' | 'onOpen' | 'onOpenMyPage'>;
+
+  assert.equal(typeof callbacks.onOpenMyPage, 'function');
+  assert.equal(Object.keys(callbacks).includes('onReply'), false);
 });

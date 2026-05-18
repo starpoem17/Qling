@@ -17,5 +17,5 @@ export type ReceivedWorriesScreenProps = {
   readonly passingDeliveryIds: readonly string[];
   readonly onPass: (deliveryId: string) => void;
   readonly onOpen: (item: { readonly deliveryId: string; readonly worryId: string }) => void;
-  readonly onReply: (item: { readonly deliveryId: string; readonly worryId: string }) => void;
+  readonly onOpenMyPage: () => void;
 };

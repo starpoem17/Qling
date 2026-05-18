@@ -31,7 +31,7 @@ export type AppRoute =
 
 export type AppRouteState =
   | { route: Exclude<AppRoute, 'write_reply' | 'received_answer_detail' | 'read_received_reply' | 'my_worry_detail'> }
-  | { route: 'write_reply'; deliveryId: string; worryId?: string }
+  | { route: 'write_reply'; deliveryId: string; worryId: string }
   | { route: 'received_answer_detail' | 'read_received_reply'; worryId: string; replyId: string }
   | { route: 'my_worry_detail'; worryId: string };
 
@@ -149,7 +149,7 @@ export function routeToWriteWorry(): AppRoute {
   return 'write_worry';
 }
 
-export function routeToWriteReply(params: { deliveryId: string; worryId?: string }): AppRouteState {
+export function routeToWriteReply(params: { deliveryId: string; worryId: string }): AppRouteState {
   return { route: 'write_reply', deliveryId: params.deliveryId, worryId: params.worryId };
 }
 

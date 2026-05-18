@@ -613,56 +613,146 @@ Onboarding 선례의 정확한 표현:
 허용 수정 범위: `src/screens/receivedWorries/**`, shared visual primitive only as needed.
 금지 수정 범위: `useHomeWorryFeed`, `passDeliveryViaApi`, `markDeliveryReadWithServer` 서비스 경계 변경.
 
-- [ ] TODO-P3.1: 06 PNG PIL anchor를 재측정해 주요 element bbox를 completion note로 보강한다.
+- [x] TODO-P3.1: 06 PNG PIL anchor를 재측정해 주요 element bbox를 completion note로 보강한다.
   - 대상 파일: `design/reference/pngs/screens/06-received-worries.png`, `docs/TODO.md`
   - 완료 기준: 상단 좌측 눈, 우측 마이페이지 버튼, 고민 카드, 건너뛰기 버튼, 하단바 bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 출력값을 completion note에 기록한다.
   - production PNG evidence: 없음.
-- [ ] TODO-P3.2: `ReceivedWorriesScreen`을 06 구조로 재구성한다.
+  - completion note:
+    - changed files: `docs/TODO.md`
+    - test command/result: PIL one-off measurement 성공; `npm test`, `npm run lint`, `npm run build`, `npm run validate:design-reference`, `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: `design/reference/pngs/screens/06-received-worries.png`
+    - measured result: reference size `393x852`; dominant `#ffffff 181468`, `#ff8b3d 54530`, `#fff1d1 35241`, `#fff5eb 16382`; non-white bbox `(0,0,393,852)`. crop/threshold bbox: OS status `(30,21,379,34)`, top-left eye `(8,68,105,130)`, my-page `(295,74,380,125)`, card outer crop `(10,165,383,565)`, category `(35,199,130,230)`, createdAt `(235,200,354,215)`, body text crop `(35,230,360,360)`, pass button crop `(35,450,360,535)`, bottom bar `(0,730,393,828)`, left tab crop `(25,760,135,830)`, center eye crop `(145,735,250,825)`, right tab crop `(255,760,370,830)`, home indicator `(120,825,275,828)`.
+    - tolerated difference: reference의 status bar/time/network/battery와 home indicator는 production DOM에서 제외되는 OS chrome으로 기록.
+- [x] TODO-P3.2: `ReceivedWorriesScreen`을 06 구조로 재구성한다.
   - 대상 파일: `src/screens/receivedWorries/ReceivedWorriesScreen.tsx`, `src/screens/receivedWorries/contract.ts`
   - 완료 기준: 상단 좌측 눈은 기능 없음, 우측 마이페이지 버튼은 이동 action, 고민 카드와 하단 고정바가 06 PNG 구조를 따른다.
   - 검증: screen rendering test 또는 manual DOM check.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P3.10.
-- [ ] TODO-P3.3: `ReceivedWorriesContainer`는 기존 data/action 경계를 유지하고 screen props만 확장한다.
+  - completion note:
+    - changed files: `src/screens/receivedWorries/ReceivedWorriesScreen.tsx`, `src/screens/receivedWorries/contract.ts`, `src/screens/receivedWorries/contract.test.ts`, `src/screens/receivedWorries/importBoundary.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: `tmp/received-worries-pixel-alignment/06-received-worries-production.png`
+    - capture type: `harness component`
+    - harness route/data verification: `received-worries top-left eye is presentational and my-page action is explicit`, `received-worries presentational pass click is isolated from card body open`, `received-worries contract exposes my-page intent without reply duplicate intent`
+    - reference PNG path: `design/reference/pngs/screens/06-received-worries.png`
+    - measured result: header eye is `role="presentation"`/`aria-hidden`, my-page button has `aria-label="마이페이지 열기"`, card open uses `{ deliveryId, worryId }`, pass uses `event.stopPropagation()` and `onPass(deliveryId)`. Production PNG size `393x852`.
+    - tolerated difference: screen 내부 bottom nav 중복 없음; bottom nav는 shared app shell이 렌더링하므로 card/content padding만 screen에서 조정.
+- [x] TODO-P3.3: `ReceivedWorriesContainer`는 기존 data/action 경계를 유지하고 screen props만 확장한다.
   - 대상 파일: `src/screens/receivedWorries/ReceivedWorriesContainer.tsx`, `src/screens/receivedWorries/contract.ts`
   - 완료 기준: `useHomeWorryFeed`, `passDeliveryViaApi`, `markDeliveryReadWithServer` import 경계가 유지된다.
   - 검증: `src/screens/receivedWorries/importBoundary.test.ts`, `src/screens/receivedWorries/containerPolicy.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P3.4: 고민 박스 클릭 시 17 route state가 `deliveryId`/`worryId`를 보존하고 read 처리한다.
+  - completion note:
+    - changed files: `src/screens/receivedWorries/ReceivedWorriesContainer.tsx`, `src/screens/receivedWorries/importBoundary.test.ts`, `src/screens/receivedWorries/containerPolicy.ts`, `src/screens/receivedWorries/containerPolicy.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: container imports test confirms only allowed service boundaries: `deliveries/apiClient`, `deliveries/uiPolicy`, `homeWorryFeed`, `readState/apiClient`, `appShell/prdNavigationPolicy`; no direct server/firestore/rules imports.
+    - reference PNG path: 해당 없음
+    - measured result: `ReceivedWorriesScreen.tsx` service/API/Firebase/server import 없음; container는 기존 service boundary 안에서 screen props만 확장.
+    - tolerated difference: 해당 없음
+- [x] TODO-P3.4: 고민 박스 클릭 시 17 route state가 `deliveryId`/`worryId`를 보존하고 read 처리한다.
   - 대상 파일: `src/screens/receivedWorries/ReceivedWorriesContainer.tsx`, `src/services/appShell/prdNavigationPolicy.ts`
   - 완료 기준: `routeToWriteReply({ deliveryId, worryId })`가 안정적으로 호출되고 selected worry fallback 없이 새로고침/route state 테스트가 가능하다.
   - 검증: container policy 또는 route test.
   - production PNG evidence: 없음.
-- [ ] TODO-P3.5: 건너뛰기 버튼은 확인 모달 없이 즉시 목록 제거와 pass domain action을 수행한다.
+  - completion note:
+    - changed files: `src/screens/receivedWorries/ReceivedWorriesContainer.tsx`, `src/services/appShell/prdNavigationPolicy.ts`, `src/services/appShell/prdNavigationPolicy.test.ts`, `src/screens/receivedWorries/importBoundary.test.ts`, `src/screens/receivedWorries/containerPolicy.ts`, `src/screens/receivedWorries/containerPolicy.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `keeps write-reply route state recoverable with delivery and worry ids`, `received-worries read marker policy only allows authenticated PRD deliveries`, import boundary test for `markDeliveryReadWithServer`.
+    - reference PNG path: 해당 없음
+    - measured result: `routeToWriteReply` param/type now requires `deliveryId` and `worryId`; container removed legacy `setView('write_reply')` fallback and calls `routeToWriteReply({ deliveryId, worryId })`; read remains through `markDeliveryReadWithServer` only for authenticated `prd_delivery`.
+    - tolerated difference: 17 screen implementation is Phase 6, but Phase 3 route-state contract is id-bearing and test-covered.
+- [x] TODO-P3.5: 건너뛰기 버튼은 확인 모달 없이 즉시 목록 제거와 pass domain action을 수행한다.
   - 대상 파일: `src/screens/receivedWorries/ReceivedWorriesContainer.tsx`, `src/screens/receivedWorries/ReceivedWorriesScreen.tsx`
   - 완료 기준: pass success 후 suppressed set과 refresh가 적용되고 modal/dialog가 뜨지 않는다.
   - 검증: `src/screens/receivedWorries/containerPolicy.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P3.6: category mapping을 PRD fallback 정책으로 수정한다.
+  - completion note:
+    - changed files: `src/screens/receivedWorries/ReceivedWorriesScreen.tsx`, `src/screens/receivedWorries/ReceivedWorriesContainer.tsx`, `src/screens/receivedWorries/importBoundary.test.ts`, `src/screens/receivedWorries/containerPolicy.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass; source search confirms no `confirm(`, pass confirmation state, dialog/modal in production pass path.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `received-worries presentational pass click is isolated from card body open`, `received-worries pass mutation starts only once per delivery id`; service pass API semantics untouched.
+    - reference PNG path: 해당 없음
+    - measured result: pass button calls `event.stopPropagation()` then `props.onPass(item.deliveryId)`; container retains `suppressedDeliveryIds`, `passingDeliveryIdsRef`, refresh key increment, `routeAfterPass()`, existing failure alert policy.
+    - tolerated difference: 해당 없음
+- [x] TODO-P3.6: category mapping을 PRD fallback 정책으로 수정한다.
   - 대상 파일: `src/screens/receivedWorries/mapping.ts`, `src/screens/receivedWorries/mapping.test.ts`
   - 완료 기준: `validCategories[0]` 우선, 없고 fallback이 `잡담`이면 `잡담`, 무효 카테고리는 사용자-facing 미표시.
   - 검증: mapping tests.
   - production PNG evidence: 없음.
-- [ ] TODO-P3.7: createdAt 표시 규칙을 06 카드에서 검증한다.
+  - completion note:
+    - changed files: `src/screens/receivedWorries/mapping.ts`, `src/screens/receivedWorries/mapping.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: mapping pure tests only; service type not modified. `HomeWorryFeedLetter` has no `validCategories`, so existing service policy's `validCategories -> categories` adaptation is treated as the equivalent read-model field.
+    - reference PNG path: 해당 없음
+    - measured result: `categories.find(isWorryCategory)` first, then `category === '잡담'`, then valid single `category`, then domain fallback `WORRY_CATEGORIES[0]`; invalid category strings are not exposed.
+    - tolerated difference: 해당 없음
+- [x] TODO-P3.7: createdAt 표시 규칙을 06 카드에서 검증한다.
   - 대상 파일: `src/screens/receivedWorries/mapping.ts`, shared date formatter
   - 완료 기준: `방금 전`, `n분 전`, `n시간 전`, `YYYY-MM-DD` 케이스가 로컬 타임존 기준으로 통과한다.
   - 검증: `src/screens/receivedWorries/mapping.test.ts`
   - production PNG evidence: 없음.
-- [ ] TODO-P3.8: 06 받은 고민 화면에서 고민 작성자의 개인정보가 노출되지 않음을 검증한다.
+  - completion note:
+    - changed files: `src/screens/receivedWorries/mapping.test.ts`, `src/screens/receivedWorries/importBoundary.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: `tmp/received-worries-pixel-alignment/06-received-worries-production.png`
+    - capture type: `harness component`
+    - harness route/data verification: mapping test injects deterministic `now`; screen source keeps `time dateTime={item.receivedAt.isoValue}`.
+    - reference PNG path: `design/reference/pngs/screens/06-received-worries.png`
+    - measured result: `formatDisplayDate` unchanged; mapping tests cover `방금 전`, `25분 전`, `4시간 전`, `2026-05-18`; missing timestamp remains `{ label: '수신됨' }`.
+    - tolerated difference: 해당 없음
+- [x] TODO-P3.8: 06 받은 고민 화면에서 고민 작성자의 개인정보가 노출되지 않음을 검증한다.
   - 대상 파일: `src/screens/receivedWorries/mapping.ts`, `src/screens/receivedWorries/contract.ts`, `src/screens/receivedWorries/ReceivedWorriesScreen.tsx`
   - 완료 기준: publisher nickname, gender, age, interests, profile metadata가 screen props와 DOM에 없고 PRD가 허용한 고민 내용/요약/카테고리/시간만 표시된다.
   - 검증: mapping/screen test 또는 completion note의 수동 DOM verification.
   - production PNG evidence: 없음.
-- [ ] TODO-P3.9: empty/loading 상태를 PRD 문구와 spinner로 맞춘다.
+  - completion note:
+    - changed files: `src/screens/receivedWorries/contract.ts`, `src/screens/receivedWorries/mapping.test.ts`, `src/screens/receivedWorries/importBoundary.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `does not expose invalid category or publisher privacy fields in screen item`, `received-worries loading empty and privacy source stay PRD-scoped`.
+    - reference PNG path: 해당 없음
+    - measured result: `ReceivedWorryFeedItem` remains limited to `deliveryId`, `worryId`, content, category, createdAt display, unread; privacy fixture fields (`publisherNickname`, `senderNickname`, `gender`, `age`, `interests`, `profileMetadata`, uid values) do not appear in output JSON; contract has no forbidden privacy fields.
+    - tolerated difference: 해당 없음
+- [x] TODO-P3.9: empty/loading 상태를 PRD 문구와 spinner로 맞춘다.
   - 대상 파일: `src/screens/receivedWorries/ReceivedWorriesScreen.tsx`, `src/screens/receivedWorries/contract.ts`
   - 완료 기준: empty title/message는 `지금은 도착한 고민이 없어요.`, loading은 skeleton이 아닌 spinner.
   - 검증: screen state test.
   - production PNG evidence: 없음. 같은 phase에서 empty/loading visual을 캡처하면 `tmp/received-worries-pixel-alignment/06-empty-production.png` 또는 `06-loading-production.png`를 기록한다.
-- [ ] TODO-P3.10: 06 production PNG evidence를 생성한다.
+  - completion note:
+    - changed files: `src/screens/receivedWorries/ReceivedWorriesScreen.tsx`, `src/screens/receivedWorries/containerPolicy.ts`, `src/screens/receivedWorries/containerPolicy.test.ts`, `src/screens/receivedWorries/importBoundary.test.ts`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: `received-worries container policy maps loading error empty and ready states`, `received-worries loading empty and privacy source stay PRD-scoped`; loading uses shared `LoadingState`/`LoadingSpinner`, no skeleton/fake content.
+    - reference PNG path: 해당 없음
+    - measured result: empty state policy message is exactly `지금은 도착한 고민이 없어요.` and screen renders it once as `EmptyState title`; loading renders spinner primitive.
+    - tolerated difference: optional empty/loading PNG not created; required ready-state PNG created in TODO-P3.10.
+- [x] TODO-P3.10: 06 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/received-worries-pixel-alignment/06-received-worries-production.png`
   - 완료 기준: 393x852 production capture이며 reference PNG 복사본이 아니고 capture type, source, reference/production path, measured size, dominant colors, non-bg bbox, 주요 bbox 차이가 completion note에 기록된다.
   - 검증: PNG 크기 확인과 reference anchor 비교 completion note.
   - production PNG evidence: `tmp/received-worries-pixel-alignment/06-received-worries-production.png`
+  - completion note:
+    - changed files: `tmp/received-worries-pixel-alignment/06-received-worries-production.png`, `tmp/received-worries-pixel-alignment/harness/index.html`, `tmp/received-worries-pixel-alignment/harness/src/main.tsx`
+    - test command/result: `npm test` pass; `npm run lint` pass; `npm run build` pass; `npm run validate:design-reference` pass; `npm run test:rules` pass; PNG size check pass; reference copy check pass.
+    - production PNG path: `tmp/received-worries-pixel-alignment/06-received-worries-production.png`
+    - capture type: `harness component`
+    - harness route/data verification: production `ReceivedWorriesScreen.tsx` imported by harness; route/Container covered by `keeps write-reply route state recoverable with delivery and worry ids`, `received-worries container keeps service imports in the allowed boundary`, pass/read policy tests.
+    - reference PNG path: `design/reference/pngs/screens/06-received-worries.png`
+    - measured result: production size `393x852`; SHA differs from reference. Production dominant `#ffffff 179448`, `#ff8b3d 42694`, `#fff3df 17495`, `#fff1d1 4370`; production non-white bbox `(0,0,393,852)`. Key production bboxes: top-left eye `(0,46,115,135)`, my-page `(285,50,393,130)`, first card crop `(0,115,393,292)`, category `(36,128,128,162)`, createdAt `(90,128,170,162)`, body `(36,192,354,236)`, pass `(261,128,357,152)`, bottom bar `(0,730,393,852)`, center indicator `(120,735,250,835)`.
+    - tolerated difference: reference includes OS chrome; production intentionally excludes fake status/home chrome. Header vertical offset differs because production starts app content at top without fake status bar; bottom nav icon shape remains shared primitive from Phase 2, not duplicated in screen.
 
 검증 명령:
 - `npm test`
