@@ -146,7 +146,7 @@ test('delete account route returns 200 for already deleted service result', asyn
   assert.deepEqual(res.body, { status: 'deleted' });
 });
 
-test('delete account route deletes Firestore account state before Firebase Auth user', async () => {
+test('delete account route marks Firestore account state before Firebase Auth user without requiring typed confirmation input', async () => {
   const route = captureRoute();
   const res = createRes();
   await route.handler({ headers: { authorization: 'Bearer token' }, body: { confirm: true } } as never, res as never);

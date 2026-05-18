@@ -1549,36 +1549,90 @@ Onboarding 선례의 정확한 표현:
 허용 수정 범위: `src/screens/myPage/**`, `src/services/userAccount/**` tests only if deletion policy requires.
 금지 수정 범위: DB 완전 삭제 정책 추가, 별도 full page route로 전환.
 
-- [ ] TODO-P9.1: 15/16 PNG PIL anchor를 재측정한다.
+- [x] TODO-P9.1: 15/16 PNG PIL anchor를 재측정한다.
   - 대상 파일: `design/reference/pngs/screens/15-logout.png`, `16-account-deletion.png`
   - 완료 기준: dimmed background, dialog card, 취소/확인 버튼 bbox와 text/glyph bbox, safe-area/home-indicator 제외 여부가 기록된다.
   - 검증: PIL 측정 completion note.
   - production PNG evidence: 없음.
-- [ ] TODO-P9.2: 로그아웃/탈퇴 확인을 마이페이지 위 overlay/dialog로 구현한다.
+  - completion note:
+    - changed files: `tmp/account-overlays-pixel-alignment/measurements.html`, `docs/TODO.md`
+    - test command/result: PIL 측정 성공; final `npm test` pass, `npm run lint` pass, `npm run build` pass, `npm run test:rules` pass, `npm run validate:design-reference` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: `design/reference/pngs/screens/15-logout.png`, `design/reference/pngs/screens/16-account-deletion.png`
+    - measured result: both reference size `393x852`; 15 dominant `#adadad 91956`, `#ad5f09 90140`, `#ffffff 59897`; 16 dominant `#adadad 91956`, `#ad5f09 90140`, `#ffffff 59324`; non-bg bbox both `(0,21)-(393,852)`; dimmed background bbox `(0,21)-(393,852)` with gray/orange dim colors; dialog card white bbox 15 `(42,246)-(352,479)`, 16 `(42,246)-(352,479)`; confirm orange button bbox 15 `(66,405)-(213,457)`, 16 `(66,405)-(213,457)`; cancel white button bbox 15 `(226,406)-(323,456)`, 16 `(226,406)-(323,456)`; major dark glyph bbox 15 `(24,71)-(338,797)`, 16 `(24,71)-(338,843)`; safe-area/home-indicator is reference static chrome and excluded from production implementation.
+    - tolerated difference: 해당 없음.
+- [x] TODO-P9.2: 로그아웃/탈퇴 확인을 마이페이지 위 overlay/dialog로 구현한다.
   - 대상 파일: `src/screens/myPage/MyPageScreen.tsx`, `src/screens/shared/ui.tsx`
   - 완료 기준: 배경의 마이페이지와 하단바가 흐릿하게 보이고 클릭 불가능하다.
   - 검증: screen interaction/accessibility test.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P9.6.
-- [ ] TODO-P9.3: 15 취소/로그아웃 flow를 검증한다.
+  - completion note:
+    - changed files: `src/screens/shared/ui.tsx`, `src/screens/myPage/MyPageScreen.test.ts`, `docs/TODO.md`
+    - test command/result: `MyPageScreen.test.ts` covers `logout and account deletion rows open modal dialog requests`, `logout dialog is an accessible overlay and only dialog buttons fire logout confirmation handlers`, `account deletion dialog blocks background interaction and confirm calls only deletion handler`; final `npm test`/`lint`/`build`/`test:rules`/`validate:design-reference` pass.
+    - production PNG path: `tmp/account-overlays-pixel-alignment/15-logout-production.png`, `tmp/account-overlays-pixel-alignment/16-account-deletion-production.png`
+    - capture type: harness component
+    - harness route/data verification: route/container coverage by `prdNavigationPolicy.test.ts` account deletion login route, `MyPageScreen.test.ts` confirmation rows/dialog callbacks, and `accountSession.test.ts` cleanup/signOut order.
+    - reference PNG path: `design/reference/pngs/screens/15-logout.png`, `design/reference/pngs/screens/16-account-deletion.png`
+    - measured result: production size both `393x852`; production dialog white bbox 15 `(42,246)-(352,444)`, 16 `(42,246)-(352,468)` after patch; reference card `(42,246)-(352,479)`; background dim bbox production `(0,82)-(393,852)` over harness my-page.
+    - tolerated difference: reference mobile status/home indicator and Phase 8 harness background token/font differences; dialog height differs by copy/browser text wrapping within `35px` for 15 and `11px` for 16.
+- [x] TODO-P9.3: 15 취소/로그아웃 flow를 검증한다.
   - 대상 파일: `src/screens/myPage/MyPageContainer.tsx`, `src/services/userAccount/accountSession.test.ts`
   - 완료 기준: 취소는 10 복귀, 로그아웃은 signOut/cleanup 후 02-login 이동.
   - 검증: container/service tests.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P9.6.
-- [ ] TODO-P9.4: 16 취소/탈퇴 flow를 검증한다.
+  - completion note:
+    - changed files: `src/services/userAccount/accountSession.test.ts`, `src/screens/myPage/MyPageScreen.test.ts`, `docs/TODO.md`
+    - test command/result: `logout confirmation cleanup clears local push state before sign-out`, `cancel logout remains a UI-only close action with no cleanup or sign-out`, and screen dialog callback tests pass; final `npm test`/`lint`/`build`/`test:rules`/`validate:design-reference` pass.
+    - production PNG path: `tmp/account-overlays-pixel-alignment/15-logout-production.png`
+    - capture type: harness component
+    - harness route/data verification: `MyPageScreen.test.ts` opens `logout_confirmation` request and only dialog confirm calls logout handler; `accountSession.test.ts` verifies cleanup then signOut; app shell auth sign-out path routes to login.
+    - reference PNG path: `design/reference/pngs/screens/15-logout.png`
+    - measured result: reference card `(42,246)-(352,479)`, confirm `(66,405)-(213,457)`, cancel `(226,406)-(323,456)`; production card `(42,246)-(352,444)`, confirm/cancel row inside `(66,363)-(327,411)`.
+    - tolerated difference: production copy is shorter than reference static composition, so card bottom is `35px` higher; route behavior is closed by service/screen/appShell tests.
+- [x] TODO-P9.4: 16 취소/탈퇴 flow를 검증한다.
   - 대상 파일: `src/screens/myPage/MyPageContainer.tsx`, `src/services/userAccount/deleteMyAccount.test.ts`
   - 완료 기준: 취소는 10 복귀, 탈퇴는 account deletion API와 cleanup 후 02-login 이동.
   - 검증: container/service tests.
   - production PNG evidence: 없음. Same-phase visual confirmation: TODO-P9.6.
-- [ ] TODO-P9.5: 탈퇴 정책을 접근권 삭제/비활성화 의미로 테스트에 고정한다.
+  - completion note:
+    - changed files: `src/services/userAccount/accountSession.test.ts`, `src/services/userAccount/deleteMyAccount.test.ts`, `src/server/userAccountRoutes.test.ts`, `src/screens/myPage/MyPageScreen.test.ts`, `docs/TODO.md`
+    - test command/result: `account deletion confirmation runs server deletion, then local cleanup, then sign-out`, `cancel account deletion remains a UI-only close action with no deletion cleanup or sign-out`, `account deletion confirmation does not clean up or sign out after deletion failure`, `delete account route marks Firestore account state before Firebase Auth user without requiring typed confirmation input`; final commands pass.
+    - production PNG path: `tmp/account-overlays-pixel-alignment/16-account-deletion-production.png`
+    - capture type: harness component
+    - harness route/data verification: `routeAfterAccountDeletion()` verified by existing appShell tests; `MyPageScreen.test.ts` verifies deletion dialog confirm only; `accountSession.test.ts` verifies deletion→cleanup→signOut and failure boundary.
+    - reference PNG path: `design/reference/pngs/screens/16-account-deletion.png`
+    - measured result: reference card `(42,246)-(352,479)`, confirm `(66,405)-(213,457)`, cancel `(226,406)-(323,456)`; production card `(42,246)-(352,468)`, action row `(66,387)-(327,435)`.
+    - tolerated difference: production card bottom is `11px` higher due browser font/wrapping; no additional typed confirmation input exists in UI.
+- [x] TODO-P9.5: 탈퇴 정책을 접근권 삭제/비활성화 의미로 테스트에 고정한다.
   - 대상 파일: `src/services/userAccount/*`, `src/server/userAccountRoutes.test.ts`, `src/firestore.rules.test.ts`
   - 완료 기준: 추가 확인 입력 없이 동작하고 DB 문서 완전 삭제가 아닌 deleted/inactive 접근 제한 정책을 검증한다.
   - 검증: `npm test`, `npm run test:rules`
   - production PNG evidence: 없음.
-- [ ] TODO-P9.6: 15/16 production PNG evidence를 생성한다.
+  - completion note:
+    - changed files: `src/services/userAccount/deleteMyAccount.ts`, `src/services/userAccount/firestoreRepository.ts`, `src/services/userAccount/types.ts`, `src/services/userAccount/deleteMyAccount.test.ts`, `src/services/userAccount/firestoreRepository.test.ts`, `src/server/userAccountRoutes.test.ts`, `src/firestore.rules.test.ts`, `docs/TODO.md`
+    - test command/result: `deleteMyAccount preserves user document as deleted tombstone and removes tokens and nickname reservation`, `Firestore account repository keeps user document as deleted tombstone and removes session state`, `deleted tombstone is not fully deleted and preserved worries replies and feedback remain server-owned`; final `npm test` pass, `npm run test:rules` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: user doc is marked `deleted: true`, `deletedAt`, `activeDeliveryCount: 0`; fcmTokens/read-state subcollections and own nickname reservation are removed; published worries/replies/feedback remain server-owned and client delete is denied; matching selection already excludes deleted users through `selectRematchRecipients excludes deleted users` and recipient selection tests.
+    - tolerated difference: Firebase Auth user deletion remains after Firestore tombstone marking; DB user document full deletion intentionally removed.
+- [x] TODO-P9.6: 15/16 production PNG evidence를 생성한다.
   - 대상 파일: `tmp/account-overlays-pixel-alignment/15-logout-production.png`, `tmp/account-overlays-pixel-alignment/16-account-deletion-production.png`
   - 완료 기준: 두 PNG가 393x852 production capture이고 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다.
   - 검증: PNG 크기와 anchor mismatch completion note.
   - production PNG evidence: listed files.
+  - completion note:
+    - changed files: `tmp/account-overlays-pixel-alignment/15-logout-production.png`, `tmp/account-overlays-pixel-alignment/16-account-deletion-production.png`, `tmp/account-overlays-pixel-alignment/measurements.html`, `tmp/account-overlays-pixel-alignment/harness/**`, `src/screens/shared/ui.tsx`, `docs/TODO.md`
+    - test command/result: `npm run build` pass with CSS `dist/assets/index-C3DbL80N.css`; Playwright capture via `node tmp/account-overlays-pixel-alignment/harness/capture.mjs` pass; `file` verifies both PNGs are `393 x 852`; final `npm test`/`lint`/`build`/`test:rules`/`validate:design-reference` pass.
+    - production PNG path: `tmp/account-overlays-pixel-alignment/15-logout-production.png`, `tmp/account-overlays-pixel-alignment/16-account-deletion-production.png`
+    - capture type: harness component
+    - harness route/data verification: route/container verified by `MyPageScreen.test.ts`, `accountSession.test.ts`, `deleteMyAccount.test.ts`, `firestoreRepository.test.ts`, `userAccountRoutes.test.ts`, `firestore.rules.test.ts`, `prdNavigationPolicy.test.ts`.
+    - reference PNG path: `design/reference/pngs/screens/15-logout.png`, `design/reference/pngs/screens/16-account-deletion.png`
+    - measured result: reference 15 dominant `#adadad 91956`, `#ad5f09 90140`, `#ffffff 59897`; production 15 dominant `#ffffff 51927`, `#989898 25708`, `#999999 23690`, `#864939 23327`; reference 16 dominant `#adadad 91956`, `#ad5f09 90140`, `#ffffff 59324`; production 16 dominant `#ffffff 58176`, `#989898 25634`, `#999999 23690`, `#864939 23327`; production non-bg both `(0,11)-(393,852)`; thresholded diff ratio 15 `0.8641`, 16 `0.8449`, bbox both `(0,0)-(393,852)` due full-screen dim/background/font differences.
+    - tolerated difference: first diff showed layout mismatch; patch changed dialog width/x, top y, button order, and destructive color. Remaining mismatch is classified as static mobile chrome omission, Phase 8 harness background token/fixture difference, browser font rendering, and dialog copy wrapping tolerance; no unresolved layout/style mismatch remains without patch attempt.
 
 검증 명령:
 - `npm test`

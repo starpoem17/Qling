@@ -18,6 +18,13 @@ class Ref {
     };
   }
 
+  async set(data: Record<string, unknown>, options?: { merge?: boolean }) {
+    this.db.maybeFail(`set:${this.path}`);
+    const current = this.db.docs.get(this.path) ?? {};
+    this.db.docs.set(this.path, options?.merge ? { ...current, ...data } : data);
+    this.db.ref(this.path);
+  }
+
   collection(name: string) {
     return {
       get: async () => {
@@ -149,7 +156,7 @@ class FakeDb {
   }
 }
 
-test('Firestore account repository deletes profile session state and nickname reservation', async () => {
+test('Firestore account repository keeps user document as deleted tombstone and removes session state', async () => {
   const db = new FakeDb({
     'users/user-1': { uid: 'user-1', normalizedNickname: 'rNickname' },
     'users/user-1/fcmTokens/token-1': { token: 'token-1' },
@@ -160,7 +167,7 @@ test('Firestore account repository deletes profile session state and nickname re
   });
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
   assert.deepEqual(result, {
     status: 'success',
@@ -181,12 +188,19 @@ test('Firestore account repository deletes profile session state and nickname re
   });
   assert.deepEqual(db.deletedPaths.sort(), [
     'nicknameReservations/rNickname',
-    'users/user-1',
     'users/user-1/deliveryReadStates/delivery-1',
     'users/user-1/fcmTokens/token-1',
     'users/user-1/fcmTokens/token-2',
     'users/user-1/replyReadStates/reply-1',
   ].sort());
+  assert.deepEqual(db.docs.get('users/user-1'), {
+    uid: 'user-1',
+    normalizedNickname: 'rNickname',
+    deleted: true,
+    deletedAt: 'deleted-at',
+    activeDeliveryCount: 0,
+    updatedAt: 'deleted-at',
+  });
   assert.equal(db.listDocumentsCalls, 0);
 });
 
@@ -194,7 +208,7 @@ test('Firestore account repository cleanup is idempotent without nickname reserv
   const db = new FakeDb({});
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'missing-user' });
+    .deleteUserAccountState({ uid: 'missing-user', deletedAt: 'deleted-at' });
 
   assert.deepEqual(result, {
     status: 'success',
@@ -212,7 +226,14 @@ test('Firestore account repository cleanup is idempotent without nickname reserv
       'verify_nickname_reservation_deleted',
     ],
   });
-  assert.deepEqual(db.deletedPaths, ['users/missing-user']);
+  assert.deepEqual(db.deletedPaths, []);
+  assert.deepEqual(db.docs.get('users/missing-user'), {
+    uid: 'missing-user',
+    deleted: true,
+    deletedAt: 'deleted-at',
+    activeDeliveryCount: 0,
+    updatedAt: 'deleted-at',
+  });
 });
 
 test('Firestore account repository deletes freshly re-onboarded starpoem profile and reservation', async () => {
@@ -233,7 +254,7 @@ test('Firestore account repository deletes freshly re-onboarded starpoem profile
   });
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'm28rhnqrTtcQiT04Szff2HBSZ5q1' });
+    .deleteUserAccountState({ uid: 'm28rhnqrTtcQiT04Szff2HBSZ5q1', deletedAt: 'deleted-at' });
 
   assert.deepEqual(result, {
     status: 'success',
@@ -254,9 +275,8 @@ test('Firestore account repository deletes freshly re-onboarded starpoem profile
   });
   assert.deepEqual(db.deletedPaths.sort(), [
     'nicknameReservations/starpoem',
-    'users/m28rhnqrTtcQiT04Szff2HBSZ5q1',
   ].sort());
-  assert.equal(db.docs.has('users/m28rhnqrTtcQiT04Szff2HBSZ5q1'), false);
+  assert.equal(db.docs.get('users/m28rhnqrTtcQiT04Szff2HBSZ5q1')?.deleted, true);
   assert.equal(db.docs.has('nicknameReservations/starpoem'), false);
 });
 
@@ -267,13 +287,13 @@ test('Firestore account repository succeeds with each optional account subcollec
     });
 
     const result = await createFirestoreUserAccountRepository({ db: db as never })
-      .deleteUserAccountState({ uid });
+      .deleteUserAccountState({ uid, deletedAt: 'deleted-at' });
 
     assert.equal(result.status, 'success');
     assert.equal(result.deletedTokenCount, 0);
     assert.equal(result.deletedReadStateCount, 0);
     assert.equal(result.deletedNicknameReservation, false);
-    assert.equal(db.docs.has(`users/${uid}`), false);
+    assert.equal(db.docs.get(`users/${uid}`)?.deleted, true);
   }
 });
 
@@ -285,7 +305,7 @@ test('delete_fcm_tokens succeeds when fcmTokens subcollection is missing', async
   });
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
   assert.equal(result.status, 'success');
   assert.equal(result.deletedTokenCount, 0);
@@ -302,7 +322,8 @@ test('delete_fcm_tokens succeeds when fcmTokens subcollection is missing', async
   ]);
   assert.equal(db.deletedPaths.includes('users/user-1/deliveryReadStates/delivery-1'), true);
   assert.equal(db.deletedPaths.includes('users/user-1/replyReadStates/reply-1'), true);
-  assert.equal(db.deletedPaths.includes('users/user-1'), true);
+  assert.equal(db.deletedPaths.includes('users/user-1'), false);
+  assert.equal(db.docs.get('users/user-1')?.deleted, true);
 });
 
 test('delete_fcm_tokens succeeds when fcmTokens subcollection exists but is empty', async () => {
@@ -313,12 +334,13 @@ test('delete_fcm_tokens succeeds when fcmTokens subcollection exists but is empt
   });
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
   assert.equal(result.status, 'success');
   assert.equal(result.deletedTokenCount, 0);
   assert.equal(db.existingEmptyCollections.has('users/user-1/fcmTokens'), true);
-  assert.equal(db.deletedPaths.includes('users/user-1'), true);
+  assert.equal(db.deletedPaths.includes('users/user-1'), false);
+  assert.equal(db.docs.get('users/user-1')?.deleted, true);
 });
 
 test('delete_fcm_tokens deletes one token doc', async () => {
@@ -329,7 +351,7 @@ test('delete_fcm_tokens deletes one token doc', async () => {
   });
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
   assert.equal(result.status, 'success');
   assert.equal(result.deletedTokenCount, 1);
@@ -346,7 +368,7 @@ test('delete_fcm_tokens deletes multiple token docs', async () => {
   });
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
   assert.equal(result.status, 'success');
   assert.equal(result.deletedTokenCount, 2);
@@ -359,7 +381,7 @@ test('delete_fcm_tokens reports phase only when an actual token delete fails', a
     'users/user-1': { uid: 'user-1' },
   });
   const missingResult = await createFirestoreUserAccountRepository({ db: missingDb as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
   assert.equal(missingResult.status, 'success');
 
   const failingDb = new FakeDb({
@@ -367,7 +389,7 @@ test('delete_fcm_tokens reports phase only when an actual token delete fails', a
     'users/user-2/fcmTokens/token-1': { token: 'token-1' },
   }, new Set(['delete:users/user-2/fcmTokens/token-1']));
   const failingResult = await createFirestoreUserAccountRepository({ db: failingDb as never })
-    .deleteUserAccountState({ uid: 'user-2' });
+    .deleteUserAccountState({ uid: 'user-2', deletedAt: 'deleted-at' });
 
   assert.deepEqual(failingResult, {
     status: 'failed',
@@ -384,7 +406,7 @@ test('delete_fcm_tokens reports list_collections step when subcollection discove
   }, new Set(['listCollections:users/user-1']));
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
   assert.deepEqual(result, {
     status: 'failed',
@@ -401,7 +423,7 @@ test('delete_fcm_tokens reports list_token_docs step when token doc listing fail
   }, new Set(['getCollection:users/user-1/fcmTokens']));
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
   assert.deepEqual(result, {
     status: 'failed',
@@ -418,7 +440,7 @@ test('delete_fcm_tokens reports commit_token_deletes step when token delete comm
   }, new Set(['delete:users/user-1/fcmTokens/token-1']));
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
   assert.deepEqual(result, {
     status: 'failed',
@@ -459,14 +481,15 @@ for (const readState of readStateCases) {
     });
 
     const result = await createFirestoreUserAccountRepository({ db: db as never })
-      .deleteUserAccountState({ uid: 'user-1' });
+      .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
     assert.equal(result.status, 'success');
     assert.equal(result.deletedReadStateCount, 1);
     assert.equal(db.seenCollectionRoots.has('users/user-1'), true);
     assert.equal(db.seenCollectionGets.has(`users/user-1/${readState.collectionName}`), false);
     assert.equal(db.deletedPaths.includes(`users/user-1/${readState.otherCollectionName}/other-1`), true);
-    assert.equal(db.deletedPaths.includes('users/user-1'), true);
+    assert.equal(db.deletedPaths.includes('users/user-1'), false);
+    assert.equal(db.docs.get('users/user-1')?.deleted, true);
   });
 
   test(`${readState.label} cleanup succeeds when subcollection exists but is empty`, async () => {
@@ -477,12 +500,13 @@ for (const readState of readStateCases) {
     });
 
     const result = await createFirestoreUserAccountRepository({ db: db as never })
-      .deleteUserAccountState({ uid: 'user-1' });
+      .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
     assert.equal(result.status, 'success');
     assert.equal(result.deletedReadStateCount, 0);
     assert.equal(db.seenCollectionGets.has(`users/user-1/${readState.collectionName}`), true);
-    assert.equal(db.deletedPaths.includes('users/user-1'), true);
+    assert.equal(db.deletedPaths.includes('users/user-1'), false);
+    assert.equal(db.docs.get('users/user-1')?.deleted, true);
   });
 
   test(`${readState.label} cleanup deletes one document by reference`, async () => {
@@ -497,7 +521,7 @@ for (const readState of readStateCases) {
     });
 
     const result = await createFirestoreUserAccountRepository({ db: db as never })
-      .deleteUserAccountState({ uid: 'user-1' });
+      .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
     assert.equal(result.status, 'success');
     assert.equal(result.deletedReadStateCount, 1);
@@ -515,7 +539,7 @@ for (const readState of readStateCases) {
     });
 
     const result = await createFirestoreUserAccountRepository({ db: db as never })
-      .deleteUserAccountState({ uid: 'user-1' });
+      .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
     assert.equal(result.status, 'success');
     assert.equal(result.deletedReadStateCount, 2);
@@ -534,7 +558,7 @@ for (const readState of readStateCases) {
     });
 
     const result = await createFirestoreUserAccountRepository({ db: db as never })
-      .deleteUserAccountState({ uid: 'user-1' });
+      .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
     assert.equal(result.status, 'success');
     assert.equal(result.deletedReadStateCount, 1);
@@ -548,7 +572,7 @@ for (const readState of readStateCases) {
     }, new Set([`getCollection:users/user-1/${readState.collectionName}`]));
 
     const result = await createFirestoreUserAccountRepository({ db: db as never })
-      .deleteUserAccountState({ uid: 'user-1' });
+      .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
     assert.deepEqual(result, {
       status: 'failed',
@@ -567,7 +591,7 @@ for (const readState of readStateCases) {
     }, new Set([`delete:${docPath}`]));
 
     const result = await createFirestoreUserAccountRepository({ db: db as never })
-      .deleteUserAccountState({ uid: 'user-1' });
+      .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
     assert.deepEqual(result, {
       status: 'failed',
@@ -588,7 +612,7 @@ for (const readState of readStateCases) {
     });
 
     const result = await createFirestoreUserAccountRepository({ db: db as never })
-      .deleteUserAccountState({ uid: 'user-1' });
+      .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
     assert.deepEqual(result, {
       status: 'failed',
@@ -611,7 +635,7 @@ test('read-state cleanup proceeds to nickname reservation cleanup after delivery
   });
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
   assert.equal(result.status, 'success');
   assert.deepEqual(result.completedPhases.slice(0, 6), [
@@ -631,11 +655,11 @@ test('Firestore account repository succeeds when nickname reservation is missing
   });
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
   assert.equal(result.status, 'success');
   assert.equal(result.deletedNicknameReservation, false);
-  assert.equal(db.docs.has('users/user-1'), false);
+  assert.equal(db.docs.get('users/user-1')?.deleted, true);
 });
 
 test('Firestore account repository does not delete nickname reservation owned by another uid', async () => {
@@ -645,21 +669,21 @@ test('Firestore account repository does not delete nickname reservation owned by
   });
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
   assert.equal(result.status, 'success');
   assert.equal(result.deletedNicknameReservation, false);
-  assert.equal(db.docs.has('users/user-1'), false);
+  assert.equal(db.docs.get('users/user-1')?.deleted, true);
   assert.deepEqual(db.docs.get('nicknameReservations/shared-name'), { uid: 'other-user' });
 });
 
 test('Firestore account repository reports sanitized failure phase and code', async () => {
   const db = new FakeDb({
     'users/user-1': { uid: 'user-1' },
-  }, new Set(['delete:users/user-1']));
+  }, new Set(['set:users/user-1']));
 
   const result = await createFirestoreUserAccountRepository({ db: db as never })
-    .deleteUserAccountState({ uid: 'user-1' });
+    .deleteUserAccountState({ uid: 'user-1', deletedAt: 'deleted-at' });
 
   assert.deepEqual(result, {
     status: 'failed',

@@ -17,6 +17,15 @@ test('logout confirmation cleanup clears local push state before sign-out', asyn
   assert.deepEqual(calls, ['cleanup', 'signOut']);
 });
 
+test('cancel logout remains a UI-only close action with no cleanup or sign-out', () => {
+  const calls: string[] = [];
+  const closeLogoutDialog = () => calls.push('close-my-page-overlay');
+
+  closeLogoutDialog();
+
+  assert.deepEqual(calls, ['close-my-page-overlay']);
+});
+
 test('account deletion confirmation runs server deletion, then local cleanup, then sign-out', async () => {
   const calls: string[] = [];
   const result = await confirmAccountDeletionWithCleanup({
@@ -34,6 +43,15 @@ test('account deletion confirmation runs server deletion, then local cleanup, th
 
   assert.deepEqual(result, { status: 'completed' });
   assert.deepEqual(calls, ['delete', 'cleanup', 'signOut']);
+});
+
+test('cancel account deletion remains a UI-only close action with no deletion cleanup or sign-out', () => {
+  const calls: string[] = [];
+  const closeDeletionDialog = () => calls.push('close-my-page-overlay');
+
+  closeDeletionDialog();
+
+  assert.deepEqual(calls, ['close-my-page-overlay']);
 });
 
 test('account deletion confirmation does not clean up or sign out after deletion failure', async () => {

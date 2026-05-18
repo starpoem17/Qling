@@ -418,6 +418,47 @@ describe('deleted transition', () => {
     }));
     await assertSucceeds(dbFor('missingDeletedUser').doc('users/missingDeletedUser/fcmTokens/token-1').set(tokenDoc));
   });
+
+  test('deleted tombstone is not fully deleted and preserved worries replies and feedback remain server-owned', async () => {
+    await seed('users/deletedAuthor', { ...safeProfile('deletedAuthor'), deleted: true, deletedAt: new Date() });
+    await seed('users/recipient', safeProfile('recipient'));
+    await seed('worries/deleted_author_worry', {
+      authorUid: 'deletedAuthor',
+      content: 'preserved worry',
+      status: 'active',
+    });
+    await seed('deliveries/deleted_author_worry_recipient', {
+      worryId: 'deleted_author_worry',
+      recipientUid: 'recipient',
+      status: 'active',
+    });
+    await seed('replies/deleted_author_reply', {
+      ...prdReply,
+      replyId: 'deleted_author_reply',
+      worryId: 'deleted_author_worry',
+      deliveryId: 'deleted_author_worry_recipient',
+      authorUid: 'deletedAuthor',
+      replierUid: 'recipient',
+      publisherVisible: true,
+    });
+    await seed('feedbacks/deleted_author_feedback', {
+      ...likeFeedback,
+      replyId: 'deleted_author_reply',
+      worryId: 'deleted_author_worry',
+      deliveryId: 'deleted_author_worry_recipient',
+      publisherUid: 'deletedAuthor',
+      replierUid: 'recipient',
+    });
+
+    await assertFails(dbFor('deletedAuthor').doc('users/deletedAuthor').get());
+    await assertFails(dbFor('deletedAuthor').doc('users/deletedAuthor').delete());
+    await assertSucceeds(dbFor('recipient').doc('worries/deleted_author_worry').get());
+    await assertSucceeds(dbFor('recipient').doc('replies/deleted_author_reply').get());
+    await assertSucceeds(dbFor('recipient').doc('feedbacks/deleted_author_feedback').get());
+    await assertFails(dbFor('recipient').doc('worries/deleted_author_worry').delete());
+    await assertFails(dbFor('recipient').doc('replies/deleted_author_reply').delete());
+    await assertFails(dbFor('recipient').doc('feedbacks/deleted_author_feedback').delete());
+  });
 });
 
 describe('PRD source-of-truth rules', () => {

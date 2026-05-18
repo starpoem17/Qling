@@ -133,13 +133,19 @@ export function createFirestoreUserAccountRepository(params: {
       });
       if (deletedNicknameReservation.status === 'failed') return cleanupFailure(deletedNicknameReservation);
 
-      const deletedUser = await runPhase('delete_user_document', () => commitDeletes(params.db, [userRef]));
+      const deletedUser = await runPhase('delete_user_document', () => userRef.set({
+        uid: input.uid,
+        deleted: true,
+        deletedAt: input.deletedAt,
+        activeDeliveryCount: 0,
+        updatedAt: input.deletedAt,
+      }, { merge: true }));
       if (deletedUser.status === 'failed') return cleanupFailure(deletedUser);
 
       const verifiedUser = await runPhase('verify_user_document_deleted', async () => {
         const postDeleteUser = await userRef.get();
-        if (postDeleteUser.exists) {
-          throw Object.assign(new Error('user document still exists'), { code: 'verification/user-document-exists' });
+        if (!postDeleteUser.exists || postDeleteUser.data()?.deleted !== true) {
+          throw Object.assign(new Error('user document tombstone missing'), { code: 'verification/user-document-not-marked-deleted' });
         }
       });
       if (verifiedUser.status === 'failed') return cleanupFailure(verifiedUser);

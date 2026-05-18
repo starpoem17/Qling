@@ -264,25 +264,21 @@ export function QlingDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm" role="presentation">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 px-4 pt-[246px] backdrop-blur-sm" role="presentation">
       <section
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={describedBy}
         aria-busy={processing || undefined}
-        className="w-full max-w-sm rounded-[var(--qling-radius-modal)] bg-[var(--qling-color-surface)] p-6 shadow-[var(--qling-shadow-modal)]"
+        className="w-full max-w-[310px] rounded-[var(--qling-radius-modal)] bg-[var(--qling-color-surface)] px-6 py-8 shadow-[var(--qling-shadow-modal)]"
       >
         <h2 id={titleId} className="text-lg font-bold text-[var(--qling-color-text)]">{title}</h2>
         {description && <p id={descriptionId} className="mt-2 text-sm leading-6 text-[var(--qling-color-muted)]">{description}</p>}
         {errorMessage && <p id={errorId} className="mt-3 text-sm font-semibold text-[var(--qling-color-danger)]">{errorMessage}</p>}
         <div className="mt-6 flex gap-[var(--qling-space-cta-gap)]">
+          <PrimaryCTA onClick={onConfirm} processing={processing}>{confirmLabel}</PrimaryCTA>
           <SecondaryCTA onClick={onCancel} disabled={processing}>{cancelLabel}</SecondaryCTA>
-          {destructive ? (
-            <DestructiveCTA onClick={onConfirm} processing={processing}>{confirmLabel}</DestructiveCTA>
-          ) : (
-            <PrimaryCTA onClick={onConfirm} processing={processing}>{confirmLabel}</PrimaryCTA>
-          )}
         </div>
       </section>
     </div>

@@ -22,8 +22,10 @@ export async function deleteMyAccount(params: {
   repository: UserAccountRepository;
   clock: UserAccountClock;
 }): Promise<DeleteMyAccountResult> {
-  void params.clock;
-  const cleanup = await params.repository.deleteUserAccountState({ uid: params.uid });
+  const cleanup = await params.repository.deleteUserAccountState({
+    uid: params.uid,
+    deletedAt: params.clock.now(),
+  });
   if (cleanup.status === 'failed') {
     throw new AccountDeletionCleanupError(cleanup.phase, cleanup.firebaseCode, cleanup.step);
   }

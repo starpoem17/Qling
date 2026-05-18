@@ -47,7 +47,9 @@ function createRepository(options: {
       const deletedNicknameReservation = nicknameReservations.delete('user-1-normalized');
       tokens.clear();
       readStates.clear();
-      delete profile.uid;
+      profile.deleted = true;
+      profile.deletedAt = params.deletedAt;
+      profile.activeDeliveryCount = 0;
       return {
         status: 'success',
         deletedTokenCount,
@@ -61,7 +63,7 @@ function createRepository(options: {
   return { repository, profile, tokens, readStates, nicknameReservations, contentSentinel, calls };
 }
 
-test('deleteMyAccount deletes profile/session state and removes tokens and nickname reservation', async () => {
+test('deleteMyAccount preserves user document as deleted tombstone and removes tokens and nickname reservation', async () => {
   const harness = createRepository();
   const beforeContent = structuredClone(harness.contentSentinel);
 
@@ -78,7 +80,10 @@ test('deleteMyAccount deletes profile/session state and removes tokens and nickn
     deletedNicknameReservation: true,
     completedPhases: ['load_user_profile', 'delete_user_document'],
   });
-  assert.equal(harness.profile.uid, undefined);
+  assert.equal(harness.profile.uid, 'user-1');
+  assert.equal(harness.profile.deleted, true);
+  assert.equal(harness.profile.deletedAt, 'deleted-at');
+  assert.equal(harness.profile.activeDeliveryCount, 0);
   assert.equal(harness.tokens.size, 0);
   assert.equal(harness.readStates.size, 0);
   assert.equal(harness.nicknameReservations.size, 0);

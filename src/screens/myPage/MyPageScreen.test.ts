@@ -105,6 +105,76 @@ test('my-page forwards edit interests, my answers, push toggle, and policy actio
   assert.deepEqual(events, ['edit', 'answers', 'push:true', 'setting:privacy_policy']);
 });
 
+test('logout and account deletion rows open modal dialog requests', () => {
+  const events: string[] = [];
+  const tree = MyPageScreen(baseMyPageProps({
+    onSettingSelect: item => events.push(`setting:${item}`),
+  }));
+
+  click(findElement(tree, element => element.type === 'button' && /로그아웃/.test(String(element.props['aria-label'] ?? ''))));
+  click(findElement(tree, element => element.type === 'button' && /회원 탈퇴/.test(String(element.props['aria-label'] ?? ''))));
+
+  assert.deepEqual(events, ['setting:logout', 'setting:delete_account']);
+});
+
+test('logout dialog is an accessible overlay and only dialog buttons fire logout confirmation handlers', () => {
+  const events: string[] = [];
+  const tree = MyPageScreen(baseMyPageProps({
+    logoutConfirmation: {
+      isOpen: true,
+      isProcessing: false,
+      onCancel: () => events.push('cancel-logout'),
+      onConfirm: () => events.push('confirm-logout'),
+    },
+    onSettingSelect: item => events.push(`background:${item}`),
+  }));
+  const html = renderToStaticMarkup(tree);
+
+  assert.match(html, /role="dialog"/);
+  assert.match(html, /aria-modal="true"/);
+  assert.match(html, /로그아웃할까요\?/);
+  assert.match(html, /fixed inset-0 z-\[100\]/);
+
+  const dialog = findElement(tree, element => typeof element.type === 'function'
+    && element.type.name === 'QlingDialog'
+    && element.props.confirmLabel === '로그아웃');
+  assert.equal(dialog.props.cancelLabel, '취소');
+  assert.equal(dialog.props.confirmLabel, '로그아웃');
+  clickProp(dialog, 'onCancel');
+  clickProp(dialog, 'onConfirm');
+
+  assert.deepEqual(events, ['cancel-logout', 'confirm-logout']);
+});
+
+test('account deletion dialog blocks background interaction and confirm calls only deletion handler', () => {
+  const events: string[] = [];
+  const tree = MyPageScreen(baseMyPageProps({
+    accountDeletionConfirmation: {
+      isOpen: true,
+      isProcessing: false,
+      onCancel: () => events.push('cancel-deletion'),
+      onConfirm: () => events.push('confirm-deletion'),
+    },
+    onSettingSelect: item => events.push(`background:${item}`),
+  }));
+  const html = renderToStaticMarkup(tree);
+
+  assert.match(html, /role="dialog"/);
+  assert.match(html, /계정을 삭제할까요\?/);
+  assert.match(html, /fixed inset-0 z-\[100\]/);
+  assert.match(html, /bg-black\/40/);
+
+  const dialog = findElement(tree, element => typeof element.type === 'function'
+    && element.type.name === 'QlingDialog'
+    && element.props.confirmLabel === '계정 삭제');
+  assert.equal(dialog.props.cancelLabel, '취소');
+  assert.equal(dialog.props.confirmLabel, '계정 삭제');
+  assert.equal(dialog.props.destructive, true);
+  clickProp(dialog, 'onConfirm');
+
+  assert.deepEqual(events, ['confirm-deletion']);
+});
+
 function baseEditInterestsProps(overrides: Partial<EditInterestsProps> = {}): EditInterestsProps {
   return {
     categoryOptions: WORRY_CATEGORIES,
@@ -186,4 +256,10 @@ function click(element: TestElement): void {
   const onClick = element.props.onClick;
   assert.equal(typeof onClick, 'function');
   (onClick as () => void)();
+}
+
+function clickProp(element: TestElement, propName: 'onCancel' | 'onConfirm'): void {
+  const handler = element.props[propName];
+  assert.equal(typeof handler, 'function');
+  (handler as () => void)();
 }

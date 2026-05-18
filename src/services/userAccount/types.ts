@@ -53,5 +53,5 @@ export type UserAccountClock = {
 };
 
 export type UserAccountRepository = {
-  deleteUserAccountState(params: { uid: string }): Promise<AccountDeletionCleanupResult>;
+  deleteUserAccountState(params: { uid: string; deletedAt: unknown }): Promise<AccountDeletionCleanupResult>;
 };
