@@ -42,7 +42,6 @@ export function OnboardingScreen(props: Props) {
   return (
     <section className="mx-auto flex min-h-dvh w-full justify-center bg-[#ff8b0d] text-[#1a1a1a]">
       <div className="relative h-[852px] w-[393px] shrink-0 overflow-hidden bg-[#ff8b0d]">
-        <StatusBar />
         <div className="absolute left-0 top-[196px] h-[656px] w-[393px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" />
         <p className="absolute top-[70px] text-[17px] font-extrabold leading-none tracking-normal text-white" style={{ left: visualStep === 'interests' ? 171 : 165 }}>
           회원가입
@@ -65,25 +64,8 @@ export function OnboardingScreen(props: Props) {
             onPrevious={() => setVisualStep('basic')}
           />
         )}
-
-        <div className="absolute left-[129.5px] top-[838px] h-[5px] w-[134px] rounded-[3px] bg-white" />
       </div>
     </section>
-  );
-}
-
-function StatusBar() {
-  return (
-    <>
-      <p className="absolute left-[30px] top-[18px] text-[16px] font-semibold leading-none text-white">10:46</p>
-      <div className="absolute left-[295px] top-[28px] h-[4px] w-[3px] rounded-[0.5px] bg-white" />
-      <div className="absolute left-[300px] top-[26px] h-[6px] w-[3px] rounded-[0.5px] bg-white" />
-      <div className="absolute left-[305px] top-[24px] h-[8px] w-[3px] rounded-[0.5px] bg-white" />
-      <div className="absolute left-[310px] top-[22px] h-[10px] w-[3px] rounded-[0.5px] bg-white" />
-      <div className="absolute left-[350px] top-[22px] h-[12px] w-[26px] rounded-[3px] border-[1.5px] border-white" />
-      <div className="absolute left-[377px] top-[25px] h-[6px] w-[2px] rounded-[1px] bg-white" />
-      <div className="absolute left-[352px] top-[24.5px] h-[7px] w-[16px] rounded-[1px] bg-white" />
-    </>
   );
 }
 
