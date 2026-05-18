@@ -37,7 +37,3 @@ Operational setup, environment variables, emulator details, deployment notes, an
 ## Project Docs
 
 - `docs/PRD.md`
-- `docs/TODO.md`
-- `docs/phase.md`
-- `docs/matching_algorithm.md`
-- `docs/ops.md`
