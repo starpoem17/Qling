@@ -9,10 +9,10 @@ const item = {
   worryId: 'worry-1',
   summaryText: '꾸미고 싶은데 안 꾸며봐서 어떻게 꾸며야 할 지 잘 모르겠어요...',
   categoryLabel: '외모',
-  createdAtLabel: '2026-05-02',
+  createdAtLabel: '2026.05.02',
   replyCountLabel: '5명이 답변했어요',
   hasUnreadReplies: true,
-  accessibilityLabel: '답변 확인으로 이동, 카테고리 외모, 작성일 2026-05-02, 5명이 답변했어요, 읽지 않은 답장 있음',
+  accessibilityLabel: '답변 확인으로 이동, 카테고리 외모, 작성일 2026.05.02, 5명이 답변했어요, 읽지 않은 답장 있음',
 } as const;
 
 function baseProps(overrides: Partial<MyWorriesScreenProps> = {}): MyWorriesScreenProps {

@@ -25,7 +25,7 @@ test('maps selected delivery data to original worry summary props', () => {
     summaryText: 'LLM summary',
     originalBodyText: 'Original worry body',
     receivedAt: {
-      label: '2026-05-18',
+      label: '2026.05.18',
       isoValue: new Date(2026, 4, 18, 23, 59, 0).toISOString(),
     },
   });
@@ -55,7 +55,15 @@ test('reply summary uses shared local display date formatter', () => {
   assert.equal(mapSelectedWorryToOriginalWorrySummary({
     ...base,
     createdAt: { toMillis: () => new Date(2026, 4, 17, 12, 0, 0).getTime() },
-  }, { now })?.receivedAt?.label, '2026-05-17');
+  }, { now })?.receivedAt?.label, '2026.05.17');
+  assert.equal(mapSelectedWorryToOriginalWorrySummary({
+    ...base,
+    createdAt: { seconds: new Date(2026, 4, 19, 11, 59, 45).getTime() / 1000 },
+  }, { now })?.receivedAt?.label, '방금 전');
+  assert.equal(mapSelectedWorryToOriginalWorrySummary({
+    ...base,
+    createdAt: { _seconds: new Date(2026, 4, 17, 12, 0, 0).getTime() / 1000 },
+  }, { now })?.receivedAt?.label, '2026.05.17');
 });
 
 test('reply summary fallback uses original first 20 characters plus ellipsis', () => {

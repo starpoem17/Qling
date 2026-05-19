@@ -268,5 +268,13 @@ test('my answer date labels use the shared local display date formatter with inj
   assert.equal(mapMyGivenReplyToListItem({
     ...reply,
     createdAt: { toMillis: () => new Date(2026, 4, 18, 23, 59, 0).getTime() },
-  }, undefined, { now }).dateLabel, '2026-05-18');
+  }, undefined, { now }).dateLabel, '2026.05.18');
+  assert.equal(mapMyGivenReplyToListItem({
+    ...reply,
+    createdAt: { seconds: new Date(2026, 4, 19, 11, 59, 30).getTime() / 1000 },
+  }, undefined, { now }).dateLabel, '방금 전');
+  assert.equal(mapMyGivenReplyToListItem({
+    ...reply,
+    createdAt: { _seconds: new Date(2026, 4, 18, 23, 59, 0).getTime() / 1000 },
+  }, undefined, { now }).dateLabel, '2026.05.18');
 });

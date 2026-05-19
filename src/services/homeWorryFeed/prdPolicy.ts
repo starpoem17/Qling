@@ -81,11 +81,14 @@ export function selectVisibleAnswerFeedItems(params: {
       source: 'prd_delivery' as const,
       hasUnread: !params.readStatesByDeliveryId?.has(delivery.id),
     }];
-  }).sort((a, b) => {
-    const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-    const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-    return timeB - timeA;
-  });
+  }).sort((a, b) => timestampMillis(b.createdAt) - timestampMillis(a.createdAt));
+}
+
+function timestampMillis(value: HomeWorryFeedTimestamp | null | undefined): number {
+  if (value?.toMillis) return value.toMillis();
+  if (typeof value?.seconds === 'number') return value.seconds * 1000;
+  if (typeof value?._seconds === 'number') return value._seconds * 1000;
+  return 0;
 }
 
 export const selectActivePrdAnswerFeedItems = selectVisibleAnswerFeedItems;

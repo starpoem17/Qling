@@ -16,7 +16,10 @@ function stringArray(value: unknown): string[] {
 }
 
 function timestampMillis(value: TimestampLike | null | undefined): number {
-  return value?.toMillis ? value.toMillis() : 0;
+  if (value?.toMillis) return value.toMillis();
+  if (typeof value?.seconds === 'number') return value.seconds * 1000;
+  if (typeof value?._seconds === 'number') return value._seconds * 1000;
+  return 0;
 }
 
 function sortNewestFirst<T extends { createdAt?: TimestampLike | null }>(items: T[]): T[] {

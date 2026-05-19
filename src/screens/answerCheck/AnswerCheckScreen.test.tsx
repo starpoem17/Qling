@@ -11,7 +11,7 @@ function baseProps(overrides: Partial<AnswerCheckScreenProps> = {}): AnswerCheck
       worryId: 'worry-1',
       bodyText: '내 고민 본문',
       categoryLabel: '외모',
-      createdAtLabel: '2026-05-02',
+      createdAtLabel: '2026.05.02',
     },
     replies: [
       {

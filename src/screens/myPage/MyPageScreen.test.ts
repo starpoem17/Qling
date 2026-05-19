@@ -21,7 +21,7 @@ function baseMyPageProps(overrides: Partial<MyPageScreenProps> = {}): MyPageScre
       previewText: '누구나 그런 시기가 있는 것 같아요.',
       originalWorryPreview: '주변 친구들은 잘하고 있는 것 같아요.',
       categoryLabel: '자존감',
-      dateLabel: '2026-05-02',
+      dateLabel: '2026.05.02',
       hasReceivedHeart: true,
       accessibilityLabel: '내가 쓴 답변, 카테고리 자존감, 피드백 받은 하트',
     }],
@@ -90,7 +90,7 @@ test('my-page empty answer preview renders a single non-interactive Figma card w
   assert.match(html, /첫 답변을 남겨보세요!/);
   assert.match(html, /h-\[86px\]/);
   assert.doesNotMatch(html, /아직 내가 보낸 위로가 없어요/);
-  assert.doesNotMatch(html, /자존감|2026-05-02|카테고리/);
+  assert.doesNotMatch(html, /자존감|2026\.05\.02|카테고리/);
   assert.doesNotMatch(html, /aria-label="내가 쓴 답변,/);
 });
 

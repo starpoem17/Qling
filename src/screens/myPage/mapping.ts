@@ -7,7 +7,7 @@ import type {
 } from './contract';
 import { HELPED_COUNT_LABEL } from './contract';
 import type { MyWorryListItem, ReplyReadModelItem } from '../../services/myWorries';
-import { formatDisplayDate, type DisplayDateOptions } from '../shared/displayDate';
+import { formatDisplayDate, type DisplayDateInput, type DisplayDateOptions } from '../shared/displayDate';
 
 export type MyPageProfileInput = {
   readonly nickname?: string;
@@ -40,8 +40,8 @@ export function mapPushStatus(params: {
   return { status: 'default', enabled: false, message: '켜면 브라우저 알림 권한 요청과 푸시 등록을 시도합니다.' };
 }
 
-function dateLabel(value: { toMillis?: () => number } | null | undefined, options?: DisplayDateOptions): string | undefined {
-  if (!value?.toMillis) return undefined;
+function dateLabel(value: DisplayDateInput, options?: DisplayDateOptions): string | undefined {
+  if (!value) return undefined;
   return formatDisplayDate(value, options).label;
 }
 

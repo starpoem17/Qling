@@ -14,7 +14,7 @@ function baseProps(overrides: Partial<MyAnswersScreenProps> = {}): MyAnswersScre
       previewText: '누구나 그런 시기가 있는 것 같아요. 저도 비슷한 경험이 있어요.',
       originalWorryPreview: '주변 친구들은 원하는대로 잘하고 있는 것 같은데 저만 뒤처지는 기분이 들어요.',
       categoryLabel: '자존감',
-      dateLabel: '2026-05-02',
+      dateLabel: '2026.05.02',
       hasReceivedHeart: true,
       feedbackLabel: '받은 하트',
       feedbackComment: '힘이 됐어요',
@@ -30,7 +30,7 @@ test('my answers screen renders same card format with heart and one small commen
 
   assert.match(html, /내가 쓴 답변/);
   assert.match(html, /자존감/);
-  assert.match(html, /2026-05-02/);
+  assert.match(html, /2026\.05\.02/);
   assert.match(html, /주변 친구들은/);
   assert.match(html, /누구나 그런 시기가/);
   assert.match(html, /힘이 됐어요/);

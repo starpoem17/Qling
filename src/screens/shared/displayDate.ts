@@ -3,7 +3,11 @@ import type { DisplayDate } from './contract';
 export type DisplayDateInput =
   | Date
   | number
-  | { readonly toMillis?: () => number }
+  | {
+    readonly toMillis?: () => number;
+    readonly seconds?: number;
+    readonly _seconds?: number;
+  }
   | null
   | undefined;
 
@@ -16,7 +20,14 @@ function millisFromInput(value: DisplayDateInput): number | undefined {
   if (value instanceof Date) return value.getTime();
   if (typeof value === 'number') return value;
   const millis = value?.toMillis?.();
-  return typeof millis === 'number' ? millis : undefined;
+  if (typeof millis === 'number') return millis;
+  const seconds = typeof value?.seconds === 'number'
+    ? value.seconds
+    : typeof value?._seconds === 'number'
+      ? value._seconds
+      : undefined;
+  if (typeof seconds === 'number') return seconds * 1000;
+  return undefined;
 }
 
 function isSameLocalDate(a: Date, b: Date): boolean {
@@ -29,7 +40,7 @@ function formatLocalDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return `${year}.${month}.${day}`;
 }
 
 export function formatDisplayDate(value: DisplayDateInput, options: DisplayDateOptions = {}): DisplayDate {

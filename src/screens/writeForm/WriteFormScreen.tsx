@@ -11,7 +11,6 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
     : props.draft.moderation.status === 'failed'
       ? props.draft.moderation.message
     : undefined;
-  const receivedAtLabel = formatReplyReceivedAt(props.originalWorry.receivedAt?.label);
 
   return (
     <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 min-h-[755px] bg-[#fff1d1] px-4 pb-6 pt-6 text-[#2a2a2a]">
@@ -38,7 +37,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
             className="absolute left-[80px] top-[17px] text-xs font-semibold leading-[15px] tracking-[-0.36px] text-[#b8b8b8]"
             dateTime={props.originalWorry.receivedAt.isoValue}
           >
-            {receivedAtLabel}
+            {props.originalWorry.receivedAt.label}
           </time>
         )}
         <button
@@ -142,20 +141,10 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
 
 function ReplyCategoryChip({ label }: { readonly label: string }) {
   return (
-    <button
-      type="button"
-      disabled
-      aria-pressed="true"
-      className="pointer-events-none inline-flex min-h-[23px] items-center justify-center rounded-full bg-[#ffe4cc] px-3 py-[5px] text-center text-[11px] font-bold leading-[13px] text-[#ff8b3d] disabled:opacity-100"
+    <span
+      className="pointer-events-none box-border inline-flex h-[23px] items-center justify-center rounded-full bg-[#ffe4cc] px-3 py-0 text-center text-[11px] font-bold leading-[13px] text-[#ff8b3d]"
     >
       {label}
-    </button>
+    </span>
   );
-}
-
-function formatReplyReceivedAt(label: string | undefined): string | undefined {
-  if (!label) return label;
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(label);
-  if (!match) return label;
-  return `${match[1]}.${match[2]}.${match[3]}`;
 }

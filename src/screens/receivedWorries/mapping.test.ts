@@ -193,5 +193,13 @@ test('formats received worry dates from the local timezone with injected now', (
   assert.equal(mapHomeWorryFeedLetterToReceivedWorryFeedItem({
     ...base,
     createdAt: { toMillis: () => new Date(2026, 4, 18, 23, 59, 0).getTime() },
-  } as HomeWorryFeedLetter, { now })?.receivedAt.label, '2026-05-18');
+  } as HomeWorryFeedLetter, { now })?.receivedAt.label, '2026.05.18');
+  assert.equal(mapHomeWorryFeedLetterToReceivedWorryFeedItem({
+    ...base,
+    createdAt: { seconds: new Date(2026, 4, 19, 11, 59, 45).getTime() / 1000 },
+  } as HomeWorryFeedLetter, { now })?.receivedAt.label, '방금 전');
+  assert.equal(mapHomeWorryFeedLetterToReceivedWorryFeedItem({
+    ...base,
+    createdAt: { _seconds: new Date(2026, 4, 18, 23, 59, 0).getTime() / 1000 },
+  } as HomeWorryFeedLetter, { now })?.receivedAt.label, '2026.05.18');
 });

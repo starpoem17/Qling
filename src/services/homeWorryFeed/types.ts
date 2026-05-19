@@ -4,6 +4,8 @@ export interface HomeWorryFeedProfile {
 
 export interface HomeWorryFeedTimestamp {
   toMillis?: () => number;
+  seconds?: number;
+  _seconds?: number;
 }
 
 export interface HomeWorryFeedLetter {

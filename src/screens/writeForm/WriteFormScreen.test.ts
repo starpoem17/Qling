@@ -25,7 +25,7 @@ function baseProps(overrides: Partial<WriteFormScreenProps> = {}): WriteFormScre
       category: WORRY_CATEGORIES[0],
       summaryText: '요약만 기본 카드에 표시됩니다.',
       originalBodyText: '원문 전체는 overlay 안에서만 표시됩니다.',
-      receivedAt: { label: '2026-05-18', isoValue: '2026-05-18T00:00:00.000Z' },
+      receivedAt: { label: '2026.05.18', isoValue: '2026-05-18T00:00:00.000Z' },
     },
     draft: baseDraft,
     isOriginalOverlayOpen: false,
@@ -43,6 +43,8 @@ test('write reply screen shows summary on the base card and keeps original body 
   const openHtml = renderToStaticMarkup(WriteFormScreen(baseProps({ isOriginalOverlayOpen: true })));
 
   assert.match(closedHtml, /요약만 기본 카드에 표시됩니다\./);
+  assert.match(closedHtml, />2026\.05\.18</);
+  assert.doesNotMatch(closedHtml, />2026-05-18</);
   assert.doesNotMatch(closedHtml, /원문 전체는 overlay 안에서만 표시됩니다\./);
   assert.match(openHtml, /원문 전체는 overlay 안에서만 표시됩니다\./);
   assert.match(openHtml, /role="dialog"/);
@@ -105,6 +107,16 @@ test('write reply screen omits AI filter guidance from the Figma-aligned form', 
 
   assert.doesNotMatch(html, /AI 안심 필터 적용 안내/);
   assert.doesNotMatch(html, /AI 안심 필터가 내용을 확인하고 있습니다\./);
+});
+
+test('write reply screen uses compact Figma category chips', () => {
+  const html = renderToStaticMarkup(WriteFormScreen(baseProps({ isOriginalOverlayOpen: true })));
+
+  assert.match(html, /h-\[23px\]/);
+  assert.match(html, /box-border/);
+  assert.match(html, /py-0/);
+  assert.doesNotMatch(html, /min-h-\[23px\]/);
+  assert.doesNotMatch(html, /py-\[5px\]/);
 });
 
 test('write reply screen does not expose publisher profile metadata', () => {

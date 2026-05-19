@@ -1,5 +1,7 @@
 export interface TimestampLike {
   toMillis?: () => number;
+  seconds?: number;
+  _seconds?: number;
 }
 
 export interface MyWorryListItem {
