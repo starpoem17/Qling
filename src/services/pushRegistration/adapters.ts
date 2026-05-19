@@ -11,7 +11,7 @@ import { getTokenPreview } from './policy';
 import { resolveMessagingRegistration } from './serviceWorker';
 import type { ExistingTokenDoc, PushRegistrationAdapters } from './types';
 
-const FCM_VAPID_KEY = 'BFHIR9z_IvTS-YS65CP7-JuEb2Q0psopN5-qzUcBhvg6RNLuc5QevbXyENEb7JyeBULPZSOUPE8r46dGEQDqI6M';
+const FCM_VAPID_PUBLIC_KEY = import.meta.env?.VITE_FCM_VAPID_PUBLIC_KEY;
 
 const getStorage = () => typeof window === 'undefined' ? null : window.localStorage;
 
@@ -77,9 +77,13 @@ export const createProductionPushRegistrationAdapters = (): PushRegistrationAdap
   resolveMessagingRegistration,
   getFcmToken: registration => {
     if (!messaging) return Promise.resolve(null);
+    if (!FCM_VAPID_PUBLIC_KEY) {
+      console.warn('FCM: Missing VITE_FCM_VAPID_PUBLIC_KEY.');
+      return Promise.resolve(null);
+    }
 
     return getToken(messaging, {
-      vapidKey: FCM_VAPID_KEY,
+      vapidKey: FCM_VAPID_PUBLIC_KEY,
       serviceWorkerRegistration: registration,
     });
   },
