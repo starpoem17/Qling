@@ -71,6 +71,13 @@ test('bottom navigation central eye renders as a non-interactive indicator', () 
   assert.doesNotMatch(centralIndicatorBlock, /data-target-route/);
 });
 
+test('bottom navigation visually activates both side buttons on my-page special state', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+
+  assert.match(source, /const isVisuallyActive = isActive \|\| activeTab === '마이페이지'/);
+  assert.match(source, /isVisuallyActive\s*\?\s*'bg-\[#fae5d7\] text-\[#ff8b3d\]'/);
+});
+
 test('profile motif remains visual-only without avatar data requirements', () => {
   const props = {
     label: 'Profile motif',
@@ -118,9 +125,11 @@ test('text area and settings row contracts expose required state mapping props',
   const settingsRow = {
     label: '탈퇴',
     description: '계정을 삭제합니다.',
+    leadingIcon: 'icon',
     danger: true,
     disabled: false,
     accessibilityLabel: '계정 탈퇴',
+    showDivider: false,
     onSelect: () => undefined,
   } satisfies SettingsRowProps;
 
@@ -132,6 +141,7 @@ test('text area and settings row contracts expose required state mapping props',
   assert.equal(settingsRow.danger, true);
   assert.equal(settingsRow.disabled, false);
   assert.equal(settingsRow.accessibilityLabel, '계정 탈퇴');
+  assert.equal(settingsRow.showDivider, false);
 });
 
 test('category chip contract allows layout classes without changing selection behavior', () => {

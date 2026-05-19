@@ -113,9 +113,11 @@ export type PolicyTextContainerProps =
 export type SettingsRowProps = {
   readonly label: string;
   readonly description?: string;
+  readonly leadingIcon?: ReactNode;
   readonly danger?: boolean;
   readonly disabled?: boolean;
   readonly accessibilityLabel?: string;
+  readonly showDivider?: boolean;
   readonly onSelect?: () => void;
 };
 

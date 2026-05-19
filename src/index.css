@@ -48,9 +48,9 @@
   --qling-radius-content-sheet: 1.75rem;
   --qling-radius-cta: 1rem;
 
-  --qling-shadow-card: 0 12px 28px rgb(37 34 31 / 0.08);
+  --qling-shadow-card: 0 4px 4px rgb(0 0 0 / 0.25);
   --qling-shadow-modal: 0 24px 60px rgb(37 34 31 / 0.18);
-  --qling-shadow-sheet: 0 18px 44px rgb(37 34 31 / 0.12);
+  --qling-shadow-sheet: 0 4px 4px rgb(0 0 0 / 0.25);
   --qling-shadow-nav: 0 -10px 32px rgb(37 34 31 / 0.10);
 
   --qling-space-shell-x: clamp(1rem, 4vw, 1.5rem);

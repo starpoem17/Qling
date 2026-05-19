@@ -82,6 +82,27 @@ test('my-page profile summary does not render private profile fields or interest
   }
 });
 
+test('my-page empty answer preview renders a single non-interactive Figma card without metadata', () => {
+  const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps({
+    answerPreviewItems: [],
+  })));
+
+  assert.match(html, /첫 답변을 남겨보세요!/);
+  assert.match(html, /h-\[86px\]/);
+  assert.doesNotMatch(html, /아직 내가 보낸 위로가 없어요/);
+  assert.doesNotMatch(html, /자존감|2026-05-02|카테고리/);
+  assert.doesNotMatch(html, /aria-label="내가 쓴 답변,/);
+});
+
+test('my-page hides push helper and status copy while keeping the accessible switch state', () => {
+  const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps()));
+
+  assert.doesNotMatch(html, /켜면 브라우저 알림 권한 요청과 푸시 등록을 시도합니다/);
+  assert.doesNotMatch(html, /알림 권한 설정이 필요합니다/);
+  assert.match(html, /role="switch"/);
+  assert.match(html, /aria-checked="false"/);
+});
+
 test('my-page forwards edit interests, my answers, push toggle, and policy actions', () => {
   const events: string[] = [];
   const tree = MyPageScreen(baseMyPageProps({

@@ -110,6 +110,7 @@ export function BottomNavigation({
       <div className="absolute left-4 right-[15px] top-[37px] grid grid-cols-2 gap-[130px]">
         {visibleTabs.map(({ tab, label }) => {
           const isActive = activeTab === tab;
+          const isVisuallyActive = isActive || activeTab === '마이페이지';
           return (
             <button
               key={tab}
@@ -119,7 +120,7 @@ export function BottomNavigation({
               onClick={() => onSelectTab(tab)}
               className={cn(
                 'relative flex h-9 min-w-0 items-center justify-center rounded-[7px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2',
-                isActive
+                isVisuallyActive
                   ? 'bg-[#fae5d7] text-[#ff8b3d]'
                   : 'bg-[#dadce0] text-[#b8b8b8] hover:bg-[#d0d2d6]',
               )}
@@ -426,10 +427,13 @@ function StatusState({ icon, title, message, actionLabel, onAction, danger }: St
 
 export function ProfileMotif({ label = '프로필 모티프' }: ProfileMotifProps) {
   return (
-    <div aria-label={label} role="img" className="relative h-20 w-20 rounded-full bg-[var(--qling-color-cream-soft)] shadow-[var(--qling-shadow-card)]">
-      <div className="absolute left-1/2 top-1/2 h-9 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--qling-color-surface)]" />
-      <div className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--qling-color-primary-orange)]" />
-      <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--qling-color-text)]" />
+    <div aria-label={label} role="img" className="relative h-16 w-16 shrink-0 rounded-full bg-[#ff8b0d]">
+      <span aria-hidden="true" className="absolute left-[25px] top-[18px] h-[25px] w-[17px] overflow-hidden rounded-full bg-white">
+        <span className="absolute left-[8px] top-0 h-[25px] w-[14px] rounded-full bg-[#1a1a1e]" />
+      </span>
+      <span aria-hidden="true" className="absolute left-[43px] top-[18px] h-[25px] w-[17px] overflow-hidden rounded-full bg-white">
+        <span className="absolute left-[8px] top-0 h-[25px] w-[14px] rounded-full bg-[#1a1a1e]" />
+      </span>
     </div>
   );
 }
@@ -451,20 +455,26 @@ export function PolicyTextContainer(props: PolicyTextContainerProps) {
   return <EmptyState title={props.title} message={props.message} />;
 }
 
-export function SettingsRow({ label, description, danger, disabled, accessibilityLabel, onSelect }: SettingsRowProps) {
+export function SettingsRow({ label, description, leadingIcon, danger, disabled, accessibilityLabel, showDivider = true, onSelect }: SettingsRowProps) {
   return (
     <button
       type="button"
       aria-label={accessibilityLabel}
       disabled={disabled}
       onClick={onSelect}
-      className="flex w-full items-center justify-between gap-4 border-b border-[var(--qling-color-border)] py-4 text-left disabled:cursor-not-allowed disabled:opacity-55"
+      className={cn(
+        'flex h-12 w-full items-center justify-between gap-3 px-5 py-3 text-left disabled:cursor-not-allowed disabled:opacity-55',
+        showDivider && 'border-b border-[var(--qling-color-border)]',
+      )}
     >
-      <span className="min-w-0">
-        <span className={cn('block text-sm font-bold', danger ? 'text-[var(--qling-color-danger)]' : 'text-[var(--qling-color-text)]')}>{label}</span>
-        {description && <span className="mt-1 block text-xs leading-5 text-[var(--qling-color-muted)]">{description}</span>}
+      <span className="flex min-w-0 items-center gap-3">
+        {leadingIcon && <span className="shrink-0" aria-hidden="true">{leadingIcon}</span>}
+        <span className="min-w-0">
+          <span className={cn('block truncate text-[15px] font-semibold leading-[22px]', danger ? 'text-[#ea4335]' : 'text-[#1a1a1e]')}>{label}</span>
+          {description && <span className="mt-1 block text-xs leading-5 text-[var(--qling-color-muted)]">{description}</span>}
+        </span>
       </span>
-      <ChevronRight className="h-4 w-4 shrink-0 text-[var(--qling-color-muted)]" aria-hidden="true" />
+      <ChevronRight className="h-[18px] w-[18px] shrink-0 text-[#c2c4c8]" aria-hidden="true" />
     </button>
   );
 }
