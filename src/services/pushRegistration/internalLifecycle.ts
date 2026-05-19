@@ -590,9 +590,7 @@ export function createPushRegistrationLifecycle<TRegistration>({
     if (permission === 'granted') {
       const result = await maybeRecoverPushRegistration(user, 'permission-granted');
 
-      if (result.registered) {
-        adapters.alert('알림 설정 완료! 토큰이 갱신되었습니다.');
-      } else {
+      if (!result.registered) {
         adapters.alert('오류: ' + (result.error ?? '알림 설정 실패'));
       }
       return;
