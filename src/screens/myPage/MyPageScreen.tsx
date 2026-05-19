@@ -230,24 +230,39 @@ function SettingIcon({ item }: { readonly item: MyPageSettingItem }) {
 
 export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () => void }) {
   const policyBody = props.body?.trim();
+  const cardContent = props.state.status === 'loading'
+    ? props.state.label
+    : props.state.status === 'error'
+      ? props.state.message
+      : policyBody || (props.state.status === 'empty' ? props.state.message : '정책을 준비 중입니다.');
 
   return (
-    <div className="space-y-5">
-      <BackButton onBack={props.onBack} label="마이페이지로" />
-      {props.state.status === 'loading' ? (
-        <LoadingState title={props.title} message={props.state.label} />
-      ) : props.state.status === 'error' ? (
-        <PolicyTextContainer state="error" title={props.title} message={props.state.message} />
-      ) : policyBody ? (
-        <PolicyTextContainer state="body" title={props.title} body={policyBody} />
-      ) : (
-        <PolicyTextContainer
-          state="empty"
-          title={props.title}
-          message={props.state.status === 'empty' ? props.state.message : '정책을 준비 중입니다.'}
-        />
-      )}
-    </div>
+    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[852px] bg-[#ff8b0d] text-[#1a1a1e]">
+      <div className="relative mx-auto h-[852px] w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
+        <button
+          type="button"
+          onClick={props.onBack}
+          aria-label="마이페이지로 돌아가기"
+          className="absolute left-[22px] top-[56px] h-[39px] w-[13px] text-left text-[32px] font-semibold leading-[39px] text-[#2a2a2a] focus:outline-none focus:ring-2 focus:ring-[#2a2a2a]"
+        >
+          ‹
+        </button>
+        <h1
+          aria-label={props.title}
+          className="absolute left-[141px] top-[66px] h-[21px] w-[121px] text-left text-[17px] font-extrabold leading-[21px] tracking-[-0.02em] text-[#2a2a2a]"
+        >
+          개인정보 처리방침
+        </h1>
+        <article className="absolute left-4 top-[127px] h-[589px] w-[361px] overflow-hidden rounded-[18px] bg-white px-[18px] pt-[31px]">
+          <div
+            className="whitespace-pre-wrap text-[13px] font-semibold leading-[150%] tracking-[-0.05em] text-[#1a1a1e]"
+            role={props.state.status === 'error' ? 'alert' : undefined}
+          >
+            {cardContent}
+          </div>
+        </article>
+      </div>
+    </section>
   );
 }
 

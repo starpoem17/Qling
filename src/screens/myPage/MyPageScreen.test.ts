@@ -287,6 +287,27 @@ test('privacy policy screen uses exact PRD empty copy', () => {
   assert.doesNotMatch(html, /운영정책/);
 });
 
+test('privacy policy screen renders document body in the Figma card layout', () => {
+  const html = renderToStaticMarkup(PolicyScreen({
+    policy: 'privacy_policy',
+    title: '개인정보처리방침',
+    body: '수집 데이터:\n수집하는 데이터 항목\n\n보관 기간:\n탈퇴 시 삭제 기준',
+    state: { status: 'ready' },
+    onBack: () => undefined,
+  }));
+
+  assert.match(html, /bg-\[#ff8b0d\]/);
+  assert.match(html, /top-\[127px\]/);
+  assert.match(html, /h-\[589px\]/);
+  assert.match(html, /w-\[361px\]/);
+  assert.match(html, /rounded-\[18px\]/);
+  assert.match(html, /개인정보 처리방침/);
+  assert.match(html, /aria-label="개인정보처리방침"/);
+  assert.match(html, /수집 데이터:/);
+  assert.match(html, /탈퇴 시 삭제 기준/);
+  assert.doesNotMatch(html, /정책을 준비 중입니다\./);
+});
+
 type TestElement = ReactElement<Record<string, unknown>>;
 
 function findElement(tree: ReactNode, predicate: (element: TestElement) => boolean): TestElement {
