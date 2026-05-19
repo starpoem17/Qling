@@ -1,6 +1,5 @@
-import { Loader2, UserRound, XCircle } from 'lucide-react';
+import { CircleUserRound } from 'lucide-react';
 import type { KeyboardEvent, MouseEvent } from 'react';
-import { cn } from '../../lib/utils';
 import {
   CategoryChip,
   EmptyState,
@@ -14,7 +13,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   const passingDeliveryIds = new Set(props.passingDeliveryIds);
 
   const header = (
-    <header className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[120px] bg-[#ff8b3d] px-4 pt-[68px]">
+    <header className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[120px] bg-[#ff8b3d] px-8 pt-[68px]">
       <div className="flex items-start justify-between">
         <div
           role="presentation"
@@ -30,7 +29,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
           onClick={props.onOpenMyPage}
           className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
         >
-          <UserRound className="h-7 w-7" aria-hidden="true" />
+          <CircleUserRound className="h-7 w-7" aria-hidden="true" />
         </button>
       </div>
     </header>
@@ -76,7 +75,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
         className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px)] rounded-t-[28px] bg-[#fff1d1] px-4 pb-4 pt-5"
         aria-label="받은 고민 목록"
       >
-        <div className="grid gap-4">
+        <div className="grid gap-[14px]">
           {props.items.map(item => {
             const isPassing = passingDeliveryIds.has(item.deliveryId);
             const content = item.bodyText ?? item.previewText;
@@ -84,10 +83,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
             return (
               <QlingCard
                 key={item.deliveryId}
-                className={cn(
-                  'relative overflow-hidden rounded-2xl border-0 bg-white p-0 shadow-[0_5px_9px_rgb(42_42_42/0.24)]',
-                  item.isUnread && 'ring-2 ring-[#ff8b3d]',
-                )}
+                className="relative h-[135px] overflow-hidden rounded-[18px] border-0 bg-white p-0 shadow-[0_4px_4px_rgb(0_0_0/0.25)]"
               >
                 <div
                   role="button"
@@ -99,7 +95,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                     props.onOpen({ deliveryId: item.deliveryId, worryId: item.worryId });
                   }}
                   aria-label={`${item.category} 고민에 답변 작성하기`}
-                  className="block w-full px-5 pb-9 pt-3 text-left focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset"
+                  className="block h-full w-full px-[18px] pb-7 pt-[11px] text-left focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset"
                 >
                   <span className="flex items-start justify-between gap-3">
                     <span className="flex min-w-0 items-center gap-3">
@@ -107,10 +103,10 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                         label={item.category}
                         selected
                         disabled
-                        className="pointer-events-none min-h-0 w-auto px-3 py-1 text-[12px] leading-4 text-[#ff8b3d] disabled:opacity-100"
+                        className="pointer-events-none h-6 min-h-0 w-auto border-0 bg-[#ffe4cc] px-3 py-0 text-[11px] font-bold leading-[14px] text-[#ff8b3d] disabled:opacity-100"
                       />
                       <time
-                        className="text-[12px] font-medium leading-7 text-[#b8b8b8]"
+                        className="text-[12px] font-medium leading-6 text-[#b8b8b8]"
                         dateTime={item.receivedAt.isoValue}
                       >
                         {item.receivedAt.label}
@@ -125,15 +121,14 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                         }}
                         disabled={isPassing}
                         aria-label={`${item.category} 고민 건너뛰기`}
-                        className="inline-flex h-6 shrink-0 items-center justify-center gap-1 rounded-[var(--qling-radius-pill)] bg-[#ff8b3d] px-3 text-[11px] font-extrabold text-white transition-colors hover:bg-[var(--qling-color-secondary-orange)] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex h-[23px] w-[65px] shrink-0 items-center justify-center rounded-[var(--qling-radius-pill)] border border-[#ff8b3d] bg-[#ff8b3d] text-[11px] font-bold leading-[14px] text-white transition-colors hover:bg-[var(--qling-color-secondary-orange)] disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {isPassing ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : <XCircle className="h-3 w-3" aria-hidden="true" />}
                         {isPassing ? '처리 중' : '건너뛰기'}
                       </button>
                     </span>
                   </span>
                   {item.isUnread && <span className="sr-only">새 고민</span>}
-                  <span className="mt-6 block whitespace-pre-wrap break-words text-[16px] font-extrabold leading-7 text-[#2a2a2a]">
+                  <span className="mt-[21px] line-clamp-2 block whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 tracking-[-0.03em] text-[#2a2a2a]">
                     {content}
                   </span>
                 </div>

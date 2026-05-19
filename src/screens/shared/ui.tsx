@@ -4,9 +4,9 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronRight,
-  FileText,
+  House,
   Loader2,
-  MessageSquare,
+  Send,
   Radio,
   UserRound,
 } from 'lucide-react';
@@ -61,21 +61,21 @@ export function BottomNavigation({
   onSelectTab,
 }: BottomNavigationProps) {
   const iconByTab: Record<BottomNavigationTab, ReactNode> = {
-    답변하기: <MessageSquare className="h-5 w-5" aria-hidden="true" />,
-    '나의 고민': <FileText className="h-5 w-5" aria-hidden="true" />,
+    답변하기: <House className="h-6 w-6" aria-hidden="true" />,
+    '나의 고민': <Send className="h-6 w-6" aria-hidden="true" />,
     마이페이지: <UserRound className="h-5 w-5" aria-hidden="true" />,
   };
   const visibleTabs = tabs.filter(tab => tab.tab !== '마이페이지');
   const indicatorPositionClass = activeTab === '답변하기'
-    ? '-translate-x-[140%]'
+    ? '-translate-x-1/2'
     : activeTab === '나의 고민'
-      ? 'translate-x-[40%]'
+      ? 'translate-x-1/2'
       : '-translate-x-1/2';
 
   return (
     <nav
       aria-label="주요 화면"
-      className="fixed bottom-0 left-1/2 z-50 w-full max-w-[var(--qling-mobile-canvas-width)] -translate-x-1/2 border-t border-[var(--qling-color-border)] bg-[rgb(255_255_255/0.96)] shadow-[var(--qling-shadow-nav)] backdrop-blur-md"
+      className="fixed bottom-0 left-1/2 z-50 h-[97px] w-full max-w-[var(--qling-mobile-canvas-width)] -translate-x-1/2 bg-[#fff5eb]"
       style={{ paddingBottom: 'var(--qling-space-safe-bottom)' }}
     >
       <div
@@ -84,30 +84,34 @@ export function BottomNavigation({
         data-testid="bottom-navigation-central-indicator"
         data-indicator-state={activeTab}
         className={cn(
-          'pointer-events-none absolute left-1/2 top-0 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--qling-color-primary-orange)] text-[var(--qling-color-text)] shadow-[var(--qling-shadow-card)] transition-transform',
+          'pointer-events-none absolute left-1/2 top-[9px] flex h-[59px] w-[95px] items-center justify-center rounded-[29px] bg-[#ff8b3d] text-[#2a2a2a] transition-transform',
           indicatorPositionClass,
         )}
       >
-        <Radio className="h-5 w-5" aria-hidden="true" />
+        <span className="flex items-center gap-1" aria-hidden="true">
+          <span className="block h-[26px] w-[17px] rounded-full bg-white shadow-[inset_-6px_0_0_#2a2a2a]" />
+          <span className="block h-[26px] w-[17px] rounded-full bg-white shadow-[inset_-6px_0_0_#2a2a2a]" />
+        </span>
       </div>
-      <div className="mx-auto grid h-[var(--qling-space-nav-height)] max-w-2xl grid-cols-2 gap-12 px-2 pt-3">
+      <div className="mx-auto grid h-full grid-cols-2 gap-[130px] px-4 pt-[37px]">
         {visibleTabs.map(({ tab, label }) => {
           const isActive = activeTab === tab || activeTab === '마이페이지';
           return (
             <button
               key={tab}
               type="button"
+              aria-label={label}
               aria-current={isActive ? 'page' : undefined}
               onClick={() => onSelectTab(tab)}
               className={cn(
-                'flex min-w-0 flex-col items-center justify-center gap-1 rounded-[var(--qling-radius-bottom-nav)] text-xs font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)] focus:ring-offset-2',
+                'flex h-9 min-w-0 items-center justify-center rounded-[7px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2',
                 isActive
-                  ? 'bg-[var(--qling-color-cream-soft)] text-[var(--qling-color-text)]'
-                  : 'text-[var(--qling-color-muted)] hover:bg-[var(--qling-color-cream)]',
+                  ? 'bg-[#fae5d7] text-[#ff8b3d]'
+                  : 'bg-[#dadce0] text-[#b8b8b8] hover:bg-[#d0d2d6]',
               )}
             >
               {iconByTab[tab]}
-              <span className="max-w-full truncate">{label}</span>
+              <span className="sr-only">{label}</span>
             </button>
           );
         })}
