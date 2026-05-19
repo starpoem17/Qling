@@ -69,6 +69,14 @@ test('write reply screen renders visual pencil placeholder only for an empty dra
   assert.doesNotMatch(filledHtml, /고민자에게 따뜻한 말을 전달해주세요!/);
 });
 
+test('write reply textarea starts at the visual placeholder position', () => {
+  const html = renderToStaticMarkup(WriteFormScreen(baseProps()));
+
+  assert.match(html, /pt-\[22px\]/);
+  assert.match(html, /top-\[22px\]/);
+  assert.doesNotMatch(html, /pt-\[63px\]/);
+});
+
 test('write reply screen forwards back, overlay, draft, close, and publish events without route objects', () => {
   const events: string[] = [];
   const tree = WriteFormScreen(baseProps({

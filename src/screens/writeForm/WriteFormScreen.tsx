@@ -61,7 +61,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           disabled={props.draft.isProcessing}
           aria-invalid={Boolean(validationMessage) || undefined}
           onChange={event => props.onDraftChange(event.currentTarget.value)}
-          className="box-border h-full w-full resize-none bg-transparent px-[22px] pb-10 pt-[63px] text-sm font-medium leading-6 tracking-[-0.42px] text-[#2a2a2a] outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          className="box-border h-full w-full resize-none bg-transparent px-[22px] pb-10 pt-[22px] text-base font-medium leading-6 tracking-[-0.64px] text-[#2a2a2a] outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-60"
         />
         {props.draft.value === '' && (
           <span
