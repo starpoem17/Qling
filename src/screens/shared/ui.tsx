@@ -66,30 +66,27 @@ export function BottomNavigation({
     마이페이지: <UserRound className="h-5 w-5" aria-hidden="true" />,
   };
   const visibleTabs = tabs.filter(tab => tab.tab !== '마이페이지');
-  const indicatorPositionClass = activeTab === '답변하기'
-    ? '-translate-x-1/2'
-    : activeTab === '나의 고민'
-      ? 'translate-x-1/2'
-      : '-translate-x-1/2';
+  const isAnswerTab = activeTab === '답변하기' || activeTab === '마이페이지';
+  const leftEyePositionClass = isAnswerTab ? 'left-[14px]' : 'left-[48px]';
+  const rightEyePositionClass = isAnswerTab ? 'left-[33px]' : 'left-[67px]';
 
   return (
     <nav
       aria-label="주요 화면"
-      className="fixed bottom-[-7px] left-1/2 z-50 h-[104px] w-full max-w-[var(--qling-mobile-canvas-width)] -translate-x-1/2 bg-[#fff5eb]"
+      className="fixed bottom-[-7px] left-1/2 z-50 h-[104px] w-full max-w-[var(--qling-mobile-canvas-width)] -translate-x-1/2"
       style={{ paddingBottom: 'var(--qling-space-safe-bottom)' }}
     >
+      <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-0 h-[88px] w-[114px] -translate-x-1/2 rounded-[30px] bg-[#fff5eb]" />
+      <div aria-hidden="true" className="pointer-events-none absolute left-0 top-[29px] h-[72px] w-full bg-[#fff5eb]" />
       <div
         aria-hidden="true"
         role="presentation"
         data-testid="bottom-navigation-central-indicator"
         data-indicator-state={activeTab}
-        className={cn(
-          'pointer-events-none absolute left-1/2 top-[9px] flex h-[59px] w-[95px] items-center justify-center rounded-[29px] bg-[#ff8b3d] text-[#2a2a2a] transition-transform',
-          indicatorPositionClass,
-        )}
+        className="pointer-events-none absolute left-1/2 top-[9px] flex h-[59px] w-[95px] -translate-x-1/2 items-center justify-center rounded-[29px] bg-[#ff8b3d] text-[#2a2a2a]"
       >
         <span className="relative block h-full w-full" aria-hidden="true">
-          <svg className="absolute left-[14px] top-[15px]" width="17" height="26" viewBox="0 0 17 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg className={cn('absolute top-[15px] transition-[left]', leftEyePositionClass)} width="17" height="26" viewBox="0 0 17 26" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M16.8497 12.7299C16.97 23.6896 13.0814 25.4598 8.43297 25.4598C3.78452 25.4598 -0.289859 23.087 0.0162047 12.7299C0.322268 2.37274 3.78452 1.71661e-05 8.43297 1.71661e-05C13.0814 1.71661e-05 16.7295 1.77015 16.8497 12.7299Z" fill="#FFF5EB" />
             <mask id="bottom-navigation-left-eye-mask" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="17" height="26">
               <path d="M8.44531 1.00002C10.6606 1.00007 12.3637 1.42299 13.5908 2.89748C14.8732 4.43845 15.8145 7.33004 15.874 12.7569C15.9334 18.1729 14.9891 21.0535 13.6875 22.5869C12.4315 24.0665 10.6652 24.4912 8.44531 24.4912C6.28278 24.4912 4.44319 23.9447 3.14062 22.3701C1.80394 20.7543 0.865303 17.8616 1.01562 12.7754C1.16686 7.65838 2.09957 4.73758 3.38574 3.10256C4.61627 1.53836 6.29704 1.00002 8.44531 1.00002Z" fill="#FFF5EB" stroke="black" strokeWidth="2" />
@@ -98,7 +95,7 @@ export function BottomNavigation({
               <path d="M9.56676 13.254C9.56676 18.3804 6.74704 22.5363 3.26873 22.5363C-0.209573 22.5363 -3.0293 20.1811 -3.0293 13.254C-3.0293 8.12752 -0.209573 3.9717 3.26873 3.9717C6.74704 3.9717 9.56676 8.12752 9.56676 13.254Z" fill="#1A1A1A" />
             </g>
           </svg>
-          <svg className="absolute left-[33px] top-[15px]" width="17" height="26" viewBox="0 0 17 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg className={cn('absolute top-[15px] transition-[left]', rightEyePositionClass)} width="17" height="26" viewBox="0 0 17 26" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M16.8497 12.7299C16.97 23.6896 13.0814 25.4598 8.43297 25.4598C3.78452 25.4598 -0.289859 23.087 0.0162047 12.7299C0.322268 2.37274 3.78452 1.71661e-05 8.43297 1.71661e-05C13.0814 1.71661e-05 16.7295 1.77015 16.8497 12.7299Z" fill="#FFF5EB" />
             <mask id="bottom-navigation-right-eye-mask" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="17" height="26">
               <path d="M8.44531 1.00002C10.6606 1.00007 12.3637 1.42299 13.5908 2.89748C14.8732 4.43845 15.8145 7.33004 15.874 12.7569C15.9334 18.1729 14.9891 21.0535 13.6875 22.5869C12.4315 24.0665 10.6652 24.4912 8.44531 24.4912C6.28278 24.4912 4.44319 23.9447 3.14062 22.3701C1.80394 20.7543 0.865303 17.8616 1.01562 12.7754C1.16686 7.65838 2.09957 4.73758 3.38574 3.10256C4.61627 1.53836 6.29704 1.00002 8.44531 1.00002Z" fill="#FFF5EB" stroke="black" strokeWidth="2" />
@@ -109,9 +106,9 @@ export function BottomNavigation({
           </svg>
         </span>
       </div>
-      <div className="mx-auto grid h-full grid-cols-2 gap-[130px] px-4 pt-[37px]">
+      <div className="absolute left-4 right-[15px] top-[37px] grid grid-cols-2 gap-[130px]">
         {visibleTabs.map(({ tab, label }) => {
-          const isActive = activeTab === tab || activeTab === '마이페이지';
+          const isActive = activeTab === tab;
           return (
             <button
               key={tab}
@@ -120,7 +117,7 @@ export function BottomNavigation({
               aria-current={isActive ? 'page' : undefined}
               onClick={() => onSelectTab(tab)}
               className={cn(
-                'flex h-9 min-w-0 items-center justify-center rounded-[7px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2',
+                'relative flex h-9 min-w-0 items-center justify-center rounded-[7px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2',
                 isActive
                   ? 'bg-[#fae5d7] text-[#ff8b3d]'
                   : 'bg-[#dadce0] text-[#b8b8b8] hover:bg-[#d0d2d6]',
