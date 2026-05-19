@@ -1,28 +1,23 @@
 import { ArrowLeft, Heart } from 'lucide-react';
-import { EmptyState, ErrorState, LoadingState, OrangeHeaderBand, QlingCard, SuccessBadge } from '../shared/ui';
+import { EmptyState, ErrorState, LoadingState, SuccessBadge } from '../shared/ui';
 import type { MyAnswersScreenProps } from './contract';
 
 export function MyAnswersScreen(props: MyAnswersScreenProps) {
   return (
-    <div className="mx-auto max-w-xl space-y-5 pb-6">
-      <OrangeHeaderBand className="-mx-[var(--qling-space-shell-x)] rounded-b-[32px] pb-10 pt-4">
-        <div className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center">
-          <button
-            type="button"
-            onClick={props.onBack}
-            aria-label="마이페이지로 돌아가기"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--qling-color-text)] transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-text)]"
-          >
-            <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-          </button>
-          <h1 className="text-center text-lg font-extrabold">내가 쓴 답변</h1>
-        </div>
-        <p className="mx-auto mt-4 max-w-xs text-center text-sm font-semibold leading-6 text-[var(--qling-color-text)]">
-          내가 보낸 답변과 받은 반응을 확인합니다.
-        </p>
-      </OrangeHeaderBand>
+    <div className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-scroll-bottom))] bg-[#ff8b3d] px-4 pb-8 pt-[50px] text-[#1a1a1a]">
+      <div className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center">
+        <button
+          type="button"
+          onClick={props.onBack}
+          aria-label="마이페이지로 돌아가기"
+          className="flex h-10 w-10 items-center justify-start text-[#1a1a1a] transition-colors hover:text-[#4a3424] focus:outline-none focus:ring-2 focus:ring-[#1a1a1a] focus:ring-offset-2 focus:ring-offset-[#ff8b3d]"
+        >
+          <ArrowLeft className="h-6 w-6" strokeWidth={3} aria-hidden="true" />
+        </button>
+        <h1 className="text-center text-base font-extrabold leading-[21px]">내가 쓴 답변</h1>
+      </div>
 
-      <div className="-mt-8 space-y-3">
+      <div className="mt-[31px] space-y-[19px]">
         {props.state.status === 'loading' && <LoadingState title={props.state.label} />}
         {props.state.status === 'error' && <ErrorState title="내가 쓴 답변을 불러오지 못했어요." message={props.state.message} />}
         {props.state.status === 'empty' && (
@@ -32,38 +27,31 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
           <article
             key={reply.replyId}
             aria-label={reply.accessibilityLabel}
-            className="block w-full rounded-[18px] text-left"
+            className="block w-full rounded-2xl bg-white px-[18px] pb-[19px] pt-[11px] text-left shadow-[0_4px_4px_rgb(0_0_0/0.25)]"
           >
-            <QlingCard className="space-y-3 rounded-[18px]">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-2">
-                  {reply.categoryLabel && (
-                    <span className="rounded-[var(--qling-radius-pill)] bg-[#ffe4cc] px-3 py-1 text-xs font-extrabold text-[var(--qling-color-primary-orange)]">
-                      {reply.categoryLabel}
-                    </span>
-                  )}
-                  {reply.isUnread && <SuccessBadge label="새 반응" />}
-                </div>
-                {reply.hasReceivedHeart && <Heart className="h-5 w-5 shrink-0 fill-[var(--qling-color-danger)] text-[var(--qling-color-danger)]" aria-hidden="true" />}
-              </div>
-              <div className="space-y-2">
-                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[var(--qling-color-muted)]">
-                  {reply.dateLabel && <span>{reply.dateLabel}</span>}
-                  {reply.feedbackLabel && <span>{reply.feedbackLabel}</span>}
-                </div>
-                <p className="whitespace-pre-wrap break-words text-base font-extrabold leading-7 text-[var(--qling-color-text)]">
-                  {reply.originalWorryPreview}
-                </p>
-                <p className="whitespace-pre-wrap break-words text-sm font-semibold leading-6 text-[var(--qling-color-muted)]">
-                  {reply.previewText}
-                </p>
-                {reply.feedbackComment && (
-                  <p className="whitespace-pre-wrap break-words border-t border-[var(--qling-color-border)] pt-2 text-xs font-semibold leading-5 text-[var(--qling-color-muted)]">
-                    {reply.feedbackComment}
-                  </p>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-[9px]">
+                {reply.categoryLabel && (
+                  <span className="rounded-full bg-[#ffe4cc] px-3 py-[5px] text-[11px] font-bold leading-[13px] text-[#ff8b3d]">
+                    {reply.categoryLabel}
+                  </span>
                 )}
+                {reply.dateLabel && <span className="text-xs font-semibold leading-[15px] text-[#b8b8b8]">{reply.dateLabel}</span>}
+                {reply.isUnread && <SuccessBadge label="새 반응" />}
               </div>
-            </QlingCard>
+              {reply.hasReceivedHeart && <Heart className="mt-0.5 h-5 w-5 shrink-0 fill-[#e94335] text-[#e94335]" aria-hidden="true" />}
+            </div>
+            <p className="mt-3 whitespace-pre-wrap break-words text-[15px] font-extrabold leading-6 text-[#2a2a2a]">
+              {reply.originalWorryPreview}
+            </p>
+            <p className="mt-[14px] whitespace-pre-wrap break-words border-t border-[#d9d9d9] pt-[13px] text-xs font-semibold leading-[19px] text-[#2a2a2a]">
+              {reply.previewText}
+            </p>
+            {reply.feedbackComment && (
+              <p className="mt-3 whitespace-pre-wrap break-words border-t border-[#eeeeee] pt-2 text-xs font-semibold leading-5 text-[#77716b]">
+                {reply.feedbackComment}
+              </p>
+            )}
           </article>
         ))}
       </div>

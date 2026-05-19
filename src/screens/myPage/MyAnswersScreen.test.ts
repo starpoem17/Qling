@@ -35,7 +35,9 @@ test('my answers screen renders same card format with heart and one small commen
   assert.match(html, /누구나 그런 시기가/);
   assert.match(html, /힘이 됐어요/);
   assert.match(html, /text-xs/);
-  assert.match(html, /fill-\[var\(--qling-color-danger\)\]/);
+  assert.match(html, /bg-\[#ff8b3d\]/);
+  assert.match(html, /fill-\[#e94335\]/);
+  assert.doesNotMatch(html, /내가 보낸 답변과 받은 반응을 확인합니다\./);
 });
 
 test('my answers screen does not make item cards navigate to detail routes', () => {
