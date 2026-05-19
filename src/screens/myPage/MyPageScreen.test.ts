@@ -101,6 +101,25 @@ test('my-page hides push helper and status copy while keeping the accessible swi
   assert.doesNotMatch(html, /알림 권한 설정이 필요합니다/);
   assert.match(html, /role="switch"/);
   assert.match(html, /aria-checked="false"/);
+  assert.match(html, /bg-\[#d8d8dc\]/);
+  assert.match(html, /left-0\.5/);
+  assert.doesNotMatch(html, /translate-x/);
+});
+
+test('my-page active push toggle renders green track and right-fixed thumb', () => {
+  const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps({
+    pushSettings: {
+      status: 'registered',
+      enabled: true,
+      onToggle: () => undefined,
+    },
+  })));
+
+  assert.match(html, /aria-checked="true"/);
+  assert.match(html, /bg-\[#34c759\]/);
+  assert.match(html, /right-0\.5/);
+  assert.doesNotMatch(html, /aria-disabled/);
+  assert.doesNotMatch(html, /translate-x/);
 });
 
 test('my-page forwards edit interests, my answers, push toggle, and policy actions', () => {
@@ -124,6 +143,23 @@ test('my-page forwards edit interests, my answers, push toggle, and policy actio
   click(findElement(tree, element => element.type === 'button' && /개인정보처리방침/.test(String(element.props['aria-label'] ?? ''))));
 
   assert.deepEqual(events, ['edit', 'answers', 'push:true', 'setting:privacy_policy']);
+});
+
+test('my-page active push toggle click is a no-op', () => {
+  const events: string[] = [];
+  const tree = MyPageScreen(baseMyPageProps({
+    pushSettings: {
+      status: 'registered',
+      enabled: true,
+      onToggle: enabled => {
+        events.push(`push:${enabled}`);
+      },
+    },
+  }));
+
+  click(findElement(tree, element => element.type === 'button' && element.props.role === 'switch'));
+
+  assert.deepEqual(events, []);
 });
 
 test('logout and account deletion rows open modal dialog requests', () => {

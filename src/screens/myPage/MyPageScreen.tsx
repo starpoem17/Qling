@@ -135,6 +135,11 @@ function EmptyAnswerPreviewCard() {
 }
 
 function PushToggleRow({ pushSettings }: { readonly pushSettings: MyPageScreenProps['pushSettings'] }) {
+  const handleToggleClick = () => {
+    if (pushSettings.enabled) return;
+    void pushSettings.onToggle(true);
+  };
+
   return (
     <div className="flex h-12 w-full items-center justify-between gap-3 border-b border-[var(--qling-color-border)] px-5 py-3 text-left">
       <span className="flex min-w-0 items-center gap-3">
@@ -148,13 +153,13 @@ function PushToggleRow({ pushSettings }: { readonly pushSettings: MyPageScreenPr
         role="switch"
         aria-checked={pushSettings.enabled}
         aria-label="알림 설정 토글"
-        onClick={() => void pushSettings.onToggle(!pushSettings.enabled)}
+        onClick={handleToggleClick}
         disabled={pushSettings.status === 'unsupported'}
         className={`relative h-[31px] w-[51px] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] disabled:opacity-50 ${pushSettings.enabled ? 'bg-[#34c759]' : 'bg-[#d8d8dc]'}`}
       >
         <span
           aria-hidden="true"
-          className={`absolute top-0.5 h-[27px] w-[27px] rounded-full bg-white shadow-[0_1px_2px_rgb(0_0_0/0.18)] transition-transform ${pushSettings.enabled ? 'translate-x-[22px]' : 'translate-x-0.5'}`}
+          className={`absolute top-0.5 h-[27px] w-[27px] rounded-full bg-white shadow-[0_1px_2px_rgb(0_0_0/0.18)] transition-[left,right] ${pushSettings.enabled ? 'right-0.5' : 'left-0.5'}`}
         />
       </button>
     </div>
