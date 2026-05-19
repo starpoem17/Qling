@@ -1,14 +1,44 @@
 {
-  "version": 1,
-  "purpose": "Maps design reference assets to production UI files for future pixel-alignment work.",
+  "version": 2,
+  "purpose": "Maps Qling reference PNG screens to production UI files and validator-owned traceability checks for Phase 11.",
+  "sourceOfTruth": {
+    "prd": "docs/PRD.md",
+    "designPngs": "design/reference/pngs/screens/*.png",
+    "note": "Reference PNG files are the visual source of truth. React reference fixtures and CSS export are preview-only hints, not production source."
+  },
+  "referenceRoot": "design/reference/pngs/screens",
+  "previewOnlySources": [
+    {
+      "path": "design/reference/src",
+      "scope": "preview-only static fixture",
+      "note": "Do not import or treat this fixture package as production UI source of truth."
+    },
+    {
+      "path": "design/reference/css/reference-export.css",
+      "scope": "preview-only advisory export",
+      "note": "Use only as a measurement hint; production tokens and screen modules remain under src/."
+    }
+  ],
+  "unusedScreens": [
+    {
+      "id": "11",
+      "slug": "no-reference",
+      "status": "unused",
+      "reason": "No reference PNG exists for screen 11; it must not be mapped to a production route or production UI file."
+    }
+  ],
   "screens": [
     {
+      "id": "01",
       "slug": "splash",
       "description": "Splash/loading entry screen.",
       "reference": {
-        "screenshots": ["design/reference/screenshots/splash.png"],
-        "css": ["design/reference/css/reference-export.css"],
-        "notes": "design/reference/notes/splash.md"
+        "screenshots": [
+          "design/reference/pngs/screens/01-splash.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
       },
       "production": {
         "screen": "src/screens/loadingShell/LoadingShellScreen.tsx",
@@ -16,23 +46,52 @@
         "contract": "src/screens/loadingShell/contract.ts",
         "mapping": null
       },
-      "sharedDependencies": ["src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "allowedEditScope": ["src/screens/loadingShell/LoadingShellScreen.tsx", "src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "mustNotEditForPixelWork": ["src/services/**", "src/server/**", "server.ts", "firestore.rules", "src/screens/**/contract.ts", "src/screens/**/mapping.ts"],
-      "statesToCheck": ["splash", "app-loading", "session-loading", "profile-loading", "route-loading"],
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/loadingShell/LoadingShellScreen.tsx",
+        "src/screens/loadingShell/contract.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "splash",
+        "loading"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/splash is a fixture only."
+      },
       "verification": {
-        "manual": true,
-        "screenshotDiffRequired": false,
-        "commands": ["npm test", "npm run lint", "npm run build"]
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
       }
     },
     {
+      "id": "02",
       "slug": "login",
-      "description": "Login screen with Google sign-in and session state messaging.",
+      "description": "Login screen.",
       "reference": {
-        "screenshots": ["design/reference/screenshots/login.png"],
-        "css": ["design/reference/css/reference-export.css"],
-        "notes": "design/reference/notes/login.md"
+        "screenshots": [
+          "design/reference/pngs/screens/02-login.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
       },
       "production": {
         "screen": "src/screens/loadingShell/LoginScreen.tsx",
@@ -40,27 +99,53 @@
         "contract": "src/screens/loadingShell/contract.ts",
         "mapping": null
       },
-      "sharedDependencies": ["src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "allowedEditScope": ["src/screens/loadingShell/LoginScreen.tsx", "src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "mustNotEditForPixelWork": ["src/services/**", "src/server/**", "server.ts", "firestore.rules", "src/screens/**/contract.ts", "src/screens/**/mapping.ts"],
-      "statesToCheck": ["default", "checking", "signing-in", "error"],
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/loadingShell/LoginScreen.tsx",
+        "src/screens/loadingShell/contract.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "default",
+        "signing-in",
+        "error"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/login is a fixture only."
+      },
       "verification": {
-        "manual": true,
-        "screenshotDiffRequired": false,
-        "commands": ["npm test", "npm run lint", "npm run build"]
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
       }
     },
     {
-      "slug": "onboarding",
-      "description": "Combined production onboarding flow for basic profile, duplicate check, and interests.",
+      "id": "03",
+      "slug": "onboarding-basic",
+      "description": "Onboarding basic profile state.",
       "reference": {
         "screenshots": [
-          "design/reference/screenshots/onboarding-basic.png",
-          "design/reference/screenshots/onboarding-duplicate.png",
-          "design/reference/screenshots/onboarding-interests.png"
+          "design/reference/pngs/screens/03-onboarding-basic.png"
         ],
-        "css": ["design/reference/css/reference-export.css"],
-        "notes": "design/reference/notes/onboarding.md"
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
       },
       "production": {
         "screen": "src/screens/onboarding/OnboardingScreen.tsx",
@@ -68,23 +153,162 @@
         "contract": "src/screens/onboarding/contract.ts",
         "mapping": null
       },
-      "sharedDependencies": ["src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "allowedEditScope": ["src/screens/onboarding/OnboardingScreen.tsx", "src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "mustNotEditForPixelWork": ["src/services/**", "src/server/**", "server.ts", "firestore.rules", "src/screens/**/contract.ts", "src/screens/**/mapping.ts"],
-      "statesToCheck": ["default", "duplicate-checking", "duplicate-available", "validation-error", "submitting"],
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/onboarding/OnboardingScreen.tsx",
+        "src/screens/onboarding/OnboardingContainer.tsx",
+        "src/screens/onboarding/contract.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "basic-profile",
+        "validation-error"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/onboarding-basic is a fixture only.",
+        "productionState": "03, 04, and 05 are states of the same production onboarding screen."
+      },
       "verification": {
-        "manual": true,
-        "screenshotDiffRequired": false,
-        "commands": ["npm test", "npm run lint", "npm run build"]
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
       }
     },
     {
+      "id": "04",
+      "slug": "onboarding-duplicate",
+      "description": "Onboarding duplicate nickname state.",
+      "reference": {
+        "screenshots": [
+          "design/reference/pngs/screens/04-onboarding-duplicate.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
+      },
+      "production": {
+        "screen": "src/screens/onboarding/OnboardingScreen.tsx",
+        "container": "src/screens/onboarding/OnboardingContainer.tsx",
+        "contract": "src/screens/onboarding/contract.ts",
+        "mapping": null
+      },
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/onboarding/OnboardingScreen.tsx",
+        "src/screens/onboarding/OnboardingContainer.tsx",
+        "src/screens/onboarding/contract.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "duplicate-nickname"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/onboarding-duplicate is a fixture only.",
+        "productionState": "03, 04, and 05 are states of the same production onboarding screen."
+      },
+      "verification": {
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
+      }
+    },
+    {
+      "id": "05",
+      "slug": "onboarding-interests",
+      "description": "Onboarding interests state.",
+      "reference": {
+        "screenshots": [
+          "design/reference/pngs/screens/05-onboarding-interests.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
+      },
+      "production": {
+        "screen": "src/screens/onboarding/OnboardingScreen.tsx",
+        "container": "src/screens/onboarding/OnboardingContainer.tsx",
+        "contract": "src/screens/onboarding/contract.ts",
+        "mapping": null
+      },
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/onboarding/OnboardingScreen.tsx",
+        "src/screens/onboarding/OnboardingContainer.tsx",
+        "src/screens/onboarding/contract.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "interests"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/onboarding-interests is a fixture only.",
+        "productionState": "03, 04, and 05 are states of the same production onboarding screen."
+      },
+      "verification": {
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
+      }
+    },
+    {
+      "id": "06",
       "slug": "received-worries",
       "description": "Received worries tab / answer queue screen.",
       "reference": {
-        "screenshots": ["design/reference/screenshots/received-worries.png"],
-        "css": ["design/reference/css/reference-export.css"],
-        "notes": "design/reference/notes/received-worries.md"
+        "screenshots": [
+          "design/reference/pngs/screens/06-received-worries.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
       },
       "production": {
         "screen": "src/screens/receivedWorries/ReceivedWorriesScreen.tsx",
@@ -92,75 +316,226 @@
         "contract": "src/screens/receivedWorries/contract.ts",
         "mapping": "src/screens/receivedWorries/mapping.ts"
       },
-      "sharedDependencies": ["src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "allowedEditScope": ["src/screens/receivedWorries/ReceivedWorriesScreen.tsx", "src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "mustNotEditForPixelWork": ["src/services/**", "src/server/**", "server.ts", "firestore.rules", "src/screens/**/contract.ts", "src/screens/**/mapping.ts"],
-      "statesToCheck": ["default", "loading", "empty", "error", "pass-action"],
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/receivedWorries/ReceivedWorriesScreen.tsx",
+        "src/screens/receivedWorries/ReceivedWorriesContainer.tsx",
+        "src/screens/receivedWorries/contract.ts",
+        "src/screens/receivedWorries/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "default",
+        "loading",
+        "empty",
+        "pass-action"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/received-worries is a fixture only."
+      },
       "verification": {
-        "manual": true,
-        "screenshotDiffRequired": false,
-        "commands": ["npm test", "npm run lint", "npm run build"]
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
       }
     },
     {
-      "slug": "answer-write",
-      "description": "Reply writing screen for answering a received worry.",
+      "id": "07",
+      "slug": "question-write-a",
+      "description": "Worry writing screen.",
       "reference": {
         "screenshots": [
-          "design/reference/screenshots/answer-write-1.png",
-          "design/reference/screenshots/answer-write-2.png",
-          "design/reference/screenshots/answer-write-3.png"
+          "design/reference/pngs/screens/07-question-write-a.png"
         ],
-        "css": ["design/reference/css/reference-export.css"],
-        "notes": "design/reference/notes/answer-write.md"
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
       },
       "production": {
-        "screen": "src/screens/writeForm/WriteFormScreen.tsx",
-        "container": "src/screens/writeForm/WriteReplyContainer.tsx",
+        "screen": "src/screens/writeForm/WriteWorryScreen.tsx",
+        "container": "src/screens/writeForm/WriteWorryContainer.tsx",
         "contract": "src/screens/writeForm/contract.ts",
         "mapping": "src/screens/writeForm/mapping.ts"
       },
-      "sharedDependencies": ["src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "allowedEditScope": ["src/screens/writeForm/WriteFormScreen.tsx", "src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "mustNotEditForPixelWork": ["src/services/**", "src/server/**", "server.ts", "firestore.rules", "src/screens/**/contract.ts", "src/screens/**/mapping.ts"],
-      "statesToCheck": ["default", "input-error", "moderation-checking", "moderation-rejected", "submit-loading", "submit-disabled"],
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/writeForm/WriteWorryScreen.tsx",
+        "src/screens/writeForm/WriteWorryContainer.tsx",
+        "src/screens/writeForm/contract.ts",
+        "src/screens/writeForm/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "empty-draft",
+        "typing",
+        "filter-rejected",
+        "submitting"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/question-write-a is a fixture only."
+      },
       "verification": {
-        "manual": true,
-        "screenshotDiffRequired": false,
-        "commands": ["npm test", "npm run lint", "npm run build"]
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
       }
     },
     {
-      "slug": "reply-detail",
-      "description": "Reply detail screen for viewing a reply and feedback/actions.",
+      "id": "08",
+      "slug": "answer-check",
+      "description": "Publisher answer check and feedback screen.",
       "reference": {
-        "screenshots": ["design/reference/screenshots/reply-detail.png"],
-        "css": ["design/reference/css/reference-export.css"],
-        "notes": "design/reference/notes/reply-detail.md"
+        "screenshots": [
+          "design/reference/pngs/screens/08-answer-check.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
       },
       "production": {
-        "screen": "src/screens/replyDetail/ReplyDetailScreen.tsx",
-        "container": "src/screens/replyDetail/ReplyDetailContainer.tsx",
-        "contract": "src/screens/replyDetail/contract.ts",
-        "mapping": "src/screens/replyDetail/mapping.ts"
+        "screen": "src/screens/answerCheck/AnswerCheckScreen.tsx",
+        "container": "src/screens/answerCheck/AnswerCheckContainer.tsx",
+        "contract": "src/screens/answerCheck/contract.ts",
+        "mapping": "src/screens/answerCheck/mapping.ts"
       },
-      "sharedDependencies": ["src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "allowedEditScope": ["src/screens/replyDetail/ReplyDetailScreen.tsx", "src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "mustNotEditForPixelWork": ["src/services/**", "src/server/**", "server.ts", "firestore.rules", "src/screens/**/contract.ts", "src/screens/**/mapping.ts"],
-      "statesToCheck": ["default", "loading", "error", "feedback-submitting", "dialog-open"],
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/answerCheck/AnswerCheckScreen.tsx",
+        "src/screens/answerCheck/AnswerCheckContainer.tsx",
+        "src/screens/answerCheck/contract.ts",
+        "src/screens/answerCheck/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "default",
+        "zero-replies",
+        "like-comment",
+        "dislike-comment"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/answer-check is a fixture only.",
+        "canonicalMapping": "Do not use legacy replyDetail as the canonical mapping for screen 08."
+      },
       "verification": {
-        "manual": true,
-        "screenshotDiffRequired": false,
-        "commands": ["npm test", "npm run lint", "npm run build"]
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
       }
     },
     {
+      "id": "09",
+      "slug": "question-write-b",
+      "description": "Worry publish success confirmation.",
+      "reference": {
+        "screenshots": [
+          "design/reference/pngs/screens/09-question-write-b.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
+      },
+      "production": {
+        "screen": "src/screens/writeForm/WriteWorrySuccessScreen.tsx",
+        "container": "src/screens/writeForm/WriteWorrySuccessContainer.tsx",
+        "contract": "src/screens/writeForm/contract.ts",
+        "mapping": "src/screens/writeForm/mapping.ts"
+      },
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/writeForm/WriteWorrySuccessScreen.tsx",
+        "src/screens/writeForm/WriteWorrySuccessContainer.tsx",
+        "src/screens/writeForm/contract.ts",
+        "src/screens/writeForm/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "success-confirmation"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/question-write-b is a fixture only.",
+        "productionState": "Separate production success screen exists in writeForm."
+      },
+      "verification": {
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
+      }
+    },
+    {
+      "id": "10",
       "slug": "my-page",
       "description": "My page profile and account actions screen.",
       "reference": {
-        "screenshots": ["design/reference/screenshots/my-page.png"],
-        "css": ["design/reference/css/reference-export.css"],
-        "notes": "design/reference/notes/my-page.md"
+        "screenshots": [
+          "design/reference/pngs/screens/10-my-page.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
       },
       "production": {
         "screen": "src/screens/myPage/MyPageScreen.tsx",
@@ -168,47 +543,112 @@
         "contract": "src/screens/myPage/contract.ts",
         "mapping": "src/screens/myPage/mapping.ts"
       },
-      "sharedDependencies": ["src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "allowedEditScope": ["src/screens/myPage/MyPageScreen.tsx", "src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "mustNotEditForPixelWork": ["src/services/**", "src/server/**", "server.ts", "firestore.rules", "src/screens/**/contract.ts", "src/screens/**/mapping.ts"],
-      "statesToCheck": ["default", "loading", "error", "account-action-dialog"],
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/myPage/MyPageScreen.tsx",
+        "src/screens/myPage/MyPageContainer.tsx",
+        "src/screens/myPage/contract.ts",
+        "src/screens/myPage/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "default",
+        "push-enabled",
+        "push-blocked"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/my-page is a fixture only."
+      },
       "verification": {
-        "manual": true,
-        "screenshotDiffRequired": false,
-        "commands": ["npm test", "npm run lint", "npm run build"]
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
       }
     },
     {
-      "slug": "my-worries",
-      "description": "My worries list and reply access screen.",
+      "id": "12",
+      "slug": "edit-interests",
+      "description": "My page interests editing screen.",
       "reference": {
-        "screenshots": ["design/reference/screenshots/my-worries.png"],
-        "css": ["design/reference/css/reference-export.css"],
-        "notes": "design/reference/notes/my-worries.md"
+        "screenshots": [
+          "design/reference/pngs/screens/12-edit-interests.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
       },
       "production": {
-        "screen": "src/screens/myPage/MyWorriesScreen.tsx",
-        "container": "src/screens/myPage/MyWorriesContainer.tsx",
+        "screen": "src/screens/myPage/MyPageScreen.tsx",
+        "container": "src/screens/myPage/MyPageContainer.tsx",
         "contract": "src/screens/myPage/contract.ts",
         "mapping": "src/screens/myPage/mapping.ts"
       },
-      "sharedDependencies": ["src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "allowedEditScope": ["src/screens/myPage/MyWorriesScreen.tsx", "src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "mustNotEditForPixelWork": ["src/services/**", "src/server/**", "server.ts", "firestore.rules", "src/screens/**/contract.ts", "src/screens/**/mapping.ts"],
-      "statesToCheck": ["default", "loading", "empty", "error", "reply-list-open"],
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/myPage/MyPageScreen.tsx",
+        "src/screens/myPage/MyPageContainer.tsx",
+        "src/screens/myPage/contract.ts",
+        "src/screens/myPage/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "edit-interests",
+        "zero-selection-validation",
+        "saving"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/edit-interests is a fixture only.",
+        "productionState": "Rendered by EditInterestsScreen exported from MyPageScreen.tsx."
+      },
       "verification": {
-        "manual": true,
-        "screenshotDiffRequired": false,
-        "commands": ["npm test", "npm run lint", "npm run build"]
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
       }
     },
     {
+      "id": "13",
       "slug": "my-answers",
       "description": "My answers list screen.",
       "reference": {
-        "screenshots": ["design/reference/screenshots/my-answers.png"],
-        "css": ["design/reference/css/reference-export.css"],
-        "notes": "design/reference/notes/my-answers.md"
+        "screenshots": [
+          "design/reference/pngs/screens/13-my-answers.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
       },
       "production": {
         "screen": "src/screens/myPage/MyAnswersScreen.tsx",
@@ -216,38 +656,442 @@
         "contract": "src/screens/myPage/contract.ts",
         "mapping": "src/screens/myPage/mapping.ts"
       },
-      "sharedDependencies": ["src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "allowedEditScope": ["src/screens/myPage/MyAnswersScreen.tsx", "src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "mustNotEditForPixelWork": ["src/services/**", "src/server/**", "server.ts", "firestore.rules", "src/screens/**/contract.ts", "src/screens/**/mapping.ts"],
-      "statesToCheck": ["default", "loading", "empty", "error"],
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/myPage/MyAnswersScreen.tsx",
+        "src/screens/myPage/MyAnswersContainer.tsx",
+        "src/screens/myPage/contract.ts",
+        "src/screens/myPage/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "default",
+        "empty",
+        "liked-answer",
+        "commented-answer"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/my-answers is a fixture only."
+      },
       "verification": {
-        "manual": true,
-        "screenshotDiffRequired": false,
-        "commands": ["npm test", "npm run lint", "npm run build"]
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
       }
     },
     {
-      "slug": "loading-shell",
-      "description": "Generic loading shell used while app/session/profile/route state resolves.",
+      "id": "14",
+      "slug": "privacy-policy",
+      "description": "Privacy policy screen.",
       "reference": {
-        "screenshots": [],
-        "css": ["design/reference/css/reference-export.css"],
-        "notes": "design/reference/notes/loading-shell.md"
+        "screenshots": [
+          "design/reference/pngs/screens/14-privacy-policy.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
       },
       "production": {
-        "screen": "src/screens/loadingShell/LoadingShellScreen.tsx",
-        "container": null,
-        "contract": "src/screens/loadingShell/contract.ts",
-        "mapping": null
+        "screen": "src/screens/myPage/MyPageScreen.tsx",
+        "container": "src/screens/myPage/MyPageContainer.tsx",
+        "contract": "src/screens/myPage/contract.ts",
+        "mapping": "src/screens/myPage/mapping.ts"
       },
-      "sharedDependencies": ["src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "allowedEditScope": ["src/screens/loadingShell/LoadingShellScreen.tsx", "src/screens/shared/ui.tsx", "src/screens/shared/uiContract.ts", "src/index.css"],
-      "mustNotEditForPixelWork": ["src/services/**", "src/server/**", "server.ts", "firestore.rules", "src/screens/**/contract.ts", "src/screens/**/mapping.ts"],
-      "statesToCheck": ["app-loading", "session-loading", "profile-loading", "route-loading"],
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/myPage/MyPageScreen.tsx",
+        "src/screens/myPage/MyPageContainer.tsx",
+        "src/screens/myPage/contract.ts",
+        "src/screens/myPage/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "privacy-policy-body",
+        "privacy-policy-empty"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/privacy-policy is a fixture only.",
+        "relatedDocumentSource": "docs/privacy_policy.md is the policy text source, but it is not a production UI screen file."
+      },
       "verification": {
-        "manual": true,
-        "screenshotDiffRequired": false,
-        "commands": ["npm test", "npm run lint", "npm run build"]
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
+      }
+    },
+    {
+      "id": "15",
+      "slug": "logout",
+      "description": "Logout confirmation overlay.",
+      "reference": {
+        "screenshots": [
+          "design/reference/pngs/screens/15-logout.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
+      },
+      "production": {
+        "screen": "src/screens/myPage/MyPageScreen.tsx",
+        "container": "src/screens/myPage/MyPageContainer.tsx",
+        "contract": "src/screens/myPage/contract.ts",
+        "mapping": "src/screens/myPage/mapping.ts"
+      },
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/myPage/MyPageScreen.tsx",
+        "src/screens/myPage/MyPageContainer.tsx",
+        "src/screens/myPage/contract.ts",
+        "src/screens/myPage/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "logout-overlay",
+        "logout-processing",
+        "logout-error"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/logout is a fixture only.",
+        "productionState": "Overlay state rendered by MyPageScreen."
+      },
+      "verification": {
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
+      }
+    },
+    {
+      "id": "16",
+      "slug": "account-deletion",
+      "description": "Account deletion confirmation overlay.",
+      "reference": {
+        "screenshots": [
+          "design/reference/pngs/screens/16-account-deletion.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
+      },
+      "production": {
+        "screen": "src/screens/myPage/MyPageScreen.tsx",
+        "container": "src/screens/myPage/MyPageContainer.tsx",
+        "contract": "src/screens/myPage/contract.ts",
+        "mapping": "src/screens/myPage/mapping.ts"
+      },
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/myPage/MyPageScreen.tsx",
+        "src/screens/myPage/MyPageContainer.tsx",
+        "src/screens/myPage/contract.ts",
+        "src/screens/myPage/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "account-deletion-overlay",
+        "account-deletion-processing",
+        "account-deletion-error"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/account-deletion is a fixture only.",
+        "productionState": "Overlay state rendered by MyPageScreen.",
+        "relatedDomainFiles": [
+          "src/services/userAccount/accountSession.ts",
+          "src/services/userAccount/deleteMyAccount.ts"
+        ]
+      },
+      "verification": {
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
+      }
+    },
+    {
+      "id": "17",
+      "slug": "answer-write-1",
+      "description": "Reply writing screen.",
+      "reference": {
+        "screenshots": [
+          "design/reference/pngs/screens/17-answer-write-1.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
+      },
+      "production": {
+        "screen": "src/screens/writeForm/WriteFormScreen.tsx",
+        "container": "src/screens/writeForm/WriteReplyContainer.tsx",
+        "contract": "src/screens/writeForm/contract.ts",
+        "mapping": "src/screens/writeForm/mapping.ts"
+      },
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/writeForm/WriteFormScreen.tsx",
+        "src/screens/writeForm/WriteReplyContainer.tsx",
+        "src/screens/writeForm/contract.ts",
+        "src/screens/writeForm/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "empty-draft",
+        "typing",
+        "filter-rejected",
+        "submitting"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/answer-write-1 is a fixture only."
+      },
+      "verification": {
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
+      }
+    },
+    {
+      "id": "18",
+      "slug": "answer-write-2",
+      "description": "Original worry overlay over reply writing screen.",
+      "reference": {
+        "screenshots": [
+          "design/reference/pngs/screens/18-answer-write-2.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
+      },
+      "production": {
+        "screen": "src/screens/writeForm/WriteFormScreen.tsx",
+        "container": "src/screens/writeForm/WriteReplyContainer.tsx",
+        "contract": "src/screens/writeForm/contract.ts",
+        "mapping": "src/screens/writeForm/mapping.ts"
+      },
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/writeForm/WriteFormScreen.tsx",
+        "src/screens/writeForm/WriteReplyContainer.tsx",
+        "src/screens/writeForm/contract.ts",
+        "src/screens/writeForm/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "original-worry-overlay",
+        "overlay-close-preserves-draft"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/answer-write-2 is a fixture only.",
+        "productionState": "Overlay state rendered by WriteFormScreen."
+      },
+      "verification": {
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
+      }
+    },
+    {
+      "id": "19",
+      "slug": "answer-write-3",
+      "description": "Reply publish success confirmation.",
+      "reference": {
+        "screenshots": [
+          "design/reference/pngs/screens/19-answer-write-3.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
+      },
+      "production": {
+        "screen": "src/screens/writeForm/WriteReplySuccessScreen.tsx",
+        "container": "src/screens/writeForm/WriteReplySuccessContainer.tsx",
+        "contract": "src/screens/writeForm/contract.ts",
+        "mapping": "src/screens/writeForm/mapping.ts"
+      },
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/writeForm/WriteReplySuccessScreen.tsx",
+        "src/screens/writeForm/WriteReplySuccessContainer.tsx",
+        "src/screens/writeForm/contract.ts",
+        "src/screens/writeForm/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "success-confirmation"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/answer-write-3 is a fixture only.",
+        "productionState": "Separate production success screen exists in writeForm."
+      },
+      "verification": {
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
+      }
+    },
+    {
+      "id": "20",
+      "slug": "my-worries",
+      "description": "My worries list screen.",
+      "reference": {
+        "screenshots": [
+          "design/reference/pngs/screens/20-my-worries.png"
+        ],
+        "css": [
+          "design/reference/css/reference-export.css"
+        ]
+      },
+      "production": {
+        "screen": "src/screens/myPage/MyWorriesScreen.tsx",
+        "container": "src/screens/myPage/MyWorriesContainer.tsx",
+        "contract": "src/screens/myPage/contract.ts",
+        "mapping": "src/screens/myPage/mapping.ts"
+      },
+      "sharedDependencies": [
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "allowedEditScope": [
+        "src/screens/myPage/MyWorriesScreen.tsx",
+        "src/screens/myPage/MyWorriesContainer.tsx",
+        "src/screens/myPage/contract.ts",
+        "src/screens/myPage/mapping.ts",
+        "src/screens/shared/ui.tsx",
+        "src/screens/shared/uiContract.ts",
+        "src/index.css"
+      ],
+      "mustNotEditForPixelWork": [
+        "src/services/**",
+        "src/server/**",
+        "server.ts",
+        "firestore.rules",
+        "src/App.tsx"
+      ],
+      "statesToCheck": [
+        "default",
+        "loading",
+        "empty",
+        "answer-check-intent"
+      ],
+      "notes": {
+        "previewOnly": "design/reference/src/screens/my-worries is a fixture only."
+      },
+      "verification": {
+        "commands": [
+          "npm run validate:design-reference",
+          "npm test",
+          "npm run lint",
+          "npm run build"
+        ]
       }
     }
   ]

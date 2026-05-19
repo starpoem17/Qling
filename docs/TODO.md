@@ -1734,31 +1734,86 @@ Onboarding 선례의 정확한 표현:
 허용 수정 범위: `design/reference/screen-map.json`, `scripts/validateDesignReference.mjs`, validator tests if added.
 금지 수정 범위: reference PNG 수정/복사, production UI 코드 변경.
 
-- [ ] TODO-P11.1: `screen-map.json`을 06~20 실제 PNG 파일명과 production files로 업데이트한다.
+- [x] TODO-P11.1: `screen-map.json`을 06~20 실제 PNG 파일명과 production files로 업데이트한다.
   - 대상 파일: `design/reference/screen-map.json`
   - 완료 기준: `design/reference/pngs/screens/*.png` 경로를 사용하고 06~20 production screen/container/contract/mapping이 정확하다.
   - 검증: `npm run validate:design-reference`
   - production PNG evidence: 없음.
-- [ ] TODO-P11.2: 11번 화면은 없음/미사용으로 명시하고 production route에 매핑하지 않는다.
+  - completion note:
+    - changed files: `design/reference/screen-map.json`, `scripts/validateDesignReference.mjs`, `src/designReference/validateDesignReference.test.ts`, `docs/TODO.md`
+    - test command/result: `find design/reference/pngs/screens -maxdepth 1 -type f | sort` 성공; `npm run validate:design-reference` pass (`19 screen mappings`, `19 reference PNGs`); `npm test` pass (`715 pass`, `1 skipped`); `npm run lint` pass; `npm run build` pass; `npm run test:rules` pass (`78 pass`).
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: `design/reference/pngs/screens/*.png` 중 01,02,03,04,05,06,07,08,09,10,12,13,14,15,16,17,18,19,20 총 19개를 screen-map/validator가 검증.
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+    - validator evidence: 과거 `design/reference/screenshots` 제거, 06~20 production screen/container/contract/mapping 실제 파일 존재 검증, missing reference PNG/missing production file/wildcard misuse/screen 11 misuse/legacy screenshots path negative test 추가.
+    - screen 11 policy: `unusedScreens`에만 `id: "11"`, `status: "unused"`로 명시하고 production mapping 없음.
+- [x] TODO-P11.2: 11번 화면은 없음/미사용으로 명시하고 production route에 매핑하지 않는다.
   - 대상 파일: `design/reference/screen-map.json`, `scripts/validateDesignReference.mjs`
   - 완료 기준: screen 11이 required production mapping으로 취급되지 않는다.
   - 검증: validator output.
   - production PNG evidence: 없음.
-- [ ] TODO-P11.3: `validateDesignReference.mjs`가 새 screen-map 구조와 PNG 경로를 검증하게 한다.
+  - completion note:
+    - changed files: `design/reference/screen-map.json`, `scripts/validateDesignReference.mjs`, `src/designReference/validateDesignReference.test.ts`, `docs/TODO.md`
+    - test command/result: `npm run validate:design-reference` pass; `npm test` pass. Negative test `design reference validator rejects screen 11 as required production mapping` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: screen 11은 reference PNG 없음; validator는 11을 required coverage에서 제외하고 01~20 중 11 제외 19개 PNG만 요구.
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+    - validator evidence: screen 11이 `screens`에 들어오거나 reference screenshot/production mapping처럼 표현되면 실패; `unusedScreens[screen 11]` production path도 금지.
+    - screen 11 policy: 없음/미사용, production route/screen/container/contract/mapping 금지.
+- [x] TODO-P11.3: `validateDesignReference.mjs`가 새 screen-map 구조와 PNG 경로를 검증하게 한다.
   - 대상 파일: `scripts/validateDesignReference.mjs`
   - 완료 기준: missing reference PNG, missing production file, wildcard misuse, 11 misuse를 실패로 잡는다.
   - 검증: `npm run validate:design-reference`
   - production PNG evidence: 없음.
-- [ ] TODO-P11.4: `design/current`나 reference fixture가 있다면 preview-only 범위를 명시한다.
+  - completion note:
+    - changed files: `scripts/validateDesignReference.mjs`, `src/designReference/validateDesignReference.test.ts`, `design/reference/screen-map.json`, `docs/TODO.md`
+    - test command/result: `npm run validate:design-reference` pass (`Design reference validation passed for 19 screen mappings and 19 reference PNGs.`); `npm test` pass with validator negative tests for missing reference PNG, missing production file, wildcard misuse, screen 11 misuse, and legacy screenshot path.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: all reference-backed `reference.screenshots[]` must start with `design/reference/pngs/screens/`, end with `.png`, contain no wildcard, and exist.
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+    - validator evidence: 새 pure function `validateDesignReferenceMap`와 CLI guard가 field-level error를 출력하며 screen count/PNG count를 통과 output에 표시.
+    - screen 11 policy: required coverage list는 11 제외; 오용은 validator/test가 실패로 잡음.
+- [x] TODO-P11.4: `design/current`나 reference fixture가 있다면 preview-only 범위를 명시한다.
   - 대상 파일: `design/reference/screen-map.json`, validator notes fields
   - 완료 기준: production UI와 PRD 정책을 reference preview 코드가 오염시키지 않는다.
   - 검증: `rg -n "design/reference/src|screenshots|pngs/screens" design/reference/screen-map.json`
   - production PNG evidence: 없음.
-- [ ] TODO-P11.5: phase 완료 조건에 design validation을 포함한다.
+  - completion note:
+    - changed files: `design/reference/screen-map.json`, `scripts/validateDesignReference.mjs`, `docs/TODO.md`
+    - test command/result: `rg -n "design/reference/src|design/current|preview|sourceOfTruth|pngs/screens" design/reference/screen-map.json scripts/validateDesignReference.mjs` confirms source-of-truth and preview-only fields; `rg -n "design/reference/screenshots|screenshots/" design/reference/screen-map.json scripts/validateDesignReference.mjs` returns validator legacy-path guard strings only and no screen-map legacy paths; `npm run validate:design-reference` pass.
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: `sourceOfTruth.designPngs` and `referenceRoot` point to `design/reference/pngs/screens`.
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+    - validator evidence: validator requires `sourceOfTruth`, `previewOnlySources`, and per-screen `notes.previewOnly`; production mappings cannot point to preview fixture paths because string production paths must exist and are explicitly enumerated under `src/screens/**`.
+    - screen 11 policy: preview fixture status does not create a screen 11 mapping; 11 remains `unusedScreens`.
+- [x] TODO-P11.5: phase 완료 조건에 design validation을 포함한다.
   - 대상 파일: package/validator config
   - 완료 기준: `npm run validate:design-reference`가 통과한다.
   - 검증: `npm run validate:design-reference`
   - production PNG evidence: 없음.
+  - completion note:
+    - changed files: `docs/TODO.md`; package script/config 변경 없음 (`package.json`에 기존 `validate:design-reference` 유지)
+    - test command/result: `npm run validate:design-reference` pass; `npm test` pass (`715 pass`, `1 skipped`); `npm run lint` pass; `npm run build` pass with existing Vite chunk/dynamic import warnings only; `npm run test:rules` pass (`78 pass`).
+    - production PNG path: 해당 없음
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: validator 통과 output이 19 reference PNG coverage를 보고.
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+    - validator evidence: `npm run validate:design-reference`가 Phase 11 completion commands와 각 screen entry `verification.commands`에 포함됨.
+    - screen 11 policy: completion gate에서 screen 11 오용 negative test와 validator 통과를 함께 확인.
 
 검증 명령:
 - `npm run validate:design-reference`
