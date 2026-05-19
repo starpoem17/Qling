@@ -88,9 +88,25 @@ export function BottomNavigation({
           indicatorPositionClass,
         )}
       >
-        <span className="flex items-center gap-1" aria-hidden="true">
-          <span className="block h-[26px] w-[17px] rounded-full bg-white shadow-[inset_-6px_0_0_#2a2a2a]" />
-          <span className="block h-[26px] w-[17px] rounded-full bg-white shadow-[inset_-6px_0_0_#2a2a2a]" />
+        <span className="relative block h-full w-full" aria-hidden="true">
+          <svg className="absolute left-[14px] top-[15px]" width="17" height="26" viewBox="0 0 17 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.8497 12.7299C16.97 23.6896 13.0814 25.4598 8.43297 25.4598C3.78452 25.4598 -0.289859 23.087 0.0162047 12.7299C0.322268 2.37274 3.78452 1.71661e-05 8.43297 1.71661e-05C13.0814 1.71661e-05 16.7295 1.77015 16.8497 12.7299Z" fill="#FFF5EB" />
+            <mask id="bottom-navigation-left-eye-mask" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="17" height="26">
+              <path d="M8.44531 1.00002C10.6606 1.00007 12.3637 1.42299 13.5908 2.89748C14.8732 4.43845 15.8145 7.33004 15.874 12.7569C15.9334 18.1729 14.9891 21.0535 13.6875 22.5869C12.4315 24.0665 10.6652 24.4912 8.44531 24.4912C6.28278 24.4912 4.44319 23.9447 3.14062 22.3701C1.80394 20.7543 0.865303 17.8616 1.01562 12.7754C1.16686 7.65838 2.09957 4.73758 3.38574 3.10256C4.61627 1.53836 6.29704 1.00002 8.44531 1.00002Z" fill="#FFF5EB" stroke="black" strokeWidth="2" />
+            </mask>
+            <g mask="url(#bottom-navigation-left-eye-mask)">
+              <path d="M9.56676 13.254C9.56676 18.3804 6.74704 22.5363 3.26873 22.5363C-0.209573 22.5363 -3.0293 20.1811 -3.0293 13.254C-3.0293 8.12752 -0.209573 3.9717 3.26873 3.9717C6.74704 3.9717 9.56676 8.12752 9.56676 13.254Z" fill="#1A1A1A" />
+            </g>
+          </svg>
+          <svg className="absolute left-[33px] top-[15px]" width="17" height="26" viewBox="0 0 17 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.8497 12.7299C16.97 23.6896 13.0814 25.4598 8.43297 25.4598C3.78452 25.4598 -0.289859 23.087 0.0162047 12.7299C0.322268 2.37274 3.78452 1.71661e-05 8.43297 1.71661e-05C13.0814 1.71661e-05 16.7295 1.77015 16.8497 12.7299Z" fill="#FFF5EB" />
+            <mask id="bottom-navigation-right-eye-mask" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="17" height="26">
+              <path d="M8.44531 1.00002C10.6606 1.00007 12.3637 1.42299 13.5908 2.89748C14.8732 4.43845 15.8145 7.33004 15.874 12.7569C15.9334 18.1729 14.9891 21.0535 13.6875 22.5869C12.4315 24.0665 10.6652 24.4912 8.44531 24.4912C6.28278 24.4912 4.44319 23.9447 3.14062 22.3701C1.80394 20.7543 0.865303 17.8616 1.01562 12.7754C1.16686 7.65838 2.09957 4.73758 3.38574 3.10256C4.61627 1.53836 6.29704 1.00002 8.44531 1.00002Z" fill="#FFF5EB" stroke="black" strokeWidth="2" />
+            </mask>
+            <g mask="url(#bottom-navigation-right-eye-mask)">
+              <path d="M9.56676 13.254C9.56676 18.3804 6.74704 22.5363 3.26873 22.5363C-0.209573 22.5363 -3.0293 20.1811 -3.0293 13.254C-3.0293 8.12752 -0.209573 3.9717 3.26873 3.9717C6.74704 3.9717 9.56676 8.12752 9.56676 13.254Z" fill="#1A1A1A" />
+            </g>
+          </svg>
         </span>
       </div>
       <div className="mx-auto grid h-full grid-cols-2 gap-[130px] px-4 pt-[37px]">
