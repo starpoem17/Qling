@@ -7,6 +7,7 @@ import {
   type BottomNavigationProps,
   type CategoryChipProps,
   type QlingDialogProps,
+  type QlingSuccessDialogProps,
   type PolicyTextContainerProps,
   type ProfileMotifProps,
   type QlingTextAreaProps,
@@ -205,9 +206,32 @@ test('modal dialog contract preserves aria-capable confirmation and processing/e
   assert.equal(dialog.processing, true);
   assert.match(source, /role="dialog"/);
   assert.match(source, /aria-modal="true"/);
-  assert.match(source, /aria-labelledby=\{titleId\}/);
+  assert.match(source, /aria-labelledby=\{labelledBy\}/);
   assert.match(source, /aria-describedby=\{describedBy\}/);
   assert.match(source, /useId/);
+});
+
+test('modal dialog uses the Figma popup default without static mobile chrome', () => {
+  const successDialog = {
+    title: '고민 전송이 완료되었어요 !',
+    description: '답변이 오면 알려드릴게요',
+    accessibilityLabel: '고민 전송 완료 확인',
+    onConfirm: () => undefined,
+  } satisfies QlingSuccessDialogProps;
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+
+  assert.equal(successDialog.title, '고민 전송이 완료되었어요 !');
+  assert.match(source, /bg-black\/32/);
+  assert.match(source, /pt-\[251px\]/);
+  assert.match(source, /max-w-\[310px\]/);
+  assert.match(source, /rounded-\[24px\]/);
+  assert.match(source, /shadow-\[0_12px_40px_rgb\(0_0_0\/0\.18\)\]/);
+  assert.match(source, /text-center/);
+  assert.match(source, /min-h-\[52px\]/);
+  assert.match(source, /rounded-\[12px\]/);
+  assert.match(source, /bg-\[#ff8b3d\]/);
+  assert.match(source, /data-testid="figma-clover"/);
+  assert.match(source, /bg-\[#5cc15a\]/);
 });
 
 test('shared primitive module does not import Firebase, API, server, or service mutation boundaries', () => {

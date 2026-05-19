@@ -87,6 +87,13 @@ export type QlingDialogProps = {
   readonly onConfirm: () => void;
 };
 
+export type QlingSuccessDialogProps = {
+  readonly title: string;
+  readonly description: string;
+  readonly accessibilityLabel: string;
+  readonly onConfirm: () => void;
+};
+
 export type StatusStateProps = {
   readonly title: string;
   readonly message?: string;

@@ -58,13 +58,13 @@ test('write-form presentational screen emits draft and publish events only', () 
 test('write-worry success screen exposes only confirm intent', () => {
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'writeForm', 'WriteWorrySuccessScreen.tsx'), 'utf8');
 
-  assert.match(source, /onClick=\{props\.onConfirm\}/);
+  assert.match(source, /onConfirm=\{props\.onConfirm\}/);
   assert.doesNotMatch(source, /setView|routeAfterWorrySuccessConfirmation|filterAlert|publishWorryViaApi/);
 });
 
 test('write-reply success screen exposes only confirm intent', () => {
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'writeForm', 'WriteReplySuccessScreen.tsx'), 'utf8');
 
-  assert.match(source, /onClick=\{props\.onConfirm\}/);
+  assert.match(source, /onConfirm=\{props\.onConfirm\}/);
   assert.doesNotMatch(source, /setView|routeAfterReplySuccessConfirmation|filterAlert|publishReplyViaApi/);
 });

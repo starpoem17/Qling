@@ -21,6 +21,7 @@ import type {
   PolicyTextContainerProps,
   ProfileMotifProps,
   QlingDialogProps,
+  QlingSuccessDialogProps,
   QlingTextAreaProps,
   SettingsRowProps,
   StatusStateProps,
@@ -182,6 +183,107 @@ export function DestructiveCTA(props: CtaProps) {
   return <CTA {...props} variant="destructive" />;
 }
 
+function FigmaClover() {
+  return (
+    <span className="relative mx-auto block h-11 w-11" aria-hidden="true" data-testid="figma-clover">
+      <span className="absolute left-[13px] top-[5px] h-[18px] w-[18px] rounded-full bg-[#5cc15a]" />
+      <span className="absolute left-[21px] top-[13px] h-[18px] w-[18px] rounded-full bg-[#5cc15a]" />
+      <span className="absolute left-[13px] top-[21px] h-[18px] w-[18px] rounded-full bg-[#5cc15a]" />
+      <span className="absolute left-[5px] top-[13px] h-[18px] w-[18px] rounded-full bg-[#5cc15a]" />
+      <span className="absolute left-[21px] top-[37px] h-2 w-0.5 rounded-[1px] bg-[#5cc15a]" />
+    </span>
+  );
+}
+
+function FigmaModalFrame({
+  children,
+  labelledBy,
+  describedBy,
+  busy,
+}: {
+  readonly children: ReactNode;
+  readonly labelledBy: string;
+  readonly describedBy?: string;
+  readonly busy?: boolean;
+}) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/32 px-10 pt-[251px]" role="presentation">
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={labelledBy}
+        aria-describedby={describedBy}
+        aria-busy={busy || undefined}
+        className="w-full max-w-[310px] rounded-[24px] bg-white px-6 pb-[35px] pt-[30px] text-center shadow-[0_12px_40px_rgb(0_0_0/0.18)]"
+      >
+        {children}
+      </section>
+    </div>
+  );
+}
+
+function FigmaModalButton({
+  children,
+  onClick,
+  disabled,
+  processing,
+  accessibilityLabel,
+  variant = 'primary',
+}: {
+  readonly children: ReactNode;
+  readonly onClick?: () => void;
+  readonly disabled?: boolean;
+  readonly processing?: boolean;
+  readonly accessibilityLabel?: string;
+  readonly variant?: 'primary' | 'secondary' | 'destructive';
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={accessibilityLabel}
+      aria-busy={processing || undefined}
+      disabled={disabled || processing}
+      onClick={onClick}
+      className={cn(
+        'inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-[12px] px-4 py-3 text-[15px] font-bold leading-[19px] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55',
+        variant === 'primary' && 'bg-[#ff8b3d] text-white focus:ring-[#ff8b3d]',
+        variant === 'secondary' && 'border border-[#e7ded5] bg-white text-[#1a1a1e] focus:ring-[#ff8b3d]',
+        variant === 'destructive' && 'bg-[var(--qling-color-danger)] text-white focus:ring-[var(--qling-color-danger)]',
+      )}
+    >
+      {processing && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+      {children}
+    </button>
+  );
+}
+
+export function QlingSuccessDialog({
+  title,
+  description,
+  accessibilityLabel,
+  onConfirm,
+}: QlingSuccessDialogProps) {
+  const titleId = useId();
+  const descriptionId = useId();
+
+  return (
+    <FigmaModalFrame labelledBy={titleId} describedBy={descriptionId}>
+      <FigmaClover />
+      <h1 id={titleId} className="mt-5 text-[19px] font-bold leading-6 text-[#1a1a1e]">
+        {title}
+      </h1>
+      <p id={descriptionId} className="mt-[19px] text-sm font-normal leading-[21px] text-[#6e7076]">
+        {description}
+      </p>
+      <div className="mt-[43px]">
+        <FigmaModalButton accessibilityLabel={accessibilityLabel} onClick={onConfirm}>
+          확인
+        </FigmaModalButton>
+      </div>
+    </FigmaModalFrame>
+  );
+}
+
 export function QlingCard({ children, className }: { readonly children: ReactNode; readonly className?: string }) {
   return (
     <article className={cn('rounded-[var(--qling-radius-card)] border border-[var(--qling-color-border)] bg-[var(--qling-color-surface)] p-[var(--qling-space-card-padding)] shadow-[var(--qling-shadow-card)]', className)}>
@@ -281,24 +383,15 @@ export function QlingDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 px-4 pt-[246px] backdrop-blur-sm" role="presentation">
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        aria-describedby={describedBy}
-        aria-busy={processing || undefined}
-        className="w-full max-w-[310px] rounded-[var(--qling-radius-modal)] bg-[var(--qling-color-surface)] px-6 py-8 shadow-[var(--qling-shadow-modal)]"
-      >
-        <h2 id={titleId} className="text-lg font-bold text-[var(--qling-color-text)]">{title}</h2>
-        {description && <p id={descriptionId} className="mt-2 text-sm leading-6 text-[var(--qling-color-muted)]">{description}</p>}
-        {errorMessage && <p id={errorId} className="mt-3 text-sm font-semibold text-[var(--qling-color-danger)]">{errorMessage}</p>}
-        <div className="mt-6 flex gap-[var(--qling-space-cta-gap)]">
-          <PrimaryCTA onClick={onConfirm} processing={processing}>{confirmLabel}</PrimaryCTA>
-          <SecondaryCTA onClick={onCancel} disabled={processing}>{cancelLabel}</SecondaryCTA>
-        </div>
-      </section>
-    </div>
+    <FigmaModalFrame labelledBy={titleId} describedBy={describedBy} busy={processing}>
+      <h2 id={titleId} className="text-[19px] font-bold leading-6 text-[#1a1a1e]">{title}</h2>
+      {description && <p id={descriptionId} className="mt-[19px] text-sm leading-[21px] text-[#6e7076]">{description}</p>}
+      {errorMessage && <p id={errorId} className="mt-3 text-sm font-semibold text-[var(--qling-color-danger)]">{errorMessage}</p>}
+      <div className="mt-[43px] flex gap-[var(--qling-space-cta-gap)]">
+        <FigmaModalButton onClick={onConfirm} processing={processing} variant={destructive ? 'destructive' : 'primary'}>{confirmLabel}</FigmaModalButton>
+        <FigmaModalButton onClick={onCancel} disabled={processing} variant="secondary">{cancelLabel}</FigmaModalButton>
+      </div>
+    </FigmaModalFrame>
   );
 }
 

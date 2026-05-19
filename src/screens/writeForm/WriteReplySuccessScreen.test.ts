@@ -22,7 +22,7 @@ test('write reply success screen forwards confirm intent only', () => {
     },
   }), element => element.props.accessibilityLabel === '답변 전송 완료 확인');
 
-  click(confirmCta);
+  confirm(confirmCta);
 
   assert.equal(confirmed, true);
 });
@@ -47,8 +47,8 @@ function findOptionalElement(tree: ReactNode, predicate: (element: TestElement) 
   return found;
 }
 
-function click(element: TestElement): void {
-  const onClick = element.props.onClick;
-  assert.equal(typeof onClick, 'function');
-  (onClick as () => void)();
+function confirm(element: TestElement): void {
+  const onConfirm = element.props.onConfirm;
+  assert.equal(typeof onConfirm, 'function');
+  (onConfirm as () => void)();
 }

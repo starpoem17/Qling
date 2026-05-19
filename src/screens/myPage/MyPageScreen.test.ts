@@ -162,7 +162,7 @@ test('account deletion dialog blocks background interaction and confirm calls on
   assert.match(html, /role="dialog"/);
   assert.match(html, /계정을 삭제할까요\?/);
   assert.match(html, /fixed inset-0 z-\[100\]/);
-  assert.match(html, /bg-black\/40/);
+  assert.match(html, /bg-black\/32/);
 
   const dialog = findElement(tree, element => typeof element.type === 'function'
     && element.type.name === 'QlingDialog'
