@@ -89,7 +89,7 @@ test('write reply screen forwards back, overlay, draft, close, and publish event
   change(findElement(tree, element => element.type === 'textarea'), '바뀐 답변');
   click(findButtonByAriaLabel(tree, /원문 닫기/));
   click(findButtonByAriaLabel(tree, /답변하기로 돌아가기/));
-  click(findElement(tree, element => element.props.accessibilityLabel === '답변 전송'));
+  click(findButtonByAriaLabel(tree, /답변 전송/));
 
   assert.deepEqual(events, [
     'open-original',
@@ -98,6 +98,13 @@ test('write reply screen forwards back, overlay, draft, close, and publish event
     'back',
     'publish:delivery-1:worry-1',
   ]);
+});
+
+test('write reply screen omits AI filter guidance from the Figma-aligned form', () => {
+  const html = renderToStaticMarkup(WriteFormScreen(baseProps()));
+
+  assert.doesNotMatch(html, /AI 안심 필터 적용 안내/);
+  assert.doesNotMatch(html, /AI 안심 필터가 내용을 확인하고 있습니다\./);
 });
 
 test('write reply screen does not expose publisher profile metadata', () => {
