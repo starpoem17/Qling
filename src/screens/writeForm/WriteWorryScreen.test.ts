@@ -61,12 +61,20 @@ test('write worry screen forwards typing, back, and publish events', () => {
 
   change(findElement(tree, element => element.type === 'textarea'), '바뀐 고민');
   click(findButtonByAriaLabel(tree, /나의 고민으로 돌아가기/));
-  click(findElement(tree, element => element.props.accessibilityLabel === '고민 전송'));
+  click(findButtonByAriaLabel(tree, /고민 전송/));
 
   assert.deepEqual(events, ['draft:바뀐 고민', 'back', 'publish']);
 });
 
 test('write worry screen reflects validation disabled state and moderation copy', () => {
+  const invalidHtml = renderToStaticMarkup(WriteWorryScreen(baseProps({
+    draft: {
+      ...validDraft,
+      value: '짧음',
+      characterCount: 2,
+      validation: { status: 'invalid', message: '조금 더 자세히 적어주세요.' },
+    },
+  })));
   const rejectedHtml = renderToStaticMarkup(WriteWorryScreen(baseProps({
     draft: {
       ...validDraft,
@@ -87,12 +95,51 @@ test('write worry screen reflects validation disabled state and moderation copy'
       submitDisabledReason: undefined,
     },
   })));
-  const disabledCta = findElement(WriteWorryScreen(baseProps()), element => element.props.accessibilityLabel === '고민 전송');
+  const checkingHtml = renderToStaticMarkup(WriteWorryScreen(baseProps({
+    draft: {
+      ...validDraft,
+      value: '확인 중인 내용',
+      characterCount: 7,
+      validation: { status: 'valid' },
+      moderation: { status: 'checking' },
+      submitDisabledReason: 'moderation-pending',
+    },
+  })));
+  const disabledCta = findButtonByAriaLabel(WriteWorryScreen(baseProps()), /고민 전송/);
 
   assert.equal(propsOf(disabledCta).disabled, true);
+  assert.match(invalidHtml, /role="alertdialog"/);
+  assert.match(invalidHtml, /조금 더 자세히 적어주세요\./);
+  assert.match(invalidHtml, /확인/);
   assert.match(rejectedHtml, /개인정보가 포함되어 있어요\./);
   assert.match(rejectedHtml, /연락처는 지워주세요\./);
   assert.match(failedHtml, /전송 실패: network down/);
+  assert.match(checkingHtml, /AI 안심 필터가 내용을 확인하고 있습니다\./);
+});
+
+test('write worry popup confirm hides only the popup element', () => {
+  let hidden = false;
+  const tree = WriteWorryScreen(baseProps({
+    draft: {
+      ...validDraft,
+      value: '짧음',
+      characterCount: 2,
+      validation: { status: 'invalid', message: '조금 더 자세히 적어주세요.' },
+    },
+  }));
+  const confirmButton = findButtonByAriaLabel(tree, /고민 작성 알림 확인/);
+
+  click(confirmButton, {
+    currentTarget: {
+      closest: () => ({
+        setAttribute: (name: string, value: string) => {
+          if (name === 'hidden' && value === '') hidden = true;
+        },
+      }),
+    },
+  });
+
+  assert.equal(hidden, true);
 });
 
 type TestElement = ReactElement<Record<string, unknown>>;
@@ -124,10 +171,10 @@ function propsOf(element: TestElement): Record<string, unknown> {
   return element.props;
 }
 
-function click(element: TestElement): void {
+function click(element: TestElement, event?: unknown): void {
   const onClick = propsOf(element).onClick;
   assert.equal(typeof onClick, 'function');
-  (onClick as () => void)();
+  (onClick as (event?: unknown) => void)(event);
 }
 
 function change(element: TestElement, value: string): void {

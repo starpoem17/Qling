@@ -1,5 +1,4 @@
 import { ArrowLeft, Pencil, Send } from 'lucide-react';
-import { ContentSheet, PrimaryCTA } from '../shared/ui';
 import { cn } from '../../lib/utils';
 import type { WriteWorryScreenProps } from './contract';
 
@@ -13,24 +12,30 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
     : props.draft.moderation.status === 'failed'
       ? props.draft.moderation.message
       : undefined;
+  const checkingMessage = props.draft.moderation.status === 'checking'
+    ? 'AI 안심 필터가 내용을 확인하고 있습니다.'
+    : undefined;
+  const popupMessage = validationMessage ?? moderationMessage ?? checkingMessage;
   const showVisualPlaceholder = props.draft.value.trim().length === 0;
 
   return (
-    <div className="space-y-5 pb-4">
-      <header className="relative flex min-h-16 items-center justify-center">
+    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 h-[755px] bg-[#fff1d1]">
+      <header>
         <button
           type="button"
           onClick={props.onBack}
-          className="absolute left-0 inline-flex h-10 w-10 items-center justify-center rounded-full text-[var(--qling-color-text)] transition-colors hover:bg-[var(--qling-color-cream-soft)] focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)]"
+          className="absolute left-[5px] top-[50px] inline-flex h-12 w-12 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-[#fff5eb]/60 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
           aria-label="나의 고민으로 돌아가기"
         >
-          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+          <ArrowLeft className="h-7 w-7" aria-hidden="true" />
         </button>
-        <h1 className="text-base font-extrabold text-[var(--qling-color-text)]">고민 작성</h1>
+        <h1 className="absolute left-1/2 top-[69px] -translate-x-1/2 text-[17px] font-extrabold leading-[21px] tracking-[-0.02em] text-[#2a2a2a]">
+          고민 작성
+        </h1>
       </header>
 
-      <ContentSheet className="border border-[#ff8b3d] bg-[#fff5eb] p-0 shadow-none">
-        <label className="relative block">
+      <section className="absolute left-5 top-[120px] h-[541px] w-[353px] rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]">
+        <label className="relative block h-full">
           <span className="sr-only">고민 내용</span>
           <textarea
             value={props.draft.value}
@@ -40,53 +45,74 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
             aria-describedby="write-worry-counter"
             onChange={event => props.onDraftChange(event.currentTarget.value)}
             className={cn(
-              'box-border h-[33.75rem] w-full resize-none rounded-[1.625rem] border-0 bg-transparent px-6 pb-12 pt-6 text-base leading-7 text-[var(--qling-color-text)] outline-none disabled:cursor-not-allowed disabled:opacity-60',
+              'box-border h-full w-full resize-none rounded-[18px] border-0 bg-transparent px-6 pb-12 pt-[22px] text-base font-medium leading-6 tracking-[-0.04em] text-[#2a2a2a] outline-none disabled:cursor-not-allowed disabled:opacity-60',
               validationMessage && 'ring-2 ring-[var(--qling-color-danger)]',
             )}
           />
           {showVisualPlaceholder && (
             <div
-              className="pointer-events-none absolute left-6 top-6 flex items-center gap-2 text-[#b8b8b8]"
+              className="pointer-events-none absolute left-6 top-[22px] flex items-center gap-2 text-[#b8b8b8]"
               data-testid="write-worry-visual-placeholder"
               aria-hidden="true"
             >
               <Pencil className="h-5 w-5" data-testid="write-worry-pencil" aria-hidden="true" />
-              <span className="text-sm font-semibold">당신의 솔직한 이야기를 들려주세요</span>
+              <span className="text-base font-medium leading-6 tracking-[-0.04em]">당신의 솔직한 이야기를 들려주세요</span>
             </div>
           )}
           <div
             id="write-worry-counter"
-            className="absolute bottom-5 right-5 text-sm font-semibold text-[#b8b8b8]"
+            className="absolute bottom-[22px] right-[19px] text-[13px] font-bold leading-4 text-[#b8b8b8]"
             data-testid="write-worry-character-count"
           >
             {props.draft.value.length} / {props.draft.maxLength}
           </div>
         </label>
-      </ContentSheet>
+      </section>
 
-      {validationMessage && (
-        <p className="text-sm font-bold text-[var(--qling-color-danger)]">{validationMessage}</p>
-      )}
-
-      {moderationMessage && (
-        <div className="whitespace-pre-wrap rounded-[var(--qling-radius-card)] border border-red-100 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-700">
-          {moderationMessage}
-        </div>
-      )}
-
-      {props.draft.moderation.status === 'checking' && (
-        <p className="text-sm font-bold text-[var(--qling-color-muted)]">AI 안심 필터가 내용을 확인하고 있습니다.</p>
-      )}
-
-      <PrimaryCTA
-        disabled={isDisabled}
-        processing={props.draft.isProcessing}
-        accessibilityLabel="고민 전송"
+      <button
+        type="button"
+        aria-label="고민 전송"
+        aria-busy={props.draft.isProcessing || undefined}
+        disabled={isDisabled || props.draft.isProcessing}
         onClick={props.onPublish}
+        className="absolute left-[63px] top-[684px] inline-flex h-12 w-[267px] items-center justify-center gap-2 rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
       >
         <Send className="h-5 w-5" aria-hidden="true" />
         고민 전송
-      </PrimaryCTA>
+      </button>
+
+      {popupMessage && (
+        <div
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 px-4"
+          role="presentation"
+          data-testid="write-worry-popup"
+        >
+          <section
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="write-worry-popup-title"
+            aria-describedby="write-worry-popup-message"
+            className="w-full max-w-[320px] rounded-2xl bg-white px-5 pb-5 pt-6 text-center shadow-2xl"
+          >
+            <h2 id="write-worry-popup-title" className="text-base font-extrabold text-[#2a2a2a]">
+              확인이 필요해요
+            </h2>
+            <p id="write-worry-popup-message" className="mt-4 whitespace-pre-wrap text-sm font-semibold leading-6 text-[#2a2a2a]">
+              {popupMessage}
+            </p>
+            <button
+              type="button"
+              aria-label="고민 작성 알림 확인"
+              onClick={(event) => {
+                event.currentTarget.closest('[data-testid="write-worry-popup"]')?.setAttribute('hidden', '');
+              }}
+              className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#ff8b3d] text-sm font-extrabold text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
+            >
+              확인
+            </button>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

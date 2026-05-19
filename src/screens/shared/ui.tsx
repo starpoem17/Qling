@@ -75,7 +75,7 @@ export function BottomNavigation({
   return (
     <nav
       aria-label="주요 화면"
-      className="fixed bottom-0 left-1/2 z-50 h-[97px] w-full max-w-[var(--qling-mobile-canvas-width)] -translate-x-1/2 bg-[#fff5eb]"
+      className="fixed bottom-[-7px] left-1/2 z-50 h-[104px] w-full max-w-[var(--qling-mobile-canvas-width)] -translate-x-1/2 bg-[#fff5eb]"
       style={{ paddingBottom: 'var(--qling-space-safe-bottom)' }}
     >
       <div
