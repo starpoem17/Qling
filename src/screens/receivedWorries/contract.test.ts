@@ -1,7 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
+import { ReceivedWorriesScreen } from './ReceivedWorriesScreen';
 import type { ReceivedWorriesScreenProps } from './contract';
+
+function baseProps(overrides: Partial<ReceivedWorriesScreenProps> = {}): ReceivedWorriesScreenProps {
+  return {
+    state: { status: 'ready' },
+    items: [{
+      deliveryId: 'delivery-1',
+      worryId: 'worry-1',
+      category: WORRY_CATEGORIES[0],
+      previewText: 'Preview text',
+      bodyText: 'Body text',
+      receivedAt: { label: 'Today', isoValue: '2026-05-16T00:00:00.000Z' },
+      isUnread: true,
+    }],
+    passingDeliveryIds: [],
+    onPass: () => undefined,
+    onOpen: () => undefined,
+    onOpenMyPage: () => undefined,
+    ...overrides,
+  };
+}
 
 test('received-worries feed item includes ids needed for pass and open events', () => {
   const props = {
@@ -68,4 +90,28 @@ test('received-worries contract exposes my-page intent without reply duplicate i
 
   assert.equal(typeof callbacks.onOpenMyPage, 'function');
   assert.equal(Object.keys(callbacks).includes('onReply'), false);
+});
+
+test('received-worries empty state renders exact PRD copy without extra helper text', () => {
+  const html = renderToStaticMarkup(ReceivedWorriesScreen(baseProps({
+    state: { status: 'empty', message: '지금은 도착한 고민이 없어요.' },
+    items: [],
+  })));
+
+  assert.match(html, /지금은 도착한 고민이 없어요\./);
+  assert.equal((html.match(/지금은 도착한 고민이 없어요\./g) ?? []).length, 1);
+  assert.doesNotMatch(html, /첫 고민을 남겨보세요/);
+  assert.doesNotMatch(html, /고민 쓰기|다시 시도|네트워크/);
+});
+
+test('received-worries loading state renders the shared spinner status without skeleton UI', () => {
+  const html = renderToStaticMarkup(ReceivedWorriesScreen(baseProps({
+    state: { status: 'loading', label: '답변할 고민을 불러오는 중이에요.' },
+    items: [],
+  })));
+
+  assert.match(html, /role="status"/);
+  assert.match(html, /aria-label="고민을 불러오고 있어요"/);
+  assert.match(html, /답변할 고민을 불러오는 중이에요\./);
+  assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
 });

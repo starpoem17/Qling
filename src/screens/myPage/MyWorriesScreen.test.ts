@@ -86,6 +86,18 @@ test('my worries empty state uses PRD copy without a separate empty CTA', () => 
   assert.equal((html.match(/고민 작성 화면으로 이동/g) ?? []).length, 1);
 });
 
+test('my worries loading state renders the shared spinner status without skeleton UI', () => {
+  const html = renderToStaticMarkup(MyWorriesScreen(baseProps({
+    state: { status: 'loading', label: '작성한 고민을 불러오고 있습니다.' },
+    items: [],
+  })));
+
+  assert.match(html, /role="status"/);
+  assert.match(html, /aria-label="나의 고민을 불러오는 중"/);
+  assert.match(html, /작성한 고민을 불러오고 있습니다\./);
+  assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
+});
+
 test('my worries DOM does not render answer writer private data', () => {
   const html = renderToStaticMarkup(MyWorriesScreen(baseProps({
     items: [{

@@ -1649,31 +1649,76 @@ Onboarding 선례의 정확한 표현:
 허용 수정 범위: relevant screen files, shared spinner primitive, screen state tests.
 금지 수정 범위: PRD에 없는 네트워크 오류 UX 확장, 별도 디자인 문서 산출물.
 
-- [ ] TODO-P10.1: PNG에 없는 답변하기 empty/loading, 나의 고민 empty/loading, feedback comment UI를 06~20 톤에 맞춰 정리한다.
+- [x] TODO-P10.1: PNG에 없는 답변하기 empty/loading, 나의 고민 empty/loading, feedback comment UI를 06~20 톤에 맞춰 정리한다.
   - 대상 파일: `src/screens/receivedWorries/*`, `src/screens/myPage/*`, answer check module
   - 완료 기준: 별도 reference PNG가 없는 상태도 기존 색상/spacing/token을 쓰며 PRD 문구를 넘어서지 않는다.
   - 검증: screen state tests.
   - production PNG evidence: 없음. Optional Phase 10 PNGs are handled only by TODO-P10.5 and are not a completion condition for this checkbox.
-- [ ] TODO-P10.2: empty 문구를 screen state test로 검증한다.
+  - completion note:
+    - changed files: `src/screens/receivedWorries/contract.test.ts`, `src/screens/myPage/MyWorriesScreen.test.ts`, `src/screens/answerCheck/AnswerCheckScreen.test.tsx`, `docs/TODO.md`
+    - test command/result: `npm test` pass (`709 pass`, `1 skipped`); `npm run lint` pass; `npm run build` pass; `npm run test:rules` pass (`78 pass`); `npm run validate:design-reference` pass. Screen state tests now cover received-worries empty/loading, my-worries empty/loading, and answer-check comment dialog open/closed rendering.
+    - production PNG path: 없음; visual review not performed
+    - capture type: 해당 없음
+    - harness route/data verification: `received-worries empty state renders exact PRD copy without extra helper text`, `received-worries loading state renders the shared spinner status without skeleton UI`, `my worries empty state uses PRD copy without a separate empty CTA`, `my worries loading state renders the shared spinner status without skeleton UI`, `comment dialog copy appears only while the comment dialog is open`
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P10.2: empty 문구를 screen state test로 검증한다.
   - 대상 파일: `src/screens/receivedWorries/*`, `src/screens/myPage/MyWorries*`
   - 완료 기준: 답변하기 empty는 `지금은 도착한 고민이 없어요.`, 나의 고민 empty는 `첫 고민을 남겨보세요.`.
   - 검증: screen state tests.
   - production PNG evidence: 없음. Optional Phase 10 PNGs are handled only by TODO-P10.5 and are not a completion condition for this checkbox.
-- [ ] TODO-P10.3: loading은 skeleton이 아니라 spinner로 통일한다.
+  - completion note:
+    - changed files: `src/screens/receivedWorries/contract.test.ts`, `src/screens/myPage/MyWorriesScreen.test.ts`, `docs/TODO.md`
+    - test command/result: `npm test` pass (`709 pass`, `1 skipped`); `npm run lint` pass; `npm run build` pass; `npm run test:rules` pass (`78 pass`); `npm run validate:design-reference` pass.
+    - production PNG path: 없음; visual review not performed
+    - capture type: 해당 없음
+    - harness route/data verification: screen assertions directly verify `지금은 도착한 고민이 없어요.` appears exactly once for received-worries empty and `첫 고민을 남겨보세요.` appears for my-worries empty without separate empty CTA.
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P10.3: loading은 skeleton이 아니라 spinner로 통일한다.
   - 대상 파일: shared/screen files
   - 완료 기준: loading states use spinner primitive.
   - 검증: screen tests 또는 DOM inspection.
   - production PNG evidence: 없음. Optional Phase 10 PNGs are handled only by TODO-P10.5 and are not a completion condition for this checkbox.
-- [ ] TODO-P10.4: 네트워크 오류 상태를 PRD 제품 정책으로 확장하지 않는다.
+  - completion note:
+    - changed files: `src/screens/receivedWorries/contract.test.ts`, `src/screens/myPage/MyWorriesScreen.test.ts`, `docs/TODO.md`
+    - test command/result: `npm test` pass (`709 pass`, `1 skipped`); `npm run lint` pass; `npm run build` pass; `npm run test:rules` pass (`78 pass`); `npm run validate:design-reference` pass. `rg -n "skeleton|Skeleton|loading" src/screens` shows Phase 10 target loading states use `LoadingState`/shared `LoadingSpinner`; skeleton matches are test assertions or unrelated write-form visual placeholder/onboarding placeholders, not loading UI.
+    - production PNG path: 없음; visual review not performed
+    - capture type: 해당 없음
+    - harness route/data verification: received-worries and my-worries loading render `role="status"` with the shared spinner aria label and assert no skeleton DOM/test-id; shared `uiContract.test.ts` keeps `LoadingSpinner` as the loading primitive.
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P10.4: 네트워크 오류 상태를 PRD 제품 정책으로 확장하지 않는다.
   - 대상 파일: screen state files
   - 완료 기준: 오류 상태는 기존 구현 세부로 유지하고 새 PRD UI 요구로 과도하게 확장하지 않는다.
   - 검증: code review note.
   - production PNG evidence: 없음.
-- [ ] TODO-P10.5: Phase 10에서 empty/loading visual review를 의도적으로 수행한 경우 production PNG evidence를 모아 기록한다.
+  - completion note:
+    - changed files: `src/screens/receivedWorries/contract.test.ts`, `src/screens/myPage/MyWorriesScreen.test.ts`, `src/screens/answerCheck/AnswerCheckScreen.test.tsx`, `docs/TODO.md`
+    - test command/result: `npm test` pass (`709 pass`, `1 skipped`); `npm run lint` pass; `npm run build` pass; `npm run test:rules` pass (`78 pass`); `npm run validate:design-reference` pass. `rg -n "error|retry|network|네트워크|오류|다시" src/screens/receivedWorries src/screens/myPage src/screens/answerCheck src/screens/replyDetail` reviewed: Phase 10 diff adds no retry button, modal, toast, network copy, or new error UX; matches are existing error states, existing push/error text, legacy replyDetail container messages, and one negative assertion.
+    - production PNG path: 없음; visual review not performed
+    - capture type: 해당 없음
+    - harness route/data verification: diff review only; existing error state contracts preserved.
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
+- [x] TODO-P10.5: Phase 10에서 empty/loading visual review를 의도적으로 수행한 경우 production PNG evidence를 모아 기록한다.
   - 대상 파일: `tmp/empty-loading-pixel-alignment/*-production.png`
   - 완료 기준: Phase 10에서 empty/loading PNG를 만들었다면 production PNG가 있고, 추가 보고 파일이 필요하면 한국어 HTML만 있으며 capture note 필수 필드가 기록된다. PNG를 만들지 않았다면 `production PNG evidence: 없음; visual review not performed`를 completion note에 기록한다.
   - 검증: `find tmp/empty-loading-pixel-alignment -type f | sort`
   - production PNG evidence: `tmp/empty-loading-pixel-alignment/*-production.png`.
+  - completion note:
+    - changed files: `docs/TODO.md`
+    - test command/result: `find tmp/empty-loading-pixel-alignment -type f | sort` returned `find: 'tmp/empty-loading-pixel-alignment': No such file or directory`; `npm test` pass (`709 pass`, `1 skipped`); `npm run lint` pass; `npm run build` pass; `npm run test:rules` pass (`78 pass`); `npm run validate:design-reference` pass.
+    - production PNG path: 없음; visual review not performed
+    - capture type: 해당 없음
+    - harness route/data verification: 해당 없음
+    - reference PNG path: 해당 없음
+    - measured result: 해당 없음
+    - tolerated difference: 해당 없음
 
 검증 명령:
 - `npm test`

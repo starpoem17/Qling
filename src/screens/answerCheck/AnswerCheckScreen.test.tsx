@@ -102,3 +102,20 @@ test('comment dialog supports submit and skip close callbacks', () => {
   assert.match(html, /건너뛰기/);
   assert.match(html, /제출/);
 });
+
+test('comment dialog copy appears only while the comment dialog is open', () => {
+  const closedHtml = renderToStaticMarkup(AnswerCheckScreen(baseProps({ commentDialog: null })));
+  const openHtml = renderToStaticMarkup(AnswerCheckScreen(baseProps({
+    commentDialog: {
+      replyId: 'reply-2',
+      feedbackState: 'liked',
+      draft: '고마웠어요',
+      maxLength: 1000,
+    },
+  })));
+
+  for (const dialogOnlyCopy of ['코멘트 남기기', '전하고 싶은 말을 남겨주세요.', '건너뛰기', '제출']) {
+    assert.equal(closedHtml.includes(dialogOnlyCopy), false);
+    assert.equal(openHtml.includes(dialogOnlyCopy), true);
+  }
+});
