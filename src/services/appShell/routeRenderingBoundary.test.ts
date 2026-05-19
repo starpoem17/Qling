@@ -83,6 +83,13 @@ test('identifies authenticated shell membership separately from route-specific g
     mountsAuthenticatedShell: true,
     mountsBottomNavigation: true,
   });
+  assert.deepEqual(routeRenderingBoundaryForRoute('edit_interests'), {
+    currentRoute: 'edit_interests',
+    routeGroup: 'my-page/account',
+    authenticatedTab: '마이페이지',
+    mountsAuthenticatedShell: true,
+    mountsBottomNavigation: false,
+  });
   assert.deepEqual(routeRenderingBoundaryForRoute('onboarding_interests'), {
     currentRoute: 'onboarding_interests',
     routeGroup: 'onboarding flow',

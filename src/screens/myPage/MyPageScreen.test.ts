@@ -252,6 +252,9 @@ test('edit interests screen renders fixed three-column chip grid and exact zero-
   })));
 
   assert.match(html, /grid-cols-3/);
+  assert.match(html, /h-\[44px\]/);
+  assert.match(html, /w-\[103px\]/);
+  assert.match(html, /top-\[752px\]/);
   assert.match(html, /1개 이상의 관심 분야를 선택해주세요\./);
   assert.match(html, /저장하기/);
   assert.match(html, /워라밸/);

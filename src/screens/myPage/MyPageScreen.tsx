@@ -3,7 +3,6 @@ import {
   CategoryChip,
   ContentSheet,
   LoadingState,
-  OrangeHeaderBand,
   PolicyTextContainer,
   PrimaryCTA,
   ProfileMotif,
@@ -25,6 +24,30 @@ const settingLabels: Record<MyPageSettingItem, string> = {
   logout: '로그아웃',
   delete_account: '회원 탈퇴',
 };
+
+const editInterestsFigmaOrder = [
+  '진로',
+  '취업',
+  '시험',
+  '학업',
+  '소득',
+  '연애',
+  '결혼',
+  '부모',
+  '자녀',
+  '우울',
+  '불안',
+  '외로움',
+  '직장',
+  '워라밸',
+  '외모',
+  '자존감',
+  '건강',
+  '노후',
+  '미래',
+  '잡담',
+  '주거',
+] as const;
 
 export function MyPageScreen(props: MyPageScreenProps) {
   const isLogoutProcessing = props.logoutConfirmation.isProcessing;
@@ -230,46 +253,66 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
 
 export function EditInterestsScreen(props: EditInterestsProps) {
   const hasValidationError = Boolean(props.validationMessages.interests);
+  const orderedCategoryOptions = editInterestsFigmaOrder.filter(category => props.categoryOptions.includes(category));
 
   return (
-    <div className="space-y-5">
-      <BackButton onBack={props.onBack} label="마이페이지로" />
-      <OrangeHeaderBand className="space-y-2">
-        <p className="text-sm font-bold opacity-85">관심 분야 수정</p>
-        <h1 className="text-2xl font-extrabold">주요 관심사는 무엇인가요?</h1>
-      </OrangeHeaderBand>
-      <ContentSheet className="space-y-5">
-        <div className="space-y-1">
-          <p className="text-sm font-bold text-[var(--qling-color-text)]">최소 1개 선택, 복수 선택 가능</p>
-          <p className="text-xs leading-5 text-[var(--qling-color-muted)]">변경사항은 저장하기를 눌러야 반영돼요.</p>
-        </div>
-        <div className="grid grid-cols-3 gap-2" aria-label="관심 분야 선택">
-          {props.categoryOptions.map(interest => (
-            <CategoryChip
-              key={interest}
-              label={interest}
-              selected={props.selectedInterests.includes(interest)}
-              disabled={props.isProcessing}
-              onSelect={() => props.onInterestToggle(interest)}
-              className="min-h-11 w-full justify-center px-2"
-            />
-          ))}
+    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 flex min-h-[852px] justify-center bg-[#ff8b0d] text-[#1a1a1a]">
+      <div className="relative h-[852px] w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
+        <div className="absolute left-0 top-[196px] h-[656px] w-[393px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" />
+        <button
+          type="button"
+          onClick={props.onBack}
+          aria-label="마이페이지로 돌아가기"
+          className="absolute left-[22px] top-[56px] h-[38px] w-6 text-left text-[32px] font-semibold leading-[38px] text-white focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          ‹
+        </button>
+        <h1 className="absolute left-[148.5px] top-[70px] w-24 text-center text-[17px] font-extrabold leading-5 tracking-normal text-white">
+          관심분야 수정
+        </h1>
+        <p className="absolute left-[28px] top-[147px] text-[26px] font-extrabold leading-8 tracking-normal text-white">
+          주요 관심사는 무엇인가요?
+        </p>
+        <p className="absolute left-6 top-[258px] text-[13px] font-bold leading-4 tracking-normal text-[#8e9095]">
+          변경사항은 저장하기를 눌러야 반영돼요.
+        </p>
+        <p className="absolute left-6 top-[277px] text-[13px] font-bold leading-4 tracking-normal text-[#8e9095]">
+          최소 1개 선택, 복수 선택 가능
+        </p>
+        <div className="absolute left-[34px] top-[322px] grid w-[324px] grid-cols-3 gap-x-[7px] gap-y-[13px]" aria-label="관심 분야 선택">
+          {orderedCategoryOptions.map(interest => {
+            const selected = props.selectedInterests.includes(interest);
+            return (
+              <button
+                key={interest}
+                type="button"
+                disabled={props.isProcessing}
+                aria-pressed={selected}
+                onClick={() => props.onInterestToggle(interest)}
+                className={`h-[44px] w-[103px] rounded-[22px] border-2 px-1 py-0 text-[14px] font-bold leading-none tracking-normal disabled:cursor-not-allowed disabled:opacity-55 ${selected ? 'border-[#ff8b0d] bg-transparent text-[#2a2a2a]' : 'border-[#d4be91] bg-[#fff1d1] text-[#25272b]'}`}
+              >
+                {interest}
+              </button>
+            );
+          })}
         </div>
         {hasValidationError && (
-          <p className="text-sm font-semibold text-[var(--qling-color-danger)]" role="alert">
+          <p className="absolute left-[34px] top-[716px] text-[13px] font-bold text-[#ea4335]" role="alert">
             {props.validationMessages.interests}
           </p>
         )}
-        <PrimaryCTA
+        <button
+          type="button"
           onClick={props.onSubmit}
           disabled={props.isProcessing}
-          processing={props.isProcessing}
-          accessibilityLabel="관심 분야 저장"
+          aria-label="관심 분야 저장"
+          aria-busy={props.isProcessing || undefined}
+          className="absolute left-6 top-[752px] h-[56px] w-[345px] rounded-[28px] bg-[#ff8b0d] text-[17px] font-extrabold leading-none tracking-normal text-[#121316] disabled:cursor-not-allowed disabled:opacity-55"
         >
           {props.isProcessing ? '저장 중' : '저장하기'}
-        </PrimaryCTA>
-      </ContentSheet>
-    </div>
+        </button>
+      </div>
+    </section>
   );
 }
 

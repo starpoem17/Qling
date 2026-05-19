@@ -132,7 +132,7 @@ export function routeRenderingBoundaryForRoute(view: AppRouteViewState): RouteRe
     routeGroup,
     authenticatedTab,
     mountsAuthenticatedShell: routeGroup !== 'login/splash/loading' && routeGroup !== 'onboarding flow',
-    mountsBottomNavigation: authenticatedTab !== null,
+    mountsBottomNavigation: authenticatedTab !== null && currentRoute !== 'edit_interests',
   };
 }
 
