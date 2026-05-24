@@ -71,6 +71,9 @@ export function usePushRegistration({
       }
 
       if (user) {
+        if (localStorage.getItem(`qling_push_disabled_${user.uid}`) === 'true') {
+          return;
+        }
         await lifecycle.maybeRecoverPushRegistration(user, 'app-foreground');
       }
     };
@@ -93,7 +96,7 @@ export function usePushRegistration({
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [adapters, lifecycle, user, pushRegistrationStatus]);
+  }, [adapters, lifecycle, user]);
 
   useEffect(() => {
     if (!user || loading || notificationPermission !== 'granted') {

@@ -236,6 +236,7 @@ export function MyPageContainer(props: MyPageContainerProps) {
         if (item === 'logout') props.setView('logout_confirmation');
         if (item === 'delete_account') props.setView('account_deletion_confirmation');
       }}
+      onBack={() => props.setView('received_worries')}
     />
   );
 }

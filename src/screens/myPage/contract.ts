@@ -78,6 +78,7 @@ export type MyPageScreenProps = {
   readonly onEditInterests: () => void;
   readonly onOpenMyAnswers: () => void;
   readonly onSettingSelect: (item: MyPageSettingItem) => void;
+  readonly onBack: () => void;
 };
 
 export type MyAnswerListItemProps = {

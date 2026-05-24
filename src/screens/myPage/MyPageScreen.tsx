@@ -57,7 +57,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
     <div className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-scroll-bottom))] bg-[#ff8b0d] px-5 pb-8 pt-[56px] text-[#1a1a1e]">
       <div className="mx-auto max-w-[353px]">
         <div className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center">
-          <BackButton onBack={() => undefined} label="이전 화면으로" inert />
+          <BackButton onBack={props.onBack} label="이전 화면으로" />
           <h1 className="truncate text-center text-[17px] font-extrabold leading-[21px]">마이페이지</h1>
         </div>
       </div>
@@ -252,7 +252,7 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
         >
           개인정보 처리방침
         </h1>
-        <article className="absolute left-4 top-[127px] h-[589px] w-[361px] overflow-hidden rounded-[18px] bg-white px-[18px] pt-[31px]">
+        <article className="absolute left-4 top-[127px] bottom-[20px] w-[361px] overflow-y-auto rounded-[18px] bg-white px-[18px] py-[31px]">
           <div
             className="whitespace-pre-wrap text-[13px] font-semibold leading-[150%] tracking-[-0.05em] text-[#1a1a1e]"
             role={props.state.status === 'error' ? 'alert' : undefined}
@@ -355,7 +355,7 @@ function ConfirmationDialog(props: {
 
 function BackButton({ onBack, label, inert = false }: { readonly onBack: () => void; readonly label: string; readonly inert?: boolean }) {
   if (inert) {
-    return <span aria-hidden="true" className="inline-flex h-10 w-10 items-center justify-start text-[32px] font-semibold leading-none text-[#2a2a2a]">‹</span>;
+    return <span aria-hidden="true" className="inline-flex h-10 w-10 items-center justify-start text-[32px] font-semibold leading-none text-[#2a2a2a]"></span>;
   }
 
   return (
