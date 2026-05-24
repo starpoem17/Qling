@@ -11,7 +11,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
   const showVisualPlaceholder = props.draft.value.trim().length === 0;
 
   return (
-    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 h-[755px] bg-[#fff1d1]">
+    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 h-[100dvh] bg-[#fff1d1] pb-6">
       <header>
         <button
           type="button"
@@ -26,7 +26,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
         </h1>
       </header>
 
-      <section className="absolute left-5 top-[120px] h-[541px] w-[353px] rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]">
+      <section className="absolute left-5 top-[120px] bottom-[94px] w-[353px] rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]">
         <label className="relative block h-full">
           <span className="sr-only">고민 내용</span>
           <textarea
@@ -67,7 +67,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
         aria-busy={props.draft.isProcessing || undefined}
         disabled={isDisabled || props.draft.isProcessing}
         onClick={props.onPublish}
-        className="absolute left-[63px] top-[684px] inline-flex h-12 w-[267px] items-center justify-center gap-2 rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-[63px] bottom-[23px] inline-flex h-12 w-[267px] items-center justify-center gap-2 rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
       >
         <Send className="h-5 w-5" aria-hidden="true" />
         고민 전송

@@ -34,7 +34,7 @@ export function LoginScreen({
 
         {errorMessage && (
           <div
-            className="absolute left-[24px] top-[604px] flex w-[345px] items-start gap-2 rounded-[10px] border border-[rgb(216_75_75/0.22)] bg-[rgb(255_255_255/0.7)] px-3 py-2 text-[12px] font-bold leading-[16px] text-[var(--qling-color-danger)]"
+            className="absolute bottom-[200px] left-1/2 flex w-[345px] -translate-x-1/2 items-start gap-2 rounded-[10px] border border-[rgb(216_75_75/0.22)] bg-[rgb(255_255_255/0.7)] px-3 py-2 text-[12px] font-bold leading-[16px] text-[var(--qling-color-danger)]"
             role="alert"
           >
             <AlertCircle className="mt-[1px] h-4 w-4 shrink-0" aria-hidden="true" />
@@ -51,14 +51,14 @@ export function LoginScreen({
             aria-label={buttonLabel}
             aria-busy={isProcessing || sessionState === 'signing-in' || undefined}
             disabled={isDisabled}
-            className="absolute left-[24px] top-[663px] h-[47px] w-[345px] rounded-[28px] border border-[#dadce0] bg-white text-[17px] font-black tracking-[-0.85px] text-[var(--qling-ref-login-text)] shadow-[0_2px_8px_0_rgba(0,0,0,0.06)] disabled:cursor-not-allowed disabled:opacity-60"
+            className="absolute bottom-[142px] left-1/2 h-[47px] w-[345px] -translate-x-1/2 rounded-[28px] border border-[#dadce0] bg-white text-[17px] font-black tracking-[-0.85px] text-[var(--qling-ref-login-text)] shadow-[0_2px_8px_0_rgba(0,0,0,0.06)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {!isProcessing && sessionState !== 'signing-in' && <GoogleMark />}
             <span className="absolute left-[116px] top-[12px] whitespace-nowrap leading-normal">{buttonLabel}</span>
           </button>
         </form>
 
-        <p className="absolute left-1/2 top-[765px] m-0 w-[385px] -translate-x-1/2 text-center text-[11px] font-bold leading-[18px] tracking-[-0.55px] text-[var(--qling-ref-login-policy)]">
+        <p className="absolute bottom-[69px] left-1/2 m-0 w-[385px] -translate-x-1/2 text-center text-[11px] font-bold leading-[18px] tracking-[-0.55px] text-[var(--qling-ref-login-policy)]">
           로그인 시 큐링의 개인정보처리방침 및 이용 약관에 동의하는 것으로 간주합니다
         </p>
       </main>

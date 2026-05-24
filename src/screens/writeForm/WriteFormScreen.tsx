@@ -8,7 +8,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
     : undefined;
 
   return (
-    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 min-h-[755px] bg-[#fff1d1] px-4 pb-6 pt-6 text-[#2a2a2a]">
+    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 min-h-[100dvh] bg-[#fff1d1] px-4 pb-6 pt-6 text-[#2a2a2a]">
       <div className="relative h-[95px]">
         <button
           type="button"

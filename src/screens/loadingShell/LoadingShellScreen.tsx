@@ -56,7 +56,7 @@ function ReferenceSplashScreen({ accessibleLabel, visibleMessage }: {
         <div className="absolute left-1/2 top-[351px] -translate-x-1/2">
           <SplashEyes />
         </div>
-        <p className="absolute left-1/2 top-[702px] -translate-x-1/2 m-0 whitespace-nowrap text-[30px] font-black leading-normal tracking-[1.2px] text-[var(--qling-ref-splash-cream)]">
+        <p className="absolute left-1/2 bottom-[120px] -translate-x-1/2 m-0 whitespace-nowrap text-[30px] font-black leading-normal tracking-[1.2px] text-[var(--qling-ref-splash-cream)]">
           {' Qling'}
         </p>
         <p className="sr-only" role="status" aria-live="polite">{visibleMessage}</p>

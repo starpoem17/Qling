@@ -236,8 +236,8 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
       : policyBody || (props.state.status === 'empty' ? props.state.message : '정책을 준비 중입니다.');
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[852px] bg-[#ff8b0d] text-[#1a1a1e]">
-      <div className="relative mx-auto h-[852px] w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
+    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[100dvh] bg-[#ff8b0d] text-[#1a1a1e]">
+      <div className="relative mx-auto h-full w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
         <button
           type="button"
           onClick={props.onBack}
@@ -270,9 +270,9 @@ export function EditInterestsScreen(props: EditInterestsProps) {
   const orderedCategoryOptions = editInterestsFigmaOrder.filter(category => props.categoryOptions.includes(category));
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 flex min-h-[852px] justify-center bg-[#ff8b0d] text-[#1a1a1a]">
-      <div className="relative h-[852px] w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
-        <div className="absolute left-0 top-[196px] h-[656px] w-[393px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" />
+    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 flex h-[100dvh] justify-center bg-[#ff8b0d] text-[#1a1a1a]">
+      <div className="relative h-full w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
+        <div className="absolute left-0 top-[196px] bottom-0 w-[393px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" />
         <button
           type="button"
           onClick={props.onBack}
@@ -311,7 +311,7 @@ export function EditInterestsScreen(props: EditInterestsProps) {
           })}
         </div>
         {hasValidationError && (
-          <p className="absolute left-[34px] top-[716px] text-[13px] font-bold text-[#ea4335]" role="alert">
+          <p className="absolute left-[34px] bottom-[110px] text-[13px] font-bold text-[#ea4335]" role="alert">
             {props.validationMessages.interests}
           </p>
         )}
@@ -321,7 +321,7 @@ export function EditInterestsScreen(props: EditInterestsProps) {
           disabled={props.isProcessing}
           aria-label="관심 분야 저장"
           aria-busy={props.isProcessing || undefined}
-          className="absolute left-6 top-[752px] h-[56px] w-[345px] rounded-[28px] bg-[#ff8b0d] text-[17px] font-extrabold leading-none tracking-normal text-[#121316] disabled:cursor-not-allowed disabled:opacity-55"
+          className="absolute left-6 bottom-[44px] h-[56px] w-[calc(100%-48px)] rounded-[28px] bg-[#ff8b0d] text-[17px] font-extrabold leading-none tracking-normal text-[#121316] disabled:cursor-not-allowed disabled:opacity-55"
         >
           {props.isProcessing ? '저장 중' : '저장하기'}
         </button>

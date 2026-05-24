@@ -34,14 +34,22 @@ export function usePushRegistration({
   }), [adapters]);
 
   const requestNotificationPermission = useCallback(
-    () => lifecycle.requestNotificationPermission(user),
+    () => {
+      if (user) {
+        localStorage.removeItem(`qling_push_disabled_${user.uid}`);
+      }
+      return lifecycle.requestNotificationPermission(user);
+    },
     [lifecycle, user]
   );
 
   const resetPushRegistrationOnSignOut = useCallback(async () => {
+    if (user) {
+      localStorage.setItem(`qling_push_disabled_${user.uid}`, 'true');
+    }
     await lifecycle.cleanupStoredPushToken();
     installedPwaAttemptedUidRef.current = null;
-  }, [lifecycle]);
+  }, [lifecycle, user]);
 
   useEffect(() => {
     const { lastKnownFcmToken } = adapters.readStoredMetadata();
@@ -92,11 +100,19 @@ export function usePushRegistration({
       return;
     }
 
+    if (localStorage.getItem(`qling_push_disabled_${user.uid}`) === 'true') {
+      return;
+    }
+
     void lifecycle.maybeRecoverPushRegistration(user, 'signed-in-stable');
   }, [user, loading, notificationPermission, lifecycle]);
 
   useEffect(() => {
     if (!user || loading || notificationPermission !== 'granted' || !isInstalledPWA()) {
+      return;
+    }
+
+    if (localStorage.getItem(`qling_push_disabled_${user.uid}`) === 'true') {
       return;
     }
 
