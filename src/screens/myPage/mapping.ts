@@ -33,11 +33,11 @@ export function mapPushStatus(params: {
   readonly registrationStatus?: string;
 }): { status: PushPermissionStatus; enabled: boolean; message?: string } {
   if (params.permission === 'unsupported') return { status: 'unsupported', enabled: false, message: '이 브라우저는 알림을 지원하지 않습니다.' };
-  if (params.registrationStatus === 'registered') return { status: 'registered', enabled: true, message: '브라우저 또는 OS 권한은 앱에서 직접 회수할 수 없어요.' };
+  if (params.registrationStatus === 'registered') return { status: 'registered', enabled: true, message: '알림이 켜져 있습니다.' };
   if (params.registrationStatus === 'error') return { status: 'error', enabled: false, message: '알림 등록에 실패했습니다. 다시 켜서 등록을 시도할 수 있어요.' };
-  if (params.permission === 'granted') return { status: 'granted', enabled: true, message: '브라우저 또는 OS 권한은 앱에서 직접 회수할 수 없어요.' };
   if (params.permission === 'denied') return { status: 'denied', enabled: false, message: '브라우저 설정에서 알림 권한을 허용해 주세요.' };
-  return { status: 'default', enabled: false, message: '켜면 브라우저 알림 권한 요청과 푸시 등록을 시도합니다.' };
+  
+  return { status: 'default', enabled: false, message: '켜면 앱 내 알림을 받을 수 있습니다.' };
 }
 
 function dateLabel(value: DisplayDateInput, options?: DisplayDateOptions): string | undefined {

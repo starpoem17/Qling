@@ -11,7 +11,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
   const showVisualPlaceholder = props.draft.value.trim().length === 0;
 
   return (
-    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 h-[100dvh] bg-[#fff1d1] pb-6">
+    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 h-[calc(100dvh-var(--qling-space-scroll-bottom))] bg-[#fff1d1] pb-6">
       <header>
         <button
           type="button"

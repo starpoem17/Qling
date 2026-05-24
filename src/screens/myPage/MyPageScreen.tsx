@@ -236,7 +236,7 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
       : policyBody || (props.state.status === 'empty' ? props.state.message : '정책을 준비 중입니다.');
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[100dvh] bg-[#ff8b0d] text-[#1a1a1e]">
+    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[calc(100dvh-var(--qling-space-scroll-bottom))] bg-[#ff8b0d] text-[#1a1a1e]">
       <div className="relative mx-auto h-full w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
         <button
           type="button"

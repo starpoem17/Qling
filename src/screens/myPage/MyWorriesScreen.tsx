@@ -64,20 +64,20 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
       {header}
 
       {props.state.status === 'loading' ? (
-        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
+        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
           <LoadingState title="나의 고민을 불러오는 중" message={props.state.label} />
         </section>
       ) : props.state.status === 'error' ? (
-        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
+        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
           <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
         </section>
       ) : props.state.status === 'empty' ? (
-        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
+        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
           <EmptyState title={props.state.message} />
         </section>
       ) : (
         <section
-          className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px)] rounded-t-[32px] bg-[#fff1d1] px-4 pb-28 pt-[30px]"
+          className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[32px] bg-[#fff1d1] px-4 pb-28 pt-[30px]"
           aria-label="나의 고민 목록"
         >
           <div className="grid gap-[14px]">
