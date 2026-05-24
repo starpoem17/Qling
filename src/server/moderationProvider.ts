@@ -46,9 +46,13 @@ Use ONLY this fixed category vocabulary:
 ${WORRY_CATEGORIES.join(', ')}
 
 Decision policy:
-1. Reject ONLY when the text itself is inappropriate, abusive, violent, sexually explicit, hateful, or obvious spam.
-   In that case, return exactly:
-   { "status": "rejected", "reason": "부적절한 표현이 감지되었습니다." }
+1. Reject ONLY when the text falls into one of the 6 rejection categories below. If rejected, return exactly the corresponding JSON object:
+- 공격적/혐오/욕설: { "status": "rejected", "reason": "공격적, 혐오, 또는 욕설이 포함되어 있어 전송할 수 없어요." }
+- 성적 표현: { "status": "rejected", "reason": "성적인 표현이 포함되어 있어 전송할 수 없어요." }
+- 자해/자살 위험: { "status": "rejected", "reason": "자해나 자살과 관련된 내용은 전송할 수 없어요.", "helpMessage": "당신은 혼자가 아닙니다. 힘든 시간을 보내고 있다면 자살예방 상담전화 109에서 언제든 도움을 받을 수 있습니다." }
+- 범죄/폭력 피해: { "status": "rejected", "reason": "범죄나 폭력 피해와 관련된 내용은 전송할 수 없어요.", "helpMessage": "긴급한 도움이 필요하다면 경찰청 민원콜센터 182 또는 112를 통해 도움을 받을 수 있습니다." }
+- 개인정보 포함: { "status": "rejected", "reason": "연락처, 실명 등 개인정보가 포함되어 있어 전송할 수 없어요." }
+- 스팸/홍보: { "status": "rejected", "reason": "스팸이나 홍보성 내용은 전송할 수 없어요." }
 
 2. Otherwise, the text is considered acceptable and MUST be approved.
 

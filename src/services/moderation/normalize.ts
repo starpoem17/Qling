@@ -2,12 +2,12 @@ import { WORRY_CATEGORY_SET } from '@midnight-radio/domain';
 
 export type NormalizedWorryModeration =
   | { status: 'approved'; categories: string[] }
-  | { status: 'rejected'; reason: string }
+  | { status: 'rejected'; reason: string; helpMessage?: string }
   | { status: 'invalid' };
 
 export type NormalizedSimpleModeration =
   | { status: 'approved' }
-  | { status: 'rejected'; reason: string }
+  | { status: 'rejected'; reason: string; helpMessage?: string }
   | { status: 'invalid' };
 
 function nonEmptyString(value: unknown): string | null {
@@ -45,11 +45,14 @@ export function normalizeWorryModeration(raw: unknown): NormalizedWorryModeratio
     return { status: 'invalid' };
   }
 
-  const result = raw as { status?: unknown; reason?: unknown; categories?: unknown; category?: unknown };
+  const result = raw as { status?: unknown; reason?: unknown; helpMessage?: unknown; categories?: unknown; category?: unknown };
 
   if (result.status === 'rejected') {
     const reason = nonEmptyString(result.reason);
-    return reason ? { status: 'rejected', reason } : { status: 'invalid' };
+    const helpMessage = nonEmptyString(result.helpMessage);
+    return reason 
+      ? { status: 'rejected', reason, ...(helpMessage ? { helpMessage } : {}) } 
+      : { status: 'invalid' };
   }
 
   if (result.status === 'approved') {
@@ -66,7 +69,7 @@ export function normalizeSimpleModeration(raw: unknown): NormalizedSimpleModerat
     return { status: 'invalid' };
   }
 
-  const result = raw as { status?: unknown; reason?: unknown };
+  const result = raw as { status?: unknown; reason?: unknown; helpMessage?: unknown };
 
   if (result.status === 'approved') {
     return { status: 'approved' };
@@ -74,7 +77,10 @@ export function normalizeSimpleModeration(raw: unknown): NormalizedSimpleModerat
 
   if (result.status === 'rejected') {
     const reason = nonEmptyString(result.reason);
-    return reason ? { status: 'rejected', reason } : { status: 'invalid' };
+    const helpMessage = nonEmptyString(result.helpMessage);
+    return reason 
+      ? { status: 'rejected', reason, ...(helpMessage ? { helpMessage } : {}) } 
+      : { status: 'invalid' };
   }
 
   return { status: 'invalid' };

@@ -363,10 +363,9 @@ function BackButton({ onBack, label, inert = false }: { readonly onBack: () => v
       type="button"
       onClick={onBack}
       aria-label={`${label} 돌아가기`}
-      className="inline-flex items-center gap-2 rounded-[var(--qling-radius-small-button)] px-2 py-1 text-sm font-bold text-[var(--qling-color-muted)] transition-colors hover:text-[var(--qling-color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)]"
+      className="inline-flex h-10 w-10 items-center justify-start text-[32px] font-semibold leading-none text-[#2a2a2a] transition-opacity hover:opacity-70 focus:outline-none focus:ring-2 focus:ring-[#2a2a2a] focus:ring-offset-2 focus:ring-offset-[#ff8b0d] rounded-md"
     >
-      <span className="text-[24px] leading-none" aria-hidden="true">‹</span>
-      {label}
+      <span aria-hidden="true">‹</span>
     </button>
   );
 }

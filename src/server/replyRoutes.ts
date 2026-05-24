@@ -76,17 +76,13 @@ export function registerReplyRoutes(app: express.Express, deps: {
     async (req, res) => {
       try {
         const authReq = req as ActiveAuthenticatedRequest;
-        
-        service.publishReplyForDelivery({
+        const result = await service.publishReplyForDelivery({
           replierUid: authReq.auth.uid,
           deliveryId: req.params.deliveryId,
           content: req.body?.content,
-        }).catch(error => console.error('Background reply publication failed:', error));
-
-        sendReplyResult(res, {
-          status: 'published',
-          replyId: 'reply_' + Date.now(),
         });
+
+        sendReplyResult(res, result);
       } catch (error) {
         console.error('Server reply publication failed:', error);
         res.status(500).json({
