@@ -22,7 +22,7 @@ const loadingCopyByReason: Record<LoadingShellProps['reason'], string> = {
 function SplashEyes() {
   return (
     <svg
-      className="absolute left-[149px] top-[351px] h-[74.98px] w-[95px]"
+      className="h-[74.98px] w-[95px]"
       fill="none"
       preserveAspectRatio="none"
       viewBox="0 0 95 74.9796"
@@ -53,8 +53,10 @@ function ReferenceSplashScreen({ accessibleLabel, visibleMessage }: {
   return (
     <div className="qling-reference-root qling-splash-root">
       <section className="qling-reference-canvas qling-splash-canvas" aria-label={accessibleLabel}>
-        <SplashEyes />
-        <p className="absolute left-[150px] top-[702px] m-0 whitespace-nowrap text-[30px] font-black leading-normal tracking-[1.2px] text-[var(--qling-ref-splash-cream)]">
+        <div className="absolute left-1/2 top-[351px] -translate-x-1/2">
+          <SplashEyes />
+        </div>
+        <p className="absolute left-1/2 top-[702px] -translate-x-1/2 m-0 whitespace-nowrap text-[30px] font-black leading-normal tracking-[1.2px] text-[var(--qling-ref-splash-cream)]">
           {' Qling'}
         </p>
         <p className="sr-only" role="status" aria-live="polite">{visibleMessage}</p>

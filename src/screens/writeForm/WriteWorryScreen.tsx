@@ -7,15 +7,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
   const validationMessage = props.draft.validation.status === 'invalid' && props.draft.value !== ''
     ? props.draft.validation.message
     : undefined;
-  const moderationMessage = props.draft.moderation.status === 'rejected'
-    ? [props.draft.moderation.reason, props.draft.moderation.helpMessage].filter(Boolean).join('\n\n')
-    : props.draft.moderation.status === 'failed'
-      ? props.draft.moderation.message
-      : undefined;
-  const checkingMessage = props.draft.moderation.status === 'checking'
-    ? 'AI 안심 필터가 내용을 확인하고 있습니다.'
-    : undefined;
-  const popupMessage = validationMessage ?? moderationMessage ?? checkingMessage;
+  const popupMessage = validationMessage;
   const showVisualPlaceholder = props.draft.value.trim().length === 0;
 
   return (

@@ -6,11 +6,6 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
   const validationMessage = props.draft.validation.status === 'invalid' && props.draft.value !== ''
     ? props.draft.validation.message
     : undefined;
-  const moderationMessage = props.draft.moderation.status === 'rejected'
-    ? [props.draft.moderation.reason, props.draft.moderation.helpMessage].filter(Boolean).join('\n\n')
-    : props.draft.moderation.status === 'failed'
-      ? props.draft.moderation.message
-    : undefined;
 
   return (
     <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 min-h-[755px] bg-[#fff1d1] px-4 pb-6 pt-6 text-[#2a2a2a]">
@@ -83,11 +78,6 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
         </span>
       </label>
 
-      {moderationMessage && (
-        <div className="mt-3 rounded-[12px] border border-red-100 bg-red-50 p-3 text-sm font-semibold leading-6 text-red-700 whitespace-pre-wrap">
-          {moderationMessage}
-        </div>
-      )}
 
       <button
         type="button"

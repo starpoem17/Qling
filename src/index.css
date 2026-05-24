@@ -24,8 +24,9 @@
 }
 
 :root {
-  --qling-mobile-canvas-width: 393px;
-  --qling-mobile-canvas-height: 852px;
+  --qling-mobile-canvas-width: 100vw;
+  --qling-mobile-canvas-max-width: 480px;
+  --qling-mobile-canvas-height: 100dvh;
   --qling-font-sans: "SUIT Variable", "SUIT", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   --qling-color-primary-orange: #e07a5f;
@@ -82,8 +83,9 @@
 }
 
 .qling-reference-canvas {
-  width: 393px;
-  height: 852px;
+  width: var(--qling-mobile-canvas-width);
+  max-width: var(--qling-mobile-canvas-max-width);
+  height: var(--qling-mobile-canvas-height);
   position: relative;
   overflow: hidden;
   flex: 0 0 auto;
@@ -99,10 +101,12 @@
 
 .qling-production-frame {
   width: min(100vw, var(--qling-mobile-canvas-width));
+  max-width: var(--qling-mobile-canvas-max-width);
   min-height: 100dvh;
   position: relative;
   overflow-x: hidden;
   background: var(--qling-color-cream);
+  margin: 0 auto;
 }
 
 .qling-splash-root,

@@ -159,8 +159,7 @@ function EmptyAnswerPreviewCard() {
 
 function PushToggleRow({ pushSettings }: { readonly pushSettings: MyPageScreenProps['pushSettings'] }) {
   const handleToggleClick = () => {
-    if (pushSettings.enabled) return;
-    void pushSettings.onToggle(true);
+    void pushSettings.onToggle(!pushSettings.enabled);
   };
 
   return (
