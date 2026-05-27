@@ -93,6 +93,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
           {props.items.map(item => {
             const isPassing = passingDeliveryIds.has(item.deliveryId);
             const content = item.bodyText ?? item.previewText;
+            const displayContent = content.length > 45 ? content.replace(/\n/g, ' ').slice(0, 45).trim() + '...' : content;
 
             return (
               <QlingCard
@@ -142,8 +143,8 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                     </span>
                   </span>
                   {item.isUnread && <span className="sr-only">새 고민</span>}
-                  <span className="mt-[21px] line-clamp-2 block break-words text-[16px] font-extrabold leading-6 tracking-[-0.03em] text-[#2a2a2a]">
-                    {content}
+                  <span className="mt-[21px] block break-words text-[16px] font-extrabold leading-6 tracking-[-0.03em] text-[#2a2a2a]">
+                    {displayContent}
                   </span>
                 </div>
               </QlingCard>

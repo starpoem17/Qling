@@ -41,8 +41,8 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           aria-label="원문 보기"
           className="group absolute inset-0 text-left focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
         >
-          <span className="absolute left-[19px] top-[44px] w-[325px] line-clamp-2 break-words text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
-            {props.originalWorry.summaryText}
+          <span className="absolute left-[19px] top-[44px] w-[325px] break-words text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
+            {props.originalWorry.summaryText.length > 45 ? props.originalWorry.summaryText.replace(/\n/g, ' ').slice(0, 45).trim() + '...' : props.originalWorry.summaryText}
           </span>
           <ChevronDown className="absolute right-[17px] top-[17px] h-6 w-6 text-[#2a2a2a] transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
         </button>
