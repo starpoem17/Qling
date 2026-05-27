@@ -293,22 +293,24 @@ export function EditInterestsScreen(props: EditInterestsProps) {
         <p className="absolute left-6 top-[277px] text-[13px] font-bold leading-4 tracking-normal text-[#8e9095]">
           최소 1개 선택, 복수 선택 가능
         </p>
-        <div className="absolute left-[34px] top-[322px] grid w-[324px] grid-cols-3 gap-x-[7px] gap-y-[13px]" aria-label="관심 분야 선택">
-          {orderedCategoryOptions.map(interest => {
-            const selected = props.selectedInterests.includes(interest);
-            return (
-              <button
-                key={interest}
-                type="button"
-                disabled={props.isProcessing}
-                aria-pressed={selected}
-                onClick={() => props.onInterestToggle(interest)}
-                className={`h-[44px] w-[103px] rounded-[22px] border-2 px-1 py-0 text-[14px] font-bold leading-none tracking-normal disabled:cursor-not-allowed disabled:opacity-55 ${selected ? 'border-[#ff8b0d] bg-transparent text-[#2a2a2a]' : 'border-[#d4be91] bg-[#fff1d1] text-[#25272b]'}`}
-              >
-                {interest}
-              </button>
-            );
-          })}
+        <div className="absolute bottom-[116px] left-[34px] right-[35px] top-[322px] overflow-y-auto pb-4 scrollbar-hide">
+          <div className="grid w-full grid-cols-3 gap-x-[7px] gap-y-[13px]" aria-label="관심 분야 선택">
+            {orderedCategoryOptions.map(interest => {
+              const selected = props.selectedInterests.includes(interest);
+              return (
+                <button
+                  key={interest}
+                  type="button"
+                  disabled={props.isProcessing}
+                  aria-pressed={selected}
+                  onClick={() => props.onInterestToggle(interest)}
+                  className={`h-[44px] w-full rounded-[22px] border-2 px-1 py-0 text-[14px] font-bold leading-none tracking-normal disabled:cursor-not-allowed disabled:opacity-55 ${selected ? 'border-[#ff8b0d] bg-transparent text-[#2a2a2a]' : 'border-[#d4be91] bg-[#fff1d1] text-[#25272b]'}`}
+                >
+                  {interest}
+                </button>
+              );
+            })}
+          </div>
         </div>
         {hasValidationError && (
           <p className="absolute left-[34px] bottom-[110px] text-[13px] font-bold text-[#ea4335]" role="alert">

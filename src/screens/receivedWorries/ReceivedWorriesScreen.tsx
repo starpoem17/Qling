@@ -142,7 +142,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                     </span>
                   </span>
                   {item.isUnread && <span className="sr-only">새 고민</span>}
-                  <span className="mt-[21px] line-clamp-2 block whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 tracking-[-0.03em] text-[#2a2a2a]">
+                  <span className="mt-[21px] line-clamp-2 block break-words text-[16px] font-extrabold leading-6 tracking-[-0.03em] text-[#2a2a2a]">
                     {content}
                   </span>
                 </div>
