@@ -99,29 +99,42 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="write-reply-original-title"
-            className="absolute top-[201px] h-[504px] w-[377px] max-w-[calc(100vw-14px)] overflow-hidden rounded-[18px] bg-white shadow-[0_12px_40px_rgb(0_0_0/0.18)]"
+            className="absolute top-[201px] flex h-[504px] w-[377px] max-w-[calc(100vw-14px)] flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_12px_40px_rgb(0_0_0/0.18)]"
           >
-            <h2 id="write-reply-original-title" className="absolute left-1/2 top-3 -translate-x-1/2 text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] text-[#2a2a2a]">
-              고민 보기
-            </h2>
-            <div className="absolute left-0 top-11 h-px w-full bg-[#c2c4c8]" />
-            <div className="absolute left-[9px] top-[55px]">
-              <ReplyCategoryChip label={props.originalWorry.category} />
+            <div className="relative h-11 shrink-0 border-b border-[#c2c4c8]">
+              <h2 id="write-reply-original-title" className="absolute left-1/2 top-3 -translate-x-1/2 text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] text-[#2a2a2a]">
+                고민 보기
+              </h2>
             </div>
-            <p className="absolute left-[9px] top-[87px] w-[360px] max-w-[calc(100%-18px)] break-words text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
-              {props.originalWorry.summaryText}
-            </p>
-            <p className="absolute left-[9px] top-[155px] h-[238px] w-[360px] max-w-[calc(100%-18px)] overflow-y-auto whitespace-pre-wrap break-words text-xs font-medium leading-6 tracking-[-0.36px] text-[#2a2a2a]">
-              {props.originalWorry.originalBodyText}
-            </p>
-            <button
-              type="button"
-              onClick={props.onCloseOriginal}
-              aria-label="원문 닫기"
-              className="absolute bottom-9 left-1/2 flex h-[52px] w-[262px] -translate-x-1/2 items-center justify-center rounded-[12px] bg-[#ff8b3d] text-[15px] font-bold leading-[19px] tracking-[-0.15px] text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
-            >
-              닫기
-            </button>
+            
+            <div className="flex min-h-0 flex-1 flex-col px-[14px] pt-3">
+              <div className="shrink-0">
+                <ReplyCategoryChip label={props.originalWorry.category} />
+              </div>
+              
+              {props.originalWorry.summaryText !== props.originalWorry.originalBodyText && (
+                <p className="mt-3 shrink-0 break-words text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
+                  {props.originalWorry.summaryText}
+                </p>
+              )}
+              
+              <div className="mt-4 min-h-0 flex-1 overflow-y-auto pb-4">
+                <p className="whitespace-pre-wrap break-words text-xs font-medium leading-6 tracking-[-0.36px] text-[#2a2a2a]">
+                  {props.originalWorry.originalBodyText}
+                </p>
+              </div>
+            </div>
+
+            <div className="shrink-0 pb-9 pt-2">
+              <button
+                type="button"
+                onClick={props.onCloseOriginal}
+                aria-label="원문 닫기"
+                className="mx-auto flex h-[52px] w-full max-w-[262px] items-center justify-center rounded-[12px] bg-[#ff8b3d] text-[15px] font-bold leading-[19px] tracking-[-0.15px] text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
+              >
+                닫기
+              </button>
+            </div>
           </section>
         </div>
       )}
