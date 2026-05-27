@@ -1,6 +1,6 @@
 import type { ExampleWorrySeed, SelectedExampleSeed } from './types';
 
-const MAX_EXAMPLES = 5;
+const MAX_EXAMPLES = 50;
 const MIN_FEEDBACK_DELAY_MS = 5 * 60 * 1000;
 const MAX_FEEDBACK_DELAY_MS = 15 * 60 * 1000;
 
