@@ -14,7 +14,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           type="button"
           onClick={props.onBack}
           aria-label="답변하기로 돌아가기"
-          className="absolute left-[1px] top-[28px] flex h-11 w-11 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-[#fff5eb] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
+          className="absolute left-[1px] top-[28px] flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-[#fff5eb] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>

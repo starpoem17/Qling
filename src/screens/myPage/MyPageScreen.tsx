@@ -1,4 +1,4 @@
-import { Heart } from 'lucide-react';
+import { Heart, ArrowLeft } from 'lucide-react';
 import {
   CategoryChip,
   ContentSheet,
@@ -242,9 +242,9 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
           type="button"
           onClick={props.onBack}
           aria-label="마이페이지로 돌아가기"
-          className="absolute left-[22px] top-[56px] h-[39px] w-[13px] text-left text-[32px] font-semibold leading-[39px] text-[#2a2a2a] focus:outline-none focus:ring-2 focus:ring-[#2a2a2a]"
+          className="absolute left-[16px] top-[56px] flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-[#2a2a2a]"
         >
-          ‹
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
         <h1
           aria-label={props.title}
@@ -277,9 +277,9 @@ export function EditInterestsScreen(props: EditInterestsProps) {
           type="button"
           onClick={props.onBack}
           aria-label="마이페이지로 돌아가기"
-          className="absolute left-[22px] top-[56px] h-[38px] w-6 text-left text-[32px] font-semibold leading-[38px] text-white focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute left-[16px] top-[56px] flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white"
         >
-          ‹
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
         <h1 className="absolute left-[148.5px] top-[70px] w-24 text-center text-[17px] font-extrabold leading-5 tracking-normal text-white">
           관심분야 수정
@@ -355,7 +355,7 @@ function ConfirmationDialog(props: {
 
 function BackButton({ onBack, label, inert = false }: { readonly onBack: () => void; readonly label: string; readonly inert?: boolean }) {
   if (inert) {
-    return <span aria-hidden="true" className="inline-flex h-10 w-10 items-center justify-start text-[32px] font-semibold leading-none text-[#2a2a2a]"></span>;
+    return <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center"></span>;
   }
 
   return (
@@ -363,9 +363,9 @@ function BackButton({ onBack, label, inert = false }: { readonly onBack: () => v
       type="button"
       onClick={onBack}
       aria-label={`${label} 돌아가기`}
-      className="inline-flex h-10 w-10 items-center justify-start text-[32px] font-semibold leading-none text-[#2a2a2a] transition-opacity hover:opacity-70 focus:outline-none focus:ring-2 focus:ring-[#2a2a2a] focus:ring-offset-2 focus:ring-offset-[#ff8b0d] rounded-md"
+      className="flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-[#2a2a2a] focus:ring-offset-2 focus:ring-offset-[#ff8b0d]"
     >
-      <span aria-hidden="true">‹</span>
+      <ArrowLeft className="h-5 w-5" aria-hidden="true" />
     </button>
   );
 }

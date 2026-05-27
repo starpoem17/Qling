@@ -16,10 +16,10 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
         <button
           type="button"
           onClick={props.onBack}
-          className="absolute left-[5px] top-[50px] inline-flex h-12 w-12 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-[#fff5eb]/60 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
+          className="absolute left-[5px] top-[50px] flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-[#fff5eb]/60 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
           aria-label="나의 고민으로 돌아가기"
         >
-          <ArrowLeft className="h-7 w-7" aria-hidden="true" />
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
         <h1 className="absolute left-1/2 top-[69px] -translate-x-1/2 text-[17px] font-extrabold leading-[21px] tracking-[-0.02em] text-[#2a2a2a]">
           고민 작성

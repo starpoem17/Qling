@@ -10,9 +10,9 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
           type="button"
           onClick={props.onBack}
           aria-label="마이페이지로 돌아가기"
-          className="flex h-10 w-10 items-center justify-start text-[#1a1a1a] transition-colors hover:text-[#4a3424] focus:outline-none focus:ring-2 focus:ring-[#1a1a1a] focus:ring-offset-2 focus:ring-offset-[#ff8b3d]"
+          className="flex h-10 w-10 items-center justify-center rounded-full text-[#1a1a1a] transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a] focus:ring-offset-2 focus:ring-offset-[#ff8b3d]"
         >
-          <ArrowLeft className="h-6 w-6" strokeWidth={3} aria-hidden="true" />
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
         <h1 className="text-center text-base font-extrabold leading-[21px]">내가 쓴 답변</h1>
       </div>
