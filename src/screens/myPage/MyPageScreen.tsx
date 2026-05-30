@@ -1,7 +1,8 @@
-import { Heart, ArrowLeft } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import {
   CategoryChip,
   ContentSheet,
+  FigmaTopBar,
   LoadingState,
   PolicyTextContainer,
   PrimaryCTA,
@@ -54,15 +55,10 @@ export function MyPageScreen(props: MyPageScreenProps) {
   const isAccountDeletionProcessing = props.accountDeletionConfirmation.isProcessing;
 
   return (
-    <div className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-full bg-[#ff8b0d] px-5 pb-8 pt-[56px] text-[#1a1a1e]">
-      <div className="mx-auto max-w-[353px]">
-        <div className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center">
-          <BackButton onBack={props.onBack} label="이전 화면으로" />
-          <h1 className="truncate text-center text-[17px] font-extrabold leading-[21px]">마이페이지</h1>
-        </div>
-      </div>
+    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 min-h-full bg-[#ff8b0d] px-5 pb-8 pt-[132px] text-[#1a1a1e]">
+      <FigmaTopBar title="마이페이지" onBack={props.onBack} backLabel="이전 화면으로 돌아가기" tone="light" />
 
-      <QlingCard className="mx-auto mt-9 flex h-[93px] max-w-[353px] items-center gap-[19px] rounded-[24px] border-0 px-[17px] py-[14px]">
+      <QlingCard className="mx-auto flex h-[93px] max-w-[353px] items-center gap-[19px] rounded-[24px] border-0 px-[17px] py-[14px]">
         <DefaultProfileImage label={props.profile.profileMotif.label} />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
@@ -249,20 +245,7 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
   return (
     <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-full bg-[#ff8b0d] text-[#1a1a1e]">
       <div className="relative mx-auto h-full w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
-        <button
-          type="button"
-          onClick={props.onBack}
-          aria-label="마이페이지로 돌아가기"
-          className="absolute left-[16px] top-[56px] flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-[#2a2a2a]"
-        >
-          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-        </button>
-        <h1
-          aria-label={props.title}
-          className="absolute left-[141px] top-[66px] h-[21px] w-[121px] text-left text-[17px] font-extrabold leading-[21px] tracking-[-0.02em] text-[#2a2a2a]"
-        >
-          개인정보 처리방침
-        </h1>
+        <FigmaTopBar title="개인정보 처리방침" titleAriaLabel={props.title} onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
         <article className="absolute left-4 top-[127px] bottom-[20px] w-[361px] overflow-y-auto rounded-[18px] bg-white px-[18px] py-[31px]">
           <div
             className="whitespace-pre-wrap text-[13px] font-semibold leading-[150%] tracking-[-0.05em] text-[#1a1a1e]"
@@ -284,17 +267,7 @@ export function EditInterestsScreen(props: EditInterestsProps) {
     <section className="-mx-[var(--qling-space-shell-x)] -mt-6 flex h-full justify-center bg-[#ff8b0d] text-[#1a1a1a]">
       <div className="relative h-full w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
         <div className="absolute left-0 top-[196px] bottom-0 w-[393px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" />
-        <button
-          type="button"
-          onClick={props.onBack}
-          aria-label="마이페이지로 돌아가기"
-          className="absolute left-[16px] top-[56px] flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white"
-        >
-          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-        </button>
-        <h1 className="absolute left-[148.5px] top-[70px] w-24 text-center text-[17px] font-extrabold leading-5 tracking-normal text-white">
-          관심분야 수정
-        </h1>
+        <FigmaTopBar title="관심분야 수정" onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
         <p className="absolute left-[28px] top-[147px] text-[26px] font-extrabold leading-8 tracking-normal text-white">
           주요 관심사는 무엇인가요?
         </p>
@@ -363,22 +336,5 @@ function ConfirmationDialog(props: {
       onCancel={props.confirmation.onCancel}
       onConfirm={props.confirmation.onConfirm}
     />
-  );
-}
-
-function BackButton({ onBack, label, inert = false }: { readonly onBack: () => void; readonly label: string; readonly inert?: boolean }) {
-  if (inert) {
-    return <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center"></span>;
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={onBack}
-      aria-label={`${label} 돌아가기`}
-      className="flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-[#2a2a2a] focus:ring-offset-2 focus:ring-offset-[#ff8b0d]"
-    >
-      <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-    </button>
   );
 }

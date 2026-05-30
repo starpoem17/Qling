@@ -1,7 +1,7 @@
-import { ArrowLeft, MessageCircle, ThumbsDown, ThumbsUp, X } from 'lucide-react';
+import { MessageCircle, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '../../lib/utils';
-import { ErrorState, LoadingState, QlingCard, QlingTextArea, PrimaryCTA, SecondaryCTA } from '../shared/ui';
+import { ErrorState, FigmaTopBar, LoadingState, QlingCard, QlingTextArea, PrimaryCTA, SecondaryCTA } from '../shared/ui';
 import type { AnswerCheckReplyProps, AnswerCheckScreenProps } from './contract';
 
 export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
@@ -100,21 +100,13 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
 
 function AnswerCheckFrame({ onBack, children }: { readonly onBack: () => void; readonly children: ReactNode }) {
   return (
-    <div className="mx-auto max-w-xl space-y-4 pb-6">
-      <div className="sticky top-0 z-20 -mx-[var(--qling-space-shell-x)] bg-white/95 px-[var(--qling-space-shell-x)] py-3 backdrop-blur-md">
-        <div className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center">
-          <button
-            type="button"
-            onClick={onBack}
-            aria-label="나의 고민으로 돌아가기"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--qling-color-text)] transition-colors hover:bg-[var(--qling-color-cream-soft)] focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)]"
-          >
-            <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-          </button>
-          <h1 className="text-center text-lg font-extrabold text-[var(--qling-color-text)]">답변 확인</h1>
+    <div className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-full bg-[#fff1d1] pb-6 text-[#2a2a2a]">
+      <div className="relative mx-auto min-h-full w-full max-w-[393px]">
+        <FigmaTopBar title="답변 확인" onBack={onBack} backLabel="나의 고민으로 돌아가기" />
+        <div className="space-y-4 px-4 pt-[127px]">
+          {children}
         </div>
       </div>
-      {children}
     </div>
   );
 }

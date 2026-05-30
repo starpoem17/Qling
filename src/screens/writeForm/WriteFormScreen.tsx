@@ -1,4 +1,5 @@
-import { ArrowLeft, ChevronDown, Pencil } from 'lucide-react';
+import { ChevronDown, Pencil } from 'lucide-react';
+import { FigmaTopBar } from '../shared/ui';
 import type { WriteFormScreenProps } from './contract';
 
 export function WriteFormScreen(props: WriteFormScreenProps) {
@@ -9,19 +10,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
 
   return (
     <div className="relative h-full bg-[#fff1d1] text-[#2a2a2a]">
-      <div className="absolute left-0 top-0 h-[127px] w-full">
-        <button
-          type="button"
-          onClick={props.onBack}
-          aria-label="답변하기로 돌아가기"
-          className="absolute left-4 top-[50px] flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-[#fff5eb] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
-        >
-          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-        </button>
-        <h1 className="absolute left-1/2 top-[69px] -translate-x-1/2 text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] text-[#2a2a2a]">
-          답변 작성
-        </h1>
-      </div>
+      {FigmaTopBar({ title: '답변 작성', onBack: props.onBack, backLabel: '답변하기로 돌아가기' })}
 
       <section className="absolute left-4 right-4 top-[127px] h-[79px] overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
         <div className="absolute left-[18px] top-[11px]">

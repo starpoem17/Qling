@@ -234,6 +234,52 @@ export function ContentSheet({ children, className }: { readonly children: React
   );
 }
 
+export function FigmaTopBar({
+  title,
+  titleAriaLabel,
+  onBack,
+  backLabel,
+  tone = 'dark',
+}: {
+  readonly title: string;
+  readonly titleAriaLabel?: string;
+  readonly onBack: () => void;
+  readonly backLabel: string;
+  readonly tone?: 'dark' | 'light';
+}) {
+  const textClassName = tone === 'light' ? 'text-white' : 'text-[#2a2a2a]';
+  const hoverClassName = tone === 'light'
+    ? 'hover:bg-white/20 focus:ring-white'
+    : 'hover:bg-black/10 focus:ring-[#2a2a2a]';
+
+  return (
+    <div className="absolute left-0 top-0 z-20 h-[127px] w-full" data-measure="figma-top-bar">
+      <button
+        type="button"
+        onClick={onBack}
+        aria-label={backLabel}
+        className={cn(
+          'absolute left-2 top-10 h-[54px] w-11 rounded-full transition-colors focus:outline-none focus:ring-2',
+          hoverClassName,
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className={cn('absolute left-[14px] top-[10px] text-[32px] font-semibold leading-none', textClassName)}
+        >
+          ‹
+        </span>
+      </button>
+      <h1
+        aria-label={titleAriaLabel}
+        className={cn('absolute left-0 top-[60px] w-full whitespace-nowrap text-center text-[17px] font-extrabold leading-[21px] tracking-[-0.34px]', textClassName)}
+      >
+        {title}
+      </h1>
+    </div>
+  );
+}
+
 export function OrangeHeaderBand({ children, className }: { readonly children: ReactNode; readonly className?: string }) {
   return (
     <section className={cn('rounded-b-[var(--qling-radius-content-sheet)] bg-[var(--qling-color-primary-orange)] px-[var(--qling-space-shell-x)] py-6 text-[var(--qling-color-text)]', className)}>

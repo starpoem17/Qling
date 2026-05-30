@@ -1,23 +1,13 @@
-import { ArrowLeft, Heart } from 'lucide-react';
-import { EmptyState, ErrorState, LoadingState, SuccessBadge } from '../shared/ui';
+import { Heart } from 'lucide-react';
+import { EmptyState, ErrorState, FigmaTopBar, LoadingState, SuccessBadge } from '../shared/ui';
 import type { MyAnswersScreenProps } from './contract';
 
 export function MyAnswersScreen(props: MyAnswersScreenProps) {
   return (
-    <div className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-full bg-[#ff8b3d] px-4 pb-8 pt-[50px] text-[#1a1a1a]">
-      <div className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center">
-        <button
-          type="button"
-          onClick={props.onBack}
-          aria-label="마이페이지로 돌아가기"
-          className="flex h-10 w-10 items-center justify-center rounded-full text-[#1a1a1a] transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a] focus:ring-offset-2 focus:ring-offset-[#ff8b3d]"
-        >
-          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-        </button>
-        <h1 className="text-center text-base font-extrabold leading-[21px]">내가 쓴 답변</h1>
-      </div>
+    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 min-h-full bg-[#ff8b3d] px-4 pb-8 pt-[127px] text-[#1a1a1a]">
+      <FigmaTopBar title="내가 쓴 답변" onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
 
-      <div className="mt-[31px] space-y-[19px]">
+      <div className="space-y-[19px]">
         {props.state.status === 'loading' && <LoadingState title={props.state.label} />}
         {props.state.status === 'error' && <ErrorState title="내가 쓴 답변을 불러오지 못했어요." message={props.state.message} />}
         {props.state.status === 'empty' && (
