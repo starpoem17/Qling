@@ -75,7 +75,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
         </section>
       ) : (
         <section
-          className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-120px)] rounded-t-[32px] bg-[#fff1d1] px-4 pb-28 pt-[30px]"
+          className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-120px)] rounded-t-[32px] bg-[#fff1d1] px-4 pb-4 pt-[30px]"
           aria-label="나의 고민 목록"
         >
           <div className="grid gap-[14px]">
