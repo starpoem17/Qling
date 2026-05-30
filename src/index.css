@@ -173,10 +173,12 @@ body {
   color: var(--qling-color-text);
 }
 
-button,
-textarea,
-input {
-  font: inherit;
+@layer base {
+  button,
+  textarea,
+  input {
+    font: inherit;
+  }
 }
 
 .qling-received-worries-font {
