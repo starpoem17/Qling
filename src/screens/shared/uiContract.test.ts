@@ -80,6 +80,18 @@ test('bottom navigation renders asset svg icons without css mask fallback boxes'
   assert.doesNotMatch(source, /WebkitMaskImage/);
 });
 
+test('bottom navigation participates in shell flex layout without viewport fixed positioning', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+  const cssSource = fs.readFileSync(path.join(process.cwd(), 'src', 'index.css'), 'utf8');
+
+  assert.match(cssSource, /\.qling-production-frame[\s\S]*display: flex;/);
+  assert.match(cssSource, /\.qling-production-frame[\s\S]*flex-direction: column;/);
+  assert.match(source, /min-h-0 w-full flex-1/);
+  assert.match(source, /h-\[80px\] w-full shrink-0/);
+  assert.doesNotMatch(source, /fixed bottom-0 left-0 right-0/);
+  assert.doesNotMatch(source, /overflow-y-auto/);
+});
+
 test('profile motif remains visual-only without avatar data requirements', () => {
   const props = {
     label: 'Profile motif',
