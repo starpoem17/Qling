@@ -114,4 +114,6 @@ test('received-worries loading state renders the shared spinner status without s
   assert.match(html, /aria-label="고민을 불러오고 있어요"/);
   assert.match(html, /답변할 고민을 불러오는 중이에요\./);
   assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
+  assert.match(html, /100dvh-120px-var\(--qling-space-nav-height\)/);
+  assert.doesNotMatch(html, /100dvh-120px-var\(--qling-space-scroll-bottom\)/);
 });

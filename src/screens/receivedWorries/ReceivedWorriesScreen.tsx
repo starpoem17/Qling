@@ -53,7 +53,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
     return (
       <div>
         {header}
-        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[28px] bg-[#fff1d1] px-4 pt-5">
+        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-nav-height))] rounded-t-[28px] bg-[#fff1d1] px-4 pt-5">
           <LoadingState title="고민을 불러오고 있어요" message={props.state.label} />
         </section>
       </div>
@@ -64,7 +64,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
     return (
       <div>
         {header}
-        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[28px] bg-[#fff1d1] px-4 pt-5">
+        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-nav-height))] rounded-t-[28px] bg-[#fff1d1] px-4 pt-5">
           <ErrorState title="답변 피드를 불러오지 못했어요" message={props.state.message} />
         </section>
       </div>
@@ -75,7 +75,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
     return (
       <div>
         {header}
-        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[28px] bg-[#fff1d1] px-4 pt-5">
+        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-nav-height))] rounded-t-[28px] bg-[#fff1d1] px-4 pt-5">
           <EmptyState title={props.state.message} />
         </section>
       </div>
@@ -86,7 +86,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
     <div>
       {header}
       <section
-        className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[28px] bg-[#fff1d1] px-4 pb-4 pt-5"
+        className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-nav-height))] rounded-t-[28px] bg-[#fff1d1] px-4 pb-4 pt-5"
         aria-label="받은 고민 목록"
       >
         <div className="grid gap-[14px]">
