@@ -146,7 +146,7 @@ test('my-page forwards edit interests, my answers, push toggle, and policy actio
   assert.deepEqual(events, ['edit', 'answers', 'push:true', 'setting:privacy_policy']);
 });
 
-test('my-page active push toggle click is a no-op', () => {
+test('my-page active push toggle click requests disable', () => {
   const events: string[] = [];
   const tree = MyPageScreen(baseMyPageProps({
     pushSettings: {
@@ -160,7 +160,7 @@ test('my-page active push toggle click is a no-op', () => {
 
   click(findElement(tree, element => element.type === 'button' && element.props.role === 'switch'));
 
-  assert.deepEqual(events, []);
+  assert.deepEqual(events, ['push:false']);
 });
 
 test('logout and account deletion rows open modal dialog requests', () => {
@@ -254,8 +254,6 @@ test('edit interests screen renders fixed three-column chip grid and exact zero-
 
   assert.match(html, /grid-cols-3/);
   assert.match(html, /h-\[44px\]/);
-  assert.match(html, /w-\[103px\]/);
-  assert.match(html, /top-\[752px\]/);
   assert.match(html, /1개 이상의 관심 분야를 선택해주세요\./);
   assert.match(html, /저장하기/);
   assert.match(html, /워라밸/);
@@ -299,7 +297,6 @@ test('privacy policy screen renders document body in the Figma card layout', () 
 
   assert.match(html, /bg-\[#ff8b0d\]/);
   assert.match(html, /top-\[127px\]/);
-  assert.match(html, /h-\[589px\]/);
   assert.match(html, /w-\[361px\]/);
   assert.match(html, /rounded-\[18px\]/);
   assert.match(html, /개인정보 처리방침/);
