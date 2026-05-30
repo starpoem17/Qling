@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 export type SharedPrimitiveId =
   | 'appShellMobileFrame'
   | 'bottomNavigation'
-  | 'centralBottomNavigationIndicator'
   | 'contentSheet'
   | 'orangeHeaderBand'
   | 'primaryCta'
@@ -18,7 +17,7 @@ export type SharedPrimitiveId =
   | 'policyTextContainer'
   | 'settingsRow';
 
-export type BottomNavigationTab = '답변하기' | '나의 고민' | '마이페이지';
+export type BottomNavigationTab = '답변하기' | '나의 고민' | '채팅' | '순위';
 
 export type BottomNavigationItem = {
   readonly tab: BottomNavigationTab;
@@ -27,7 +26,7 @@ export type BottomNavigationItem = {
 
 export type BottomNavigationProps = {
   readonly tabs: readonly BottomNavigationItem[];
-  readonly activeTab: BottomNavigationTab;
+  readonly activeTab: BottomNavigationTab | null;
   readonly onSelectTab: (tab: BottomNavigationTab) => void;
 };
 
@@ -124,7 +123,6 @@ export type SettingsRowProps = {
 export const SHARED_UI_PRIMITIVE_OWNERSHIP = [
   { id: 'appShellMobileFrame', primitive: 'MobileAppShell' },
   { id: 'bottomNavigation', primitive: 'BottomNavigation' },
-  { id: 'centralBottomNavigationIndicator', primitive: 'BottomNavigation' },
   { id: 'contentSheet', primitive: 'ContentSheet' },
   { id: 'orangeHeaderBand', primitive: 'OrangeHeaderBand' },
   { id: 'primaryCta', primitive: 'PrimaryCTA' },

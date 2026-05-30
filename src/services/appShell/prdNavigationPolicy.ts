@@ -1,4 +1,4 @@
-export const PRD_APP_TABS = ['답변하기', '나의 고민', '마이페이지'] as const;
+export const PRD_APP_TABS = ['답변하기', '나의 고민', '채팅', '순위'] as const;
 
 export type PrdAppTab = (typeof PRD_APP_TABS)[number];
 
@@ -22,7 +22,10 @@ export type AppRoute =
   | 'answer_check'
   | 'my_worries'
   | 'my_worry_detail'
+  | 'chat'
+  | 'ranking'
   | 'my_page'
+  | '마이페이지'
   | 'edit_interests'
   | 'my_answers'
   | 'privacy_policy'
@@ -78,6 +81,8 @@ export const REQUIRED_PHASE_2_ROUTE_STATES = [
   'write_reply_success',
   'received_answer_detail',
   'answer_check',
+  'chat',
+  'ranking',
   'my_page',
   'edit_interests',
   'my_answers',
@@ -205,6 +210,8 @@ export function tabForRoute(route: AppRouteViewState): PrdAppTab | null {
   const currentRoute = routeName(route);
   if (PRD_APP_TABS.includes(currentRoute as PrdAppTab)) return currentRoute as PrdAppTab;
   if (currentRoute === 'received_worries' || currentRoute === 'write_reply' || currentRoute === 'write_reply_success') return '답변하기';
+  if (currentRoute === 'chat') return '채팅';
+  if (currentRoute === 'ranking') return '순위';
   if (
     currentRoute === 'my_worries'
     || currentRoute === 'write_worry'
@@ -218,10 +225,11 @@ export function tabForRoute(route: AppRouteViewState): PrdAppTab | null {
   }
   if (
     currentRoute === 'my_page'
+    || currentRoute === '마이페이지'
     || currentRoute === 'my_answers'
     || MY_PAGE_SUBROUTES.includes(currentRoute as (typeof MY_PAGE_SUBROUTES)[number])
   ) {
-    return '마이페이지';
+    return null;
   }
   return null;
 }

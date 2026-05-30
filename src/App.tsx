@@ -54,6 +54,8 @@ import {
 } from './screens/shared/ui';
 import { LoadingShellScreen } from './screens/loadingShell/LoadingShellScreen';
 import { LoginScreen } from './screens/loadingShell/LoginScreen';
+import { ChatScreen } from './screens/chat/ChatScreen';
+import { RankingContainer } from './screens/ranking/RankingContainer';
 
 // --- Types ---
 interface UserProfile {
@@ -285,7 +287,7 @@ export default function App() {
 
   return (
     <MobileAppShell
-      bottomNavigation={routeBoundary.mountsBottomNavigation && routeBoundary.authenticatedTab && (
+      bottomNavigation={routeBoundary.mountsBottomNavigation && (
         <BottomNavigation
           tabs={PRD_APP_TABS.map(tab => ({ tab, label: tab }))}
           activeTab={routeBoundary.authenticatedTab}
@@ -439,6 +441,18 @@ export default function App() {
                 setSelectedMyWorry={setSelectedMyWorry}
                 setView={setView}
               />
+            </motion.div>
+          )}
+
+          {(currentRoute === '채팅' || currentRoute === 'chat') && (
+            <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <ChatScreen />
+            </motion.div>
+          )}
+
+          {(currentRoute === '순위' || currentRoute === 'ranking') && (
+            <motion.div key="ranking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <RankingContainer user={user} />
             </motion.div>
           )}
 

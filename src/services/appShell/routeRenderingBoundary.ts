@@ -45,6 +45,10 @@ export const ROUTE_RENDERING_BOUNDARY = {
       'received_answer_detail',
       'read_received_reply',
       'my_worry_detail',
+      '채팅',
+      'chat',
+      '순위',
+      'ranking',
       '마이페이지',
       'edit_interests',
       'my_answers',
@@ -132,7 +136,7 @@ export function routeRenderingBoundaryForRoute(view: AppRouteViewState): RouteRe
     routeGroup,
     authenticatedTab,
     mountsAuthenticatedShell: routeGroup !== 'login/splash/loading' && routeGroup !== 'onboarding flow',
-    mountsBottomNavigation: authenticatedTab !== null && currentRoute !== 'edit_interests',
+    mountsBottomNavigation: routeGroup !== 'login/splash/loading' && routeGroup !== 'onboarding flow',
   };
 }
 

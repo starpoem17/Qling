@@ -47,6 +47,7 @@ function baseMyPageProps(overrides: Partial<MyPageScreenProps> = {}): MyPageScre
     onEditInterests: () => undefined,
     onOpenMyAnswers: () => undefined,
     onSettingSelect: () => undefined,
+    onBack: () => undefined,
     ...overrides,
   };
 }

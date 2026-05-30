@@ -4,11 +4,8 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronRight,
-  House,
   Loader2,
-  Send,
   Radio,
-  UserRound,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type {
@@ -62,55 +59,21 @@ export function BottomNavigation({
   onSelectTab,
 }: BottomNavigationProps) {
   const iconByTab: Record<BottomNavigationTab, ReactNode> = {
-    답변하기: <House className="h-6 w-6" aria-hidden="true" />,
-    '나의 고민': <Send className="h-6 w-6" aria-hidden="true" />,
-    마이페이지: <UserRound className="h-5 w-5" aria-hidden="true" />,
+    답변하기: <BottomNavAnswerIcon />,
+    '나의 고민': <BottomNavHomeIcon />,
+    채팅: <BottomNavChatIcon />,
+    순위: <BottomNavRankingIcon />,
   };
-  const visibleTabs = tabs.filter(tab => tab.tab !== '마이페이지');
-  const isAnswerTab = activeTab === '답변하기' || activeTab === '마이페이지';
-  const leftEyePositionClass = isAnswerTab ? 'left-[14px]' : 'left-[48px]';
-  const rightEyePositionClass = isAnswerTab ? 'left-[33px]' : 'left-[67px]';
 
   return (
     <nav
       aria-label="주요 화면"
-      className="fixed bottom-[-7px] left-1/2 z-50 h-[104px] w-full max-w-[var(--qling-mobile-canvas-width)] -translate-x-1/2"
+      className="fixed bottom-0 left-1/2 z-50 h-[80px] w-full max-w-[var(--qling-mobile-canvas-max-width)] -translate-x-1/2 bg-[#fff5eb]"
       style={{ paddingBottom: 'var(--qling-space-safe-bottom)' }}
     >
-      <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-0 h-[88px] w-[114px] -translate-x-1/2 rounded-[30px] bg-[#fff5eb]" />
-      <div aria-hidden="true" className="pointer-events-none absolute left-0 top-[29px] h-[72px] w-full bg-[#fff5eb]" />
-      <div
-        aria-hidden="true"
-        role="presentation"
-        data-testid="bottom-navigation-central-indicator"
-        data-indicator-state={activeTab}
-        className="pointer-events-none absolute left-1/2 top-[9px] flex h-[59px] w-[95px] -translate-x-1/2 items-center justify-center rounded-[29px] bg-[#ff8b3d] text-[#2a2a2a]"
-      >
-        <span className="relative block h-full w-full" aria-hidden="true">
-          <svg className={cn('absolute top-[15px] transition-[left]', leftEyePositionClass)} width="17" height="26" viewBox="0 0 17 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16.8497 12.7299C16.97 23.6896 13.0814 25.4598 8.43297 25.4598C3.78452 25.4598 -0.289859 23.087 0.0162047 12.7299C0.322268 2.37274 3.78452 1.71661e-05 8.43297 1.71661e-05C13.0814 1.71661e-05 16.7295 1.77015 16.8497 12.7299Z" fill="#FFF5EB" />
-            <mask id="bottom-navigation-left-eye-mask" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="17" height="26">
-              <path d="M8.44531 1.00002C10.6606 1.00007 12.3637 1.42299 13.5908 2.89748C14.8732 4.43845 15.8145 7.33004 15.874 12.7569C15.9334 18.1729 14.9891 21.0535 13.6875 22.5869C12.4315 24.0665 10.6652 24.4912 8.44531 24.4912C6.28278 24.4912 4.44319 23.9447 3.14062 22.3701C1.80394 20.7543 0.865303 17.8616 1.01562 12.7754C1.16686 7.65838 2.09957 4.73758 3.38574 3.10256C4.61627 1.53836 6.29704 1.00002 8.44531 1.00002Z" fill="#FFF5EB" stroke="black" strokeWidth="2" />
-            </mask>
-            <g mask="url(#bottom-navigation-left-eye-mask)">
-              <path d="M9.56676 13.254C9.56676 18.3804 6.74704 22.5363 3.26873 22.5363C-0.209573 22.5363 -3.0293 20.1811 -3.0293 13.254C-3.0293 8.12752 -0.209573 3.9717 3.26873 3.9717C6.74704 3.9717 9.56676 8.12752 9.56676 13.254Z" fill="#1A1A1A" />
-            </g>
-          </svg>
-          <svg className={cn('absolute top-[15px] transition-[left]', rightEyePositionClass)} width="17" height="26" viewBox="0 0 17 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16.8497 12.7299C16.97 23.6896 13.0814 25.4598 8.43297 25.4598C3.78452 25.4598 -0.289859 23.087 0.0162047 12.7299C0.322268 2.37274 3.78452 1.71661e-05 8.43297 1.71661e-05C13.0814 1.71661e-05 16.7295 1.77015 16.8497 12.7299Z" fill="#FFF5EB" />
-            <mask id="bottom-navigation-right-eye-mask" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="17" height="26">
-              <path d="M8.44531 1.00002C10.6606 1.00007 12.3637 1.42299 13.5908 2.89748C14.8732 4.43845 15.8145 7.33004 15.874 12.7569C15.9334 18.1729 14.9891 21.0535 13.6875 22.5869C12.4315 24.0665 10.6652 24.4912 8.44531 24.4912C6.28278 24.4912 4.44319 23.9447 3.14062 22.3701C1.80394 20.7543 0.865303 17.8616 1.01562 12.7754C1.16686 7.65838 2.09957 4.73758 3.38574 3.10256C4.61627 1.53836 6.29704 1.00002 8.44531 1.00002Z" fill="#FFF5EB" stroke="black" strokeWidth="2" />
-            </mask>
-            <g mask="url(#bottom-navigation-right-eye-mask)">
-              <path d="M9.56676 13.254C9.56676 18.3804 6.74704 22.5363 3.26873 22.5363C-0.209573 22.5363 -3.0293 20.1811 -3.0293 13.254C-3.0293 8.12752 -0.209573 3.9717 3.26873 3.9717C6.74704 3.9717 9.56676 8.12752 9.56676 13.254Z" fill="#1A1A1A" />
-            </g>
-          </svg>
-        </span>
-      </div>
-      <div className="absolute left-4 right-[15px] top-[37px] grid grid-cols-2 gap-[130px]">
-        {visibleTabs.map(({ tab, label }) => {
+      <div className="grid h-full grid-cols-4">
+        {tabs.map(({ tab, label }) => {
           const isActive = activeTab === tab;
-          const isVisuallyActive = isActive || activeTab === '마이페이지';
           return (
             <button
               key={tab}
@@ -119,19 +82,65 @@ export function BottomNavigation({
               aria-current={isActive ? 'page' : undefined}
               onClick={() => onSelectTab(tab)}
               className={cn(
-                'relative flex h-9 min-w-0 items-center justify-center rounded-[7px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2',
-                isVisuallyActive
-                  ? 'bg-[#fae5d7] text-[#ff8b3d]'
-                  : 'bg-[#dadce0] text-[#b8b8b8] hover:bg-[#d0d2d6]',
+                'flex min-w-0 flex-col items-center justify-start gap-[5px] pt-[14px] text-[13px] font-bold leading-[13px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset',
+                isActive ? 'text-[#ff8b3d]' : 'text-[#c5bdad] hover:text-[#a89f8e]',
               )}
             >
               {iconByTab[tab]}
-              <span className="sr-only">{label}</span>
+              <span>{label}</span>
             </button>
           );
         })}
       </div>
     </nav>
+  );
+}
+
+function BottomNavAnswerIcon() {
+  return (
+    <svg className="h-[34px] w-[39px]" viewBox="0 0 39 34" fill="none" aria-hidden="true">
+      <path
+        d="M36.8 2.2 6.1 15.4c-2 .9-2 3.8.1 4.5l8 2.7 3.2 8.4c.8 2 3.5 2.1 4.5.2L38.5 4.4c.8-1.4-.3-3-1.7-2.2Z"
+        fill="currentColor"
+      />
+      <path
+        d="m16.1 22.7 3.9 5.7 3.1-11.7 9.1-8.5-12.5 7.1-3.6 7.4Z"
+        fill="#fff5eb"
+        fillOpacity="0.72"
+      />
+    </svg>
+  );
+}
+
+function BottomNavHomeIcon() {
+  return (
+    <svg className="h-[30px] w-[30px]" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+      <path
+        d="M3 13.3 14.2 3.2a1.2 1.2 0 0 1 1.6 0L27 13.3c.8.7.3 2-.8 2h-1.7v10.2c0 .8-.7 1.5-1.5 1.5h-5.4v-7.8h-5.2V27H7c-.8 0-1.5-.7-1.5-1.5V15.3H3.8c-1.1 0-1.6-1.3-.8-2Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function BottomNavChatIcon() {
+  return (
+    <svg className="h-[30px] w-[30px]" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+      <path
+        d="M4.2 5.2A3.2 3.2 0 0 1 7.4 2h15.2a3.2 3.2 0 0 1 3.2 3.2v12.9a3.2 3.2 0 0 1-3.2 3.2h-8.8l-6.2 5.4c-1.3 1.1-3.4.2-3.4-1.5v-20Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function BottomNavRankingIcon() {
+  return (
+    <svg className="h-[28px] w-[26px]" viewBox="0 0 26 28" fill="none" aria-hidden="true">
+      <path d="M1 14h5v13H1V14Z" fill="currentColor" />
+      <path d="M10.5 7h5v20h-5V7Z" fill="currentColor" />
+      <path d="M20 1h5v26h-5V1Z" fill="currentColor" />
+    </svg>
   );
 }
 

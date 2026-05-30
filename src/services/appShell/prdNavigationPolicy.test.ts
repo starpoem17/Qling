@@ -36,7 +36,7 @@ import {
 } from './prdNavigationPolicy';
 
 test('defines the canonical PRD app tabs and default authenticated tab', () => {
-  assert.deepEqual(PRD_APP_TABS, ['답변하기', '나의 고민', '마이페이지']);
+  assert.deepEqual(PRD_APP_TABS, ['답변하기', '나의 고민', '채팅', '순위']);
   assert.equal(DEFAULT_AUTHENTICATED_TAB, '답변하기');
   assert.equal(DEFAULT_AUTHENTICATED_ROUTE, 'received_worries');
   assert.deepEqual(ANSWER_FEED_ROUTE_ALIASES, ['답변하기', 'received_worries']);
@@ -71,6 +71,8 @@ test('covers every Phase 2 canonical route/state in the service policy', () => {
     'write_reply_success',
     'received_answer_detail',
     'answer_check',
+    'chat',
+    'ranking',
     'my_page',
     'edit_interests',
     'my_answers',
@@ -218,7 +220,9 @@ test('defines my-page subroutes including confirmations and policy routes', () =
 test('maps detail, write, policy, and confirmation routes to their owning PRD tab', () => {
   assert.equal(tabForRoute('답변하기'), '답변하기');
   assert.equal(tabForRoute('나의 고민'), '나의 고민');
-  assert.equal(tabForRoute('마이페이지'), '마이페이지');
+  assert.equal(tabForRoute('채팅'), '채팅');
+  assert.equal(tabForRoute('순위'), '순위');
+  assert.equal(tabForRoute('마이페이지'), null);
   assert.equal(tabForRoute('received_worries'), '답변하기');
   assert.equal(tabForRoute('write_reply'), '답변하기');
   assert.equal(tabForRoute('write_reply_success'), '답변하기');
@@ -228,11 +232,11 @@ test('maps detail, write, policy, and confirmation routes to their owning PRD ta
   assert.equal(tabForRoute({ route: 'received_answer_detail', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
   assert.equal(tabForRoute({ route: 'answer_check', worryId: 'worry-1' }), '나의 고민');
   assert.equal(tabForRoute({ route: 'my_worry_detail', worryId: 'worry-1' }), '나의 고민');
-  assert.equal(tabForRoute('edit_interests'), '마이페이지');
-  assert.equal(tabForRoute('my_answers'), '마이페이지');
-  assert.equal(tabForRoute('privacy_policy'), '마이페이지');
-  assert.equal(tabForRoute('logout_confirmation'), '마이페이지');
-  assert.equal(tabForRoute('account_deletion_confirmation'), '마이페이지');
+  assert.equal(tabForRoute('edit_interests'), null);
+  assert.equal(tabForRoute('my_answers'), null);
+  assert.equal(tabForRoute('privacy_policy'), null);
+  assert.equal(tabForRoute('logout_confirmation'), null);
+  assert.equal(tabForRoute('account_deletion_confirmation'), null);
   assert.equal(tabForRoute('login'), null);
   assert.equal(tabForRoute('loading'), null);
   assert.equal(tabForRoute('onboarding_interests'), null);
@@ -243,8 +247,12 @@ test('Phase 22 maps top-level bottom-tab routes to the expected active tab', () 
   assert.equal(tabForRoute('received_worries'), '답변하기');
   assert.equal(tabForRoute('나의 고민'), '나의 고민');
   assert.equal(tabForRoute('my_worries'), '나의 고민');
-  assert.equal(tabForRoute('마이페이지'), '마이페이지');
-  assert.equal(tabForRoute('my_page'), '마이페이지');
+  assert.equal(tabForRoute('채팅'), '채팅');
+  assert.equal(tabForRoute('chat'), '채팅');
+  assert.equal(tabForRoute('순위'), '순위');
+  assert.equal(tabForRoute('ranking'), '순위');
+  assert.equal(tabForRoute('마이페이지'), null);
+  assert.equal(tabForRoute('my_page'), null);
 });
 
 test('Phase 22 maps nested bottom-tab routes to the expected active tab', () => {
@@ -256,11 +264,11 @@ test('Phase 22 maps nested bottom-tab routes to the expected active tab', () => 
   assert.equal(tabForRoute({ route: 'read_received_reply', worryId: 'worry-1', replyId: 'reply-1' }), '나의 고민');
   assert.equal(tabForRoute({ route: 'answer_check', worryId: 'worry-1' }), '나의 고민');
   assert.equal(tabForRoute({ route: 'my_worry_detail', worryId: 'worry-1' }), '나의 고민');
-  assert.equal(tabForRoute('edit_interests'), '마이페이지');
-  assert.equal(tabForRoute('my_answers'), '마이페이지');
-  assert.equal(tabForRoute('privacy_policy'), '마이페이지');
-  assert.equal(tabForRoute('logout_confirmation'), '마이페이지');
-  assert.equal(tabForRoute('account_deletion_confirmation'), '마이페이지');
+  assert.equal(tabForRoute('edit_interests'), null);
+  assert.equal(tabForRoute('my_answers'), null);
+  assert.equal(tabForRoute('privacy_policy'), null);
+  assert.equal(tabForRoute('logout_confirmation'), null);
+  assert.equal(tabForRoute('account_deletion_confirmation'), null);
 });
 
 test('Phase 1 my-page account routes include MVP subroutes and exclude removed route items', () => {
@@ -273,7 +281,7 @@ test('Phase 1 my-page account routes include MVP subroutes and exclude removed r
     'logout_confirmation',
     'account_deletion_confirmation',
   ] as const) {
-    assert.equal(tabForRoute(route), route === 'my_worries' ? '나의 고민' : '마이페이지');
+    assert.equal(tabForRoute(route), route === 'my_worries' ? '나의 고민' : null);
   }
 
   for (const excluded of [

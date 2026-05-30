@@ -20,7 +20,6 @@ test('shared primitive inventory covers every Phase 14 ownership item', () => {
     [
       'appShellMobileFrame',
       'bottomNavigation',
-      'centralBottomNavigationIndicator',
       'contentSheet',
       'orangeHeaderBand',
       'primaryCta',
@@ -43,39 +42,27 @@ test('bottom navigation contract preserves PRD tabs without central route or act
     tabs: [
       { tab: '답변하기', label: '답변하기' },
       { tab: '나의 고민', label: '나의 고민' },
-      { tab: '마이페이지', label: '마이페이지' },
+      { tab: '채팅', label: '채팅' },
+      { tab: '순위', label: '순위' },
     ],
-    activeTab: '답변하기',
+    activeTab: null,
     onSelectTab: () => undefined,
   } satisfies BottomNavigationProps;
 
-  assert.deepEqual(props.tabs.map(tab => tab.label), ['답변하기', '나의 고민', '마이페이지']);
-  assert.equal(props.activeTab, '답변하기');
+  assert.deepEqual(props.tabs.map(tab => tab.label), ['답변하기', '나의 고민', '채팅', '순위']);
+  assert.equal(props.activeTab, null);
   assert.equal(Object.hasOwn(props, 'centralAction'), false);
   assert.equal(Object.hasOwn(props, 'onCentralAction'), false);
   assert.equal(JSON.stringify(props).includes('write_worry'), false);
 });
 
-test('bottom navigation central eye renders as a non-interactive indicator', () => {
-  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
-  const centralIndicatorBlock = source.slice(
-    source.indexOf('data-testid="bottom-navigation-central-indicator"') - 220,
-    source.indexOf('data-testid="bottom-navigation-central-indicator"') + 520,
-  );
-
-  assert.match(centralIndicatorBlock, /role="presentation"/);
-  assert.match(centralIndicatorBlock, /aria-hidden="true"/);
-  assert.match(centralIndicatorBlock, /pointer-events-none/);
-  assert.doesNotMatch(centralIndicatorBlock, /<button/);
-  assert.doesNotMatch(centralIndicatorBlock, /onClick/);
-  assert.doesNotMatch(centralIndicatorBlock, /data-target-route/);
-});
-
-test('bottom navigation visually activates both side buttons on my-page special state', () => {
+test('bottom navigation removes the legacy central eye indicator', () => {
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
 
-  assert.match(source, /const isVisuallyActive = isActive \|\| activeTab === '마이페이지'/);
-  assert.match(source, /isVisuallyActive\s*\?\s*'bg-\[#fae5d7\] text-\[#ff8b3d\]'/);
+  assert.doesNotMatch(source, /bottom-navigation-central-indicator/);
+  assert.doesNotMatch(source, /bottom-navigation-left-eye-mask/);
+  assert.doesNotMatch(source, /bottom-navigation-right-eye-mask/);
+  assert.doesNotMatch(source, /isVisuallyActive/);
 });
 
 test('profile motif remains visual-only without avatar data requirements', () => {

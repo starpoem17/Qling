@@ -27,6 +27,7 @@ import { registerAdminHidingRoutes } from "./src/server/adminHidingRoutes";
 import { registerAnswerFeedRoutes } from "./src/server/answerFeedRoutes";
 import { registerPolicyRoutes } from "./src/server/policyRoutes";
 import { registerVersionRoutes } from "./src/server/versionRoutes";
+import { registerRankingRoutes } from "./src/server/rankingRoutes";
 
 // Read client config to get database ID
 const clientConfigPath = path.join(process.cwd(), 'firebase-applet-config.json');
@@ -138,6 +139,10 @@ async function startServer() {
     registerAdminHidingRoutes(app, {
       db,
     });
+    registerRankingRoutes(app, {
+      db,
+      auth: getAuth(),
+    });
   } else {
     app.post('/api/worries/publish', (_req, res) => {
       res.status(500).json({
@@ -194,6 +199,10 @@ async function startServer() {
           message: 'Firebase Admin is not initialized.',
         },
       });
+    });
+    registerRankingRoutes(app, {
+      db: null,
+      auth: {} as never,
     });
     registerRematchRoutes(app, {
       db: null,

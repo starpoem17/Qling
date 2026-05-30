@@ -34,6 +34,8 @@ test('maps canonical route states to their Phase 3 route rendering boundaries', 
   assert.equal(routeRenderingGroupForRoute('onboarding_duplicate_check'), 'onboarding flow');
   assert.equal(routeRenderingGroupForRoute('답변하기'), 'received worries');
   assert.equal(routeRenderingGroupForRoute('received_worries'), 'received worries');
+  assert.equal(routeRenderingGroupForRoute('채팅'), 'authenticated shell');
+  assert.equal(routeRenderingGroupForRoute('순위'), 'authenticated shell');
   assert.equal(routeRenderingGroupForRoute('write_worry'), 'write worry');
   assert.equal(routeRenderingGroupForRoute('write_worry_success'), 'write worry');
   assert.equal(routeRenderingGroupForRoute('write_reply'), 'write reply');
@@ -86,9 +88,16 @@ test('identifies authenticated shell membership separately from route-specific g
   assert.deepEqual(routeRenderingBoundaryForRoute('edit_interests'), {
     currentRoute: 'edit_interests',
     routeGroup: 'my-page/account',
-    authenticatedTab: '마이페이지',
+    authenticatedTab: null,
     mountsAuthenticatedShell: true,
-    mountsBottomNavigation: false,
+    mountsBottomNavigation: true,
+  });
+  assert.deepEqual(routeRenderingBoundaryForRoute('순위'), {
+    currentRoute: '순위',
+    routeGroup: 'authenticated shell',
+    authenticatedTab: '순위',
+    mountsAuthenticatedShell: true,
+    mountsBottomNavigation: true,
   });
   assert.deepEqual(routeRenderingBoundaryForRoute('onboarding_interests'), {
     currentRoute: 'onboarding_interests',

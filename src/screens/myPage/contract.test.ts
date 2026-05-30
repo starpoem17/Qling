@@ -47,6 +47,7 @@ test('my-page summary limits nickname to profile summary and labels helpedCount 
     onEditInterests: () => undefined,
     onOpenMyAnswers: () => undefined,
     onSettingSelect: () => undefined,
+    onBack: () => undefined,
   } satisfies MyPageScreenProps;
 
   assert.equal(props.profile.helpedCountLabel, '받은 하트');
