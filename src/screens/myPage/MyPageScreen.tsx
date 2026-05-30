@@ -54,7 +54,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
   const isAccountDeletionProcessing = props.accountDeletionConfirmation.isProcessing;
 
   return (
-    <div className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-scroll-bottom))] bg-[#ff8b0d] px-5 pb-8 pt-[56px] text-[#1a1a1e]">
+    <div className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-full bg-[#ff8b0d] px-5 pb-8 pt-[56px] text-[#1a1a1e]">
       <div className="mx-auto max-w-[353px]">
         <div className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center">
           <BackButton onBack={props.onBack} label="이전 화면으로" />
@@ -247,7 +247,7 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
       : policyBody || (props.state.status === 'empty' ? props.state.message : '정책을 준비 중입니다.');
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[calc(100dvh-var(--qling-space-scroll-bottom))] bg-[#ff8b0d] text-[#1a1a1e]">
+    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-full bg-[#ff8b0d] text-[#1a1a1e]">
       <div className="relative mx-auto h-full w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
         <button
           type="button"
@@ -281,7 +281,7 @@ export function EditInterestsScreen(props: EditInterestsProps) {
   const orderedCategoryOptions = editInterestsFigmaOrder.filter(category => props.categoryOptions.includes(category));
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 flex h-[100dvh] justify-center bg-[#ff8b0d] text-[#1a1a1a]">
+    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 flex h-full justify-center bg-[#ff8b0d] text-[#1a1a1a]">
       <div className="relative h-full w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
         <div className="absolute left-0 top-[196px] bottom-0 w-[393px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" />
         <button

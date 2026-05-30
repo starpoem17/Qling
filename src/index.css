@@ -148,8 +148,10 @@
 
 .qling-write-form-main {
   padding: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: #fff1d1;
+  -webkit-overflow-scrolling: touch;
 }
 
 .qling-splash-root,
@@ -165,8 +167,11 @@
 html,
 body,
 #root {
+  height: 100%;
   min-height: 100%;
   margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
   background: #ff8b3d;
 }
 

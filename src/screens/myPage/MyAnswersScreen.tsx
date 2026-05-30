@@ -4,7 +4,7 @@ import type { MyAnswersScreenProps } from './contract';
 
 export function MyAnswersScreen(props: MyAnswersScreenProps) {
   return (
-    <div className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-scroll-bottom))] bg-[#ff8b3d] px-4 pb-8 pt-[50px] text-[#1a1a1a]">
+    <div className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-full bg-[#ff8b3d] px-4 pb-8 pt-[50px] text-[#1a1a1a]">
       <div className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center">
         <button
           type="button"

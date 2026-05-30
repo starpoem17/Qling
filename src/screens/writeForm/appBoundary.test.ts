@@ -23,9 +23,15 @@ test('App.tsx delegates write-form routes to containers instead of inline public
 });
 
 test('App.tsx gives write-form routes their own main canvas and iOS chrome color', () => {
+  const cssSource = fs.readFileSync('src/index.css', 'utf8');
+
   assert.match(appSource, /currentRoute === 'write_worry' \|\| currentRoute === 'write_reply'\s*\?\s*'qling-write-form-main'/);
   assert.match(appSource, /currentRoute !== 'write_worry' && currentRoute !== 'write_reply'/);
   assert.match(appSource, /themeMeta\?\.setAttribute\('content', '#fff1d1'\)/);
   assert.match(appSource, /document\.body\.style\.backgroundColor = '#fff1d1'/);
   assert.match(appSource, /root\.style\.backgroundColor = '#fff1d1'/);
+  assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*overflow-y: auto;/);
+  assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*overscroll-behavior: contain;/);
+  assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*-webkit-overflow-scrolling: touch;/);
+  assert.doesNotMatch(cssSource, /\.qling-write-form-main\s*\{[^}]*overflow: hidden;/);
 });

@@ -92,6 +92,13 @@ test('my-page renders default profile svg at the existing profile image size', (
   assert.doesNotMatch(html, /aria-label="프로필 모티프" role="img"/);
 });
 
+test('my-page root uses parent shell height instead of creating document scroll', () => {
+  const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps()));
+
+  assert.match(html, /min-h-full/);
+  assert.doesNotMatch(html, /100dvh-var\(--qling-space-scroll-bottom\)/);
+});
+
 test('my-page empty answer preview renders a single non-interactive Figma card without metadata', () => {
   const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps({
     answerPreviewItems: [],

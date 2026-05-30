@@ -95,6 +95,9 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.match(source, /overflow-y-auto overscroll-contain/);
   assert.match(source, /\[-webkit-overflow-scrolling:touch\]/);
   assert.match(source, /h-\[80px\] w-full shrink-0/);
+  assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*height: 100%;/);
+  assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*overflow: hidden;/);
+  assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*overscroll-behavior: none;/);
   assert.doesNotMatch(source, /fixed bottom-0 left-0 right-0/);
 });
 
