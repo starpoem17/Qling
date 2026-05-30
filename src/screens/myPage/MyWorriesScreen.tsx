@@ -9,13 +9,13 @@ import type { MyWorriesScreenProps } from './contract';
 
 export function MyWorriesScreen(props: MyWorriesScreenProps) {
   const header = (
-    <header className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[120px] bg-[#ff8b3d] px-8 pt-[68px]">
-      <div className="flex items-start justify-between">
+    <header className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[100px] bg-[#ff8b3d]">
+      <div className="relative mx-auto h-full w-full max-w-[393px]">
         <div
           role="presentation"
           aria-hidden="true"
           data-testid="my-worries-top-left-eye"
-          className="h-[39px] w-12"
+          className="absolute left-8 top-[46px] h-[39px] w-12"
         >
           <svg width="48" height="39" viewBox="0 0 48 39" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M21.7228 19.3387C21.8778 35.5589 16.8647 38.1786 10.8719 38.1786C4.87903 38.1786 -0.373688 34.667 0.0208912 19.3387C0.415471 4.01042 4.87903 0.49884 10.8719 0.49884C16.8647 0.49884 21.5678 3.11859 21.7228 19.3387Z" fill="#FFF5EB" />
@@ -38,9 +38,9 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
           type="button"
           aria-label="마이페이지 열기"
           onClick={props.onOpenMyPage}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute left-[333.5px] top-[50.5px] flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
         >
-          <CircleUserRound className="h-7 w-7" aria-hidden="true" />
+          <CircleUserRound className="h-[25px] w-[25px]" aria-hidden="true" />
         </button>
       </div>
     </header>
@@ -62,20 +62,20 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
       {header}
 
       {props.state.status === 'loading' ? (
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-120px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-100px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
           <LoadingState title="나의 고민을 불러오는 중" message={props.state.label} />
         </section>
       ) : props.state.status === 'error' ? (
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-120px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-100px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
           <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
         </section>
       ) : props.state.status === 'empty' ? (
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-120px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-100px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
           <EmptyState title={props.state.message} />
         </section>
       ) : (
         <section
-          className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-120px)] rounded-t-[32px] bg-[#fff1d1] px-4 pb-4 pt-[30px]"
+          className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-100px)] rounded-t-[32px] bg-[#fff1d1] px-4 pb-4 pt-5"
           aria-label="나의 고민 목록"
         >
           <div className="grid gap-[14px]">
