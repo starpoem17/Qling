@@ -103,9 +103,9 @@ export function BottomNavigation({
   return (
     <nav
       aria-label="주요 화면"
-      className="fixed bottom-0 left-1/2 z-50 h-[80px] w-[393px] -translate-x-1/2 bg-[#fff5eb] qling-figma-font"
+      className="fixed bottom-0 left-0 right-0 z-50 h-[80px] bg-[#fff5eb] qling-figma-font"
     >
-      <div className="relative mx-auto h-full w-[393px]" data-measure="bottom-nav-frame">
+      <div className="relative mx-auto h-full w-full max-w-[480px]" data-measure="bottom-nav-frame">
         {tabs.map(({ tab, label }) => {
           const isActive = activeTab === tab;
           const item = itemByTab[tab];

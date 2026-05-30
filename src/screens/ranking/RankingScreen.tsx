@@ -10,6 +10,7 @@ export function RankingScreen(props: RankingScreenProps) {
     ? (mode === 'monthly' ? props.state.monthly : props.state.total)
     : [];
   const displayEntries = useMemo(() => entries.length > 0 ? entries : [], [entries]);
+  const rankingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 
   if (props.state.status === 'loading') {
     return (
@@ -38,20 +39,26 @@ export function RankingScreen(props: RankingScreenProps) {
   return (
     <section
       aria-label="순위"
-      className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-nav-height))] overflow-hidden bg-[#fff1d1] qling-figma-font"
+      className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-nav-height))] overflow-x-hidden bg-[#fff1d1] qling-figma-font"
     >
       <div
-        className="relative mx-auto min-h-[772px] w-[393px] bg-[#fff1d1]"
-        data-measure="ranking-screen"
+        className="mx-auto flex aspect-[393/852] w-full max-w-[480px] justify-center"
+        data-measure="ranking-responsive-canvas"
       >
-        <div className="absolute left-0 top-0 h-[370px] w-full bg-[linear-gradient(180deg,#ff8b3d_0%,#fff1d1_100%)]" />
-        <SegmentedControl mode={mode} onChange={setMode} />
-        <TopRank entry={topEntries[0]} place="first" />
-        <TopRank entry={topEntries[1]} place="second" />
-        <TopRank entry={topEntries[2]} place="third" />
-        <Podium />
-        <div className="absolute left-0 right-0 top-[396px] h-[456px] rounded-t-[45px] bg-[#fff1d1] pb-7 pt-[21px]">
-          <RankingRows entries={lowerEntries} />
+        <div
+          className="relative h-[852px] w-[393px] shrink-0 origin-top bg-[#fff1d1]"
+          data-measure="ranking-screen"
+          style={{ transform: `scale(${rankingCanvasScale})` }}
+        >
+          <div className="absolute left-0 top-0 h-[370px] w-full bg-[linear-gradient(180deg,#ff8b3d_0%,#fff1d1_100%)]" />
+          <SegmentedControl mode={mode} onChange={setMode} />
+          <TopRank entry={topEntries[0]} place="first" />
+          <TopRank entry={topEntries[1]} place="second" />
+          <TopRank entry={topEntries[2]} place="third" />
+          <Podium />
+          <div className="absolute left-0 right-0 top-[396px] h-[456px] rounded-t-[45px] bg-[#fff1d1] pb-7 pt-[21px]">
+            <RankingRows entries={lowerEntries} />
+          </div>
         </div>
       </div>
     </section>
