@@ -7,6 +7,10 @@ import {
   Loader2,
   Radio,
 } from 'lucide-react';
+import bottomNavChatUrl from '../../../assets/bottom_bar_deactivate/chat.svg';
+import bottomNavMyConcernsUrl from '../../../assets/bottom_bar_deactivate/my_concerns.svg';
+import bottomNavRankingUrl from '../../../assets/bottom_bar_deactivate/ranking.svg';
+import bottomNavReplyUrl from '../../../assets/bottom_bar_deactivate/reply.svg';
 import { cn } from '../../lib/utils';
 import type {
   BottomNavigationProps,
@@ -58,11 +62,31 @@ export function BottomNavigation({
   activeTab,
   onSelectTab,
 }: BottomNavigationProps) {
-  const iconByTab: Record<BottomNavigationTab, ReactNode> = {
-    답변하기: <BottomNavAnswerIcon />,
-    '나의 고민': <BottomNavHomeIcon />,
-    채팅: <BottomNavChatIcon />,
-    순위: <BottomNavRankingIcon />,
+  const itemByTab: Record<BottomNavigationTab, {
+    readonly iconUrl: string;
+    readonly iconClassName: string;
+    readonly centerX: number;
+  }> = {
+    답변하기: {
+      iconUrl: bottomNavReplyUrl,
+      iconClassName: 'left-[24px] top-[14px] h-[26px] w-[31px] rotate-[-35deg]',
+      centerX: 62,
+    },
+    '나의 고민': {
+      iconUrl: bottomNavMyConcernsUrl,
+      iconClassName: 'left-[25px] top-[14px] h-[29px] w-[28px]',
+      centerX: 153,
+    },
+    채팅: {
+      iconUrl: bottomNavChatUrl,
+      iconClassName: 'left-[24px] top-[15px] h-[30px] w-[30px]',
+      centerX: 243,
+    },
+    순위: {
+      iconUrl: bottomNavRankingUrl,
+      iconClassName: 'left-[26px] top-[14px] h-[29px] w-[27px]',
+      centerX: 329,
+    },
   };
 
   return (
@@ -71,9 +95,10 @@ export function BottomNavigation({
       className="fixed bottom-0 left-1/2 z-50 h-[80px] w-full max-w-[var(--qling-mobile-canvas-max-width)] -translate-x-1/2 bg-[#fff5eb]"
       style={{ paddingBottom: 'var(--qling-space-safe-bottom)' }}
     >
-      <div className="grid h-full grid-cols-4">
+      <div className="relative mx-auto h-full w-full max-w-[393px]">
         {tabs.map(({ tab, label }) => {
           const isActive = activeTab === tab;
+          const item = itemByTab[tab];
           return (
             <button
               key={tab}
@@ -82,12 +107,17 @@ export function BottomNavigation({
               aria-current={isActive ? 'page' : undefined}
               onClick={() => onSelectTab(tab)}
               className={cn(
-                'flex min-w-0 flex-col items-center justify-start gap-[5px] pt-[14px] text-[13px] font-bold leading-[13px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset',
-                isActive ? 'text-[#ff8b3d]' : 'text-[#c5bdad] hover:text-[#a89f8e]',
+                'absolute top-0 h-[80px] w-[78px] -translate-x-1/2 text-[12px] font-semibold leading-[13px] tracking-[-0.24px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b0d] focus:ring-inset',
+                isActive ? 'text-[#ff8b0d]' : 'text-[#c0b59d] hover:text-[#a89f8e]',
               )}
+              style={{ left: `${item.centerX}px` }}
             >
-              {iconByTab[tab]}
-              <span>{label}</span>
+              <BottomNavAssetIcon
+                iconUrl={item.iconUrl}
+                className={item.iconClassName}
+                active={isActive}
+              />
+              <span className="absolute left-1/2 top-[50px] h-[14px] w-12 -translate-x-1/2 text-center">{label}</span>
             </button>
           );
         })}
@@ -96,51 +126,28 @@ export function BottomNavigation({
   );
 }
 
-function BottomNavAnswerIcon() {
+function BottomNavAssetIcon({
+  iconUrl,
+  className,
+  active,
+}: {
+  readonly iconUrl: string;
+  readonly className: string;
+  readonly active: boolean;
+}) {
   return (
-    <svg className="h-[34px] w-[39px]" viewBox="0 0 39 34" fill="none" aria-hidden="true">
-      <path
-        d="M36.8 2.2 6.1 15.4c-2 .9-2 3.8.1 4.5l8 2.7 3.2 8.4c.8 2 3.5 2.1 4.5.2L38.5 4.4c.8-1.4-.3-3-1.7-2.2Z"
-        fill="currentColor"
-      />
-      <path
-        d="m16.1 22.7 3.9 5.7 3.1-11.7 9.1-8.5-12.5 7.1-3.6 7.4Z"
-        fill="#fff5eb"
-        fillOpacity="0.72"
-      />
-    </svg>
-  );
-}
-
-function BottomNavHomeIcon() {
-  return (
-    <svg className="h-[30px] w-[30px]" viewBox="0 0 30 30" fill="none" aria-hidden="true">
-      <path
-        d="M3 13.3 14.2 3.2a1.2 1.2 0 0 1 1.6 0L27 13.3c.8.7.3 2-.8 2h-1.7v10.2c0 .8-.7 1.5-1.5 1.5h-5.4v-7.8h-5.2V27H7c-.8 0-1.5-.7-1.5-1.5V15.3H3.8c-1.1 0-1.6-1.3-.8-2Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-function BottomNavChatIcon() {
-  return (
-    <svg className="h-[30px] w-[30px]" viewBox="0 0 30 30" fill="none" aria-hidden="true">
-      <path
-        d="M4.2 5.2A3.2 3.2 0 0 1 7.4 2h15.2a3.2 3.2 0 0 1 3.2 3.2v12.9a3.2 3.2 0 0 1-3.2 3.2h-8.8l-6.2 5.4c-1.3 1.1-3.4.2-3.4-1.5v-20Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-function BottomNavRankingIcon() {
-  return (
-    <svg className="h-[28px] w-[26px]" viewBox="0 0 26 28" fill="none" aria-hidden="true">
-      <path d="M1 14h5v13H1V14Z" fill="currentColor" />
-      <path d="M10.5 7h5v20h-5V7Z" fill="currentColor" />
-      <path d="M20 1h5v26h-5V1Z" fill="currentColor" />
-    </svg>
+    <span
+      className={cn('absolute block', active ? 'bg-[#ff8b0d]' : 'bg-[#c0b59d]', className)}
+      style={{
+        maskImage: `url(${iconUrl})`,
+        WebkitMaskImage: `url(${iconUrl})`,
+        maskRepeat: 'no-repeat',
+        WebkitMaskRepeat: 'no-repeat',
+        maskSize: '100% 100%',
+        WebkitMaskSize: '100% 100%',
+      }}
+      aria-hidden="true"
+    />
   );
 }
 
