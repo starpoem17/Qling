@@ -64,28 +64,43 @@ export function BottomNavigation({
 }: BottomNavigationProps) {
   const itemByTab: Record<BottomNavigationTab, {
     readonly iconUrl: string;
-    readonly iconClassName: string;
     readonly centerX: number;
+    readonly iconLeft: number;
+    readonly iconTop: number;
+    readonly iconWidth: number;
+    readonly iconHeight: number;
   }> = {
     답변하기: {
       iconUrl: bottomNavReplyUrl,
-      iconClassName: 'left-[24px] top-[14px] h-[26px] w-[31px] rotate-[-35deg]',
       centerX: 62,
+      iconLeft: 22,
+      iconTop: 25.217,
+      iconWidth: 39.144,
+      iconHeight: 34.255,
     },
     '나의 고민': {
       iconUrl: bottomNavMyConcernsUrl,
-      iconClassName: 'left-[25px] top-[14px] h-[29px] w-[28px]',
       centerX: 153,
+      iconLeft: 25.824,
+      iconTop: 14.302,
+      iconWidth: 27.153,
+      iconHeight: 28.284,
     },
     채팅: {
       iconUrl: bottomNavChatUrl,
-      iconClassName: 'left-[24px] top-[15px] h-[30px] w-[30px]',
       centerX: 243,
+      iconLeft: 24,
+      iconTop: 15,
+      iconWidth: 30,
+      iconHeight: 30,
     },
     순위: {
       iconUrl: bottomNavRankingUrl,
-      iconClassName: 'left-[26px] top-[14px] h-[29px] w-[27px]',
       centerX: 329,
+      iconLeft: 25.789,
+      iconTop: 14.302,
+      iconWidth: 26.019,
+      iconHeight: 28.284,
     },
   };
 
@@ -95,7 +110,7 @@ export function BottomNavigation({
       className="fixed bottom-0 left-1/2 z-50 h-[80px] w-full max-w-[var(--qling-mobile-canvas-max-width)] -translate-x-1/2 bg-[#fff5eb]"
       style={{ paddingBottom: 'var(--qling-space-safe-bottom)' }}
     >
-      <div className="relative mx-auto h-full w-full max-w-[393px]">
+      <div className="relative mx-auto h-full w-full max-w-[var(--qling-mobile-canvas-max-width)]" data-measure="bottom-nav-frame">
         {tabs.map(({ tab, label }) => {
           const isActive = activeTab === tab;
           const item = itemByTab[tab];
@@ -107,15 +122,19 @@ export function BottomNavigation({
               aria-current={isActive ? 'page' : undefined}
               onClick={() => onSelectTab(tab)}
               className={cn(
-                'absolute top-0 h-[80px] w-[78px] -translate-x-1/2 text-[12px] font-semibold leading-[13px] tracking-[-0.24px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b0d] focus:ring-inset',
+                'absolute top-0 h-[80px] w-[calc(100%*78/393)] -translate-x-1/2 text-[12px] font-semibold leading-[13px] tracking-[-0.24px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b0d] focus:ring-inset',
                 isActive ? 'text-[#ff8b0d]' : 'text-[#c0b59d] hover:text-[#a89f8e]',
               )}
-              style={{ left: `${item.centerX}px` }}
+              style={{ left: `calc(100% * ${item.centerX} / 393)` }}
             >
               <BottomNavAssetIcon
                 iconUrl={item.iconUrl}
-                className={item.iconClassName}
                 active={isActive}
+                left={item.iconLeft}
+                top={item.iconTop}
+                width={item.iconWidth}
+                height={item.iconHeight}
+                measureId={`bottom-nav-${tab}-icon`}
               />
               <span className="absolute left-1/2 top-[50px] h-[14px] w-12 -translate-x-1/2 text-center">{label}</span>
             </button>
@@ -128,17 +147,29 @@ export function BottomNavigation({
 
 function BottomNavAssetIcon({
   iconUrl,
-  className,
   active,
+  left,
+  top,
+  width,
+  height,
+  measureId,
 }: {
   readonly iconUrl: string;
-  readonly className: string;
   readonly active: boolean;
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
+  readonly measureId: string;
 }) {
   return (
     <span
-      className={cn('absolute block', active ? 'bg-[#ff8b0d]' : 'bg-[#c0b59d]', className)}
+      className={cn('absolute block', active ? 'bg-[#ff8b0d]' : 'bg-[#c0b59d]')}
       style={{
+        left: `calc(100% * ${left} / 78)`,
+        top: `${top}px`,
+        width: `calc(100% * ${width} / 78)`,
+        height: `${height}px`,
         maskImage: `url(${iconUrl})`,
         WebkitMaskImage: `url(${iconUrl})`,
         maskRepeat: 'no-repeat',
@@ -146,6 +177,7 @@ function BottomNavAssetIcon({
         maskSize: '100% 100%',
         WebkitMaskSize: '100% 100%',
       }}
+      data-measure={measureId}
       aria-hidden="true"
     />
   );
