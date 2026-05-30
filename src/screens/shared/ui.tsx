@@ -104,7 +104,6 @@ export function BottomNavigation({
     <nav
       aria-label="주요 화면"
       className="fixed bottom-0 left-1/2 z-50 h-[80px] w-[393px] -translate-x-1/2 bg-[#fff5eb] qling-figma-font"
-      style={{ paddingBottom: 'var(--qling-space-safe-bottom)' }}
     >
       <div className="relative mx-auto h-full w-[393px]" data-measure="bottom-nav-frame">
         {tabs.map(({ tab, label }) => {
@@ -132,7 +131,12 @@ export function BottomNavigation({
                 height={item.iconHeight}
                 measureId={`bottom-nav-${tab}-icon`}
               />
-              <span className="absolute left-1/2 top-[57.44px] flex h-[13.333px] w-12 -translate-x-1/2 -translate-y-1/2 flex-col justify-center whitespace-nowrap text-center font-['Qling_Noto_Sans_KR'] leading-[13.333px]">{label}</span>
+              <span
+                className="absolute left-1/2 top-[57.44px] flex h-[13.333px] w-12 -translate-x-1/2 -translate-y-1/2 flex-col justify-center whitespace-nowrap text-center font-['Qling_Noto_Sans_KR'] leading-[13.333px]"
+                data-measure={`bottom-nav-${tab}-label`}
+              >
+                {label}
+              </span>
             </button>
           );
         })}
@@ -158,6 +162,8 @@ function BottomNavAssetIcon({
   readonly height: number;
   readonly measureId: string;
 }) {
+  const isReplyIcon = icon === 'reply';
+
   return (
     <span
       className="absolute block"
@@ -170,12 +176,26 @@ function BottomNavAssetIcon({
       data-measure={measureId}
       aria-hidden="true"
     >
-      <img
-        src={bottomNavIconUrlByState[icon][active ? 'active' : 'inactive']}
-        alt=""
-        className="block h-full w-full"
-        draggable={false}
-      />
+      <span
+        className={cn(
+          'block',
+          isReplyIcon ? 'absolute left-1/2 top-1/2 h-[24px] w-[30px]' : 'h-full w-full',
+        )}
+        style={isReplyIcon
+          ? {
+            transform: 'translate(-50%, -50%) rotate(-35.23deg) skewX(6.56deg)',
+            transformOrigin: 'center center',
+          }
+          : undefined}
+        data-measure={isReplyIcon ? `${measureId}-transform-layer` : undefined}
+      >
+        <img
+          src={bottomNavIconUrlByState[icon][active ? 'active' : 'inactive']}
+          alt=""
+          className="block h-full w-full"
+          draggable={false}
+        />
+      </span>
     </span>
   );
 }
