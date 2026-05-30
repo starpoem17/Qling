@@ -38,7 +38,7 @@ export function RankingScreen(props: RankingScreenProps) {
   return (
     <section
       aria-label="순위"
-      className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-nav-height))] overflow-hidden bg-[#fff1d1]"
+      className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-nav-height))] overflow-hidden bg-[#fff1d1] qling-figma-font"
     >
       <div
         className="relative mx-auto min-h-[772px] w-[393px] bg-[#fff1d1]"
@@ -123,11 +123,11 @@ function TopRank({
       style={{ left: leftByPlace[place] }}
       data-measure={`ranking-top-${place}`}
     >
-      <div className="h-6 text-[20px] font-bold leading-6">
+      <div className="h-6 text-[20px] font-bold leading-6 qling-figma-font-strong">
         <span className="mr-1 text-[#ea4335]">♥</span>
         {entry.heartCount}
       </div>
-      <div className="h-[18px] truncate text-[15px] font-bold leading-[18px]">{entry.nickname}</div>
+      <div className="h-[18px] truncate text-[15px] font-bold leading-[18px] qling-figma-font-strong">{entry.nickname}</div>
       <img
         src={defaultProfileUrl}
         alt=""
@@ -147,9 +147,9 @@ function Podium() {
       <div className="absolute left-0 top-[29.6px] h-[9.66px] w-[calc(100%*131/393)] bg-[#ffd2a5] [clip-path:polygon(0_100%,100%_0,100%_100%,0_100%)]" />
       <div className="absolute top-0 h-[9.98px] w-[calc(100%*131/393)] bg-[#ffd2a5] [clip-path:polygon(0_100%,50%_0,100%_100%,0_100%)]" style={{ left: 'calc(100% * 131 / 393)' }} />
       <div className="absolute top-[48.75px] h-[10.08px] w-[calc(100%*131/393)] bg-[#ffd2a5] [clip-path:polygon(0_0,100%_100%,0_100%)]" style={{ left: 'calc(100% * 262 / 393)' }} />
-      <span className="absolute top-[50px] text-[56px] font-extrabold leading-[64px] text-[#f2d7c3]" style={{ left: 'calc(100% * 49 / 393)' }}>2</span>
-      <span className="absolute top-[18px] text-[56px] font-extrabold leading-[64px] text-[#f2d7c3]" style={{ left: 'calc(100% * 183 / 393)' }}>1</span>
-      <span className="absolute top-[80px] text-[56px] font-extrabold leading-[64px] text-[#f2d7c3]" style={{ left: 'calc(100% * 312 / 393)' }}>3</span>
+      <span className="absolute top-[50px] text-[56px] font-extrabold leading-[64px] text-[#f2d7c3] qling-figma-font-strong" style={{ left: 'calc(100% * 49 / 393)' }}>2</span>
+      <span className="absolute top-[18px] text-[56px] font-extrabold leading-[64px] text-[#f2d7c3] qling-figma-font-strong" style={{ left: 'calc(100% * 183 / 393)' }}>1</span>
+      <span className="absolute top-[80px] text-[56px] font-extrabold leading-[64px] text-[#f2d7c3] qling-figma-font-strong" style={{ left: 'calc(100% * 312 / 393)' }}>3</span>
     </div>
   );
 }
@@ -172,13 +172,13 @@ function RankingRows({ entries }: { readonly entries: readonly RankingDisplayEnt
           className="absolute left-0 h-[33px] w-full text-[#1a1a1a]"
           style={{ top: `${index * 50}px` }}
         >
-          <span className="absolute top-0 w-[26px] text-center text-[16px] font-extrabold leading-[30px]" style={{ left: 'calc(100% * 32 / 393)' }} data-measure={`ranking-row-${entry.rank}-rank`}>
+          <span className="absolute top-0 w-[26px] text-center text-[16px] font-extrabold leading-[30px] qling-figma-font-strong" style={{ left: 'calc(100% * 32 / 393)' }} data-measure={`ranking-row-${entry.rank}-rank`}>
             {entry.rank}
           </span>
-          <span className="absolute top-0 w-[204px] truncate text-center text-[16px] font-extrabold leading-7" style={{ left: 'calc(100% * 96 / 393)' }} data-measure={`ranking-row-${entry.rank}-nickname`}>
+          <span className="absolute top-0 w-[204px] truncate text-center text-[16px] font-extrabold leading-7 qling-figma-font-strong" style={{ left: 'calc(100% * 96 / 393)' }} data-measure={`ranking-row-${entry.rank}-nickname`}>
             {entry.nickname || '-'}
           </span>
-          <span className="absolute top-[3px] w-20 text-center text-[14px] font-bold leading-[17px] text-[#ea4335]" style={{ left: 'calc(100% * 305 / 393)' }} data-measure={`ranking-row-${entry.rank}-heart`}>
+          <span className="absolute top-[3px] w-20 text-center text-[14px] font-bold leading-[17px] text-[#ea4335] qling-figma-font-strong" style={{ left: 'calc(100% * 305 / 393)' }} data-measure={`ranking-row-${entry.rank}-heart`}>
             <span className="mr-1">♥</span>
             {entry.heartCount}
           </span>
