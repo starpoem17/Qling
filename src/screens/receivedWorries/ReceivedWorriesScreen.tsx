@@ -1,7 +1,6 @@
 import { CircleUserRound } from 'lucide-react';
 import type { KeyboardEvent, MouseEvent } from 'react';
 import {
-  CategoryChip,
   EmptyState,
   ErrorState,
   LoadingState,
@@ -114,12 +113,9 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                 >
                   <span className="flex items-start justify-between gap-3">
                     <span className="flex min-w-0 items-center gap-3">
-                      <CategoryChip
-                        label={item.category}
-                        selected
-                        disabled
-                        className="pointer-events-none h-6 min-h-0 w-auto border-0 bg-[#ffe4cc] px-3 py-0 text-[11px] font-bold leading-[14px] text-[#ff8b3d] disabled:opacity-100"
-                      />
+                      <span className="inline-flex shrink-0 items-start overflow-hidden rounded-[var(--qling-radius-pill)] bg-[#ffe4cc] px-3 py-[5px] text-[11px] font-bold leading-normal text-[#ff8b3d]">
+                        {item.category}
+                      </span>
                       <time
                         className="text-[12px] font-bold leading-6 text-[#b8b8b8]"
                         dateTime={item.receivedAt.isoValue}
@@ -136,7 +132,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                         }}
                         disabled={isPassing}
                         aria-label={`${item.category} 고민 건너뛰기`}
-                        className="inline-flex h-[23px] w-[65px] shrink-0 items-center justify-center rounded-[var(--qling-radius-pill)] border border-[#ff8b3d] bg-[#ff8b3d] text-[11px] font-bold leading-[14px] text-white transition-colors hover:bg-[var(--qling-color-secondary-orange)] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex h-[23px] w-[65px] shrink-0 items-center justify-center rounded-[var(--qling-radius-pill)] border border-[#ff8b3d] bg-[#ff8b3d] text-[11px] font-bold leading-normal text-white transition-colors hover:bg-[var(--qling-color-secondary-orange)] disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isPassing ? '처리 중' : '건너뛰기'}
                       </button>
