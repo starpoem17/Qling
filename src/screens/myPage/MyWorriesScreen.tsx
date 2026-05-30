@@ -1,7 +1,6 @@
 import { CircleUserRound, Heart, Send } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
-  CategoryChip,
   EmptyState,
   ErrorState,
   LoadingState,
@@ -64,20 +63,20 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
       {header}
 
       {props.state.status === 'loading' ? (
-        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
           <LoadingState title="나의 고민을 불러오는 중" message={props.state.label} />
         </section>
       ) : props.state.status === 'error' ? (
-        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
           <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
         </section>
       ) : props.state.status === 'empty' ? (
-        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]">
           <EmptyState title={props.state.message} />
         </section>
       ) : (
         <section
-          className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[32px] bg-[#fff1d1] px-4 pb-28 pt-[30px]"
+          className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-scroll-bottom))] rounded-t-[32px] bg-[#fff1d1] px-4 pb-28 pt-[30px]"
           aria-label="나의 고민 목록"
         >
           <div className="grid gap-[14px]">
@@ -94,12 +93,9 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
                 worry.hasUnreadReplies && 'ring-2 ring-[#ff8b3d]',
               )}>
                 <div className="flex min-w-0 items-center gap-3">
-                  <CategoryChip
-                    label={worry.categoryLabel}
-                    selected
-                    disabled
-                    className="pointer-events-none h-[23px] min-h-0 w-auto border-0 bg-[#ffe4cc] px-3 py-0 text-[11px] font-bold leading-[14px] text-[#ff8b3d] disabled:opacity-100"
-                  />
+                  <span className="inline-flex shrink-0 items-start overflow-hidden rounded-[var(--qling-radius-pill)] bg-[#ffe4cc] px-3 py-[5px] text-[11px] font-bold leading-normal text-[#ff8b3d]">
+                    {worry.categoryLabel}
+                  </span>
                   {worry.createdAtLabel && (
                     <time className="text-[12px] font-semibold leading-[23px] text-[#b8b8b8]">
                       {worry.createdAtLabel}
