@@ -83,6 +83,15 @@ test('my-page profile summary does not render private profile fields or interest
   }
 });
 
+test('my-page renders default profile svg at the existing profile image size', () => {
+  const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps()));
+
+  assert.match(html, /assets\/profile\/default_profile\.svg/);
+  assert.match(html, /alt="프로필 모티프"/);
+  assert.match(html, /class="h-16 w-16 shrink-0 rounded-full"/);
+  assert.doesNotMatch(html, /aria-label="프로필 모티프" role="img"/);
+});
+
 test('my-page empty answer preview renders a single non-interactive Figma card without metadata', () => {
   const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps({
     answerPreviewItems: [],

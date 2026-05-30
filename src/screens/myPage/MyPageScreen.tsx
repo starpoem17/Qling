@@ -5,10 +5,10 @@ import {
   LoadingState,
   PolicyTextContainer,
   PrimaryCTA,
-  ProfileMotif,
   QlingCard,
   QlingDialog,
   SettingsRow,
+  defaultProfileImageUrl,
 } from '../shared/ui';
 import type {
   ConfirmationProps,
@@ -63,7 +63,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
       </div>
 
       <QlingCard className="mx-auto mt-9 flex h-[93px] max-w-[353px] items-center gap-[19px] rounded-[24px] border-0 px-[17px] py-[14px]">
-        <ProfileMotif label={props.profile.profileMotif.label} />
+        <DefaultProfileImage label={props.profile.profileMotif.label} />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -129,6 +129,17 @@ export function MyPageScreen(props: MyPageScreenProps) {
       <ConfirmationDialog title="로그아웃할까요?" description="이 기기에서 Qling 계정 연결을 해제합니다." confirmLabel="로그아웃" confirmation={props.logoutConfirmation} />
       <ConfirmationDialog title="계정을 삭제할까요?" description="계정 삭제는 되돌릴 수 없습니다. 작성한 고민과 답변 접근도 함께 중단됩니다." confirmLabel="계정 삭제" confirmation={props.accountDeletionConfirmation} destructive />
     </div>
+  );
+}
+
+function DefaultProfileImage({ label }: { readonly label: string }) {
+  return (
+    <img
+      src={defaultProfileImageUrl}
+      alt={label}
+      className="h-16 w-16 shrink-0 rounded-full"
+      draggable={false}
+    />
   );
 }
 

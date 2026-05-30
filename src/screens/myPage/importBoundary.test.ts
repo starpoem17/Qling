@@ -38,7 +38,6 @@ test('MyPageScreen uses shared Phase 14 primitives without browser global URL re
 
   assert.equal(source.includes("from '../shared/ui'"), true);
   for (const primitive of [
-    'ProfileMotif',
     'SettingsRow',
     'PolicyTextContainer',
     'CategoryChip',
@@ -48,6 +47,9 @@ test('MyPageScreen uses shared Phase 14 primitives without browser global URL re
   ]) {
     assert.match(source, new RegExp(primitive));
   }
+  assert.match(source, /defaultProfileImageUrl/);
+  assert.doesNotMatch(source, /ProfileMotif/);
+  assert.doesNotMatch(source, /new URL/);
   assert.equal(source.includes('window.location'), false);
 });
 

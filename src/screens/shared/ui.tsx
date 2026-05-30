@@ -222,6 +222,8 @@ const bottomNavIconUrlByState: Record<
   },
 };
 
+export const defaultProfileImageUrl = new URL('../../../assets/profile/default_profile.svg', import.meta.url).href;
+
 export function ContentSheet({ children, className }: { readonly children: ReactNode; readonly className?: string }) {
   return (
     <section className={cn('rounded-[var(--qling-radius-content-sheet)] bg-[var(--qling-color-surface)] p-[var(--qling-space-card-padding)] shadow-[var(--qling-shadow-sheet)]', className)}>
