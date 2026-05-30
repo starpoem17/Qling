@@ -390,7 +390,7 @@ export default function App() {
             || currentRoute === 'logout_confirmation'
             || currentRoute === 'account_deletion_confirmation'
           ) && (
-            <motion.div key="my_page_account" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+            <motion.div key="my_page_account" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="min-h-full">
               <MyPageContainer
                 route={view}
                 user={user}

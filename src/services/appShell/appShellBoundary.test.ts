@@ -105,3 +105,9 @@ test('App.tsx does not render per-screen fixed visual header chrome', () => {
   assert.doesNotMatch(source, /<Radio/);
   assert.doesNotMatch(source, /Qling<\/button>/);
 });
+
+test('App.tsx gives my-page account routes a height context for full-height screens', () => {
+  const source = fs.readFileSync('src/App.tsx', 'utf8');
+
+  assert.match(source, /key="my_page_account"[\s\S]*className="min-h-full"[\s\S]*<MyPageContainer/);
+});
