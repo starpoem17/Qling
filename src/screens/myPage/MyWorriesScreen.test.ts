@@ -81,6 +81,14 @@ test('my worries screen actions match PRD entry points', () => {
   assert.equal(openedWrite, true);
 });
 
+test('my worries my-page button aligns to the Figma header icon position', () => {
+  const tree = MyWorriesScreen(baseProps());
+
+  const button = findButtonByAriaLabel(tree, /마이페이지 열기/);
+  assert.match(String(propsOf(button).className), /left-\[333\.5px\]/);
+  assert.match(String(propsOf(button).className), /top-\[53\.5px\]/);
+});
+
 test('my worries empty state uses PRD copy without a separate empty CTA', () => {
   const html = renderToStaticMarkup(MyWorriesScreen(baseProps({
     state: { status: 'empty', message: '첫 고민을 남겨보세요.' },

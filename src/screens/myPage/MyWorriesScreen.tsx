@@ -38,7 +38,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
           type="button"
           aria-label="마이페이지 열기"
           onClick={props.onOpenMyPage}
-          className="absolute left-[333.5px] top-[50.5px] flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute left-[333.5px] top-[53.5px] flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
         >
           <CircleUserRound className="h-[25px] w-[25px]" aria-hidden="true" />
         </button>
