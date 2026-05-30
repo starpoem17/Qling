@@ -33,7 +33,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
         </h1>
       </header>
 
-      <section className="mx-auto mt-5 min-h-0 w-full max-w-[440px] flex-1 rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]">
+      <section className="mx-auto mt-5 h-[541px] w-full max-w-[440px] shrink-0 rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]">
         <label className="relative block h-full">
           <span className="sr-only">고민 내용</span>
           <textarea

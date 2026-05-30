@@ -52,6 +52,7 @@ test('write worry screen does not use legacy fixed-bottom canvas coordinates', (
   assert.doesNotMatch(html, /w-\[353px\]/);
   assert.doesNotMatch(html, /top-\[69px\]/);
   assert.match(html, /flex h-full min-h-0 flex-col/);
+  assert.match(html, /h-\[541px\]/);
 });
 
 test('write worry screen forwards typing, back, and publish events', () => {
