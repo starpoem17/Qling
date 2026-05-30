@@ -53,7 +53,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
     return (
       <div>
         {header}
-        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-nav-height))] rounded-t-[28px] bg-[#fff1d1] px-4 pt-5">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-nav-height))] rounded-t-[28px] bg-[#fff1d1] px-4 pt-5">
           <LoadingState title="고민을 불러오고 있어요" message={props.state.label} />
         </section>
       </div>
@@ -64,7 +64,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
     return (
       <div>
         {header}
-        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-nav-height))] rounded-t-[28px] bg-[#fff1d1] px-4 pt-5">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-nav-height))] rounded-t-[28px] bg-[#fff1d1] px-4 pt-5">
           <ErrorState title="답변 피드를 불러오지 못했어요" message={props.state.message} />
         </section>
       </div>
@@ -75,7 +75,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
     return (
       <div>
         {header}
-        <section className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-nav-height))] rounded-t-[28px] bg-[#fff1d1] px-4 pt-5">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-nav-height))] rounded-t-[28px] bg-[#fff1d1] px-4 pt-5">
           <EmptyState title={props.state.message} />
         </section>
       </div>
@@ -86,7 +86,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
     <div>
       {header}
       <section
-        className="-mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-nav-height))] rounded-t-[28px] bg-[#fff1d1] px-4 pb-4 pt-5"
+        className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-120px-var(--qling-space-nav-height))] rounded-t-[28px] bg-[#fff1d1] px-4 pb-4 pt-5"
         aria-label="받은 고민 목록"
       >
         <div className="grid gap-[14px]">
@@ -121,7 +121,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                         className="pointer-events-none h-6 min-h-0 w-auto border-0 bg-[#ffe4cc] px-3 py-0 text-[11px] font-bold leading-[14px] text-[#ff8b3d] disabled:opacity-100"
                       />
                       <time
-                        className="text-[12px] font-medium leading-6 text-[#b8b8b8]"
+                        className="text-[12px] font-bold leading-6 text-[#b8b8b8]"
                         dateTime={item.receivedAt.isoValue}
                       >
                         {item.receivedAt.label}
