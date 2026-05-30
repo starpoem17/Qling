@@ -7,10 +7,6 @@ import {
   Loader2,
   Radio,
 } from 'lucide-react';
-import bottomNavChatUrl from '../../../assets/bottom_bar_deactivate/chat.svg';
-import bottomNavMyConcernsUrl from '../../../assets/bottom_bar_deactivate/my_concerns.svg';
-import bottomNavRankingUrl from '../../../assets/bottom_bar_deactivate/ranking.svg';
-import bottomNavReplyUrl from '../../../assets/bottom_bar_deactivate/reply.svg';
 import { cn } from '../../lib/utils';
 import type {
   BottomNavigationProps,
@@ -63,7 +59,7 @@ export function BottomNavigation({
   onSelectTab,
 }: BottomNavigationProps) {
   const itemByTab: Record<BottomNavigationTab, {
-    readonly iconUrl: string;
+    readonly icon: 'reply' | 'myConcerns' | 'chat' | 'ranking';
     readonly centerX: number;
     readonly iconLeft: number;
     readonly iconTop: number;
@@ -71,7 +67,7 @@ export function BottomNavigation({
     readonly iconHeight: number;
   }> = {
     답변하기: {
-      iconUrl: bottomNavReplyUrl,
+      icon: 'reply',
       centerX: 62,
       iconLeft: 22,
       iconTop: 25.217,
@@ -79,7 +75,7 @@ export function BottomNavigation({
       iconHeight: 34.255,
     },
     '나의 고민': {
-      iconUrl: bottomNavMyConcernsUrl,
+      icon: 'myConcerns',
       centerX: 153,
       iconLeft: 25.824,
       iconTop: 14.302,
@@ -87,7 +83,7 @@ export function BottomNavigation({
       iconHeight: 28.284,
     },
     채팅: {
-      iconUrl: bottomNavChatUrl,
+      icon: 'chat',
       centerX: 243,
       iconLeft: 24,
       iconTop: 15,
@@ -95,7 +91,7 @@ export function BottomNavigation({
       iconHeight: 30,
     },
     순위: {
-      iconUrl: bottomNavRankingUrl,
+      icon: 'ranking',
       centerX: 329,
       iconLeft: 25.789,
       iconTop: 14.302,
@@ -107,10 +103,10 @@ export function BottomNavigation({
   return (
     <nav
       aria-label="주요 화면"
-      className="fixed bottom-0 left-1/2 z-50 h-[80px] w-full max-w-[var(--qling-mobile-canvas-max-width)] -translate-x-1/2 bg-[#fff5eb]"
+      className="fixed bottom-0 left-1/2 z-50 h-[80px] w-[393px] -translate-x-1/2 bg-[#fff5eb]"
       style={{ paddingBottom: 'var(--qling-space-safe-bottom)' }}
     >
-      <div className="relative mx-auto h-full w-full max-w-[var(--qling-mobile-canvas-max-width)]" data-measure="bottom-nav-frame">
+      <div className="relative mx-auto h-full w-[393px]" data-measure="bottom-nav-frame">
         {tabs.map(({ tab, label }) => {
           const isActive = activeTab === tab;
           const item = itemByTab[tab];
@@ -128,7 +124,7 @@ export function BottomNavigation({
               style={{ left: `calc(100% * ${item.centerX} / 393)` }}
             >
               <BottomNavAssetIcon
-                iconUrl={item.iconUrl}
+                icon={item.icon}
                 active={isActive}
                 left={item.iconLeft}
                 top={item.iconTop}
@@ -136,7 +132,7 @@ export function BottomNavigation({
                 height={item.iconHeight}
                 measureId={`bottom-nav-${tab}-icon`}
               />
-              <span className="absolute left-1/2 top-[50px] h-[14px] w-12 -translate-x-1/2 text-center">{label}</span>
+              <span className="absolute left-1/2 top-[50px] h-[14px] w-12 -translate-x-1/2 whitespace-nowrap text-center">{label}</span>
             </button>
           );
         })}
@@ -146,7 +142,7 @@ export function BottomNavigation({
 }
 
 function BottomNavAssetIcon({
-  iconUrl,
+  icon,
   active,
   left,
   top,
@@ -154,7 +150,7 @@ function BottomNavAssetIcon({
   height,
   measureId,
 }: {
-  readonly iconUrl: string;
+  readonly icon: 'reply' | 'myConcerns' | 'chat' | 'ranking';
   readonly active: boolean;
   readonly left: number;
   readonly top: number;
@@ -164,22 +160,49 @@ function BottomNavAssetIcon({
 }) {
   return (
     <span
-      className={cn('absolute block', active ? 'bg-[#ff8b0d]' : 'bg-[#c0b59d]')}
+      className={cn('absolute block', active ? 'text-[#ff8b0d]' : 'text-[#c0b59d]')}
       style={{
         left: `calc(100% * ${left} / 78)`,
         top: `${top}px`,
         width: `calc(100% * ${width} / 78)`,
         height: `${height}px`,
-        maskImage: `url(${iconUrl})`,
-        WebkitMaskImage: `url(${iconUrl})`,
-        maskRepeat: 'no-repeat',
-        WebkitMaskRepeat: 'no-repeat',
-        maskSize: '100% 100%',
-        WebkitMaskSize: '100% 100%',
       }}
       data-measure={measureId}
       aria-hidden="true"
-    />
+    >
+      <BottomNavSvgIcon icon={icon} />
+    </span>
+  );
+}
+
+function BottomNavSvgIcon({ icon }: { readonly icon: 'reply' | 'myConcerns' | 'chat' | 'ranking' }) {
+  if (icon === 'reply') {
+    return (
+      <svg className="h-full w-full" viewBox="0 0 31 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M28.4689 0.0603283L28.4585 0.0627546L1.06171 6.95878C0.830747 7.0162 0.619733 7.12377 0.447539 7.27187C0.275344 7.41998 0.147341 7.604 0.0749785 7.80746C-0.0034132 8.02027 -0.0210207 8.2474 0.0237401 8.46845C0.0685009 8.68949 0.174226 8.89749 0.331402 9.07375L4.69503 13.9558C4.9103 14.1965 5.21268 14.3633 5.55006 14.4275C5.88744 14.4917 6.23867 14.4492 6.54323 14.3074L19.4231 8.23901C19.4739 8.21535 19.5325 8.20826 19.5887 8.21896C19.645 8.22966 19.6954 8.25749 19.7313 8.29763C19.7672 8.33778 19.7863 8.38773 19.7853 8.43886C19.7843 8.49 19.7633 8.53911 19.7259 8.57773L10.1643 18.3579C9.94009 18.5894 9.81402 18.8837 9.80787 19.1903C9.80171 19.4968 9.91584 19.7963 10.1306 20.0372L14.495 24.9201C14.6452 25.0883 14.8397 25.221 15.0611 25.3062C15.2825 25.3915 15.5239 25.4265 15.7636 25.4083C16.0526 25.3872 16.3277 25.2907 16.5545 25.1309C16.7119 25.0196 16.8426 24.8812 16.9388 24.7239L30.728 2.60457L30.7337 2.59423C30.9155 2.29218 30.9934 1.94879 30.958 1.60651C30.9225 1.26423 30.7752 0.938099 30.5341 0.668459C30.2931 0.398819 29.9691 0.197503 29.602 0.0894169C29.2349 -0.0186693 28.841 -0.0287828 28.4689 0.0603283Z" fill="currentColor" />
+      </svg>
+    );
+  }
+  if (icon === 'myConcerns') {
+    return (
+      <svg className="h-full w-full" viewBox="0 0 28 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13.9709 0.164763C13.8656 0.059019 13.7256 0 13.58 0C13.4344 0 13.2943 0.059019 13.1891 0.164763L0.176703 13.2229C0.121441 13.2784 0.0774763 13.3452 0.0474686 13.4191C0.0174609 13.4929 -8.66994e-05 13.6552 0 13.7356V25.9083C0 26.5385 0.238296 27.1428 0.662465 27.5884C1.08664 28.0339 1.66193 28.2843 2.2618 28.2843H9.05426C9.3542 28.2843 9.64185 28.1591 9.85393 27.9363C10.066 27.7135 10.1852 27.4114 10.1852 27.0963V16.9985C10.1852 16.8409 10.2447 16.6898 10.3508 16.5784C10.4568 16.467 10.6006 16.4045 10.7506 16.4045H16.4051C16.5551 16.4045 16.6989 16.467 16.8049 16.5784C16.911 16.6898 16.9706 16.8409 16.9706 16.9985V27.0963C16.9706 27.4114 17.0897 27.7135 17.3018 27.9363C17.5139 28.1591 17.8015 28.2843 18.1015 28.2843H24.8911C25.491 28.2843 26.0663 28.0339 26.4904 27.5884C26.9146 27.1428 27.1529 26.5385 27.1529 25.9083V13.6528C27.153 13.5725 27.1376 13.4929 27.1076 13.4191C27.0775 13.3452 27.0336 13.2784 26.9783 13.2229L13.9709 0.164763Z" fill="currentColor" />
+      </svg>
+    );
+  }
+  if (icon === 'chat') {
+    return (
+      <svg className="h-full w-full" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2.5 27.5V5C2.5 4.3125 2.74479 3.72396 3.23438 3.23438C3.72396 2.74479 4.3125 2.5 5 2.5H25C25.6875 2.5 26.276 2.74479 26.7656 3.23438C27.2552 3.72396 27.5 4.3125 27.5 5V20C27.5 20.6875 27.2552 21.276 26.7656 21.7656C26.276 22.2552 25.6875 22.5 25 22.5H7.5L2.5 27.5Z" fill="currentColor" />
+      </svg>
+    );
+  }
+  return (
+    <svg className="h-full w-full" viewBox="0 0 27 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="9.93262" width="6.21992" height="28.2843" fill="currentColor" />
+      <rect y="8.48438" width="6.21992" height="19.4454" fill="currentColor" />
+      <rect x="19.7988" y="14.1416" width="6.21992" height="14.1421" fill="currentColor" />
+    </svg>
   );
 }
 

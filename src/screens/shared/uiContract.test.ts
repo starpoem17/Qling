@@ -65,6 +65,16 @@ test('bottom navigation removes the legacy central eye indicator', () => {
   assert.doesNotMatch(source, /isVisuallyActive/);
 });
 
+test('bottom navigation renders real svg icons without css mask fallback boxes', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+
+  assert.match(source, /function BottomNavSvgIcon/);
+  assert.match(source, /fill="currentColor"/);
+  assert.match(source, /whitespace-nowrap/);
+  assert.doesNotMatch(source, /maskImage/);
+  assert.doesNotMatch(source, /WebkitMaskImage/);
+});
+
 test('profile motif remains visual-only without avatar data requirements', () => {
   const props = {
     label: 'Profile motif',

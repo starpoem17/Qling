@@ -41,7 +41,7 @@ export function RankingScreen(props: RankingScreenProps) {
       className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-nav-height))] overflow-hidden bg-[#fff1d1]"
     >
       <div
-        className="relative mx-auto min-h-[772px] w-full max-w-[var(--qling-mobile-canvas-max-width)] bg-[#fff1d1]"
+        className="relative mx-auto min-h-[772px] w-[393px] bg-[#fff1d1]"
         data-measure="ranking-screen"
       >
         <div className="absolute left-0 top-0 h-[370px] w-full bg-[linear-gradient(180deg,#ff8b3d_0%,#fff1d1_100%)]" />
@@ -76,7 +76,7 @@ function SegmentedControl({
         onClick={() => onChange('monthly')}
         aria-pressed={mode === 'monthly'}
         className={cn(
-          'absolute left-[10px] top-1 h-[25px] w-[102px] rounded-full text-[10px] font-semibold leading-3 transition-colors focus:outline-none focus:ring-2 focus:ring-white',
+          'absolute left-[10px] top-1 h-[25px] w-[102px] whitespace-nowrap rounded-full text-[10px] font-semibold leading-3 transition-colors focus:outline-none focus:ring-2 focus:ring-white',
           mode === 'monthly' ? 'bg-[#ffa462] text-white' : 'text-white',
         )}
         data-measure="ranking-segmented-monthly"
@@ -88,7 +88,7 @@ function SegmentedControl({
         onClick={() => onChange('total')}
         aria-pressed={mode === 'total'}
         className={cn(
-          'absolute left-[134px] top-1 h-[25px] w-[55px] rounded-full text-[10px] font-semibold leading-3 transition-colors focus:outline-none focus:ring-2 focus:ring-white',
+          'absolute left-[134px] top-1 h-[25px] w-[55px] whitespace-nowrap rounded-full text-[10px] font-semibold leading-3 transition-colors focus:outline-none focus:ring-2 focus:ring-white',
           mode === 'total' ? 'bg-[#ffa462] text-white' : 'text-white',
         )}
       >
