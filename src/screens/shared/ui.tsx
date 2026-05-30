@@ -117,7 +117,7 @@ export function BottomNavigation({
               aria-current={isActive ? 'page' : undefined}
               onClick={() => onSelectTab(tab)}
               className={cn(
-                'absolute top-0 h-[80px] w-[calc(100%*78/393)] -translate-x-1/2 text-[12px] font-bold tracking-[-0.24px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b0d] focus:ring-inset',
+                'absolute top-0 h-[80px] w-[calc(100%*78/393)] -translate-x-1/2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b0d] focus:ring-inset',
                 isActive ? 'text-[#ff8b0d]' : 'text-[#c0b59d] hover:text-[#a89f8e]',
               )}
               style={{ left: `calc(100% * ${item.centerX} / 393)` }}
@@ -132,7 +132,7 @@ export function BottomNavigation({
                 measureId={`bottom-nav-${tab}-icon`}
               />
               <span
-                className="absolute left-1/2 top-[57.44px] flex h-[13.333px] w-12 -translate-x-1/2 -translate-y-1/2 flex-col justify-center whitespace-nowrap text-center font-['Qling_Noto_Sans_KR'] leading-[13.333px]"
+                className="absolute left-1/2 top-[57.44px] flex h-[13.333px] w-12 -translate-x-1/2 -translate-y-1/2 flex-col justify-center whitespace-nowrap text-center font-['Qling_Noto_Sans_KR'] text-[12px] font-bold leading-[13.333px] tracking-[-0.24px]"
                 data-measure={`bottom-nav-${tab}-label`}
               >
                 {label}
