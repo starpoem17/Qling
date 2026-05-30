@@ -74,6 +74,8 @@ test('bottom navigation renders asset svg icons without css mask fallback boxes'
   assert.match(source, /<img/);
   assert.match(source, /draggable=\{false\}/);
   assert.match(source, /whitespace-nowrap/);
+  assert.match(source, /font-\['Qling_Noto_Sans_KR'\]/);
+  assert.match(source, /leading-\[13\.333px\]/);
   assert.doesNotMatch(source, /maskImage/);
   assert.doesNotMatch(source, /WebkitMaskImage/);
 });

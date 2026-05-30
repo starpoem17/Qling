@@ -132,7 +132,7 @@ export function BottomNavigation({
                 height={item.iconHeight}
                 measureId={`bottom-nav-${tab}-icon`}
               />
-              <span className="absolute left-1/2 top-[57.44px] flex h-[13.333px] w-12 -translate-x-1/2 -translate-y-1/2 flex-col justify-center whitespace-nowrap text-center leading-normal">{label}</span>
+              <span className="absolute left-1/2 top-[57.44px] flex h-[13.333px] w-12 -translate-x-1/2 -translate-y-1/2 flex-col justify-center whitespace-nowrap text-center font-['Qling_Noto_Sans_KR'] leading-[13.333px]">{label}</span>
             </button>
           );
         })}
