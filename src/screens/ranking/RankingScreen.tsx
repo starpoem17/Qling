@@ -76,7 +76,7 @@ function SegmentedControl({
         onClick={() => onChange('monthly')}
         aria-pressed={mode === 'monthly'}
         className={cn(
-          'absolute left-[10px] top-1 h-[25px] w-[102px] whitespace-nowrap rounded-full text-[10px] font-semibold leading-3 transition-colors focus:outline-none focus:ring-2 focus:ring-white',
+          'absolute left-[10px] top-1 h-[25px] w-[102px] whitespace-nowrap rounded-full text-center text-[10px] font-semibold leading-3 transition-colors focus:outline-none focus:ring-2 focus:ring-white',
           mode === 'monthly' ? 'bg-[#ffa462] text-white' : 'text-white',
         )}
         data-measure="ranking-segmented-monthly"
@@ -88,9 +88,10 @@ function SegmentedControl({
         onClick={() => onChange('total')}
         aria-pressed={mode === 'total'}
         className={cn(
-          'absolute left-[134px] top-1 h-[25px] w-[55px] whitespace-nowrap rounded-full text-[10px] font-semibold leading-3 transition-colors focus:outline-none focus:ring-2 focus:ring-white',
+          'absolute left-[112px] top-1 h-[25px] w-[102px] whitespace-nowrap rounded-full text-center text-[10px] font-semibold leading-3 transition-colors focus:outline-none focus:ring-2 focus:ring-white',
           mode === 'total' ? 'bg-[#ffa462] text-white' : 'text-white',
         )}
+        data-measure="ranking-segmented-total"
       >
         누적 순위
       </button>
@@ -174,7 +175,7 @@ function RankingRows({ entries }: { readonly entries: readonly RankingDisplayEnt
           <span className="absolute top-0 w-[26px] text-center text-[16px] font-extrabold leading-[30px]" style={{ left: 'calc(100% * 32 / 393)' }} data-measure={`ranking-row-${entry.rank}-rank`}>
             {entry.rank}
           </span>
-          <span className="absolute top-0 w-[204px] truncate text-left text-[16px] font-extrabold leading-7" style={{ left: 'calc(100% * 96 / 393)' }} data-measure={`ranking-row-${entry.rank}-nickname`}>
+          <span className="absolute top-0 w-[204px] truncate text-center text-[16px] font-extrabold leading-7" style={{ left: 'calc(100% * 96 / 393)' }} data-measure={`ranking-row-${entry.rank}-nickname`}>
             {entry.nickname || '-'}
           </span>
           <span className="absolute top-[3px] w-20 text-center text-[14px] font-bold leading-[17px] text-[#ea4335]" style={{ left: 'calc(100% * 305 / 393)' }} data-measure={`ranking-row-${entry.rank}-heart`}>
