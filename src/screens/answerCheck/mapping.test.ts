@@ -82,8 +82,6 @@ function worryItem(overrides: Partial<MyWorryListItem>): MyWorryListItem {
     content: 'worry content',
     categories: ['잡담'],
     createdAt: ts(1),
-    unreadReplyCount: 0,
-    hasUnreadReplies: false,
     source: 'prd_worries',
     ...overrides,
   };

@@ -11,8 +11,7 @@ const item = {
   categoryLabel: '외모',
   createdAtLabel: '2026.05.02',
   replyCountLabel: '5명이 답변했어요',
-  hasUnreadReplies: true,
-  accessibilityLabel: '답변 확인으로 이동, 카테고리 외모, 작성일 2026.05.02, 5명이 답변했어요, 읽지 않은 답장 있음',
+  accessibilityLabel: '답변 확인으로 이동, 카테고리 외모, 작성일 2026.05.02, 5명이 답변했어요',
 } as const;
 
 function baseProps(overrides: Partial<MyWorriesScreenProps> = {}): MyWorriesScreenProps {
@@ -35,6 +34,14 @@ test('my worries screen is a list-only screen without inline received-reply pane
   assert.doesNotMatch(html, /도착한 답장/);
   assert.doesNotMatch(html, /누군가의 따뜻한 답장/);
   assert.doesNotMatch(html, /받은 답장 상세로 이동/);
+});
+
+test('my worries screen does not render new-reply emphasis', () => {
+  const html = renderToStaticMarkup(MyWorriesScreen(baseProps()));
+
+  assert.doesNotMatch(html, /새 답장/);
+  assert.doesNotMatch(html, /<span[^>]*>새 답장<\/span>/);
+  assert.doesNotMatch(html, /읽지 않은 답장/);
 });
 
 test('my worries card click invokes answer-check intent with the selected worry item', () => {

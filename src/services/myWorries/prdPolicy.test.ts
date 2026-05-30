@@ -46,11 +46,11 @@ test('own worries are included by authorUid and other users worries are excluded
   assert.deepEqual(selected.map(worry => worry.source), ['prd_worries', 'prd_worries']);
   assert.deepEqual(selected[1].categories, ['family']);
   assert.equal(selected[1].humanReplyCount, 1);
-  assert.equal(selected[1].unreadReplyCount, 0);
-  assert.equal(selected[1].hasUnreadReplies, false);
+  assert.equal(Object.hasOwn(selected[1], 'unreadReplyCount'), false);
+  assert.equal(Object.hasOwn(selected[1], 'hasUnreadReplies'), false);
 });
 
-test('my worries computes unread reply count from private read-state docs', () => {
+test('my worries selection does not expose unread reply state', () => {
   const worries: PrdWorryDoc[] = [
     { id: 'w1', authorUid: 'me', content: 'worry one' },
     { id: 'w2', authorUid: 'me', content: 'worry two' },
@@ -64,34 +64,29 @@ test('my worries computes unread reply count from private read-state docs', () =
   const selected = selectMyWorries({
     worries,
     userUid: 'me',
-    replies,
-    readStatesByReplyId: new Map([['r2', { replyId: 'r2', readByAuthorAt: {} }]]),
   });
 
   const w1 = selected.find(worry => worry.id === 'w1');
   const w2 = selected.find(worry => worry.id === 'w2');
-  assert.equal(w1?.unreadReplyCount, 1);
-  assert.equal(w1?.hasUnreadReplies, true);
-  assert.equal(w2?.unreadReplyCount, 1);
-  assert.equal(w2?.hasUnreadReplies, true);
+  assert.ok(w1);
+  assert.ok(w2);
+  assert.equal(Object.hasOwn(w1, 'unreadReplyCount'), false);
+  assert.equal(Object.hasOwn(w1, 'hasUnreadReplies'), false);
+  assert.equal(Object.hasOwn(w2, 'unreadReplyCount'), false);
+  assert.equal(Object.hasOwn(w2, 'hasUnreadReplies'), false);
+  assert.equal(replies.length, 3);
 });
 
-test('my worries excludes hidden worries and hidden replies from unread counts', () => {
+test('my worries excludes hidden worries', () => {
   const worries: PrdWorryDoc[] = [
     { id: 'visible', authorUid: 'me', content: 'visible worry' },
     { id: 'hidden-status', authorUid: 'me', content: 'hidden worry', status: 'hidden' },
     { id: 'hidden-at', authorUid: 'me', content: 'hidden at worry', hiddenAt: {} },
   ];
-  const replies: PrdReplyDoc[] = [
-    prdReply({ id: 'visible-reply', worryId: 'visible', authorUid: 'me' }),
-    prdReply({ id: 'hidden-reply', worryId: 'visible', authorUid: 'me', status: 'hidden' }),
-    prdReply({ id: 'hidden-at-reply', worryId: 'visible', authorUid: 'me', hiddenAt: {} }),
-  ];
 
-  const selected = selectMyWorries({ worries, userUid: 'me', replies });
+  const selected = selectMyWorries({ worries, userUid: 'me' });
 
   assert.deepEqual(selected.map(worry => worry.id), ['visible']);
-  assert.equal(selected[0].unreadReplyCount, 1);
 });
 
 test('my worries excludes deleted worries', () => {

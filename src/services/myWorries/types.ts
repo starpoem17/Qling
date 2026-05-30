@@ -13,8 +13,6 @@ export interface MyWorryListItem {
   categories: string[];
   createdAt: TimestampLike | null;
   humanReplyCount?: number;
-  unreadReplyCount: number;
-  hasUnreadReplies: boolean;
   source: 'prd_worries';
 }
 

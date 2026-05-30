@@ -90,8 +90,6 @@ test('reply and worry read models map to list props without example labels', () 
       content: '01234567890123456789 extra private original',
       categories: [WORRY_CATEGORIES[1], WORRY_CATEGORIES[2]],
       createdAt: null,
-      unreadReplyCount: 1,
-      hasUnreadReplies: true,
       humanReplyCount: 2,
       source: 'prd_worries',
     },
@@ -110,7 +108,7 @@ test('reply and worry read models map to list props without example labels', () 
   assert.equal(worryItem.categoryLabel, WORRY_CATEGORIES[1]);
   assert.equal(worryItem.replyCountLabel, '2명이 답변했어요');
   assert.match(worryItem.accessibilityLabel, /2명이 답변했어요/);
-  assert.match(worryItem.accessibilityLabel, /읽지 않은 답장 있음/);
+  assert.doesNotMatch(worryItem.accessibilityLabel, /읽지 않은 답장/);
   assert.doesNotMatch(worryItem.accessibilityLabel, /현재 선택됨/);
   assert.equal(Object.hasOwn(answerItem, 'exampleLabel'), false);
 });
@@ -185,8 +183,6 @@ test('my worry mapping uses shared display date, first valid category, fallback 
     content: '01234567890123456789 extra',
     categories: ['invalid', '외로움', '취업'],
     createdAt: { toMillis: () => new Date(2026, 4, 19, 11, 55, 0).getTime() },
-    unreadReplyCount: 0,
-    hasUnreadReplies: false,
     humanReplyCount: 0,
     source: 'prd_worries' as const,
   };
@@ -208,8 +204,6 @@ test('my worry mapping falls back to 잡담 and keeps answer writer private data
       content: '개인정보 없는 요약 테스트',
       categories: ['not-a-category'],
       createdAt: null,
-      unreadReplyCount: 0,
-      hasUnreadReplies: false,
       humanReplyCount: 1,
       source: 'prd_worries',
       answerWriterNickname: '답변자닉',

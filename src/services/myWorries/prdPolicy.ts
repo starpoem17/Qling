@@ -40,17 +40,7 @@ export function isHiddenReply(reply: Pick<PrdReplyDoc, 'status' | 'hiddenAt'>): 
 export function selectVisibleMyWorries(params: {
   worries: PrdWorryDoc[];
   userUid: string;
-  replies?: PrdReplyDoc[];
-  readStatesByReplyId?: Map<string, ReplyReadStateDoc>;
 }): MyWorryListItem[] {
-  const unreadCounts = new Map<string, number>();
-  for (const reply of params.replies ?? []) {
-    if (!reply.id || reply.authorUid !== params.userUid || !reply.worryId) continue;
-    if (isHiddenReply(reply)) continue;
-    if (params.readStatesByReplyId?.has(reply.id)) continue;
-    unreadCounts.set(reply.worryId, (unreadCounts.get(reply.worryId) ?? 0) + 1);
-  }
-
   const selected = params.worries.flatMap(worry => {
     if (worry.authorUid !== params.userUid) return [];
     if (isHiddenWorry(worry)) return [];
@@ -75,8 +65,6 @@ export function selectVisibleMyWorries(params: {
           : rawCategories,
       createdAt: worry.createdAt ?? null,
       humanReplyCount,
-      unreadReplyCount: unreadCounts.get(worry.id) ?? 0,
-      hasUnreadReplies: (unreadCounts.get(worry.id) ?? 0) > 0,
       source: 'prd_worries' as const,
     }];
   });

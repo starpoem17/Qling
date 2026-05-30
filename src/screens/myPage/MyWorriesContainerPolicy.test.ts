@@ -10,7 +10,6 @@ const screenItem: MyWorryListItemProps = {
   categoryLabel: '잡담',
   createdAtLabel: '방금 전',
   replyCountLabel: '아직 답변이 없어요.',
-  hasUnreadReplies: false,
   accessibilityLabel: '답변 확인으로 이동',
 };
 
@@ -20,8 +19,6 @@ const worry: MyWorryListItem = {
   content: '원문',
   categories: ['잡담'],
   createdAt: null,
-  unreadReplyCount: 0,
-  hasUnreadReplies: false,
   humanReplyCount: 0,
   source: 'prd_worries',
 };

@@ -108,7 +108,6 @@ export type MyWorryListItemProps = {
   readonly categoryLabel: string;
   readonly createdAtLabel?: string;
   readonly replyCountLabel: string;
-  readonly hasUnreadReplies: boolean;
   readonly accessibilityLabel: string;
 };
 

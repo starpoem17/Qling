@@ -1,5 +1,4 @@
 import { CircleUserRound, Heart, Send } from 'lucide-react';
-import { cn } from '../../lib/utils';
 import {
   EmptyState,
   ErrorState,
@@ -88,10 +87,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
               onClick={() => props.onSelectWorryForAnswers(worry)}
               className="w-full rounded-[18px] text-left transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
             >
-              <QlingCard className={cn(
-                'relative h-[168px] overflow-hidden rounded-[18px] border-0 bg-white px-[18px] pb-0 pt-[11px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
-                worry.hasUnreadReplies && 'ring-2 ring-[#ff8b3d]',
-              )}>
+              <QlingCard className="relative h-[168px] overflow-hidden rounded-[18px] border-0 bg-white px-[18px] pb-0 pt-[11px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
                 <div className="flex min-w-0 items-center gap-3">
                   <span className="inline-flex shrink-0 items-start overflow-hidden rounded-[var(--qling-radius-pill)] bg-[#ffe4cc] px-3 py-[5px] text-[11px] font-bold leading-normal text-[#ff8b3d]">
                     {worry.categoryLabel}
@@ -100,11 +96,6 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
                     <time className="text-[12px] font-semibold leading-[23px] text-[#b8b8b8]">
                       {worry.createdAtLabel}
                     </time>
-                  )}
-                  {worry.hasUnreadReplies && (
-                    <span className="ml-auto rounded-[var(--qling-radius-pill)] bg-[#ff8b3d] px-2.5 py-1 text-[11px] font-extrabold text-white">
-                      새 답장
-                    </span>
                   )}
                 </div>
                 <p className="mt-[21px] line-clamp-2 whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 text-[#2a2a2a]">

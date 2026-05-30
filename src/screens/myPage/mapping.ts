@@ -95,13 +95,11 @@ export function mapMyWorryToListItem(params: {
     categoryLabel,
     createdAtLabel,
     replyCountLabel,
-    hasUnreadReplies: params.worry.hasUnreadReplies,
     accessibilityLabel: [
       '답변 확인으로 이동',
       `카테고리 ${categoryLabel}`,
       createdAtLabel ? `작성일 ${createdAtLabel}` : undefined,
       replyCountLabel,
-      params.worry.hasUnreadReplies ? '읽지 않은 답장 있음' : '읽지 않은 답장 없음',
     ].filter(Boolean).join(', '),
   };
 }

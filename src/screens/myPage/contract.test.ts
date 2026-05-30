@@ -131,8 +131,7 @@ test('my answers and my worries contracts expose list states and route callbacks
       categoryLabel: WORRY_CATEGORIES[0],
       createdAtLabel: '방금 전',
       replyCountLabel: '1명이 답변했어요',
-      hasUnreadReplies: true,
-      accessibilityLabel: '답변 확인으로 이동, 카테고리 취업, 작성일 방금 전, 1명이 답변했어요, 읽지 않은 답장 있음',
+      accessibilityLabel: '답변 확인으로 이동, 카테고리 취업, 작성일 방금 전, 1명이 답변했어요',
     },
     ],
     onWriteWorry: () => undefined,
@@ -145,7 +144,7 @@ test('my answers and my worries contracts expose list states and route callbacks
   assert.match(answers.items[0].accessibilityLabel, /피드백 없음/);
   assert.equal(worries.items[0].replyCountLabel, '1명이 답변했어요');
   assert.match(worries.items[0].accessibilityLabel, /1명이 답변했어요/);
-  assert.match(worries.items[0].accessibilityLabel, /읽지 않은 답장 있음/);
+  assert.doesNotMatch(worries.items[0].accessibilityLabel, /읽지 않은 답장/);
   assert.match(worries.items[0].accessibilityLabel, /답변 확인으로 이동/);
   for (const item of [...answers.items, ...worries.items]) {
     assert.equal(Object.hasOwn(item, 'exampleLabel'), false);
@@ -161,7 +160,6 @@ test('my worries contract is list-only and excludes answer-writer privacy fields
     categoryLabel: WORRY_CATEGORIES[0],
     createdAtLabel: '2026.05.19',
     replyCountLabel: '아직 답변이 없어요.',
-    hasUnreadReplies: false,
     accessibilityLabel: '답변 확인으로 이동',
   } satisfies MyWorriesScreenProps['items'][number]);
 
