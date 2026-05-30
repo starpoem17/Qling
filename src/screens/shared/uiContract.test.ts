@@ -65,11 +65,14 @@ test('bottom navigation removes the legacy central eye indicator', () => {
   assert.doesNotMatch(source, /isVisuallyActive/);
 });
 
-test('bottom navigation renders real svg icons without css mask fallback boxes', () => {
+test('bottom navigation renders asset svg icons without css mask fallback boxes', () => {
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
 
-  assert.match(source, /function BottomNavSvgIcon/);
-  assert.match(source, /fill="currentColor"/);
+  assert.match(source, /assets\/bottom_bar\/reply\.svg/);
+  assert.match(source, /assets\/bottom_bar\/reply_activate\.svg/);
+  assert.match(source, /bottomNavIconUrlByState/);
+  assert.match(source, /<img/);
+  assert.match(source, /draggable=\{false\}/);
   assert.match(source, /whitespace-nowrap/);
   assert.doesNotMatch(source, /maskImage/);
   assert.doesNotMatch(source, /WebkitMaskImage/);

@@ -71,8 +71,8 @@ export function BottomNavigation({
       centerX: 62,
       iconLeft: 22,
       iconTop: 25.217,
-      iconWidth: 39.144,
-      iconHeight: 34.255,
+      iconWidth: 31,
+      iconHeight: 26,
     },
     '나의 고민': {
       icon: 'myConcerns',
@@ -118,7 +118,7 @@ export function BottomNavigation({
               aria-current={isActive ? 'page' : undefined}
               onClick={() => onSelectTab(tab)}
               className={cn(
-                'absolute top-0 h-[80px] w-[calc(100%*78/393)] -translate-x-1/2 text-[12px] font-semibold leading-[13px] tracking-[-0.24px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b0d] focus:ring-inset',
+                'absolute top-0 h-[80px] w-[calc(100%*78/393)] -translate-x-1/2 text-[12px] font-semibold leading-[13.333px] tracking-[-0.24px] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b0d] focus:ring-inset',
                 isActive ? 'text-[#ff8b0d]' : 'text-[#c0b59d] hover:text-[#a89f8e]',
               )}
               style={{ left: `calc(100% * ${item.centerX} / 393)` }}
@@ -132,7 +132,7 @@ export function BottomNavigation({
                 height={item.iconHeight}
                 measureId={`bottom-nav-${tab}-icon`}
               />
-              <span className="absolute left-1/2 top-[50px] h-[14px] min-w-12 -translate-x-1/2 whitespace-nowrap text-center">{label}</span>
+              <span className="absolute left-1/2 top-[49.778px] h-[13.333px] w-12 -translate-x-1/2 whitespace-nowrap text-center">{label}</span>
             </button>
           );
         })}
@@ -160,7 +160,7 @@ function BottomNavAssetIcon({
 }) {
   return (
     <span
-      className={cn('absolute block', active ? 'text-[#ff8b0d]' : 'text-[#c0b59d]')}
+      className="absolute block"
       style={{
         left: `calc(100% * ${left} / 78)`,
         top: `${top}px`,
@@ -170,41 +170,37 @@ function BottomNavAssetIcon({
       data-measure={measureId}
       aria-hidden="true"
     >
-      <BottomNavSvgIcon icon={icon} />
+      <img
+        src={bottomNavIconUrlByState[icon][active ? 'active' : 'inactive']}
+        alt=""
+        className="block h-full w-full"
+        draggable={false}
+      />
     </span>
   );
 }
 
-function BottomNavSvgIcon({ icon }: { readonly icon: 'reply' | 'myConcerns' | 'chat' | 'ranking' }) {
-  if (icon === 'reply') {
-    return (
-      <svg className="h-full w-full" viewBox="0 0 28.3055 24.0434" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-        <path d="M27.1634 10.348L27.1539 10.344L1.96682 0.10559C1.75497 0.0186896 1.52444 -0.0153918 1.29586 0.0063948C1.06728 0.0281814 0.847779 0.105156 0.656983 0.230434C0.455403 0.359884 0.289823 0.536419 0.175141 0.744154C0.0604597 0.95189 0.00027429 1.18431 0 1.4205V7.96846C0.000112335 8.29135 0.115154 8.60409 0.325298 8.85277C0.535442 9.10145 0.827522 9.27049 1.15119 9.33077L14.8883 11.8201C14.9423 11.8302 14.991 11.8583 15.026 11.8998C15.0611 11.9413 15.0802 11.9934 15.0802 12.0473C15.0802 12.1011 15.0611 12.1533 15.026 12.1948C14.991 12.2362 14.9423 12.2644 14.8883 12.2744L1.15178 14.7638C0.828202 14.8239 0.536139 14.9927 0.325901 15.2412C0.115663 15.4896 0.000412839 15.8022 0 16.1249V22.6741C-0.000156302 22.8996 0.0568251 23.1217 0.165831 23.3203C0.274837 23.5189 0.432457 23.6879 0.624547 23.8121C0.855611 23.9626 1.12678 24.043 1.4042 24.0433C1.59706 24.0431 1.78794 24.0052 1.96564 23.9318L27.1522 13.7518L27.1634 13.7466C27.5024 13.6038 27.7913 13.3667 27.9942 13.0647C28.1972 12.7626 28.3054 12.4089 28.3054 12.0473C28.3054 11.6856 28.1972 11.3319 27.9942 11.0299C27.7913 10.7279 27.5024 10.4908 27.1634 10.348Z" fill="currentColor" />
-      </svg>
-    );
-  }
-  if (icon === 'myConcerns') {
-    return (
-      <svg className="h-full w-full" viewBox="0 0 28 29" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M13.9709 0.164763C13.8656 0.059019 13.7256 0 13.58 0C13.4344 0 13.2943 0.059019 13.1891 0.164763L0.176703 13.2229C0.121441 13.2784 0.0774763 13.3452 0.0474686 13.4191C0.0174609 13.4929 -8.66994e-05 13.6552 0 13.7356V25.9083C0 26.5385 0.238296 27.1428 0.662465 27.5884C1.08664 28.0339 1.66193 28.2843 2.2618 28.2843H9.05426C9.3542 28.2843 9.64185 28.1591 9.85393 27.9363C10.066 27.7135 10.1852 27.4114 10.1852 27.0963V16.9985C10.1852 16.8409 10.2447 16.6898 10.3508 16.5784C10.4568 16.467 10.6006 16.4045 10.7506 16.4045H16.4051C16.5551 16.4045 16.6989 16.467 16.8049 16.5784C16.911 16.6898 16.9706 16.8409 16.9706 16.9985V27.0963C16.9706 27.4114 17.0897 27.7135 17.3018 27.9363C17.5139 28.1591 17.8015 28.2843 18.1015 28.2843H24.8911C25.491 28.2843 26.0663 28.0339 26.4904 27.5884C26.9146 27.1428 27.1529 26.5385 27.1529 25.9083V13.6528C27.153 13.5725 27.1376 13.4929 27.1076 13.4191C27.0775 13.3452 27.0336 13.2784 26.9783 13.2229L13.9709 0.164763Z" fill="currentColor" />
-      </svg>
-    );
-  }
-  if (icon === 'chat') {
-    return (
-      <svg className="h-full w-full" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M2.5 27.5V5C2.5 4.3125 2.74479 3.72396 3.23438 3.23438C3.72396 2.74479 4.3125 2.5 5 2.5H25C25.6875 2.5 26.276 2.74479 26.7656 3.23438C27.2552 3.72396 27.5 4.3125 27.5 5V20C27.5 20.6875 27.2552 21.276 26.7656 21.7656C26.276 22.2552 25.6875 22.5 25 22.5H7.5L2.5 27.5Z" fill="currentColor" />
-      </svg>
-    );
-  }
-  return (
-    <svg className="h-full w-full" viewBox="0 0 27 29" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="9.93262" width="6.21992" height="28.2843" fill="currentColor" />
-      <rect y="8.48438" width="6.21992" height="19.4454" fill="currentColor" />
-      <rect x="19.7988" y="14.1416" width="6.21992" height="14.1421" fill="currentColor" />
-    </svg>
-  );
-}
+const bottomNavIconUrlByState: Record<
+  'reply' | 'myConcerns' | 'chat' | 'ranking',
+  { readonly inactive: string; readonly active: string }
+> = {
+  reply: {
+    inactive: new URL('../../../assets/bottom_bar/reply.svg', import.meta.url).href,
+    active: new URL('../../../assets/bottom_bar/reply_activate.svg', import.meta.url).href,
+  },
+  myConcerns: {
+    inactive: new URL('../../../assets/bottom_bar/my_concerns.svg', import.meta.url).href,
+    active: new URL('../../../assets/bottom_bar/my_concerns_activate.svg', import.meta.url).href,
+  },
+  chat: {
+    inactive: new URL('../../../assets/bottom_bar/chat.svg', import.meta.url).href,
+    active: new URL('../../../assets/bottom_bar/chat_activate.svg', import.meta.url).href,
+  },
+  ranking: {
+    inactive: new URL('../../../assets/bottom_bar/ranking.svg', import.meta.url).href,
+    active: new URL('../../../assets/bottom_bar/ranking_activate.svg', import.meta.url).href,
+  },
+};
 
 export function ContentSheet({ children, className }: { readonly children: ReactNode; readonly className?: string }) {
   return (
