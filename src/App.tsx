@@ -324,6 +324,9 @@ export default function App() {
           : [
             routeBoundary.routeGroup === 'onboarding flow' ? "pt-12" : "pt-6",
             routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto',
+            currentRoute === '순위' || currentRoute === 'ranking'
+              ? 'overflow-hidden'
+              : undefined,
           ],
       )}
     >

@@ -121,6 +121,17 @@ test('keeps document scrolling as route rendering policy so flex bottom navigati
   assert.equal(routeRenderingBoundaryForRoute('onboarding').mainScrollMode, 'route');
 });
 
+test('locks App main scrolling only for ranking routes', () => {
+  const source = fs.readFileSync('src/App.tsx', 'utf8');
+
+  assert.match(source, /routeBoundary\.mainScrollMode === 'document' && 'overflow-y-auto'/);
+  assert.match(source, /currentRoute === '순위' \|\| currentRoute === 'ranking'[\s\S]*\? 'overflow-hidden'/);
+  assert.ok(
+    source.indexOf("routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto'")
+      < source.indexOf("currentRoute === '순위' || currentRoute === 'ranking'"),
+  );
+});
+
 test('keeps every bottom-navigation route on the content scroll policy', () => {
   for (const route of [
     'received_worries',
