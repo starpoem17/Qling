@@ -264,6 +264,29 @@ export default function App() {
   const currentWriteReplySuccessRoute = typeof view === 'object' && view.route === 'write_reply_success' ? view : null;
   const currentAnswerCheckRoute = typeof view === 'object' && view.route === 'answer_check' ? view : null;
 
+  useEffect(() => {
+    if (currentRoute !== 'write_worry') return;
+
+    const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const root = document.getElementById('root');
+    const previousThemeColor = themeMeta?.getAttribute('content') ?? null;
+    const previousHtmlBackground = document.documentElement.style.backgroundColor;
+    const previousBodyBackground = document.body.style.backgroundColor;
+    const previousRootBackground = root?.style.backgroundColor ?? null;
+
+    themeMeta?.setAttribute('content', '#fff1d1');
+    document.documentElement.style.backgroundColor = '#fff1d1';
+    document.body.style.backgroundColor = '#fff1d1';
+    if (root) root.style.backgroundColor = '#fff1d1';
+
+    return () => {
+      if (themeMeta && previousThemeColor !== null) themeMeta.setAttribute('content', previousThemeColor);
+      document.documentElement.style.backgroundColor = previousHtmlBackground;
+      document.body.style.backgroundColor = previousBodyBackground;
+      if (root && previousRootBackground !== null) root.style.backgroundColor = previousRootBackground;
+    };
+  }, [currentRoute]);
+
   if (loading) {
     return (
       <LoadingShellScreen
@@ -296,8 +319,12 @@ export default function App() {
       )}
       hasBottomNavigation={routeBoundary.mountsBottomNavigation}
       mainClassName={cn(
-        routeBoundary.routeGroup === 'onboarding flow' ? "pt-12" : "pt-6",
-        routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto',
+        currentRoute === 'write_worry'
+          ? 'qling-write-worry-main'
+          : [
+            routeBoundary.routeGroup === 'onboarding flow' ? "pt-12" : "pt-6",
+            routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto',
+          ],
       )}
     >
       <AnimatePresence>

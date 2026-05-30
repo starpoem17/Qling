@@ -18,22 +18,22 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
   const showVisualPlaceholder = props.draft.value.trim().length === 0;
 
   return (
-    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 h-[calc(100dvh-var(--qling-space-scroll-bottom))] bg-[#fff1d1] pb-6">
-      <header>
+    <div className="flex h-full min-h-0 flex-col bg-[#fff1d1] px-5 pb-4 pt-[calc(42px+env(safe-area-inset-top,0px))] text-[#2a2a2a]">
+      <header className="relative mx-auto flex h-12 w-full max-w-[440px] shrink-0 items-center justify-center">
         <button
           type="button"
           onClick={props.onBack}
-          className="absolute left-[5px] top-[50px] flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-[#fff5eb]/60 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
+          className="absolute left-0 flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-[#fff5eb]/60 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
           aria-label="나의 고민으로 돌아가기"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
-        <h1 className="absolute left-1/2 top-[69px] -translate-x-1/2 text-[17px] font-extrabold leading-[21px] tracking-[-0.02em] text-[#2a2a2a]">
+        <h1 className="text-[17px] font-extrabold leading-[21px] tracking-[-0.02em] text-[#2a2a2a]">
           고민 작성
         </h1>
       </header>
 
-      <section className="absolute left-5 top-[120px] bottom-[94px] w-[353px] rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]">
+      <section className="mx-auto mt-5 min-h-0 w-full max-w-[440px] flex-1 rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]">
         <label className="relative block h-full">
           <span className="sr-only">고민 내용</span>
           <textarea
@@ -74,7 +74,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
         aria-busy={props.draft.isProcessing || undefined}
         disabled={isDisabled || props.draft.isProcessing}
         onClick={props.onPublish}
-        className="absolute left-[63px] bottom-[23px] inline-flex h-12 w-[267px] items-center justify-center gap-2 rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
+        className="mx-auto mt-5 inline-flex h-12 w-full max-w-[320px] shrink-0 items-center justify-center gap-2 rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
       >
         <Send className="h-5 w-5" aria-hidden="true" />
         고민 전송

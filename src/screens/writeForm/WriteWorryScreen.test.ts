@@ -44,6 +44,16 @@ test('write worry screen renders pencil visual placeholder only for an empty dra
   assert.doesNotMatch(filledHtml, /write-worry-pencil/);
 });
 
+test('write worry screen does not use legacy fixed-bottom canvas coordinates', () => {
+  const html = renderToStaticMarkup(WriteWorryScreen(baseProps()));
+
+  assert.doesNotMatch(html, /100dvh-var\(--qling-space-scroll-bottom\)/);
+  assert.doesNotMatch(html, /left-\[63px\]/);
+  assert.doesNotMatch(html, /w-\[353px\]/);
+  assert.doesNotMatch(html, /top-\[69px\]/);
+  assert.match(html, /flex h-full min-h-0 flex-col/);
+});
+
 test('write worry screen forwards typing, back, and publish events', () => {
   const events: string[] = [];
   const tree = WriteWorryScreen(baseProps({
