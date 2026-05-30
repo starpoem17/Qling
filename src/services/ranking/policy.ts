@@ -1,6 +1,6 @@
 import type { RankingEntry, RankingFeedbackDoc, RankingResponse, RankingUserDoc } from './types';
 
-const RANKING_LIMIT = 10;
+const RANKING_LIMIT = 15;
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
 export function composeRankingResponse(params: {

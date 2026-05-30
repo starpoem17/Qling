@@ -148,11 +148,11 @@ body,
 #root {
   min-height: 100%;
   margin: 0;
+  background: #ff8b3d;
 }
 
 body {
   font-family: var(--qling-font-sans);
-  background: var(--qling-color-cream);
   color: var(--qling-color-text);
 }
 

@@ -55,8 +55,8 @@ test('monthly rankings count KST month likes with helpedCountApplied only', () =
   ]);
 });
 
-test('rankings are capped at ten displayed users', () => {
-  const manyUsers = Array.from({ length: 12 }, (_, index) => ({
+test('rankings are capped at fifteen displayed users', () => {
+  const manyUsers = Array.from({ length: 17 }, (_, index) => ({
     uid: `user-${index}`,
     nickname: `사용자${index}`,
     helpedCount: 100 - index,
@@ -68,6 +68,6 @@ test('rankings are capped at ten displayed users', () => {
     now: new Date('2026-05-15T12:00:00.000Z'),
   });
 
-  assert.equal(result.total.length, 10);
-  assert.equal(result.total.at(-1)?.uid, 'user-9');
+  assert.equal(result.total.length, 15);
+  assert.equal(result.total.at(-1)?.uid, 'user-14');
 });

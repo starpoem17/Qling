@@ -14,7 +14,7 @@ export function RankingScreen(props: RankingScreenProps) {
 
   if (props.state.status === 'loading') {
     return (
-      <div className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-nav-height))] bg-[#ffd3a8] px-4 pt-[62px]">
+      <div className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ffd3a8] px-4 pt-[calc(62px+env(safe-area-inset-top,0px))]">
         <LoadingState title="순위를 불러오고 있어요" />
       </div>
     );
@@ -22,7 +22,7 @@ export function RankingScreen(props: RankingScreenProps) {
 
   if (props.state.status === 'error') {
     return (
-      <div className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-nav-height))] bg-[#ffd3a8] px-4 pt-[62px]">
+      <div className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ffd3a8] px-4 pt-[calc(62px+env(safe-area-inset-top,0px))]">
         <ErrorState title="순위를 불러오지 못했어요" message={props.state.message} />
       </div>
     );
@@ -34,15 +34,15 @@ export function RankingScreen(props: RankingScreenProps) {
     nickname: '-',
     heartCount: 0,
   });
-  const lowerEntries = displayEntries.filter(entry => entry.rank >= 4).slice(0, 7);
+  const lowerEntries = displayEntries.filter(entry => entry.rank >= 4).slice(0, 12);
 
   return (
     <section
       aria-label="순위"
-      className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-nav-height))] overflow-x-hidden bg-[#fff1d1] qling-figma-font"
+      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#fff1d1] qling-figma-font"
     >
       <div
-        className="mx-auto flex aspect-[393/852] w-full max-w-[480px] justify-center"
+        className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"
         data-measure="ranking-responsive-canvas"
       >
         <div
@@ -56,7 +56,7 @@ export function RankingScreen(props: RankingScreenProps) {
           <TopRank entry={topEntries[1]} place="second" />
           <TopRank entry={topEntries[2]} place="third" />
           <Podium />
-          <div className="absolute left-0 right-0 top-[396px] h-[456px] rounded-t-[45px] bg-[#fff1d1] pb-7 pt-[21px]">
+          <div className="absolute left-0 right-0 top-[396px] bottom-0 min-h-0 overflow-y-auto rounded-t-[45px] bg-[#fff1d1] pb-[calc(108px+env(safe-area-inset-bottom,0px))] pt-[21px] [-webkit-overflow-scrolling:touch]">
             <RankingRows entries={lowerEntries} />
           </div>
         </div>
@@ -166,17 +166,19 @@ function Podium() {
 }
 
 function RankingRows({ entries }: { readonly entries: readonly RankingDisplayEntry[] }) {
-  const rows = entries.length > 0
-    ? entries
-    : Array.from({ length: 7 }, (_, index) => ({
-      rank: index + 4,
-      uid: `empty-${index}`,
+  const entriesByRank = new Map(entries.map(entry => [entry.rank, entry]));
+  const rows = Array.from({ length: 12 }, (_, index) => {
+    const rank = index + 4;
+    return entriesByRank.get(rank) ?? {
+      rank,
+      uid: `empty-${rank}`,
       nickname: '',
       heartCount: 0,
-    }));
+    };
+  });
 
   return (
-    <ol className="relative h-[333px]">
+    <ol className="relative h-[583px]">
       {rows.map((entry, index) => (
         <li
           key={entry.uid}
