@@ -295,7 +295,10 @@ export default function App() {
         />
       )}
       hasBottomNavigation={routeBoundary.mountsBottomNavigation}
-      mainClassName={cn(routeBoundary.routeGroup === 'onboarding flow' ? "pt-12" : "pt-6")}
+      mainClassName={cn(
+        routeBoundary.routeGroup === 'onboarding flow' ? "pt-12" : "pt-6",
+        routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto',
+      )}
     >
       <AnimatePresence>
         {filterAlert && (

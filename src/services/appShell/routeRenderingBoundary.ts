@@ -124,6 +124,7 @@ export type RouteRenderingBoundary = {
   readonly authenticatedTab: PrdAppTab | null;
   readonly mountsAuthenticatedShell: boolean;
   readonly mountsBottomNavigation: boolean;
+  readonly mainScrollMode: 'document' | 'route';
 };
 
 export function routeRenderingBoundaryForRoute(view: AppRouteViewState): RouteRenderingBoundary {
@@ -137,6 +138,7 @@ export function routeRenderingBoundaryForRoute(view: AppRouteViewState): RouteRe
     authenticatedTab,
     mountsAuthenticatedShell: routeGroup !== 'login/splash/loading' && routeGroup !== 'onboarding flow',
     mountsBottomNavigation: routeGroup !== 'login/splash/loading' && routeGroup !== 'onboarding flow',
+    mainScrollMode: routeGroup !== 'login/splash/loading' && routeGroup !== 'onboarding flow' ? 'document' : 'route',
   };
 }
 

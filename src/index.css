@@ -126,10 +126,12 @@
 .qling-production-frame {
   width: min(100vw, var(--qling-mobile-canvas-width));
   max-width: var(--qling-mobile-canvas-max-width);
+  height: 100dvh;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow: hidden;
   overflow-x: hidden;
   background: var(--qling-color-cream);
   margin: 0 auto;

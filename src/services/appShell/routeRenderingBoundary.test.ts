@@ -77,6 +77,7 @@ test('identifies authenticated shell membership separately from route-specific g
     authenticatedTab: '답변하기',
     mountsAuthenticatedShell: true,
     mountsBottomNavigation: true,
+    mainScrollMode: 'document',
   });
   assert.deepEqual(routeRenderingBoundaryForRoute({ route: 'answer_check', worryId: 'worry-1' }), {
     currentRoute: 'answer_check',
@@ -84,6 +85,7 @@ test('identifies authenticated shell membership separately from route-specific g
     authenticatedTab: '나의 고민',
     mountsAuthenticatedShell: true,
     mountsBottomNavigation: true,
+    mainScrollMode: 'document',
   });
   assert.deepEqual(routeRenderingBoundaryForRoute('edit_interests'), {
     currentRoute: 'edit_interests',
@@ -91,6 +93,7 @@ test('identifies authenticated shell membership separately from route-specific g
     authenticatedTab: null,
     mountsAuthenticatedShell: true,
     mountsBottomNavigation: true,
+    mainScrollMode: 'document',
   });
   assert.deepEqual(routeRenderingBoundaryForRoute('순위'), {
     currentRoute: '순위',
@@ -98,6 +101,7 @@ test('identifies authenticated shell membership separately from route-specific g
     authenticatedTab: '순위',
     mountsAuthenticatedShell: true,
     mountsBottomNavigation: true,
+    mainScrollMode: 'document',
   });
   assert.deepEqual(routeRenderingBoundaryForRoute('onboarding_interests'), {
     currentRoute: 'onboarding_interests',
@@ -105,7 +109,16 @@ test('identifies authenticated shell membership separately from route-specific g
     authenticatedTab: null,
     mountsAuthenticatedShell: false,
     mountsBottomNavigation: false,
+    mainScrollMode: 'route',
   });
+});
+
+test('keeps document scrolling as route rendering policy so flex bottom navigation stays visible', () => {
+  assert.equal(routeRenderingBoundaryForRoute('received_worries').mainScrollMode, 'document');
+  assert.equal(routeRenderingBoundaryForRoute('my_worries').mainScrollMode, 'document');
+  assert.equal(routeRenderingBoundaryForRoute('ranking').mainScrollMode, 'document');
+  assert.equal(routeRenderingBoundaryForRoute('login').mainScrollMode, 'route');
+  assert.equal(routeRenderingBoundaryForRoute('onboarding').mainScrollMode, 'route');
 });
 
 test('keeps route rendering policy outside App.tsx branch helpers', () => {

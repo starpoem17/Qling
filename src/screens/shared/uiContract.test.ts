@@ -86,6 +86,8 @@ test('bottom navigation participates in shell flex layout without viewport fixed
 
   assert.match(cssSource, /\.qling-production-frame[\s\S]*display: flex;/);
   assert.match(cssSource, /\.qling-production-frame[\s\S]*flex-direction: column;/);
+  assert.match(cssSource, /\.qling-production-frame[\s\S]*height: 100dvh;/);
+  assert.match(cssSource, /\.qling-production-frame[\s\S]*overflow: hidden;/);
   assert.match(source, /min-h-0 w-full flex-1/);
   assert.match(source, /h-\[80px\] w-full shrink-0/);
   assert.doesNotMatch(source, /fixed bottom-0 left-0 right-0/);
