@@ -264,7 +264,7 @@ export function EditInterestsScreen(props: EditInterestsProps) {
   const orderedCategoryOptions = editInterestsFigmaOrder.filter(category => props.categoryOptions.includes(category));
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 flex h-full justify-center bg-[#ff8b0d] text-[#1a1a1a]">
+    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 flex h-[calc(100dvh-var(--qling-space-nav-height))] justify-center bg-[#ff8b0d] text-[#1a1a1a]">
       <div className="relative h-full w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
         <div className="absolute left-0 top-[196px] bottom-0 w-[393px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" />
         <FigmaTopBar title="관심분야 수정" onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
