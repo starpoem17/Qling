@@ -76,24 +76,28 @@ function SegmentedControl({
         onClick={() => onChange('monthly')}
         aria-pressed={mode === 'monthly'}
         className={cn(
-          'absolute left-[10px] top-1 h-[25px] w-[102px] whitespace-nowrap rounded-full text-center text-[10px] font-semibold leading-3 transition-colors focus:outline-none focus:ring-2 focus:ring-white',
+          'absolute left-[10px] top-1 h-[25px] w-[102px] whitespace-nowrap rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-white',
           mode === 'monthly' ? 'bg-[#ffa462] text-white' : 'text-white',
         )}
         data-measure="ranking-segmented-monthly"
       >
-        이 달의 순위
+        <span className="absolute left-[23px] top-[7px] h-3 w-[55px] text-center text-[9px] font-semibold leading-3">
+          이 달의 순위
+        </span>
       </button>
       <button
         type="button"
         onClick={() => onChange('total')}
         aria-pressed={mode === 'total'}
         className={cn(
-          'absolute left-[112px] top-1 h-[25px] w-[102px] whitespace-nowrap rounded-full text-center text-[10px] font-semibold leading-3 transition-colors focus:outline-none focus:ring-2 focus:ring-white',
+          'absolute left-[112px] top-1 h-[25px] w-[102px] whitespace-nowrap rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-white',
           mode === 'total' ? 'bg-[#ffa462] text-white' : 'text-white',
         )}
         data-measure="ranking-segmented-total"
       >
-        누적 순위
+        <span className="absolute left-[22px] top-[7px] h-3 w-[55px] text-center text-[9px] font-semibold leading-3">
+          누적 순위
+        </span>
       </button>
     </div>
   );
@@ -149,7 +153,7 @@ function Podium() {
       <div className="absolute top-[48.75px] h-[10.08px] w-[calc(100%*131/393)] bg-[#ffd2a5] [clip-path:polygon(0_0,100%_100%,0_100%)]" style={{ left: 'calc(100% * 262 / 393)' }} />
       <span className="absolute top-[50px] text-[56px] font-extrabold leading-[64px] text-[#f2d7c3] qling-figma-font-strong" style={{ left: 'calc(100% * 49 / 393)' }}>2</span>
       <span className="absolute top-[18px] text-[56px] font-extrabold leading-[64px] text-[#f2d7c3] qling-figma-font-strong" style={{ left: 'calc(100% * 183 / 393)' }}>1</span>
-      <span className="absolute top-[80px] text-[56px] font-extrabold leading-[64px] text-[#f2d7c3] qling-figma-font-strong" style={{ left: 'calc(100% * 312 / 393)' }}>3</span>
+      <span className="absolute top-[66.155px] text-[56px] font-extrabold leading-[64px] text-[#f2d7c3] qling-figma-font-strong" style={{ left: 'calc(100% * 306 / 393)' }}>3</span>
     </div>
   );
 }
