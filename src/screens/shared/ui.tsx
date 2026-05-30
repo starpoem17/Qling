@@ -35,13 +35,15 @@ export function MobileAppShell({
   mainClassName,
 }: MobileAppShellProps) {
   return (
-    <div className="qling-production-root text-[var(--qling-color-text)] font-sans selection:bg-[var(--qling-color-cream-soft)]">
+    <div className="qling-production-root h-dvh overflow-hidden text-[var(--qling-color-text)] font-sans selection:bg-[var(--qling-color-cream-soft)]">
       <div className="qling-production-frame">
         {header}
         <main
           className={cn(
             'mx-auto min-h-0 w-full flex-1 px-[var(--qling-space-shell-x)]',
-            hasBottomNavigation ? 'pb-0' : 'pb-12',
+            hasBottomNavigation
+              ? 'overflow-y-auto overscroll-contain pb-[var(--qling-space-safe-bottom)] [-webkit-overflow-scrolling:touch]'
+              : 'pb-12',
             mainClassName,
           )}
         >

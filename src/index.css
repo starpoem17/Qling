@@ -123,9 +123,11 @@
 }
 
 .qling-production-root {
+  height: 100dvh;
   min-height: 100dvh;
   display: flex;
   justify-content: center;
+  overflow: hidden;
   overflow-x: hidden;
   background: var(--qling-color-cream);
 }

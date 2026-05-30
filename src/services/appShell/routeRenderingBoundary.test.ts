@@ -121,6 +121,25 @@ test('keeps document scrolling as route rendering policy so flex bottom navigati
   assert.equal(routeRenderingBoundaryForRoute('onboarding').mainScrollMode, 'route');
 });
 
+test('keeps every bottom-navigation route on the content scroll policy', () => {
+  for (const route of [
+    'received_worries',
+    'my_worries',
+    'chat',
+    'ranking',
+    'write_worry',
+    'write_reply_success',
+    'answer_check',
+    'privacy_policy',
+    'account_deletion_confirmation',
+  ] as const) {
+    const boundary = routeRenderingBoundaryForRoute(route);
+
+    assert.equal(boundary.mountsBottomNavigation, true);
+    assert.equal(boundary.mainScrollMode, 'document');
+  }
+});
+
 test('keeps route rendering policy outside App.tsx branch helpers', () => {
   const source = fs.readFileSync('src/App.tsx', 'utf8');
 
