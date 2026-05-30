@@ -70,7 +70,7 @@ export function BottomNavigation({
       icon: 'reply',
       centerX: 62,
       iconLeft: 22,
-      iconTop: 25.217,
+      iconTop: 8.86,
       iconWidth: 39.144,
       iconHeight: 34.255,
     },
