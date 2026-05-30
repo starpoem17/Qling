@@ -77,6 +77,16 @@ test('write reply textarea starts at the visual placeholder position', () => {
   assert.doesNotMatch(html, /pt-\[63px\]/);
 });
 
+test('write reply screen uses Figma canvas positions without legacy scroll-bottom spacing', () => {
+  const html = renderToStaticMarkup(WriteFormScreen(baseProps()));
+
+  assert.match(html, /top-\[227px\]/);
+  assert.match(html, /h-\[434px\]/);
+  assert.match(html, /top-\[684px\]/);
+  assert.doesNotMatch(html, /100dvh-var\(--qling-space-scroll-bottom\)/);
+  assert.doesNotMatch(html, /mt-6 flex h-12 w-\[267px\]/);
+});
+
 test('write reply screen forwards back, overlay, draft, close, and publish events without route objects', () => {
   const events: string[] = [];
   const tree = WriteFormScreen(baseProps({

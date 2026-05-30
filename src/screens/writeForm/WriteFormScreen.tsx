@@ -8,22 +8,22 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
     : undefined;
 
   return (
-    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 min-h-[calc(100dvh-var(--qling-space-scroll-bottom))] bg-[#fff1d1] px-4 pb-6 pt-6 text-[#2a2a2a]">
-      <div className="relative h-[95px]">
+    <div className="relative h-full bg-[#fff1d1] text-[#2a2a2a]">
+      <div className="absolute left-0 top-0 h-[127px] w-full">
         <button
           type="button"
           onClick={props.onBack}
           aria-label="답변하기로 돌아가기"
-          className="absolute left-[1px] top-[28px] flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-[#fff5eb] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
+          className="absolute left-4 top-[50px] flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-[#fff5eb] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
-        <h1 className="absolute left-1/2 top-[39px] -translate-x-1/2 text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] text-[#2a2a2a]">
+        <h1 className="absolute left-1/2 top-[69px] -translate-x-1/2 text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] text-[#2a2a2a]">
           답변 작성
         </h1>
       </div>
 
-      <section className="relative h-[103px] w-full overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
+      <section className="absolute left-4 right-4 top-[127px] h-[79px] overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
         <div className="absolute left-[18px] top-[11px]">
           <ReplyCategoryChip label={props.originalWorry.category} />
         </div>
@@ -41,14 +41,14 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           aria-label="원문 보기"
           className="group absolute inset-0 text-left focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
         >
-          <span className="absolute left-[19px] top-[44px] w-[325px] break-words text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
+          <span className="absolute left-[19px] right-8 top-[44px] truncate text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
             {props.originalWorry.summaryText.length > 45 ? props.originalWorry.summaryText.replace(/\n/g, ' ').slice(0, 45).trim() + '...' : props.originalWorry.summaryText}
           </span>
           <ChevronDown className="absolute right-[17px] top-[17px] h-6 w-6 text-[#2a2a2a] transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
         </button>
       </section>
 
-      <label className="relative mt-[17px] block h-[414px] overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]">
+      <label className="absolute left-5 right-5 top-[227px] block h-[434px] overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]">
         <span className="sr-only">답변 작성</span>
         <textarea
           value={props.draft.value}
@@ -88,7 +88,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           deliveryId: props.originalWorry.deliveryId,
           worryId: props.originalWorry.worryId,
         })}
-        className="mx-auto mt-6 flex h-12 w-[267px] items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold leading-5 text-[#fff5eb] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-1/2 top-[684px] flex h-12 w-[267px] -translate-x-1/2 items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold leading-5 text-[#fff5eb] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
       >
         답변 전송
       </button>

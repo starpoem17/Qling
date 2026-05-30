@@ -265,7 +265,7 @@ export default function App() {
   const currentAnswerCheckRoute = typeof view === 'object' && view.route === 'answer_check' ? view : null;
 
   useEffect(() => {
-    if (currentRoute !== 'write_worry') return;
+    if (currentRoute !== 'write_worry' && currentRoute !== 'write_reply') return;
 
     const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     const root = document.getElementById('root');
@@ -319,8 +319,8 @@ export default function App() {
       )}
       hasBottomNavigation={routeBoundary.mountsBottomNavigation}
       mainClassName={cn(
-        currentRoute === 'write_worry'
-          ? 'qling-write-worry-main'
+        currentRoute === 'write_worry' || currentRoute === 'write_reply'
+          ? 'qling-write-form-main'
           : [
             routeBoundary.routeGroup === 'onboarding flow' ? "pt-12" : "pt-6",
             routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto',
