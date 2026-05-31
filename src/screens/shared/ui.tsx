@@ -266,20 +266,20 @@ export function FigmaTopBar({
         onClick={onBack}
         aria-label={backLabel}
         className={cn(
-          'absolute left-2 top-10 h-[54px] w-11 rounded-full transition-colors focus:outline-none focus:ring-2',
+          'absolute left-[14px] top-[49px] h-[44px] w-[28px] rounded-full transition-colors focus:outline-none focus:ring-2',
           hoverClassName,
         )}
       >
         <span
           aria-hidden="true"
-          className={cn('absolute left-[14px] top-[10px] text-[32px] font-semibold leading-none', textClassName)}
+          className={cn('absolute left-[8px] top-0 font-["Qling_Figma_Inter"] text-[32px] font-semibold leading-[38px]', textClassName)}
         >
           ‹
         </span>
       </button>
       <h1
         aria-label={titleAriaLabel}
-        className={cn('absolute left-0 top-[60px] w-full whitespace-nowrap text-center text-[17px] font-extrabold leading-[21px] tracking-[-0.34px]', textClassName)}
+        className={cn('absolute left-0 top-[60px] w-full whitespace-nowrap text-center text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] font-sans', textClassName)}
       >
         {title}
       </h1>

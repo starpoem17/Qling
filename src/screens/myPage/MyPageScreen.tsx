@@ -1,14 +1,6 @@
-import { Heart } from 'lucide-react';
 import {
-  CategoryChip,
-  ContentSheet,
   FigmaTopBar,
-  LoadingState,
-  PolicyTextContainer,
-  PrimaryCTA,
-  QlingCard,
   QlingDialog,
-  SettingsRow,
   profileImageUrlForColor,
 } from '../shared/ui';
 import type {
@@ -53,78 +45,83 @@ const editInterestsFigmaOrder = [
 export function MyPageScreen(props: MyPageScreenProps) {
   const isLogoutProcessing = props.logoutConfirmation.isProcessing;
   const isAccountDeletionProcessing = props.accountDeletionConfirmation.isProcessing;
+  const previewItems = props.answerPreviewItems.slice(0, 2);
+  const hasMultiplePreviewItems = previewItems.length >= 2;
+  const answerSectionBottom = hasMultiplePreviewItems ? 486 : 388;
+  const settingsHeadingTop = hasMultiplePreviewItems ? 511 : 426;
+  const settingsCardTop = hasMultiplePreviewItems ? 544 : 459;
+  const myPageCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 
   return (
-    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 min-h-full bg-[#ff8b0d] px-5 pb-8 pt-[132px] text-[#1a1a1e]">
-      <FigmaTopBar title="마이페이지" onBack={props.onBack} backLabel="이전 화면으로 돌아가기" tone="light" />
+    <section
+      aria-label="마이페이지"
+      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-safe-bottom)] -mt-6 h-full min-h-[calc(100dvh-var(--qling-space-nav-height))] overflow-y-auto overflow-x-hidden bg-[#ff8b3d] text-[#1a1a1e] [-webkit-overflow-scrolling:touch]"
+    >
+      <div
+        className="mx-auto flex w-full max-w-[480px] justify-center"
+        data-measure="my-page-responsive-canvas"
+        style={{ minHeight: `calc(min(100vw, var(--qling-mobile-canvas-max-width)) * 756 / 393)` }}
+      >
+        <div
+          className="relative h-[756px] w-[393px] shrink-0 origin-top bg-[#ff8b3d] font-sans"
+          data-measure="my-page-screen"
+          style={{ transform: `scale(${myPageCanvasScale})` }}
+        >
+          <FigmaTopBar title="마이페이지" onBack={props.onBack} backLabel="이전 화면으로 돌아가기" tone="light" />
 
-      <QlingCard className="mx-auto flex h-[93px] max-w-[353px] items-center gap-[19px] rounded-[24px] border-0 px-[17px] py-[14px]">
-        <DefaultProfileImage label={props.profile.profileMotif.label} profileColor={props.profile.profileMotif.profileColor} />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h2 className="truncate text-[18px] font-extrabold leading-[22px] text-[#1a1a1e]">{props.profile.nickname}</h2>
-              <p className="mt-[7px] flex min-w-0 items-center gap-[6px] text-[11px] font-medium leading-[14px] text-[#7a7a7e]">
-                <Heart className="h-[14px] w-[14px] shrink-0 fill-[#ea4335] text-[#ea4335]" aria-hidden="true" />
-                <span className="shrink-0 text-[13px] font-bold leading-4 text-[#1a1a1e]">{props.profile.helpedCount}</span>
-                <span className="ml-[18px] truncate">{props.profile.helpedCountLabel}</span>
-              </p>
-            </div>
+          <section className="absolute left-5 top-[132px] h-[93px] w-[353px] overflow-hidden rounded-[24px] bg-white" data-measure="my-page-profile-card">
+            <DefaultProfileImage label={props.profile.profileMotif.label} profileColor={props.profile.profileMotif.profileColor} />
+            <h2 className="absolute left-[100px] top-[23px] max-w-[128px] truncate text-[18px] font-extrabold leading-[22px] tracking-[-0.18px] text-[#1a1a1e]">
+              {props.profile.nickname}
+            </h2>
+            <span className="absolute left-[100px] top-[53px] font-['Qling_Figma_Inter'] text-[14px] font-bold leading-[17px] text-[#ea4335]" aria-hidden="true">♥</span>
+            <span className="absolute left-[116px] top-[54px] max-w-[28px] truncate text-[13px] font-bold leading-4 tracking-[-0.39px] text-[#1a1a1e]">
+              {props.profile.helpedCount}
+            </span>
+            <span className="absolute left-[147px] top-[56px] text-[11px] font-bold leading-[14px] tracking-[-0.33px] text-[#7a7a7e]">
+              {props.profile.helpedCountLabel}
+            </span>
             <button
               type="button"
               onClick={props.onEditInterests}
-              className="shrink-0 pt-[3px] text-xs font-medium leading-[15px] text-[#7a7a7e]"
+              className="absolute left-[256px] top-[26px] whitespace-nowrap text-[12px] font-bold leading-[15px] tracking-[-0.36px] text-[#7a7a7e] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
               aria-label="관심 분야 수정으로 이동"
             >
               관심분야 수정 &gt;
             </button>
-          </div>
-        </div>
-      </QlingCard>
+          </section>
 
-      <section className="mx-auto mt-[45px] max-w-[353px] space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="truncate text-base font-extrabold leading-5 text-white">내가 쓴 답변</h2>
+          <h2 className="absolute left-6 top-[270px] text-[16px] font-extrabold leading-5 tracking-[-0.16px] text-white">내가 쓴 답변</h2>
           <button
             type="button"
             onClick={props.onOpenMyAnswers}
-            className="shrink-0 text-[13px] font-medium leading-4 text-white"
+            className="absolute left-[312px] top-[274px] whitespace-nowrap text-[13px] font-bold leading-4 text-white/90 focus:outline-none focus:ring-2 focus:ring-white"
             aria-label="내가 쓴 답변 전체보기"
           >
             전체보기 ›
           </button>
-        </div>
-        {props.answerPreviewItems.length === 0 ? (
-          <EmptyAnswerPreviewCard />
-        ) : props.answerPreviewItems.slice(0, 2).map(item => (
-          <AnswerPreviewCard key={item.replyId} item={item} />
-        ))}
-      </section>
+          <section className="absolute left-5 w-[353px]" style={{ top: 302, height: answerSectionBottom - 302 }} data-measure="my-page-answer-preview">
+            {previewItems.length === 0 ? (
+              <EmptyAnswerPreviewCard />
+            ) : previewItems.map((item, index) => (
+              <AnswerPreviewCard key={item.replyId} item={item} top={index * 98} />
+            ))}
+          </section>
 
-      <section className="mx-auto mt-[25px] max-w-[353px] space-y-3">
-        <h2 className="truncate text-base font-extrabold leading-5 text-white">설정</h2>
-        <ContentSheet className="h-[192px] overflow-hidden rounded-[18px] p-0">
-        {props.settings.map((item, index) => item === 'push_notifications' ? (
-          <PushToggleRow key={item} pushSettings={props.pushSettings} />
-        ) : (
-          <SettingsRow
-            key={item}
-            label={settingLabels[item]}
-            leadingIcon={<SettingIcon item={item} />}
-            description={undefined}
-            danger={item === 'delete_account'}
-            disabled={(item === 'logout' && isLogoutProcessing) || (item === 'delete_account' && isAccountDeletionProcessing)}
-            accessibilityLabel={`${settingLabels[item]}으로 이동`}
-            showDivider={index < props.settings.length - 1}
-            onSelect={() => props.onSettingSelect(item)}
+          <h2 className="absolute left-5 text-[16px] font-extrabold leading-5 tracking-[-0.16px] text-white" style={{ top: settingsHeadingTop }}>설정</h2>
+          <SettingsCard
+            top={settingsCardTop}
+            settings={props.settings}
+            pushSettings={props.pushSettings}
+            isLogoutProcessing={isLogoutProcessing}
+            isAccountDeletionProcessing={isAccountDeletionProcessing}
+            onSettingSelect={props.onSettingSelect}
           />
-        ))}
-        </ContentSheet>
-      </section>
-
+        </div>
+      </div>
       <ConfirmationDialog title="로그아웃할까요?" description="이 기기에서 Qling 계정 연결을 해제합니다." confirmLabel="로그아웃" confirmation={props.logoutConfirmation} />
       <ConfirmationDialog title="계정을 삭제할까요?" description="계정 삭제는 되돌릴 수 없습니다. 작성한 고민과 답변 접근도 함께 중단됩니다." confirmLabel="계정 삭제" confirmation={props.accountDeletionConfirmation} destructive />
-    </div>
+    </section>
   );
 }
 
@@ -133,34 +130,102 @@ function DefaultProfileImage({ label, profileColor }: { readonly label: string; 
     <img
       src={profileImageUrlForColor(profileColor)}
       alt={label}
-      className="h-16 w-16 shrink-0 rounded-full"
+      className="absolute left-[27px] top-5 h-[58px] w-[58px] rounded-full"
       draggable={false}
     />
   );
 }
 
-function AnswerPreviewCard({ item }: { readonly item: MyPageScreenProps['answerPreviewItems'][number] }) {
+function AnswerPreviewCard({ item, top }: { readonly item: MyPageScreenProps['answerPreviewItems'][number]; readonly top: number }) {
   return (
-    <QlingCard className="h-[86px] space-y-[11px] overflow-hidden rounded-[18px] border-0 px-[18px] py-4">
-      <div className="flex min-w-0 items-center gap-2 text-xs font-bold">
+    <article className="absolute left-0 h-[86px] w-[353px] overflow-hidden rounded-[18px] bg-white" style={{ top }} aria-label={item.accessibilityLabel}>
+      <div className="absolute left-[18px] top-4 flex h-[22px] min-w-0 items-center gap-2 text-xs font-bold">
         {item.categoryLabel && (
-          <span className="max-w-[90px] truncate rounded-[var(--qling-radius-pill)] bg-[#ffe4cc] px-[11px] py-1 text-[#ff8b3d]">{item.categoryLabel}</span>
+          <span className="flex h-[22px] max-w-[90px] items-center rounded-[999px] bg-[#ffe4cc] px-[10.5px] font-['Qling_Figma_Inter'] text-[11px] font-bold leading-[13px] text-[#c45614]">{item.categoryLabel}</span>
         )}
-        {item.dateLabel && <span className="min-w-0 truncate text-[#9a9aa0]">{item.dateLabel}</span>}
-        {item.hasReceivedHeart && <Heart className="ml-auto h-4 w-4 shrink-0 fill-[#ea4335] text-[#ea4335]" aria-hidden="true" />}
+        {item.dateLabel && <span className="min-w-0 truncate font-['Qling_Figma_Inter'] text-[12px] font-bold leading-[15px] text-[#9a9aa0]">{item.dateLabel}</span>}
       </div>
-      <p className="line-clamp-2 break-words text-[13px] font-semibold leading-[19px] text-[#1a1a1e]">
+      <p className="absolute left-[18px] top-[49px] line-clamp-2 h-9 w-[305px] break-words text-[13px] font-semibold leading-[1.45] tracking-[-0.52px] text-[#1a1a1e]">
         "{item.previewText}"
       </p>
-    </QlingCard>
+    </article>
   );
 }
 
 function EmptyAnswerPreviewCard() {
   return (
-    <QlingCard className="flex h-[86px] items-center rounded-[18px] border-0 px-[18px] py-4">
-      <p className="truncate text-[13px] font-semibold leading-[19px] text-[#1a1a1e]">첫 답변을 남겨보세요!</p>
-    </QlingCard>
+    <article className="absolute left-0 top-0 h-[86px] w-[353px] overflow-hidden rounded-[18px] bg-white" data-measure="my-page-empty-answer-preview">
+      <p className="absolute left-[18px] top-[35px] h-9 w-[305px] break-words text-[13px] font-semibold leading-[1.45] tracking-[-0.52px] text-[#1a1a1e]">
+        답변하기 탭에서 따뜻한 첫 답변을 남겨보세요
+      </p>
+    </article>
+  );
+}
+
+function SettingsCard({
+  top,
+  settings,
+  pushSettings,
+  isLogoutProcessing,
+  isAccountDeletionProcessing,
+  onSettingSelect,
+}: {
+  readonly top: number;
+  readonly settings: readonly MyPageSettingItem[];
+  readonly pushSettings: MyPageScreenProps['pushSettings'];
+  readonly isLogoutProcessing: boolean;
+  readonly isAccountDeletionProcessing: boolean;
+  readonly onSettingSelect: (item: MyPageSettingItem) => void;
+}) {
+  const enabledSettings = new Set(settings);
+
+  return (
+    <section className="absolute left-5 h-[192px] w-[353px] overflow-hidden rounded-[18px] bg-white" style={{ top }} data-measure="my-page-settings-card">
+      {enabledSettings.has('push_notifications') && <PushToggleRow pushSettings={pushSettings} />}
+      <div className="absolute left-6 top-12 h-px w-[305px] bg-[#f0f0f2]" />
+      {enabledSettings.has('privacy_policy') && (
+        <SettingsActionRow item="privacy_policy" top={48} onSettingSelect={onSettingSelect} />
+      )}
+      <div className="absolute left-6 top-24 h-px w-[305px] bg-[#f0f0f2]" />
+      {enabledSettings.has('logout') && (
+        <SettingsActionRow item="logout" top={96} disabled={isLogoutProcessing} onSettingSelect={onSettingSelect} />
+      )}
+      <div className="absolute left-6 top-36 h-px w-[305px] bg-[#f0f0f2]" />
+      {enabledSettings.has('delete_account') && (
+        <SettingsActionRow item="delete_account" top={144} disabled={isAccountDeletionProcessing} onSettingSelect={onSettingSelect} />
+      )}
+    </section>
+  );
+}
+
+function SettingsActionRow({
+  item,
+  top,
+  disabled,
+  onSettingSelect,
+}: {
+  readonly item: Exclude<MyPageSettingItem, 'push_notifications'>;
+  readonly top: number;
+  readonly disabled?: boolean;
+  readonly onSettingSelect: (item: MyPageSettingItem) => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={`${settingLabels[item]}으로 이동`}
+      disabled={disabled}
+      onClick={() => onSettingSelect(item)}
+      className="absolute left-0 h-12 w-full disabled:cursor-not-allowed disabled:opacity-55 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset"
+      style={{ top }}
+    >
+      <span className="absolute left-5 top-3 h-6 w-6" aria-hidden="true">
+        <SettingIcon item={item} />
+      </span>
+      <span className={`absolute left-14 top-[15px] text-[15px] font-semibold leading-[18px] tracking-[-0.6px] ${item === 'delete_account' ? 'text-[#ea4335]' : 'text-[#1a1a1e]'}`}>
+        {settingLabels[item]}
+      </span>
+      <span className="absolute left-[323px] top-[15px] text-[18px] font-semibold leading-[18px] text-[#c2c4c8]" aria-hidden="true">›</span>
+    </button>
   );
 }
 
@@ -170,13 +235,11 @@ function PushToggleRow({ pushSettings }: { readonly pushSettings: MyPageScreenPr
   };
 
   return (
-    <div className="flex h-12 w-full items-center justify-between gap-3 border-b border-[var(--qling-color-border)] px-5 py-3 text-left">
-      <span className="flex min-w-0 items-center gap-3">
+    <div className="absolute left-0 top-0 h-12 w-full text-left">
+      <span className="absolute left-5 top-3 h-6 w-6" aria-hidden="true">
         <SettingIcon item="push_notifications" />
-        <span className="min-w-0">
-          <span className="block truncate text-[15px] font-semibold leading-[22px] text-[#1a1a1e]">{settingLabels.push_notifications}</span>
-        </span>
       </span>
+      <span className="absolute left-14 top-[15px] text-[15px] font-semibold leading-[18px] tracking-[-0.6px] text-[#1a1a1e]">{settingLabels.push_notifications}</span>
       <button
         type="button"
         role="switch"
@@ -184,11 +247,11 @@ function PushToggleRow({ pushSettings }: { readonly pushSettings: MyPageScreenPr
         aria-label="알림 설정 토글"
         onClick={handleToggleClick}
         disabled={pushSettings.status === 'unsupported'}
-        className={`relative h-[31px] w-[51px] shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] disabled:opacity-50 ${pushSettings.enabled ? 'bg-[#34c759]' : 'bg-[#d8d8dc]'}`}
+        className={`absolute left-[288px] top-[9px] h-[31px] w-[51px] rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] disabled:opacity-50 ${pushSettings.enabled ? 'bg-[#34c759]' : 'bg-[#d8d8dc]'}`}
       >
         <span
           aria-hidden="true"
-          className={`absolute top-0.5 h-[27px] w-[27px] rounded-full bg-white shadow-[0_1px_2px_rgb(0_0_0/0.18)] transition-[left,right] ${pushSettings.enabled ? 'right-0.5' : 'left-0.5'}`}
+          className={`absolute top-0.5 h-[27px] w-[27px] rounded-full bg-white shadow-[0_3px_8px_rgb(0_0_0/0.15),0_3px_1px_rgb(0_0_0/0.06)] transition-[left,right] ${pushSettings.enabled ? 'right-0.5' : 'left-0.5'}`}
         />
       </button>
     </div>

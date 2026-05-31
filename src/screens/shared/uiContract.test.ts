@@ -101,6 +101,16 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.doesNotMatch(source, /fixed bottom-0 left-0 right-0/);
 });
 
+test('figma top bar keeps the shared Figma back and title coordinates', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+
+  assert.match(source, /data-measure="figma-top-bar"/);
+  assert.match(source, /left-\[14px\] top-\[49px\] h-\[44px\] w-\[28px\]/);
+  assert.match(source, /text-\[32px\] font-semibold leading-\[38px\]/);
+  assert.match(source, /top-\[60px\] w-full whitespace-nowrap text-center text-\[17px\]/);
+  assert.match(source, /tracking-\[-0\.34px\]/);
+});
+
 test('profile motif remains visual-only without avatar data requirements', () => {
   const props = {
     label: 'Profile motif',

@@ -89,15 +89,19 @@ test('my-page renders colored profile svg at the existing profile image size', (
   assert.match(html, /data:image\/svg\+xml/);
   assert.match(decodeURIComponent(html), /fill="#FF8B3D"/);
   assert.match(html, /alt="프로필 모티프"/);
-  assert.match(html, /class="h-16 w-16 shrink-0 rounded-full"/);
+  assert.match(html, /h-\[58px\] w-\[58px\]/);
   assert.doesNotMatch(html, /aria-label="프로필 모티프" role="img"/);
 });
 
-test('my-page root uses parent shell height instead of creating document scroll', () => {
+test('my-page root uses a scaled Figma canvas with internal vertical scroll', () => {
   const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps()));
 
-  assert.match(html, /min-h-full/);
-  assert.doesNotMatch(html, /100dvh-var\(--qling-space-scroll-bottom\)/);
+  assert.match(html, /overflow-y-auto/);
+  assert.match(html, /data-measure="my-page-responsive-canvas"/);
+  assert.match(html, /data-measure="my-page-screen"/);
+  assert.match(html, /h-\[756px\] w-\[393px\]/);
+  assert.match(html, /scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.doesNotMatch(html, /home-indicator/);
 });
 
 test('my-page empty answer preview renders a single non-interactive Figma card without metadata', () => {
@@ -105,11 +109,53 @@ test('my-page empty answer preview renders a single non-interactive Figma card w
     answerPreviewItems: [],
   })));
 
-  assert.match(html, /첫 답변을 남겨보세요!/);
+  assert.match(html, /답변하기 탭에서 따뜻한 첫 답변을 남겨보세요/);
   assert.match(html, /h-\[86px\]/);
-  assert.doesNotMatch(html, /아직 내가 보낸 위로가 없어요/);
+  assert.match(html, /data-measure="my-page-empty-answer-preview"/);
   assert.doesNotMatch(html, /자존감|2026\.05\.02|카테고리/);
   assert.doesNotMatch(html, /aria-label="내가 쓴 답변,/);
+});
+
+test('my-page renders one real answer preview without the preview heart icon', () => {
+  const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps()));
+
+  assert.match(html, /누구나 그런 시기가 있는 것 같아요/);
+  assert.match(html, /2026\.05\.02/);
+  assert.match(html, /text-\[#c45614\]/);
+  assert.doesNotMatch(html, /h-4 w-4 shrink-0 fill-\[#ea4335\]/);
+});
+
+test('my-page renders at most two answer previews and moves settings to the two-card Figma position', () => {
+  const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps({
+    answerPreviewItems: [
+      ...baseMyPageProps().answerPreviewItems,
+      {
+        replyId: 'reply-2',
+        deliveryId: 'delivery-2',
+        worryId: 'worry-2',
+        previewText: '자신이 무엇을 좋아하는지 천천히 찾아가는 과정도 의미 있어요.',
+        originalWorryPreview: '진로를 정하기 어려워요.',
+        categoryLabel: '진로',
+        dateLabel: '2026.05.03',
+        hasReceivedHeart: false,
+        accessibilityLabel: '내가 쓴 답변, 카테고리 진로, 피드백 없음',
+      },
+      {
+        replyId: 'reply-3',
+        previewText: '세 번째 답변은 preview에 표시되지 않아야 해요.',
+        originalWorryPreview: '세 번째 고민',
+        categoryLabel: '학업',
+        dateLabel: '2026.05.04',
+        hasReceivedHeart: false,
+        accessibilityLabel: '내가 쓴 답변, 카테고리 학업, 피드백 없음',
+      },
+    ],
+  })));
+
+  assert.match(html, /누구나 그런 시기가 있는 것 같아요/);
+  assert.match(html, /자신이 무엇을 좋아하는지 천천히 찾아가는 과정도/);
+  assert.doesNotMatch(html, /세 번째 답변은 preview에 표시되지 않아야 해요/);
+  assert.match(html, /style="top:544px"/);
 });
 
 test('my-page hides push helper and status copy while keeping the accessible switch state', () => {

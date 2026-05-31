@@ -38,12 +38,7 @@ test('MyPageScreen uses shared Phase 14 primitives without browser global URL re
 
   assert.equal(source.includes("from '../shared/ui'"), true);
   for (const primitive of [
-    'SettingsRow',
-    'PolicyTextContainer',
-    'CategoryChip',
     'QlingDialog',
-    'PrimaryCTA',
-    'LoadingState',
   ]) {
     assert.match(source, new RegExp(primitive));
   }
