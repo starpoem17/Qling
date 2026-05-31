@@ -1,4 +1,4 @@
-import type { KeyboardEvent, MouseEvent, TouchEvent, WheelEvent } from 'react';
+import type { KeyboardEvent, MouseEvent, TouchEvent, UIEvent, WheelEvent } from 'react';
 import type { CSSProperties } from 'react';
 import {
   EmptyState,
@@ -7,7 +7,7 @@ import {
 } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import { QlingPeekHeader } from '../shared/QlingPeekHeader';
-import { useScrollPeekHeader } from '../shared/scrollPeekHeader';
+import { armPeekHeaderScrollAfterLayout, isPeekHeaderScrollReady, useScrollPeekHeader } from '../shared/scrollPeekHeader';
 import type { ReceivedWorriesScreenProps } from './contract';
 
 export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
@@ -16,7 +16,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
   const scrollPeekHeader = useScrollPeekHeader();
-  const contentClassName = 'qling-received-worries-font h-[836px] overflow-y-auto rounded-t-[32px] bg-[#fff1d1] px-4 pt-5 transform-gpu [-webkit-overflow-scrolling:touch]';
+  const contentClassName = 'qling-received-worries-font h-[836px] touch-none overscroll-none overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5 transform-gpu';
   const loadingContentClassName = 'qling-received-worries-font h-[752px] touch-none overscroll-none overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5';
   const contentStyle = {
     '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
@@ -56,7 +56,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
             {header}
-            <section className={contentClassName} data-header-state="expanded" style={contentStyle} onScroll={scrollPeekHeader.onScroll} onTouchStart={scrollPeekHeader.onTouchStart} onTouchMove={scrollPeekHeader.onTouchMove} onTouchEnd={scrollPeekHeader.onTouchEnd} onWheel={scrollPeekHeader.onWheel}>
+            <section ref={armPeekHeaderScrollAfterLayout} className={contentClassName} data-header-state="expanded" style={contentStyle} onScroll={event => handleReadyScroll(event, scrollPeekHeader.onScroll)} onTouchStart={event => handleReadyTouchStart(event, scrollPeekHeader.onTouchStart)} onTouchMove={event => handleReadyTouchMove(event, scrollPeekHeader.onTouchMove)} onTouchEnd={event => handleReadyTouchEnd(event, scrollPeekHeader.onTouchEnd)} onWheel={event => handleReadyWheel(event, scrollPeekHeader.onWheel)}>
               <ErrorState title="답변 피드를 불러오지 못했어요" message={props.state.message} />
             </section>
           </div>
@@ -71,7 +71,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
             {header}
-            <section className={contentClassName} data-header-state="expanded" style={contentStyle} onScroll={scrollPeekHeader.onScroll} onTouchStart={scrollPeekHeader.onTouchStart} onTouchMove={scrollPeekHeader.onTouchMove} onTouchEnd={scrollPeekHeader.onTouchEnd} onWheel={scrollPeekHeader.onWheel}>
+            <section ref={armPeekHeaderScrollAfterLayout} className={contentClassName} data-header-state="expanded" style={contentStyle} onScroll={event => handleReadyScroll(event, scrollPeekHeader.onScroll)} onTouchStart={event => handleReadyTouchStart(event, scrollPeekHeader.onTouchStart)} onTouchMove={event => handleReadyTouchMove(event, scrollPeekHeader.onTouchMove)} onTouchEnd={event => handleReadyTouchEnd(event, scrollPeekHeader.onTouchEnd)} onWheel={event => handleReadyWheel(event, scrollPeekHeader.onWheel)}>
               <EmptyState title={props.state.message} />
             </section>
           </div>
@@ -86,15 +86,16 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
         <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
           {header}
           <section
+            ref={armPeekHeaderScrollAfterLayout}
             className={`${contentClassName} pb-[calc(108px+env(safe-area-inset-bottom,0px))]`}
             data-header-state="expanded"
             style={contentStyle}
             aria-label="받은 고민 목록"
-            onScroll={scrollPeekHeader.onScroll}
-            onTouchStart={scrollPeekHeader.onTouchStart}
-            onTouchMove={scrollPeekHeader.onTouchMove}
-            onTouchEnd={scrollPeekHeader.onTouchEnd}
-            onWheel={scrollPeekHeader.onWheel}
+            onScroll={event => handleReadyScroll(event, scrollPeekHeader.onScroll)}
+            onTouchStart={event => handleReadyTouchStart(event, scrollPeekHeader.onTouchStart)}
+            onTouchMove={event => handleReadyTouchMove(event, scrollPeekHeader.onTouchMove)}
+            onTouchEnd={event => handleReadyTouchEnd(event, scrollPeekHeader.onTouchEnd)}
+            onWheel={event => handleReadyWheel(event, scrollPeekHeader.onWheel)}
           >
             <div className="grid gap-[14px]">
               {props.items.map(item => {
@@ -166,4 +167,35 @@ function blockLoadingScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLElem
   const { preventDefault, stopPropagation } = event;
   preventDefault.call(event);
   stopPropagation.call(event);
+}
+
+function handleReadyScroll(event: UIEvent<HTMLElement>, handler: (event: UIEvent<HTMLElement>) => void) {
+  if (!isPeekHeaderScrollReady(event.currentTarget)) return;
+  handler(event);
+}
+
+function handleReadyTouchStart(event: TouchEvent<HTMLElement>, handler: (event: TouchEvent<HTMLElement>) => void) {
+  if (!isPeekHeaderScrollReady(event.currentTarget)) return;
+  handler(event);
+}
+
+function handleReadyTouchMove(event: TouchEvent<HTMLElement>, handler: (event: TouchEvent<HTMLElement>) => void) {
+  if (!isPeekHeaderScrollReady(event.currentTarget)) {
+    blockLoadingScroll(event);
+    return;
+  }
+  handler(event);
+}
+
+function handleReadyTouchEnd(event: TouchEvent<HTMLElement>, handler: (event: TouchEvent<HTMLElement>) => void) {
+  if (!isPeekHeaderScrollReady(event.currentTarget)) return;
+  handler(event);
+}
+
+function handleReadyWheel(event: WheelEvent<HTMLElement>, handler: (event: WheelEvent<HTMLElement>) => void) {
+  if (!isPeekHeaderScrollReady(event.currentTarget)) {
+    blockLoadingScroll(event);
+    return;
+  }
+  handler(event);
 }
