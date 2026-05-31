@@ -1,7 +1,11 @@
-import { Pencil, Send } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { FigmaTopBar } from '../shared/ui';
 import type { WriteWorryScreenProps } from './contract';
+
+const writeWorryCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+const sendButtonTop = `min(684px, calc((100dvh - var(--qling-space-nav-height)) / (${writeWorryCanvasScale}) - 88px))`;
+const inputAreaHeight = `min(541px, max(240px, calc(${sendButtonTop} - 143px)))`;
 
 export function WriteWorryScreen(props: WriteWorryScreenProps) {
   const isDisabled = Boolean(props.draft.submitDisabledReason);
@@ -17,10 +21,18 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
   const showVisualPlaceholder = props.draft.value.trim().length === 0;
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col bg-[#fff1d1] px-5 pb-4 text-[#2a2a2a]">
-      {FigmaTopBar({ title: '고민 작성', onBack: props.onBack, backLabel: '나의 고민으로 돌아가기' })}
+    <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
+      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+        <div
+          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1]"
+          style={{ transform: `scale(${writeWorryCanvasScale})` }}
+        >
+      {FigmaTopBar({ title: '질문 작성', onBack: props.onBack, backLabel: '나의 고민으로 돌아가기' })}
 
-      <section className="absolute left-5 right-5 top-[120px] h-[541px] rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]">
+      <section
+        className="absolute left-5 top-[120px] w-[353px] rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
+        style={{ height: inputAreaHeight }}
+      >
         <label className="relative block h-full">
           <span className="sr-only">고민 내용</span>
           <textarea
@@ -31,18 +43,18 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
             aria-describedby="write-worry-counter"
             onChange={event => props.onDraftChange(event.currentTarget.value)}
             className={cn(
-              'box-border h-full w-full resize-none rounded-[18px] border-0 bg-transparent px-6 pb-12 pt-[22px] text-base font-medium leading-6 tracking-[-0.04em] text-[#2a2a2a] outline-none disabled:cursor-not-allowed disabled:opacity-60',
+              'box-border h-full w-full resize-none rounded-[18px] border-0 bg-transparent pb-12 pl-[16.5px] pr-[11.5px] pt-[17.5px] text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a] outline-none disabled:cursor-not-allowed disabled:opacity-60',
               validationMessage && 'ring-2 ring-[var(--qling-color-danger)]',
             )}
           />
           {showVisualPlaceholder && (
             <div
-              className="pointer-events-none absolute left-6 top-[22px] flex items-center gap-2 text-[#b8b8b8]"
+              className="pointer-events-none absolute left-[22.5px] top-[20.5px] flex items-center text-[#b8b8b8]"
               data-testid="write-worry-visual-placeholder"
               aria-hidden="true"
             >
               <Pencil className="h-5 w-5" data-testid="write-worry-pencil" aria-hidden="true" />
-              <span className="text-base font-medium leading-6 tracking-[-0.04em]">당신의 솔직한 이야기를 들려주세요</span>
+              <span className="ml-2 text-[16px] font-bold leading-6 tracking-[-0.64px]">당신의 솔직한 이야기를 들려주세요</span>
             </div>
           )}
           <div
@@ -61,9 +73,9 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
         aria-busy={props.draft.isProcessing || undefined}
         disabled={isDisabled || props.draft.isProcessing}
         onClick={props.onPublish}
-        className="absolute left-1/2 top-[684px] inline-flex h-12 w-[267px] -translate-x-1/2 items-center justify-center gap-2 rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-1/2 inline-flex h-12 w-[267px] -translate-x-1/2 items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-[16px] font-extrabold leading-normal text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
+        style={{ top: sendButtonTop }}
       >
-        <Send className="h-5 w-5" aria-hidden="true" />
         고민 전송
       </button>
 
@@ -99,6 +111,8 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
           </section>
         </div>
       )}
-    </div>
+        </div>
+      </div>
+    </section>
   );
 }
