@@ -1,16 +1,15 @@
 import { MessageCircle, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '../../lib/utils';
-import { ErrorState, FigmaTopBar, LoadingState, QlingCard, QlingTextArea, PrimaryCTA, SecondaryCTA } from '../shared/ui';
+import { ErrorState, FigmaTopBar, QlingCard, QlingTextArea, PrimaryCTA, SecondaryCTA } from '../shared/ui';
 import type { AnswerCheckReplyProps, AnswerCheckScreenProps } from './contract';
+
+const activeIndicatorUrl = new URL('../../../assets/loading/figma-progress-active.svg', import.meta.url).href;
+const trackUrl = new URL('../../../assets/loading/figma-progress-track.svg', import.meta.url).href;
 
 export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
   if (props.state.status === 'loading') {
-    return (
-      <AnswerCheckFrame onBack={props.onBack}>
-        <LoadingState title={props.state.label} />
-      </AnswerCheckFrame>
-    );
+    return <AnswerCheckLoadingScreen label={props.state.label} onBack={props.onBack} />;
   }
 
   if (props.state.status === 'error') {
@@ -95,6 +94,58 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
         </div>
       )}
     </AnswerCheckFrame>
+  );
+}
+
+function AnswerCheckLoadingScreen({ label, onBack }: { readonly label: string; readonly onBack: () => void }) {
+  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+
+  return (
+    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
+      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+        <div
+          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1]"
+          style={{ transform: `scale(${canvasScale})` }}
+        >
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="나의 고민으로 돌아가기"
+            className="absolute left-[14px] top-[49px] z-20 h-[44px] w-[28px] rounded-full transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-[#2a2a2a]"
+          >
+            <span
+              aria-hidden="true"
+              className="absolute left-[8px] top-0 font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-[38px] text-black"
+            >
+              ‹
+            </span>
+          </button>
+          <h1 className="absolute left-0 top-[60px] z-10 w-full whitespace-nowrap text-center font-sans text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] text-[#2a2a2a]">
+            답변 확인
+          </h1>
+          <span
+            role="status"
+            aria-live="polite"
+            className="absolute left-[177px] top-[406px] h-10 w-10"
+            data-testid="answer-check-figma-loading-indicator"
+          >
+            <span className="block h-full w-full animate-spin" aria-hidden="true">
+              <span className="absolute flex inset-[52.65%_0.66%_0.02%_63.31%] items-center justify-center">
+                <span className="block h-[11.6075px] w-[17.1763px] rotate-[100deg]">
+                  <img alt="" className="block h-full w-full" src={activeIndicatorUrl} draggable={false} />
+                </span>
+              </span>
+              <span className="absolute flex inset-[-7.83%_-5.34%_-7.56%_-7.84%] items-center justify-center">
+                <span className="block h-[38.9169px] w-[40.0038px] rotate-[100deg]">
+                  <img alt="" className="block h-full w-full" src={trackUrl} draggable={false} />
+                </span>
+              </span>
+            </span>
+            <span className="sr-only">{label}</span>
+          </span>
+        </div>
+      </div>
+    </section>
   );
 }
 

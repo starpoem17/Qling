@@ -58,6 +58,24 @@ test('answer check renders one worry and multiple answer cards', () => {
   assert.match(html, /두 번째 답변 본문/);
 });
 
+test('answer check loading state matches the Figma loading shell', () => {
+  const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
+    state: { status: 'loading', label: '답변을 불러오고 있습니다.' },
+  })));
+
+  assert.match(html, /답변 확인/);
+  assert.match(html, /aria-label="나의 고민으로 돌아가기"/);
+  assert.match(html, /role="status"/);
+  assert.match(html, /aria-live="polite"/);
+  assert.match(html, /data-testid="answer-check-figma-loading-indicator"/);
+  assert.match(html, /답변을 불러오고 있습니다\./);
+  assert.match(html, /figma-progress-active\.svg/);
+  assert.match(html, /figma-progress-track\.svg/);
+  assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#fff1d1\]/);
+  assert.match(html, /left-\[177px\] top-\[406px\] h-10 w-10/);
+  assert.doesNotMatch(html, /flex min-h-48 flex-col items-center justify-center rounded-\[var\(--qling-radius-card\)\]/);
+});
+
 test('zero replies state shows only my worry without empty copy', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({ replies: [] })));
 
