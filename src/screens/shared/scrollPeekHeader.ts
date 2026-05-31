@@ -1,7 +1,5 @@
 import type { TouchEvent, UIEvent, WheelEvent } from 'react';
 
-const DEFAULT_SCROLL_THRESHOLD_PX = 6;
-
 export type PeekHeaderScrollState = {
   collapsed: boolean;
   lastScrollTop: number;
@@ -19,31 +17,12 @@ export const initialPeekHeaderScrollState: PeekHeaderScrollState = {
 export function nextPeekHeaderScrollState(
   state: PeekHeaderScrollState,
   scrollTop: number,
-  threshold = DEFAULT_SCROLL_THRESHOLD_PX,
 ): PeekHeaderScrollState {
   const nextScrollTop = Math.max(0, scrollTop);
   if (nextScrollTop === 0) return initialPeekHeaderScrollState;
 
   const delta = nextScrollTop - state.lastScrollTop;
   if (delta === 0) return state;
-
-  if (delta < 0 && !state.canReveal) {
-    return {
-      ...state,
-      lastScrollTop: nextScrollTop,
-      accumulatedDelta: 0,
-    };
-  }
-
-  const sameDirection = Math.sign(delta) === Math.sign(state.accumulatedDelta);
-  const accumulatedDelta = sameDirection ? state.accumulatedDelta + delta : delta;
-  if (Math.abs(accumulatedDelta) < threshold) {
-    return {
-      ...state,
-      lastScrollTop: nextScrollTop,
-      accumulatedDelta,
-    };
-  }
 
   return {
     collapsed: delta > 0,
@@ -80,13 +59,8 @@ function handlePeekHeaderScroll(event: UIEvent<HTMLElement>) {
 
 function handlePeekHeaderWheel(event: WheelEvent<HTMLElement>) {
   const scroller = event.currentTarget;
-  if (event.deltaY < 0) {
-    allowReveal(scroller);
-    revealAtScrollTop(scroller);
-    return;
-  }
-
-  if (event.deltaY > 0) preventReveal(scroller);
+  if (event.deltaY === 0) return;
+  setPeekHeaderCollapsed(scroller, event.deltaY > 0);
 }
 
 function handlePeekHeaderTouchStart(event: TouchEvent<HTMLElement>) {
@@ -103,13 +77,8 @@ function handlePeekHeaderTouchMove(event: TouchEvent<HTMLElement>) {
   const previousY = Number(scroller.dataset.qlingPeekHeaderTouchY ?? touch.clientY);
   scroller.dataset.qlingPeekHeaderTouchY = String(touch.clientY);
 
-  if (touch.clientY > previousY) {
-    allowReveal(scroller);
-    revealAtScrollTop(scroller);
-    return;
-  }
-
-  if (touch.clientY < previousY) preventReveal(scroller);
+  if (touch.clientY === previousY) return;
+  setPeekHeaderCollapsed(scroller, touch.clientY < previousY);
 }
 
 function readScrollState(element: HTMLElement): PeekHeaderScrollState {
@@ -139,18 +108,20 @@ function applyPeekHeaderState(scroller: HTMLElement, isCollapsed: boolean) {
   scroller.classList.toggle('h-[752px]', !isCollapsed);
 }
 
-function allowReveal(element: HTMLElement) {
-  element.dataset.qlingPeekHeaderCanReveal = 'true';
-}
+function setPeekHeaderCollapsed(scroller: HTMLElement, isCollapsed: boolean) {
+  const currentState = readScrollState(scroller);
+  const nextState: PeekHeaderScrollState = {
+    collapsed: isCollapsed,
+    lastScrollTop: scroller.scrollTop,
+    accumulatedDelta: 0,
+    canReveal: false,
+  };
 
-function preventReveal(element: HTMLElement) {
-  element.dataset.qlingPeekHeaderCanReveal = 'false';
-}
+  if (currentState.collapsed === nextState.collapsed) {
+    writeScrollState(scroller, nextState);
+    return;
+  }
 
-function revealAtScrollTop(scroller: HTMLElement) {
-  if (scroller.scrollTop !== 0) return;
-  if (scroller.dataset.qlingPeekHeaderCollapsed !== 'true') return;
-
-  writeScrollState(scroller, initialPeekHeaderScrollState);
-  applyPeekHeaderState(scroller, false);
+  writeScrollState(scroller, nextState);
+  applyPeekHeaderState(scroller, nextState.collapsed);
 }
