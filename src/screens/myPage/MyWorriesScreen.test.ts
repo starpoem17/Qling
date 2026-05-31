@@ -81,6 +81,14 @@ test('my worries screen actions match PRD entry points', () => {
   assert.equal(openedWrite, true);
 });
 
+test('my worries write button stays outside the transformed full-bleed scroll wrapper', () => {
+  const html = renderToStaticMarkup(MyWorriesScreen(baseProps()));
+
+  assert.match(html, /-translate-x-1\/2 bg-\[#ff8b3d\]/);
+  assert.match(html, /<\/section><\/div><button[^>]+고민 작성 화면으로 이동/);
+  assert.match(html, /fixed bottom-\[calc\(var\(--qling-space-nav-height\)\+29\.5px\)\]/);
+});
+
 test('my worries my-page button aligns to the Figma header icon position', () => {
   const tree = MyWorriesScreen(baseProps());
 

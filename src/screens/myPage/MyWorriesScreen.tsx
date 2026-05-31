@@ -61,61 +61,63 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
   );
 
   return (
-    <div className={screenClassName}>
-      {header}
+    <>
+      <div className={screenClassName}>
+        {header}
 
-      {props.state.status === 'loading' ? (
-        <section className={`relative ${contentClassName}`}>
-          <FigmaTabLoading label={props.state.label} />
-        </section>
-      ) : props.state.status === 'error' ? (
-        <section className={contentClassName}>
-          <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
-        </section>
-      ) : props.state.status === 'empty' ? (
-        <section className={contentClassName}>
-          <EmptyState title={props.state.message} />
-        </section>
-      ) : (
-        <section
-          className={`${contentClassName} pb-4`}
-          aria-label="나의 고민 목록"
-        >
-          <div className="grid gap-[14px]">
-          {props.items.map(worry => (
-            <button
-              key={worry.worryId}
-              type="button"
-              aria-label={worry.accessibilityLabel}
-              onClick={() => props.onSelectWorryForAnswers(worry)}
-              className="w-full rounded-[18px] text-left transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
-            >
-              <QlingCard className="relative h-[168px] overflow-hidden rounded-[18px] border-0 bg-white px-[18px] pb-0 pt-[11px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="inline-flex shrink-0 items-start overflow-hidden rounded-[var(--qling-radius-pill)] bg-[#ffe4cc] px-3 py-[5px] text-[11px] font-bold leading-normal text-[#ff8b3d]">
-                    {worry.categoryLabel}
-                  </span>
-                  {worry.createdAtLabel && (
-                    <time className="text-[12px] font-semibold leading-[23px] text-[#b8b8b8]">
-                      {worry.createdAtLabel}
-                    </time>
-                  )}
-                </div>
-                <p className="mt-[21px] line-clamp-2 whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 text-[#2a2a2a]">
-                  {worry.summaryText}
-                </p>
-                <div className="absolute bottom-[23px] left-[18px] flex items-center gap-1.5 text-[12px] font-medium text-[#7a7a7a]">
-                  <Heart className="h-3.5 w-3.5 fill-[#ff8b3d] text-[#ff8b3d]" aria-hidden="true" />
-                  <span>{worry.replyCountLabel}</span>
-                </div>
-              </QlingCard>
-            </button>
-          ))}
-          </div>
-        </section>
-      )}
+        {props.state.status === 'loading' ? (
+          <section className={`relative ${contentClassName}`}>
+            <FigmaTabLoading label={props.state.label} />
+          </section>
+        ) : props.state.status === 'error' ? (
+          <section className={contentClassName}>
+            <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
+          </section>
+        ) : props.state.status === 'empty' ? (
+          <section className={contentClassName}>
+            <EmptyState title={props.state.message} />
+          </section>
+        ) : (
+          <section
+            className={`${contentClassName} pb-4`}
+            aria-label="나의 고민 목록"
+          >
+            <div className="grid gap-[14px]">
+            {props.items.map(worry => (
+              <button
+                key={worry.worryId}
+                type="button"
+                aria-label={worry.accessibilityLabel}
+                onClick={() => props.onSelectWorryForAnswers(worry)}
+                className="w-full rounded-[18px] text-left transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
+              >
+                <QlingCard className="relative h-[168px] overflow-hidden rounded-[18px] border-0 bg-white px-[18px] pb-0 pt-[11px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="inline-flex shrink-0 items-start overflow-hidden rounded-[var(--qling-radius-pill)] bg-[#ffe4cc] px-3 py-[5px] text-[11px] font-bold leading-normal text-[#ff8b3d]">
+                      {worry.categoryLabel}
+                    </span>
+                    {worry.createdAtLabel && (
+                      <time className="text-[12px] font-semibold leading-[23px] text-[#b8b8b8]">
+                        {worry.createdAtLabel}
+                      </time>
+                    )}
+                  </div>
+                  <p className="mt-[21px] line-clamp-2 whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 text-[#2a2a2a]">
+                    {worry.summaryText}
+                  </p>
+                  <div className="absolute bottom-[23px] left-[18px] flex items-center gap-1.5 text-[12px] font-medium text-[#7a7a7a]">
+                    <Heart className="h-3.5 w-3.5 fill-[#ff8b3d] text-[#ff8b3d]" aria-hidden="true" />
+                    <span>{worry.replyCountLabel}</span>
+                  </div>
+                </QlingCard>
+              </button>
+            ))}
+            </div>
+          </section>
+        )}
+      </div>
 
       {writeButton}
-    </div>
+    </>
   );
 }
