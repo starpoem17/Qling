@@ -131,14 +131,15 @@ export function routeRenderingBoundaryForRoute(view: AppRouteViewState): RouteRe
   const currentRoute = routeName(view);
   const authenticatedTab = tabForRoute(view);
   const routeGroup = routeRenderingGroupForRoute(currentRoute);
+  const isEditInterestsFixedCanvas = currentRoute === 'edit_interests';
 
   return {
     currentRoute,
     routeGroup,
     authenticatedTab,
     mountsAuthenticatedShell: routeGroup !== 'login/splash/loading' && routeGroup !== 'onboarding flow',
-    mountsBottomNavigation: routeGroup !== 'login/splash/loading' && routeGroup !== 'onboarding flow',
-    mainScrollMode: routeGroup !== 'login/splash/loading' && routeGroup !== 'onboarding flow' ? 'document' : 'route',
+    mountsBottomNavigation: routeGroup !== 'login/splash/loading' && routeGroup !== 'onboarding flow' && !isEditInterestsFixedCanvas,
+    mainScrollMode: routeGroup !== 'login/splash/loading' && routeGroup !== 'onboarding flow' && !isEditInterestsFixedCanvas ? 'document' : 'route',
   };
 }
 

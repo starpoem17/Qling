@@ -92,8 +92,8 @@ test('identifies authenticated shell membership separately from route-specific g
     routeGroup: 'my-page/account',
     authenticatedTab: null,
     mountsAuthenticatedShell: true,
-    mountsBottomNavigation: true,
-    mainScrollMode: 'document',
+    mountsBottomNavigation: false,
+    mainScrollMode: 'route',
   });
   assert.deepEqual(routeRenderingBoundaryForRoute('순위'), {
     currentRoute: '순위',
@@ -117,6 +117,7 @@ test('keeps document scrolling as route rendering policy so flex bottom navigati
   assert.equal(routeRenderingBoundaryForRoute('received_worries').mainScrollMode, 'document');
   assert.equal(routeRenderingBoundaryForRoute('my_worries').mainScrollMode, 'document');
   assert.equal(routeRenderingBoundaryForRoute('ranking').mainScrollMode, 'document');
+  assert.equal(routeRenderingBoundaryForRoute('edit_interests').mainScrollMode, 'route');
   assert.equal(routeRenderingBoundaryForRoute('login').mainScrollMode, 'route');
   assert.equal(routeRenderingBoundaryForRoute('onboarding').mainScrollMode, 'route');
 });
@@ -125,10 +126,11 @@ test('locks App main scrolling for fixed-canvas routes', () => {
   const source = fs.readFileSync('src/App.tsx', 'utf8');
 
   assert.match(source, /routeBoundary\.mainScrollMode === 'document' && 'overflow-y-auto'/);
-  assert.match(source, /currentRoute === '순위' \|\| currentRoute === 'ranking' \|\| currentRoute === 'privacy_policy' \|\| currentRoute === '마이페이지' \|\| currentRoute === 'my_page'[\s\S]*\? 'overflow-hidden'/);
+  assert.match(source, /currentRoute === '순위' \|\| currentRoute === 'ranking' \|\| currentRoute === 'privacy_policy' \|\| currentRoute === '마이페이지' \|\| currentRoute === 'my_page' \|\| currentRoute === 'edit_interests'[\s\S]*\? 'overflow-hidden'/);
+  assert.match(source, /currentRoute === 'edit_interests' \? 'pb-0' : undefined/);
   assert.ok(
     source.indexOf("routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto'")
-      < source.indexOf("currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page'"),
+      < source.indexOf("currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page' || currentRoute === 'edit_interests'"),
   );
 });
 
@@ -157,6 +159,9 @@ test('keeps every bottom-navigation route on the content scroll policy', () => {
     assert.equal(boundary.mountsBottomNavigation, true);
     assert.equal(boundary.mainScrollMode, 'document');
   }
+
+  assert.equal(routeRenderingBoundaryForRoute('edit_interests').mountsBottomNavigation, false);
+  assert.equal(routeRenderingBoundaryForRoute('edit_interests').mainScrollMode, 'route');
 });
 
 test('keeps route rendering policy outside App.tsx branch helpers', () => {
