@@ -10,7 +10,7 @@ type QlingPeekHeaderProps = {
 export function QlingPeekHeader(props: QlingPeekHeaderProps) {
   return (
     <header
-      className={`${props.isCollapsed ? 'h-[32px]' : 'h-[100px]'} overflow-hidden bg-[#ff8b3d] transition-[height] duration-[180ms] ease-out motion-reduce:transition-none`}
+      className={`${props.isCollapsed ? 'h-[16px]' : 'h-[100px]'} overflow-hidden bg-[#ff8b3d] transition-[height] duration-[320ms] ease-in-out motion-reduce:transition-none`}
       data-header-state={props.isCollapsed ? 'collapsed' : 'expanded'}
     >
       <div className="relative mx-auto h-[100px] w-full max-w-[393px]">
