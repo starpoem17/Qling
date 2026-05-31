@@ -113,7 +113,9 @@ test('my worries loading state renders the Figma spinner status without visible 
   assert.match(html, /left-1\/2 top-\[306px\] h-10 w-10/);
   assert.match(html, /작성한 고민을 불러오고 있습니다\./);
   assert.doesNotMatch(html, /나의 고민을 불러오는 중/);
+  assert.match(html, /left-1\/2 -mt-6 min-h-full w-\[100dvw\] max-w-\[var\(--qling-mobile-canvas-max-width\)\] -translate-x-1\/2 bg-\[#ff8b3d\]/);
   assert.match(html, /bg-\[#ff8b3d\]/);
+  assert.doesNotMatch(html, /-mx-\[var\(--qling-space-shell-x\)\]/);
   assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
 });
 

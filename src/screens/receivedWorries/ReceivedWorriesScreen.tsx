@@ -10,9 +10,11 @@ import type { ReceivedWorriesScreenProps } from './contract';
 
 export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   const passingDeliveryIds = new Set(props.passingDeliveryIds);
+  const screenClassName = 'relative left-1/2 -mt-6 min-h-full w-[100dvw] max-w-[var(--qling-mobile-canvas-max-width)] -translate-x-1/2 bg-[#ff8b3d]';
+  const contentClassName = 'qling-received-worries-font min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5';
 
   const header = (
-    <header className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[100px] bg-[#ff8b3d]">
+    <header className="h-[100px] bg-[#ff8b3d]">
       <div className="relative mx-auto h-full w-full max-w-[393px]">
         <div
           role="presentation"
@@ -50,9 +52,9 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
 
   if (props.state.status === 'loading') {
     return (
-      <div className="min-h-full bg-[#ff8b3d]">
+      <div className={screenClassName}>
         {header}
-        <section className="qling-received-worries-font relative -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
+        <section className={`relative ${contentClassName}`}>
           <FigmaTabLoading label={props.state.label} />
         </section>
       </div>
@@ -61,9 +63,9 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
 
   if (props.state.status === 'error') {
     return (
-      <div className="min-h-full bg-[#ff8b3d]">
+      <div className={screenClassName}>
         {header}
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
+        <section className={contentClassName}>
           <ErrorState title="답변 피드를 불러오지 못했어요" message={props.state.message} />
         </section>
       </div>
@@ -72,9 +74,9 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
 
   if (props.state.status === 'empty') {
     return (
-      <div className="min-h-full bg-[#ff8b3d]">
+      <div className={screenClassName}>
         {header}
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
+        <section className={contentClassName}>
           <EmptyState title={props.state.message} />
         </section>
       </div>
@@ -82,10 +84,10 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   }
 
   return (
-    <div className="min-h-full bg-[#ff8b3d]">
+    <div className={screenClassName}>
       {header}
       <section
-        className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pb-4 pt-5"
+        className={`${contentClassName} pb-4`}
         aria-label="받은 고민 목록"
       >
         <div className="grid gap-[14px]">

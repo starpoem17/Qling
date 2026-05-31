@@ -117,9 +117,11 @@ test('received-worries loading state renders the Figma spinner status without vi
   assert.match(html, /답변할 고민을 불러오는 중이에요\./);
   assert.doesNotMatch(html, /고민을 불러오고 있어요/);
   assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
+  assert.match(html, /left-1\/2 -mt-6 min-h-full w-\[100dvw\] max-w-\[var\(--qling-mobile-canvas-max-width\)\] -translate-x-1\/2 bg-\[#ff8b3d\]/);
   assert.match(html, /h-\[100px\]/);
   assert.match(html, /bg-\[#ff8b3d\]/);
   assert.match(html, /min-h-\[calc\(100dvh-180px\)\]/);
+  assert.doesNotMatch(html, /-mx-\[var\(--qling-space-shell-x\)\]/);
   assert.doesNotMatch(html, /100dvh-120px-var\(--qling-space-nav-height\)/);
   assert.doesNotMatch(html, /100dvh-120px-var\(--qling-space-scroll-bottom\)/);
 });

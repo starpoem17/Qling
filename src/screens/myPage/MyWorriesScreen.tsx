@@ -8,8 +8,11 @@ import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import type { MyWorriesScreenProps } from './contract';
 
 export function MyWorriesScreen(props: MyWorriesScreenProps) {
+  const screenClassName = 'relative left-1/2 -mt-6 min-h-full w-[100dvw] max-w-[var(--qling-mobile-canvas-max-width)] -translate-x-1/2 bg-[#ff8b3d]';
+  const contentClassName = 'qling-received-worries-font min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5';
+
   const header = (
-    <header className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[100px] bg-[#ff8b3d]">
+    <header className="h-[100px] bg-[#ff8b3d]">
       <div className="relative mx-auto h-full w-full max-w-[393px]">
         <div
           role="presentation"
@@ -58,24 +61,24 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
   );
 
   return (
-    <div className="min-h-full bg-[#ff8b3d]">
+    <div className={screenClassName}>
       {header}
 
       {props.state.status === 'loading' ? (
-        <section className="qling-received-worries-font relative -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
+        <section className={`relative ${contentClassName}`}>
           <FigmaTabLoading label={props.state.label} />
         </section>
       ) : props.state.status === 'error' ? (
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
+        <section className={contentClassName}>
           <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
         </section>
       ) : props.state.status === 'empty' ? (
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
+        <section className={contentClassName}>
           <EmptyState title={props.state.message} />
         </section>
       ) : (
         <section
-          className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pb-4 pt-5"
+          className={`${contentClassName} pb-4`}
           aria-label="나의 고민 목록"
         >
           <div className="grid gap-[14px]">
