@@ -73,9 +73,14 @@ test('app ranking route wrapper preserves full shell height for iPhone clipping 
 test('top ranking avatars and crowns are present in static markup', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
 
+  assert.match(html, /class="absolute left-0 top-0 z-10 h-\[406px\] w-\[393px\] text-center text-white" data-measure="ranking-top-first"/);
+  assert.match(html, /class="absolute left-0 top-0 z-10 h-\[406px\] w-\[393px\] text-center text-white" data-measure="ranking-top-second"/);
+  assert.match(html, /class="absolute left-0 top-0 z-10 h-\[406px\] w-\[393px\] text-center text-white" data-measure="ranking-top-third"/);
   assert.match(html, /data-measure="ranking-profile-first"/);
   assert.match(html, /data-measure="ranking-profile-second"/);
   assert.match(html, /data-measure="ranking-profile-third"/);
+  assert.match(html, /absolute block max-w-none left-\[177px\] top-\[170px\] h-6 w-\[42px\]/);
+  assert.match(html, /absolute max-w-none rounded-full left-\[163px\] top-\[200px\] h-\[69px\] w-\[69px\]/);
   assert.match(html, /crown-first\.svg/);
   assert.match(html, /crown-second\.svg/);
   assert.match(html, /crown-third\.svg/);

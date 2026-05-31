@@ -232,13 +232,13 @@ function TopRank({
   const item = layout[place];
 
   return (
-    <div className="absolute left-0 top-0 z-10 text-center text-white" data-measure={`ranking-top-${place}`}>
+    <div className="absolute left-0 top-0 z-10 h-[406px] w-[393px] text-center text-white" data-measure={`ranking-top-${place}`}>
       <div className={cn('absolute rounded-[50%] bg-[#b35a1c]/35 blur-[0.2px]', item.shadow)} />
-      <img src={item.crownUrl} alt="" className={cn('absolute block', item.crown)} />
+      <img src={item.crownUrl} alt="" className={cn('absolute block max-w-none', item.crown)} />
       <img
         src={profileImageUrlForColor(entry.profileColor)}
         alt=""
-        className={cn('absolute rounded-full', item.avatar)}
+        className={cn('absolute max-w-none rounded-full', item.avatar)}
         data-measure={`ranking-profile-${place}`}
       />
       <div className={cn('absolute truncate font-bold font-["Qling_Noto_Sans_KR"]', item.name)}>{entry.nickname || '-'}</div>
