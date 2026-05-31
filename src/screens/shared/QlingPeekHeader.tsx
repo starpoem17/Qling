@@ -1,5 +1,6 @@
 import { CircleUserRound } from 'lucide-react';
 import type { CSSProperties } from 'react';
+import type { TouchEvent, WheelEvent } from 'react';
 
 type QlingPeekHeaderProps = {
   isCollapsed: boolean;
@@ -15,9 +16,11 @@ export function QlingPeekHeader(props: QlingPeekHeaderProps) {
 
   return (
     <header
-      className="h-[100px] overflow-hidden bg-[#ff8b3d]"
+      className="h-[100px] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
       data-header-state={props.isCollapsed ? 'collapsed' : 'expanded'}
       style={headerStyle}
+      onTouchMove={blockHeaderScroll}
+      onWheel={blockHeaderScroll}
     >
       <div
         data-qling-peek-header-content="true"
@@ -58,4 +61,10 @@ export function QlingPeekHeader(props: QlingPeekHeaderProps) {
       </div>
     </header>
   );
+}
+
+function blockHeaderScroll(event: TouchEvent<HTMLElement> | WheelEvent<HTMLElement>) {
+  const { preventDefault, stopPropagation } = event;
+  preventDefault.call(event);
+  stopPropagation.call(event);
 }

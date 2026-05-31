@@ -148,6 +148,7 @@ test('peek header renders fixed wrapper and transform-driven content', () => {
 
   assert.match(expanded, /h-\[100px\]/);
   assert.doesNotMatch(collapsed, /h-\[16px\]/);
+  assert.match(expanded, /touch-none overscroll-none overflow-hidden/);
   assert.match(collapsed, /overflow-hidden/);
   assert.match(expanded, /--qling-peek-progress:0/);
   assert.match(collapsed, /--qling-peek-progress:1/);
@@ -156,6 +157,16 @@ test('peek header renders fixed wrapper and transform-driven content', () => {
   assert.match(expanded, /aria-label="마이페이지 열기"/);
   assert.match(expanded, /role="presentation"/);
   assert.match(expanded, /aria-hidden="true"/);
+});
+
+test('peek header blocks header-started scroll gestures without changing my-page click', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src/screens/shared/QlingPeekHeader.tsx'), 'utf8');
+
+  assert.match(source, /onTouchMove=\{blockHeaderScroll\}/);
+  assert.match(source, /onWheel=\{blockHeaderScroll\}/);
+  assert.match(source, /preventDefault\.call\(event\)/);
+  assert.match(source, /stopPropagation\.call\(event\)/);
+  assert.match(source, /onClick=\{props\.onOpenMyPage\}/);
 });
 
 test('peek header screens use transform layout without scroll-time height transitions', () => {
