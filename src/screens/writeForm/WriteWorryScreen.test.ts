@@ -125,7 +125,8 @@ test('write worry screen reflects validation disabled state and moderation copy'
   assert.match(rejectedHtml, /개인정보가 포함되어 있어요\./);
   assert.match(rejectedHtml, /연락처는 지워주세요\./);
   assert.match(failedHtml, /전송 실패: network down/);
-  assert.match(checkingHtml, /AI 안심 필터가 내용을 확인하고 있습니다\./);
+  assert.doesNotMatch(checkingHtml, /AI 안심 필터가 내용을 확인하고 있습니다\./);
+  assert.doesNotMatch(checkingHtml, /role="alertdialog"/);
 });
 
 test('write worry popup confirm hides only the popup element', () => {
