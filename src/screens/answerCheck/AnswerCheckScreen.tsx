@@ -273,7 +273,7 @@ function FeedbackAction({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'inline-flex items-center justify-center rounded-full transition-colors hover:bg-[#fff1d1] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] disabled:cursor-not-allowed disabled:opacity-45',
+        'inline-flex items-center justify-center rounded-full transition-colors hover:bg-[#fff1d1] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] disabled:cursor-not-allowed',
         className,
       )}
     >

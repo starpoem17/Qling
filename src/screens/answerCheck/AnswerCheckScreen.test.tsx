@@ -141,6 +141,7 @@ test('screen exposes separate like dislike and comment actions', () => {
   assert.match(html, /my_concerns\/bad\.svg/);
   assert.match(html, /my_concerns\/comment\.svg/);
   assert.match(html, /my_concerns\/comment_activate\.svg/);
+  assert.doesNotMatch(html, /disabled:opacity-45/);
   assert.doesNotMatch(html, /rotate-180/);
   assert.doesNotMatch(html, /sepia saturate|hue-rotate/);
 });
