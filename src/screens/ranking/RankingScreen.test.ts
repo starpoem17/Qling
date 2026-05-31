@@ -106,6 +106,7 @@ test('ranking text preserves Figma font weights after class merging', () => {
 
 test('top ranking avatars and crowns are present in static markup', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
 
   assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[406px\] w-\[393px\] text-center text-white" data-measure="ranking-top-first"/);
   assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[406px\] w-\[393px\] text-center text-white" data-measure="ranking-top-second"/);
@@ -124,6 +125,34 @@ test('top ranking avatars and crowns are present in static markup', () => {
   assert.match(html, /crown-second\.svg/);
   assert.match(html, /crown-third\.svg/);
   assert.doesNotMatch(html, /bg-\[#b35a1c\]\/35/);
+  assert.match(source, /left-6 top-\[13px\] h-\[67px\] w-\[108px\] rounded-t-\[16px\] bg-white\/20/);
+  assert.match(source, /left-\[261px\] top-7 h-\[52px\] w-\[108px\] rounded-t-\[16px\] bg-white\/20/);
+});
+
+test('empty second and third podium slots keep only ellipses', () => {
+  const rankings = period();
+  const entries = rankings.entries.filter(item => item.rank !== 2 && item.rank !== 3);
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps({
+    state: {
+      status: 'ready',
+      monthly: { ...rankings, entries },
+      total: { ...rankings, entries },
+      season: {
+        monthLabel: '5월 시즌',
+        daysUntilMonthEnd: 1,
+      },
+    },
+  })));
+
+  assert.match(html, /data-measure="ranking-profile-first"/);
+  assert.doesNotMatch(html, /data-measure="ranking-profile-second"/);
+  assert.doesNotMatch(html, /data-measure="ranking-profile-third"/);
+  assert.match(html, /absolute block max-w-none left-\[55px\] top-\[269px\] h-\[18px\] w-\[42px\]/);
+  assert.match(html, /absolute block max-w-none left-\[294px\] top-\[284px\] h-\[18px\] w-\[42px\]/);
+  assert.doesNotMatch(html, /crown-second\.svg/);
+  assert.doesNotMatch(html, /crown-third\.svg/);
+  assert.doesNotMatch(html, />User 2</);
+  assert.doesNotMatch(html, />User 3</);
 });
 
 test('profile image generation recolors only the shared default profile background', () => {
@@ -139,6 +168,7 @@ test('viewer rank card stays above the shell bottom navigation on shorter iPhone
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
 
   assert.match(html, /aria-label="내 순위 24위"/);
+  assert.doesNotMatch(html, /chevron-right\.svg/);
   assert.doesNotMatch(html, /top-\[693px\]/);
   assert.match(html, /top:min\(693px, calc\(\(100dvh - var\(--qling-space-nav-height\) - 79px\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\)\)/);
 });

@@ -2,7 +2,6 @@ import { CircleUserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
-import { DEFAULT_PROFILE_COLOR } from '../../lib/profileColor';
 import { ErrorState, profileImageUrlForColor } from '../shared/ui';
 import type {
   RankingDisplayEntry,
@@ -27,7 +26,6 @@ const rankingAssetUrlByName = {
   heartLight: new URL('../../../assets/ranking/heart-white.svg', import.meta.url).href,
   rankUp: new URL('../../../assets/ranking/rank-up.svg', import.meta.url).href,
   rankDown: new URL('../../../assets/ranking/rank-down.svg', import.meta.url).href,
-  chevronRight: new URL('../../../assets/ranking/chevron-right.svg', import.meta.url).href,
 } as const;
 
 export function RankingScreen(props: RankingScreenProps) {
@@ -189,13 +187,13 @@ function SegmentedControl({
 }
 
 function TopRankings({ period }: { readonly period: RankingDisplayPeriod }) {
-  const topEntries = [1, 2, 3].map(rank => period.entries.find(entry => entry.rank === rank) ?? emptyEntry(rank));
+  const topEntries = [1, 2, 3].map(rank => period.entries.find(entry => entry.rank === rank) ?? null);
 
   return (
     <>
-      <TopRank entry={topEntries[0]} place="first" />
-      <TopRank entry={topEntries[1]} place="second" />
-      <TopRank entry={topEntries[2]} place="third" />
+      <TopRank entry={topEntries[0] ?? null} place="first" />
+      <TopRank entry={topEntries[1] ?? null} place="second" />
+      <TopRank entry={topEntries[2] ?? null} place="third" />
       <Podium topOffset={326} />
     </>
   );
@@ -205,7 +203,7 @@ function TopRank({
   entry,
   place,
 }: {
-  readonly entry: RankingDisplayEntry;
+  readonly entry: RankingDisplayEntry | null;
   readonly place: 'first' | 'second' | 'third';
 }) {
   const layout = {
@@ -242,15 +240,19 @@ function TopRank({
   return (
     <div className="pointer-events-none absolute left-0 top-0 z-10 h-[406px] w-[393px] text-center text-white" data-measure={`ranking-top-${place}`}>
       <img src={item.ellipseUrl} alt="" aria-hidden="true" className={cn('absolute block max-w-none', item.ellipse)} />
-      <img src={item.crownUrl} alt="" className={cn('absolute block max-w-none', item.crown)} />
-      <img
-        src={profileImageUrlForColor(entry.profileColor)}
-        alt=""
-        className={cn('absolute max-w-none rounded-full', item.avatar)}
-        data-measure={`ranking-profile-${place}`}
-      />
-      <div className={cn('absolute truncate font-bold', item.name)} style={qlingNotoSansKrStyle}>{entry.nickname || '-'}</div>
-      <HeartCount className={cn('absolute text-white', item.hearts)} heartCount={entry.heartCount} size="small" tone="light" />
+      {entry && (
+        <>
+          <img src={item.crownUrl} alt="" className={cn('absolute block max-w-none', item.crown)} />
+          <img
+            src={profileImageUrlForColor(entry.profileColor)}
+            alt=""
+            className={cn('absolute max-w-none rounded-full', item.avatar)}
+            data-measure={`ranking-profile-${place}`}
+          />
+          <div className={cn('absolute truncate font-bold', item.name)} style={qlingNotoSansKrStyle}>{entry.nickname || '-'}</div>
+          <HeartCount className={cn('absolute text-white', item.hearts)} heartCount={entry.heartCount} size="small" tone="light" />
+        </>
+      )}
     </div>
   );
 }
@@ -356,7 +358,6 @@ function ViewerRankCard({
       </span>
       <HeartCount className="shrink-0 text-[#191f28]" heartCount={viewer.heartCount} />
       <RankDelta value={viewer.rankDelta} compact />
-      <img src={rankingAssetUrlByName.chevronRight} alt="" className="h-[10px] w-[5px] shrink-0" aria-hidden="true" />
     </div>
   );
 }
@@ -425,17 +426,4 @@ function LoadingSpinner() {
       <span className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-[#ff8b3d] border-r-[#ff8b3d]" />
     </div>
   );
-}
-
-function emptyEntry(rank: number): RankingDisplayEntry {
-  return {
-    rank,
-    uid: `empty-${rank}`,
-    nickname: '-',
-    heartCount: 0,
-    profileColor: DEFAULT_PROFILE_COLOR,
-    replyCount: 0,
-    adoptedCount: 0,
-    rankDelta: 0,
-  };
 }
