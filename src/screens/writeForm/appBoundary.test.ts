@@ -30,8 +30,8 @@ test('App.tsx gives write-form routes their own main canvas and iOS chrome color
   assert.match(appSource, /themeMeta\?\.setAttribute\('content', '#fff1d1'\)/);
   assert.match(appSource, /document\.body\.style\.backgroundColor = '#fff1d1'/);
   assert.match(appSource, /root\.style\.backgroundColor = '#fff1d1'/);
-  assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*overflow-y: auto;/);
+  assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*overflow: hidden;/);
   assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*overscroll-behavior: contain;/);
   assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*-webkit-overflow-scrolling: touch;/);
-  assert.doesNotMatch(cssSource, /\.qling-write-form-main\s*\{[^}]*overflow: hidden;/);
+  assert.doesNotMatch(cssSource, /\.qling-write-form-main\s*\{[^}]*overflow-y: auto;/);
 });

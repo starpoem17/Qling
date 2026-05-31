@@ -3,7 +3,6 @@ import { FigmaTopBar } from '../shared/ui';
 import type { WriteFormScreenProps } from './contract';
 
 const writeCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
-const writeCanvasMinHeight = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) * 852 / 393)';
 const sendButtonTop = `min(684px, calc((100dvh - var(--qling-space-nav-height)) / (${writeCanvasScale}) - 88px))`;
 const inputAreaHeight = `min(434px, max(240px, calc(${sendButtonTop} - 250px)))`;
 
@@ -14,14 +13,8 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
     : undefined;
 
   return (
-    <section
-      className="h-full min-h-0 overflow-hidden bg-[#fff1d1] text-[#2a2a2a]"
-      style={{ minHeight: writeCanvasMinHeight }}
-    >
-      <div
-        className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"
-        style={{ minHeight: writeCanvasMinHeight }}
-      >
+    <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
+      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
         <div
           className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1]"
           style={{ transform: `scale(${writeCanvasScale})` }}
