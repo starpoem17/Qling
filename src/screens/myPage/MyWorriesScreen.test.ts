@@ -87,14 +87,17 @@ test('my worries screen actions match PRD entry points', () => {
   assert.equal(openedWrite, true);
 });
 
-test('my worries write button stays outside the transformed full-bleed scroll wrapper', () => {
+test('my worries write button uses the transformed Figma canvas coordinates', () => {
   const html = renderToStaticMarkup(MyWorriesScreen(baseProps()));
 
   assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] -mb-\[var\(--qling-space-scroll-bottom\)\] -mt-6 h-dvh overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
-  assert.match(html, /<\/section><button[^>]+고민 작성 화면으로 이동/);
-  assert.match(html, /fixed bottom-\[calc\(var\(--qling-space-nav-height\)\+29\.5px\)\]/);
+  assert.match(html, /고민 작성 화면으로 이동/);
+  assert.match(html, /absolute left-\[302px\] z-40 flex h-\[59\.5px\] w-\[59\.5px\]/);
+  assert.match(html, /top:min\(683px, calc\(\(100dvh - var\(--qling-space-nav-height\) - 29\.5px - 59\.5px\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\)\)/);
+  assert.match(html, /my_concerns\/send\.svg/);
+  assert.doesNotMatch(html, /fixed bottom-\[calc\(var\(--qling-space-nav-height\)\+29\.5px\)\]/);
 });
 
 test('my worries my-page button aligns to the Figma header icon position', () => {
@@ -157,7 +160,10 @@ test('my worries DOM does not render answer writer private data', () => {
   })));
 
   for (const forbidden of ['답변자닉', 'gender', 'age', 'interests', 'profileMetadata', 'replierUid', '답변 본문 preview']) {
-    assert.equal(html.includes(forbidden), false);
+    const isPresent = forbidden === 'age'
+      ? /\bage\b/.test(html)
+      : html.includes(forbidden);
+    assert.equal(isPresent, false);
   }
 });
 

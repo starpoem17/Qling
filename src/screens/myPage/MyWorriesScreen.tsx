@@ -1,4 +1,4 @@
-import { Heart, Send } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import type { CSSProperties, TouchEvent, WheelEvent } from 'react';
 import {
   EmptyState,
@@ -10,8 +10,11 @@ import { QlingPeekHeader } from '../shared/QlingPeekHeader';
 import { useScrollPeekHeader } from '../shared/scrollPeekHeader';
 import type { MyWorriesScreenProps } from './contract';
 
+const writeWorryIconUrl = new URL('../../../assets/my_concerns/send.svg', import.meta.url).href;
+
 export function MyWorriesScreen(props: MyWorriesScreenProps) {
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+  const writeButtonTop = `min(683px, calc((100dvh - var(--qling-space-nav-height) - 29.5px - 59.5px) / (${canvasScale})))`;
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
   const scrollPeekHeader = useScrollPeekHeader();
@@ -36,9 +39,10 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
       type="button"
       aria-label="고민 작성 화면으로 이동"
       onClick={props.onWriteWorry}
-      className="fixed bottom-[calc(var(--qling-space-nav-height)+29.5px)] left-1/2 z-40 ml-[105.5px] flex h-[59.5px] w-[59.5px] items-center justify-center rounded-full bg-[#ff8b3d] text-white shadow-[0_8px_18px_rgb(42_42_42/0.20)] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-white"
+      className="absolute left-[302px] z-40 flex h-[59.5px] w-[59.5px] items-center justify-center rounded-full bg-[#ff8b3d] text-white shadow-[0_8px_18px_rgb(42_42_42/0.20)] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-white"
+      style={{ top: writeButtonTop }}
     >
-      <Send className="h-7 w-7" aria-hidden="true" />
+      <img src={writeWorryIconUrl} alt="" className="h-[27px] w-[27px]" aria-hidden="true" draggable={false} />
     </button>
   );
 
@@ -110,11 +114,10 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
                 </div>
               </section>
             )}
+            {writeButton}
           </div>
         </div>
       </section>
-
-      {writeButton}
     </>
   );
 }
