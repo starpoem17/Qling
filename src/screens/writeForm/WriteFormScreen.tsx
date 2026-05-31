@@ -88,33 +88,31 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="write-reply-original-title"
-            className="absolute top-[201px] flex h-[504px] w-[377px] max-w-[calc(100vw-14px)] flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_12px_40px_rgb(0_0_0/0.18)]"
+            className="absolute top-[251px] flex h-[440px] w-[393px] max-w-full flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_12px_40px_rgb(0_0_0/0.18)]"
           >
             <div className="relative h-11 shrink-0 border-b border-[#c2c4c8]">
               <h2 id="write-reply-original-title" className="absolute left-1/2 top-3 -translate-x-1/2 text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] text-[#2a2a2a]">
                 고민 보기
               </h2>
             </div>
-            
-            <div className="flex min-h-0 flex-1 flex-col px-[14px] pt-3">
+
+            <div className="flex min-h-0 flex-1 flex-col px-[13px] pt-[10px]">
               <div className="shrink-0">
                 <ReplyCategoryChip label={props.originalWorry.category} />
               </div>
-              
-              {props.originalWorry.summaryText !== props.originalWorry.originalBodyText && (
-                <p className="mt-3 shrink-0 break-words text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
-                  {props.originalWorry.summaryText}
-                </p>
-              )}
-              
-              <div className="mt-4 min-h-0 flex-1 overflow-y-auto pb-4">
-                <p className="whitespace-pre-wrap break-words text-xs font-medium leading-6 tracking-[-0.36px] text-[#2a2a2a]">
+
+              <p className="mt-[11px] shrink-0 break-words px-1 text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
+                {props.originalWorry.summaryText}
+              </p>
+
+              <div className="mt-[13px] min-h-0 flex-1 overflow-y-auto px-[6px] pb-4">
+                <p className="whitespace-pre-wrap break-words text-xs font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
                   {props.originalWorry.originalBodyText}
                 </p>
               </div>
             </div>
 
-            <div className="shrink-0 pb-9 pt-2">
+            <div className="shrink-0 pb-[37px] pt-[8px]">
               <button
                 type="button"
                 onClick={props.onCloseOriginal}

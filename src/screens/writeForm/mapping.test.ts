@@ -22,7 +22,7 @@ test('maps selected delivery data to original worry summary props', () => {
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
     category: WORRY_CATEGORIES[3],
-    summaryText: 'LLM summary',
+    summaryText: 'Original worry body...',
     originalBodyText: 'Original worry body',
     receivedAt: {
       label: '2026.05.18',
@@ -67,17 +67,23 @@ test('reply summary uses shared local display date formatter', () => {
 });
 
 test('reply summary fallback uses original first 20 characters plus ellipsis', () => {
-  assert.equal(buildUserFacingSummary({
-    summaryText: '',
-    originalBodyText: '01234567890123456789extra',
-  }), '01234567890123456789...');
-  assert.equal(buildUserFacingSummary({
-    summaryText: '   ',
-    originalBodyText: '짧은 원문',
-  }), '짧은 원문...');
-  assert.equal(buildUserFacingSummary({
-    originalBodyText: '',
-  }), '...');
+  assert.equal(buildUserFacingSummary('01234567890123456789extra'), '01234567890123456789...');
+  assert.equal(buildUserFacingSummary('짧은 원문'), '짧은 원문...');
+  assert.equal(buildUserFacingSummary(''), '...');
+});
+
+test('reply summary ignores refined content and always falls back to original first 20 characters', () => {
+  const summary = mapSelectedWorryToOriginalWorrySummary({
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+    category: WORRY_CATEGORIES[0],
+    originalContent: '01234567890123456789 원문 전체',
+    refinedContent: 'LLM이 만든 별도 요약',
+    createdAt: null,
+  } as SelectedReceivedWorry);
+
+  assert.equal(summary?.summaryText, '01234567890123456789...');
+  assert.equal(summary?.originalBodyText, '01234567890123456789 원문 전체');
 });
 
 test('reply summary mapping keeps original body out of the default summary field', () => {

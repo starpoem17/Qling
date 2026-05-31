@@ -44,22 +44,14 @@ export function mapSelectedWorryToOriginalWorrySummary(
     deliveryId: worry.deliveryId,
     worryId: worry.worryId,
     category: firstValidCategory(worry.categories, worry.category),
-    summaryText: buildUserFacingSummary({
-      summaryText: worry.refinedContent,
-      originalBodyText,
-    }),
+    summaryText: buildUserFacingSummary(originalBodyText),
     originalBodyText,
     receivedAt: displayDateFromTimestamp(worry.createdAt, options),
   };
 }
 
-export function buildUserFacingSummary(params: {
-  readonly summaryText?: string;
-  readonly originalBodyText: string;
-}): string {
-  const trimmedSummary = params.summaryText?.trim();
-  if (trimmedSummary) return trimmedSummary;
-  return `${params.originalBodyText.slice(0, 20)}...`;
+export function buildUserFacingSummary(originalBodyText: string): string {
+  return `${Array.from(originalBodyText).slice(0, 20).join('')}...`;
 }
 
 function displayDateFromTimestamp(createdAt: HomeWorryFeedTimestamp | null | undefined, options?: DisplayDateOptions): DisplayDate {

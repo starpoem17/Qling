@@ -50,6 +50,17 @@ test('write reply screen shows summary on the base card and keeps original body 
   assert.match(openHtml, /role="dialog"/);
 });
 
+test('write reply original overlay keeps only the original body scrollable', () => {
+  const html = renderToStaticMarkup(WriteFormScreen(baseProps({ isOriginalOverlayOpen: true })));
+
+  assert.match(html, /고민 보기/);
+  assert.match(html, /요약만 기본 카드에 표시됩니다\./);
+  assert.match(html, /원문 전체는 overlay 안에서만 표시됩니다\./);
+  assert.match(html, /mt-\[13px\] min-h-0 flex-1 overflow-y-auto px-\[6px\] pb-4/);
+  assert.match(html, /text-xs font-bold leading-6 tracking-\[-0\.36px\]/);
+  assert.match(html, /shrink-0 pb-\[37px\] pt-\[8px\]/);
+});
+
 test('write reply screen renders visual pencil placeholder only for an empty draft', () => {
   const emptyHtml = renderToStaticMarkup(WriteFormScreen(baseProps()));
   const filledHtml = renderToStaticMarkup(WriteFormScreen(baseProps({
