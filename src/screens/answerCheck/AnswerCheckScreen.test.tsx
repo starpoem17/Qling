@@ -29,10 +29,11 @@ function baseProps(overrides: Partial<AnswerCheckScreenProps> = {}): AnswerCheck
         replyId: 'reply-2',
         bodyText: '두 번째 답변 본문',
         createdAtLabel: '1분 전',
+        publisherComment: '고마웠어요',
         feedbackState: 'liked',
         canLike: true,
         canDislike: false,
-        canComment: true,
+        canComment: false,
         isFeedbackProcessing: false,
         isCommentProcessing: false,
       },
@@ -85,6 +86,17 @@ test('zero replies state shows only my worry without empty copy', () => {
   assert.equal((html.match(/도착한 답변<\/p>/g) ?? []).length, 0);
 });
 
+test('answer check cards use Figma-like card internals without the old helper labels', () => {
+  const html = renderToStaticMarkup(AnswerCheckScreen(baseProps()));
+
+  assert.match(html, /rounded-\[18px\] bg-white px-\[19px\]/);
+  assert.match(html, /shadow-\[0_4px_4px_rgb\(0_0_0\/0\.25\)\]/);
+  assert.match(html, /text-\[16px\] font-extrabold leading-6 tracking-\[-0\.48px\]/);
+  assert.match(html, /text-\[12px\] font-bold leading-6 tracking-\[-0\.36px\]/);
+  assert.doesNotMatch(html, />내 고민<\/p>/);
+  assert.doesNotMatch(html, />도착한 답변<\/p>/);
+});
+
 test('answer check DOM does not render answer writer private data', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
     replies: [{
@@ -104,9 +116,19 @@ test('screen exposes separate like dislike and comment actions', () => {
   assert.match(html, /aria-label="좋아요"/);
   assert.match(html, /aria-label="싫어요"/);
   assert.match(html, /aria-label="코멘트"/);
+  assert.match(html, /my_concerns\/good\.svg/);
+  assert.match(html, /my_concerns\/bad\.svg/);
+  assert.match(html, /my_concerns\/comment\.svg/);
 });
 
-test('comment dialog supports submit and skip close callbacks', () => {
+test('saved publisher comment appears under the answer card divider', () => {
+  const html = renderToStaticMarkup(AnswerCheckScreen(baseProps()));
+
+  assert.match(html, /고마웠어요/);
+  assert.match(html, /bg-\[#c2c4c8\]/);
+});
+
+test('inline comment editor supports submit and skip close callbacks', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
     commentDialog: {
       replyId: 'reply-1',
@@ -117,23 +139,28 @@ test('comment dialog supports submit and skip close callbacks', () => {
   })));
 
   assert.match(html, /좋아요 코멘트 입력|싫어요 코멘트 입력/);
+  assert.match(html, /textarea/);
   assert.match(html, /건너뛰기/);
   assert.match(html, /제출/);
+  assert.doesNotMatch(html, /role="dialog"/);
+  assert.doesNotMatch(html, /코멘트 남기기/);
 });
 
-test('comment dialog copy appears only while the comment dialog is open', () => {
+test('inline comment editor copy appears only while comment entry is open', () => {
   const closedHtml = renderToStaticMarkup(AnswerCheckScreen(baseProps({ commentDialog: null })));
   const openHtml = renderToStaticMarkup(AnswerCheckScreen(baseProps({
     commentDialog: {
-      replyId: 'reply-2',
+      replyId: 'reply-1',
       feedbackState: 'liked',
       draft: '고마웠어요',
       maxLength: 1000,
     },
   })));
 
-  for (const dialogOnlyCopy of ['코멘트 남기기', '전하고 싶은 말을 남겨주세요.', '건너뛰기', '제출']) {
+  for (const dialogOnlyCopy of ['전하고 싶은 말을 남겨주세요.', '건너뛰기', '제출']) {
     assert.equal(closedHtml.includes(dialogOnlyCopy), false);
     assert.equal(openHtml.includes(dialogOnlyCopy), true);
   }
+  assert.equal(closedHtml.includes('코멘트 남기기'), false);
+  assert.equal(openHtml.includes('코멘트 남기기'), false);
 });

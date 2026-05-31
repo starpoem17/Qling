@@ -1,11 +1,13 @@
-import { MessageCircle, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '../../lib/utils';
-import { ErrorState, FigmaTopBar, QlingCard, QlingTextArea, PrimaryCTA, SecondaryCTA } from '../shared/ui';
+import { ErrorState, FigmaTopBar } from '../shared/ui';
 import type { AnswerCheckReplyProps, AnswerCheckScreenProps } from './contract';
 
 const activeIndicatorUrl = new URL('../../../assets/loading/figma-progress-active.svg', import.meta.url).href;
 const trackUrl = new URL('../../../assets/loading/figma-progress-track.svg', import.meta.url).href;
+const goodIconUrl = new URL('../../../assets/my_concerns/good.svg', import.meta.url).href;
+const badIconUrl = new URL('../../../assets/my_concerns/bad.svg', import.meta.url).href;
+const commentIconUrl = new URL('../../../assets/my_concerns/comment.svg', import.meta.url).href;
 
 export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
   if (props.state.status === 'loading') {
@@ -23,76 +25,28 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
   return (
     <AnswerCheckFrame onBack={props.onBack}>
       {props.worry && (
-        <QlingCard className="space-y-3 bg-[var(--qling-color-cream-soft)]">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-[var(--qling-radius-pill)] bg-white px-3 py-1 text-xs font-bold text-[var(--qling-color-primary-orange)]">
-              {props.worry.categoryLabel}
-            </span>
-            <span className="text-xs font-semibold text-[var(--qling-color-muted)]">{props.worry.createdAtLabel}</span>
-          </div>
-          <p className="text-xs font-bold text-[var(--qling-color-muted)]">내 고민</p>
-          <p className="whitespace-pre-wrap break-words text-base font-extrabold leading-7 text-[var(--qling-color-text)]">
-            {props.worry.bodyText}
-          </p>
-        </QlingCard>
+        <WorryCard
+          categoryLabel={props.worry.categoryLabel}
+          createdAtLabel={props.worry.createdAtLabel}
+          bodyText={props.worry.bodyText}
+        />
       )}
 
-      <div className="space-y-4" aria-label="도착한 답변 목록">
+      <div className="grid gap-[22px]" aria-label="도착한 답변 목록">
         {props.replies.map(reply => (
           <AnswerCard
             key={reply.replyId}
             reply={reply}
+            commentDialog={props.commentDialog?.replyId === reply.replyId ? props.commentDialog : null}
             onLike={props.onLike}
             onDislike={props.onDislike}
             onOpenComment={props.onOpenComment}
+            onCommentChange={props.onCommentChange}
+            onCommentSubmit={props.onCommentSubmit}
+            onCommentClose={props.onCommentClose}
           />
         ))}
       </div>
-
-      {props.commentDialog && (
-        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/35 px-4 pb-4">
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-label={props.commentDialog.feedbackState === 'liked' ? '좋아요 코멘트 입력' : '싫어요 코멘트 입력'}
-            className="w-full max-w-[360px] rounded-[var(--qling-radius-card)] bg-white p-5 shadow-[var(--qling-shadow-sheet)]"
-          >
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-base font-extrabold text-[var(--qling-color-text)]">코멘트 남기기</h2>
-              <button
-                type="button"
-                aria-label="코멘트 창 닫기"
-                onClick={props.onCommentClose}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--qling-color-muted)] hover:bg-[var(--qling-color-cream)]"
-              >
-                <X className="h-5 w-5" aria-hidden="true" />
-              </button>
-            </div>
-            {props.commentDialog.moderationMessage && (
-              <p className="mb-3 whitespace-pre-wrap text-sm font-semibold text-[var(--qling-color-danger)]">
-                {props.commentDialog.moderationMessage}
-              </p>
-            )}
-            <QlingTextArea
-              value={props.commentDialog.draft}
-              onChange={props.onCommentChange}
-              maxLength={props.commentDialog.maxLength}
-              label="코멘트"
-              placeholder="전하고 싶은 말을 남겨주세요."
-              errorMessage={props.commentDialog.validationMessage}
-            />
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <SecondaryCTA onClick={props.onCommentClose}>건너뛰기</SecondaryCTA>
-              <PrimaryCTA
-                onClick={props.onCommentSubmit}
-                disabled={Boolean(props.commentDialog.validationMessage)}
-              >
-                제출
-              </PrimaryCTA>
-            </div>
-          </section>
-        </div>
-      )}
     </AnswerCheckFrame>
   );
 }
@@ -150,82 +104,152 @@ function AnswerCheckLoadingScreen({ label, onBack }: { readonly label: string; r
 }
 
 function AnswerCheckFrame({ onBack, children }: { readonly onBack: () => void; readonly children: ReactNode }) {
+  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+
   return (
-    <div className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-full bg-[#fff1d1] pb-6 text-[#2a2a2a]">
-      <div className="relative mx-auto min-h-full w-full max-w-[393px]">
-        <FigmaTopBar title="답변 확인" onBack={onBack} backLabel="나의 고민으로 돌아가기" />
-        <div className="space-y-4 px-4 pt-[127px]">
-          {children}
+    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-full overflow-x-hidden bg-[#fff1d1] pb-[calc(24px+env(safe-area-inset-bottom,0px))] text-[#2a2a2a]">
+      <div className="mx-auto flex w-full max-w-[480px] justify-center overflow-visible">
+        <div
+          className="relative min-h-[852px] w-[393px] shrink-0 origin-top bg-[#fff1d1] qling-received-worries-font"
+          style={{ transform: `scale(${canvasScale})` }}
+        >
+          <FigmaTopBar title="답변 확인" onBack={onBack} backLabel="나의 고민으로 돌아가기" />
+          <div className="grid gap-[22px] px-4 pt-[127px] pb-[36px]">
+            {children}
+          </div>
         </div>
       </div>
-    </div>
+    </section>
+  );
+}
+
+function WorryCard({
+  categoryLabel,
+  createdAtLabel,
+  bodyText,
+}: {
+  readonly categoryLabel: string;
+  readonly createdAtLabel: string;
+  readonly bodyText: string;
+}) {
+  return (
+    <section className="rounded-[18px] bg-white px-[19px] pb-[24px] pt-[11px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
+      <div className="flex items-start gap-[18px]">
+        <span className="inline-flex shrink-0 items-start overflow-hidden rounded-[999px] bg-[#ffe4cc] px-3 py-[5px] font-['Qling_Figma_Inter'] text-[11px] font-bold leading-normal text-[#ff8b3d]">
+          {categoryLabel}
+        </span>
+        <time className="pt-[6px] text-[12px] font-semibold leading-none tracking-[-0.36px] text-[#b8b8b8]">
+          {createdAtLabel}
+        </time>
+      </div>
+      <p className="mt-[14px] whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
+        {bodyText}
+      </p>
+      <div className="mt-[10px] h-px rounded-[3px] bg-[#c2c4c8]" />
+    </section>
   );
 }
 
 function AnswerCard({
   reply,
+  commentDialog,
   onLike,
   onDislike,
   onOpenComment,
+  onCommentChange,
+  onCommentSubmit,
+  onCommentClose,
 }: {
   readonly reply: AnswerCheckReplyProps;
+  readonly commentDialog: AnswerCheckScreenProps['commentDialog'];
   readonly onLike: (replyId: string) => void;
   readonly onDislike: (replyId: string) => void;
   readonly onOpenComment: (replyId: string) => void;
+  readonly onCommentChange: (value: string) => void;
+  readonly onCommentSubmit: () => void;
+  readonly onCommentClose: () => void;
 }) {
   const liked = reply.feedbackState === 'liked';
   const disliked = reply.feedbackState === 'disliked';
+  const hasComment = typeof reply.publisherComment === 'string' && reply.publisherComment.trim().length > 0;
+  const commentActive = hasComment || Boolean(commentDialog);
   return (
-    <QlingCard className={cn('space-y-4', liked && 'border-[var(--qling-color-primary-orange)]')}>
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-extrabold text-[var(--qling-color-primary-orange)]">도착한 답변</p>
-        {reply.createdAtLabel && <span className="text-xs font-semibold text-[var(--qling-color-muted)]">{reply.createdAtLabel}</span>}
-      </div>
-      <p className="whitespace-pre-wrap break-words text-base font-semibold leading-8 text-[var(--qling-color-text)]">
+    <section className="rounded-[18px] bg-white px-[19px] pb-[20px] pt-[17px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
+      {reply.createdAtLabel && (
+        <time className="block text-[12px] font-semibold leading-none tracking-[-0.36px] text-[#b8b8b8]">
+          {reply.createdAtLabel}
+        </time>
+      )}
+      <p className="mt-[15px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
         {reply.bodyText}
       </p>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="mt-[5px] flex items-center justify-end gap-[5px]">
         <FeedbackAction
           label="좋아요"
+          iconUrl={goodIconUrl}
           selected={liked}
           disabled={!reply.canLike || reply.isFeedbackProcessing}
           onClick={() => onLike(reply.replyId)}
-        >
-          <ThumbsUp className="h-4 w-4" aria-hidden="true" />
-        </FeedbackAction>
+          className="h-[28px] w-[17px]"
+          iconClassName="h-[17px] w-[17px]"
+        />
         <FeedbackAction
           label="싫어요"
+          iconUrl={badIconUrl}
           selected={disliked}
           disabled={!reply.canDislike || reply.isFeedbackProcessing}
           onClick={() => onDislike(reply.replyId)}
-        >
-          <ThumbsDown className="h-4 w-4" aria-hidden="true" />
-        </FeedbackAction>
+          className="h-[28px] w-[17px]"
+          iconClassName="h-[17px] w-[17px] rotate-180"
+        />
         <FeedbackAction
           label="코멘트"
-          selected={false}
+          iconUrl={commentIconUrl}
+          selected={commentActive}
           disabled={!reply.canComment || reply.isCommentProcessing}
           onClick={() => onOpenComment(reply.replyId)}
-        >
-          <MessageCircle className="h-4 w-4" aria-hidden="true" />
-        </FeedbackAction>
+          className="h-[28px] w-[20px]"
+          iconClassName="h-[15px] w-[15px]"
+        />
       </div>
-    </QlingCard>
+      {(hasComment || commentDialog) && <div className="mt-[8px] h-px rounded-[3px] bg-[#c2c4c8]" />}
+      {hasComment && (
+        <p className="mt-[13px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
+          {reply.publisherComment}
+        </p>
+      )}
+      {commentDialog && (
+        <InlineCommentEditor
+          draft={commentDialog.draft}
+          maxLength={commentDialog.maxLength}
+          validationMessage={commentDialog.validationMessage}
+          moderationMessage={commentDialog.moderationMessage}
+          feedbackState={commentDialog.feedbackState}
+          onChange={onCommentChange}
+          onSubmit={onCommentSubmit}
+          onClose={onCommentClose}
+        />
+      )}
+    </section>
   );
 }
 
 function FeedbackAction({
   label,
+  iconUrl,
   selected,
   disabled,
   onClick,
-  children,
+  className,
+  iconClassName,
 }: {
   readonly label: string;
+  readonly iconUrl: string;
   readonly selected: boolean;
   readonly disabled: boolean;
   readonly onClick: () => void;
-  readonly children: ReactNode;
+  readonly className: string;
+  readonly iconClassName: string;
 }) {
   return (
     <button
@@ -235,14 +259,83 @@ function FeedbackAction({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'flex min-h-11 items-center justify-center gap-1 rounded-[var(--qling-radius-cta)] border px-2 text-xs font-extrabold transition-colors disabled:cursor-not-allowed disabled:opacity-50',
-        selected
-          ? 'border-[var(--qling-color-primary-orange)] bg-[var(--qling-color-cream-soft)] text-[var(--qling-color-primary-orange)]'
-          : 'border-[var(--qling-color-border)] bg-white text-[var(--qling-color-text)]',
+        'inline-flex items-center justify-center rounded-full transition-colors hover:bg-[#fff1d1] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] disabled:cursor-not-allowed disabled:opacity-45',
+        className,
       )}
     >
-      {children}
-      {label}
+      <img
+        src={iconUrl}
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        className={cn(
+          'object-contain',
+          selected && 'filter sepia saturate-[4] hue-rotate-[335deg]',
+          iconClassName,
+        )}
+      />
     </button>
+  );
+}
+
+function InlineCommentEditor({
+  draft,
+  maxLength,
+  validationMessage,
+  moderationMessage,
+  feedbackState,
+  onChange,
+  onSubmit,
+  onClose,
+}: {
+  readonly draft: string;
+  readonly maxLength: number;
+  readonly validationMessage?: string;
+  readonly moderationMessage?: string;
+  readonly feedbackState: 'liked' | 'disliked';
+  readonly onChange: (value: string) => void;
+  readonly onSubmit: () => void;
+  readonly onClose: () => void;
+}) {
+  const label = feedbackState === 'liked' ? '좋아요 코멘트 입력' : '싫어요 코멘트 입력';
+
+  return (
+    <div className="mt-[13px]" aria-label={label}>
+      {moderationMessage && (
+        <p className="mb-2 whitespace-pre-wrap text-[12px] font-bold leading-[18px] tracking-[-0.36px] text-[var(--qling-color-danger)]">
+          {moderationMessage}
+        </p>
+      )}
+      <textarea
+        value={draft}
+        onChange={event => onChange(event.target.value)}
+        maxLength={maxLength}
+        aria-label={label}
+        placeholder="전하고 싶은 말을 남겨주세요."
+        className="min-h-[72px] w-full resize-none rounded-[12px] border border-[#c2c4c8] bg-white px-3 py-2 text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a] outline-none placeholder:text-[#b8b8b8] focus:border-[#ff8b3d] focus:ring-2 focus:ring-[#ff8b3d]/20"
+      />
+      {validationMessage && (
+        <p className="mt-1 text-[11px] font-bold leading-[16px] tracking-[-0.33px] text-[var(--qling-color-danger)]">
+          {validationMessage}
+        </p>
+      )}
+      <div className="mt-2 flex justify-end gap-3 text-[12px] font-extrabold leading-5 tracking-[-0.36px]">
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-full px-1 text-[#7a7a7a] hover:text-[#2a2a2a] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
+        >
+          건너뛰기
+        </button>
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={Boolean(validationMessage)}
+          className="rounded-full px-1 text-[#ff8b3d] hover:text-[#e56f22] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] disabled:cursor-not-allowed disabled:opacity-45"
+        >
+          제출
+        </button>
+      </div>
+    </div>
   );
 }

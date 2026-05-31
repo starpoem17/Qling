@@ -16,6 +16,7 @@ export type AnswerCheckReplyProps = {
   readonly replyId: string;
   readonly bodyText: string;
   readonly createdAtLabel?: string;
+  readonly publisherComment?: string;
   readonly feedbackState: AnswerFeedbackState;
   readonly canLike: boolean;
   readonly canDislike: boolean;

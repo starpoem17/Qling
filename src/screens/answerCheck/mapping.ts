@@ -26,6 +26,7 @@ export function mapReplyToAnswerCheckProps(params: {
     replyId: params.reply.id,
     bodyText: params.reply.content,
     createdAtLabel: formatDisplayDate(params.reply.createdAt, { now: params.now }).label,
+    publisherComment: params.reply.publisherComment,
     feedbackState: params.reply.feedback === 'helpful'
       ? 'liked'
       : params.reply.feedback === 'not_helpful'
@@ -33,7 +34,7 @@ export function mapReplyToAnswerCheckProps(params: {
         : 'none',
     canLike: params.reply.feedback !== 'not_helpful',
     canDislike: params.reply.feedback !== 'helpful',
-    canComment: params.reply.feedback !== 'not_helpful',
+    canComment: params.reply.feedback !== 'not_helpful' && !params.reply.publisherComment,
     isFeedbackProcessing: params.processingReplyIds?.has(params.reply.id) ?? false,
     isCommentProcessing: params.processingReplyIds?.has(params.reply.id) ?? false,
   };

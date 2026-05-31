@@ -75,6 +75,22 @@ test('maps local hidden reply and feedback states', () => {
   ]);
 });
 
+test('maps publisher comment and prevents adding a second comment', () => {
+  const mapped = mapRepliesToAnswerCheckProps({
+    replies: [
+      replyItem({
+        id: 'commented',
+        feedback: 'helpful',
+        publisherComment: '고마웠어요',
+      }),
+    ],
+  });
+
+  assert.equal(mapped[0].publisherComment, '고마웠어요');
+  assert.equal(mapped[0].feedbackState, 'liked');
+  assert.equal(mapped[0].canComment, false);
+});
+
 function worryItem(overrides: Partial<MyWorryListItem>): MyWorryListItem {
   return {
     id: 'worry',
