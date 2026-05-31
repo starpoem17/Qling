@@ -316,13 +316,21 @@ test('edit interests screen renders fixed three-column chip grid and exact zero-
     validationMessages: { interests: '1개 이상의 관심 분야를 선택해주세요.' },
   })));
 
+  assert.match(html, /max-w-\[480px\]/);
+  assert.match(html, /h-\[852px\]/);
+  assert.match(html, /w-\[393px\]/);
+  assert.match(html, /origin-top/);
+  assert.match(html, /calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)/);
   assert.match(html, /grid-cols-3/);
-  assert.match(html, /h-\[calc\(100dvh-var\(--qling-space-nav-height\)\)\]/);
+  assert.match(html, /w-\[103px\]/);
   assert.match(html, /h-\[44px\]/);
-  assert.match(html, /1개 이상의 관심 분야를 선택해주세요\./);
+  assert.match(html, /tracking-\[-0\.14px\]/);
+  assert.match(html, /top-\[730px\]/);
+  assert.match(html, /font-extrabold/);
+  assert.match(html, /최소 1개의 관심분야를 선택해주세요/);
   assert.match(html, /저장하기/);
-  assert.match(html, /워라밸/);
-  assert.doesNotMatch(html, /워라벨/);
+  assert.match(html, /워라벨/);
+  assert.doesNotMatch(html, />워라밸</);
 });
 
 test('edit interests screen forwards chip toggle and submit interactions', () => {
@@ -333,9 +341,10 @@ test('edit interests screen forwards chip toggle and submit interactions', () =>
   }));
 
   click(findElement(tree, element => element.type === 'button' && element.props.children === '진로'));
+  click(findElement(tree, element => element.type === 'button' && element.props.children === '워라벨'));
   click(findElement(tree, element => element.type === 'button' && element.props['aria-label'] === '관심 분야 저장'));
 
-  assert.deepEqual(events, ['toggle:진로', 'submit']);
+  assert.deepEqual(events, ['toggle:진로', 'toggle:워라밸', 'submit']);
 });
 
 test('privacy policy screen uses exact PRD empty copy', () => {
