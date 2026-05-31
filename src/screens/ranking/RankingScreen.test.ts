@@ -1,9 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { DEFAULT_PROFILE_COLOR } from '../../lib/profileColor';
 import { RankingScreen } from './RankingScreen';
+import { profileImageUrlForColor } from '../shared/ui';
 import type { RankingDisplayEntry, RankingDisplayPeriod, RankingScreenProps } from './contract';
 
 function entry(rank: number): RankingDisplayEntry {
@@ -53,10 +56,38 @@ test('ranking screen scales the Figma canvas by width only like the other tab sc
 
   assert.match(html, /data-measure="ranking-responsive-canvas"/);
   assert.match(html, /data-measure="ranking-screen"/);
+  assert.match(html, /font-\[&#x27;Qling_Noto_Sans_KR&#x27;\]/);
+  assert.match(html, /min-height:calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \* 852 \/ 393\)/);
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
   assert.doesNotMatch(html, /transform:scale\(min\(/);
   assert.doesNotMatch(html, /var\(--qling-space-safe-bottom\)\) \/ 772px/);
+});
+
+test('app ranking route wrapper preserves full shell height for iPhone clipping behavior', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'App.tsx'), 'utf8');
+
+  assert.match(source, /key="ranking"[\s\S]*className="h-full min-h-0"/);
+});
+
+test('top ranking avatars and crowns are present in static markup', () => {
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
+
+  assert.match(html, /data-measure="ranking-profile-first"/);
+  assert.match(html, /data-measure="ranking-profile-second"/);
+  assert.match(html, /data-measure="ranking-profile-third"/);
+  assert.match(html, /crown-first\.svg/);
+  assert.match(html, /crown-second\.svg/);
+  assert.match(html, /crown-third\.svg/);
+});
+
+test('profile image generation recolors only the shared default profile background', () => {
+  const decoded = decodeURIComponent(profileImageUrlForColor('#6FA8F0'));
+
+  assert.match(decoded, /fill="#6FA8F0"/);
+  assert.doesNotMatch(decoded, /fill="#FF8B3D"/);
+  assert.match(decoded, /mask0_346_383/);
+  assert.match(decoded, /mask1_346_383/);
 });
 
 test('viewer rank card stays above the shell bottom navigation on shorter iPhone viewports', () => {

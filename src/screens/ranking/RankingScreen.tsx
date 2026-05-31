@@ -13,6 +13,7 @@ import type {
 } from './contract';
 
 const rankingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+const rankingCanvasMinHeight = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) * 852 / 393)';
 const viewerRankCardTop = `min(693px, calc((100dvh - var(--qling-space-nav-height) - 79px) / (${rankingCanvasScale})))`;
 
 const rankingAssetUrlByName = {
@@ -80,9 +81,14 @@ function RankingFrame({ children }: { readonly children: ReactNode }) {
   return (
     <section
       aria-label="순위"
-      className="-mx-[var(--qling-space-shell-x)] -mt-6 h-full min-h-0 overflow-hidden bg-[#ff8b3d] qling-figma-font"
+      className="-mx-[var(--qling-space-shell-x)] -mt-6 h-full min-h-0 overflow-hidden bg-[#ff8b3d] font-['Qling_Noto_Sans_KR']"
+      style={{ minHeight: rankingCanvasMinHeight }}
     >
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden" data-measure="ranking-responsive-canvas">
+      <div
+        className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"
+        data-measure="ranking-responsive-canvas"
+        style={{ minHeight: rankingCanvasMinHeight }}
+      >
         <div
           className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]"
           data-measure="ranking-screen"
