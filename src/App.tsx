@@ -489,7 +489,7 @@ export default function App() {
 
           {(currentRoute === '순위' || currentRoute === 'ranking') && (
             <motion.div key="ranking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <RankingContainer user={user} />
+              <RankingContainer user={user} onOpenMyPage={() => setView('마이페이지')} />
             </motion.div>
           )}
 

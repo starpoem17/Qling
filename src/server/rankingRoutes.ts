@@ -1,7 +1,7 @@
 import type express from 'express';
 import type { Auth } from 'firebase-admin/auth';
 import type { Firestore } from 'firebase-admin/firestore';
-import { createRequireActiveFirebaseAuth } from './auth';
+import { createRequireActiveFirebaseAuth, type ActiveAuthenticatedRequest } from './auth';
 import { getRankingsOnServer } from '../services/ranking/server';
 
 export function registerRankingRoutes(app: express.Express, deps: {
@@ -25,9 +25,13 @@ export function registerRankingRoutes(app: express.Express, deps: {
   app.get(
     '/api/rankings',
     createRequireActiveFirebaseAuth({ auth: deps.auth, db: deps.db }),
-    async (_req, res) => {
+    async (req, res) => {
       try {
-        res.status(200).json(await getRankings({ db: deps.db as Firestore }));
+        const authReq = req as ActiveAuthenticatedRequest;
+        res.status(200).json(await getRankings({
+          db: deps.db as Firestore,
+          viewerUid: authReq.auth.uid,
+        }));
       } catch (error) {
         console.error('Server rankings failed:', error);
         res.status(500).json({

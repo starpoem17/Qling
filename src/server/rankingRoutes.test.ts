@@ -36,6 +36,7 @@ function captureRoute(options: {
 } = {}) {
   const handlers: Array<(req: unknown, res: unknown, next: () => void) => unknown> = [];
   let called = false;
+  let capturedParams: unknown = null;
   const app = {
     get(path: string, ...routeHandlers: typeof handlers) {
       assert.equal(path, '/api/rankings');
@@ -48,20 +49,22 @@ function captureRoute(options: {
       verifyIdToken: options.verifyIdToken ?? (async () => ({ uid: 'viewer' })),
     } as never,
     db: createDb(options.userData) as never,
-    getRankings: async () => {
+    getRankings: async (params) => {
       called = true;
+      capturedParams = params;
       return (options.result ?? { monthly: [], total: [] }) as never;
     },
   });
 
-  return { handlers, called: () => called };
+  return { handlers, called: () => called, capturedParams: () => capturedParams };
 }
 
 test('ranking route requires active auth before returning rankings', async () => {
   const route = captureRoute({
     result: {
-      monthly: [{ rank: 1, uid: 'user-1', nickname: '닉네임', heartCount: 3 }],
-      total: [],
+      monthly: { entries: [{ rank: 1, uid: 'user-1', nickname: '닉네임', heartCount: 3 }], viewer: null },
+      total: { entries: [], viewer: null },
+      season: { monthLabel: '5월 시즌', daysUntilMonthEnd: 12 },
     },
   });
   const req = { headers: { authorization: 'Bearer token' } };
@@ -72,9 +75,11 @@ test('ranking route requires active auth before returning rankings', async () =>
 
   assert.equal(res.statusCode, 200);
   assert.equal(route.called(), true);
+  assert.equal((route.capturedParams() as { viewerUid?: string }).viewerUid, 'viewer');
   assert.deepEqual(res.body, {
-    monthly: [{ rank: 1, uid: 'user-1', nickname: '닉네임', heartCount: 3 }],
-    total: [],
+    monthly: { entries: [{ rank: 1, uid: 'user-1', nickname: '닉네임', heartCount: 3 }], viewer: null },
+    total: { entries: [], viewer: null },
+    season: { monthLabel: '5월 시즌', daysUntilMonthEnd: 12 },
   });
 });
 
