@@ -314,9 +314,14 @@ test('privacy policy screen renders document body in the Figma card layout', () 
   }));
 
   assert.match(html, /bg-\[#ff8b0d\]/);
+  assert.match(html, /h-dvh/);
+  assert.match(html, /data-measure="policy-responsive-canvas"/);
+  assert.match(html, /data-measure="policy-screen"/);
   assert.match(html, /top-\[127px\]/);
+  assert.match(html, /bottom-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
   assert.match(html, /w-\[361px\]/);
   assert.match(html, /rounded-\[18px\]/);
+  assert.match(html, /\[-webkit-overflow-scrolling:touch\]/);
   assert.match(html, /개인정보 처리방침/);
   assert.match(html, /aria-label="개인정보처리방침"/);
   assert.match(html, /수집 데이터:/);

@@ -241,19 +241,32 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
     : props.state.status === 'error'
       ? props.state.message
       : policyBody || (props.state.status === 'empty' ? props.state.message : '정책을 준비 중입니다.');
+  const policyCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-full bg-[#ff8b0d] text-[#1a1a1e]">
-      <div className="relative mx-auto h-full w-full max-w-[393px] overflow-hidden bg-[#ff8b0d]">
-        <FigmaTopBar title="개인정보 처리방침" titleAriaLabel={props.title} onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
-        <article className="absolute left-4 top-[127px] bottom-[20px] w-[361px] overflow-y-auto rounded-[18px] bg-white px-[18px] py-[31px]">
-          <div
-            className="whitespace-pre-wrap text-[13px] font-semibold leading-[150%] tracking-[-0.05em] text-[#1a1a1e]"
-            role={props.state.status === 'error' ? 'alert' : undefined}
-          >
-            {cardContent}
-          </div>
-        </article>
+    <section
+      aria-label={props.title}
+      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b0d] text-[#1a1a1e] qling-figma-font"
+    >
+      <div
+        className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"
+        data-measure="policy-responsive-canvas"
+      >
+        <div
+          className="relative h-[852px] w-[393px] shrink-0 origin-top bg-[#ff8b0d]"
+          data-measure="policy-screen"
+          style={{ transform: `scale(${policyCanvasScale})` }}
+        >
+          <FigmaTopBar title="개인정보 처리방침" titleAriaLabel={props.title} onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
+          <article className="absolute left-4 top-[127px] bottom-[calc(108px+env(safe-area-inset-bottom,0px))] w-[361px] overflow-y-auto rounded-[18px] bg-white px-[18px] py-[31px] [-webkit-overflow-scrolling:touch]">
+            <div
+              className="whitespace-pre-wrap text-[13px] font-semibold leading-[150%] tracking-[-0.05em] text-[#1a1a1e]"
+              role={props.state.status === 'error' ? 'alert' : undefined}
+            >
+              {cardContent}
+            </div>
+          </article>
+        </div>
       </div>
     </section>
   );
