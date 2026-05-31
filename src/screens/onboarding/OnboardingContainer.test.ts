@@ -199,3 +199,33 @@ test('onboarding screen uses ranking-style responsive Figma canvas scaling', () 
   assert.match(screen, /h-\[852px\]/);
   assert.match(screen, /w-\[393px\]/);
 });
+
+test('onboarding progress bars use the Figma anchored fill contract', () => {
+  const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
+
+  assert.match(screen, /left-\[24px\] top-\[235px\] h-\[6px\] w-\[345px\] rounded-\[3px\] bg-\[#f2e5d3\]/);
+  assert.match(screen, /left-\[24px\] top-\[235px\] h-\[6px\] rounded-\[3px\] bg-\[#ff8b3d\]/);
+  assert.match(screen, /progressWidthClassName="w-\[115px\]"/);
+  assert.match(screen, /progressWidthClassName="w-\[230px\]"/);
+  assert.doesNotMatch(screen, /bg-\[#2a2c30\]/);
+  assert.doesNotMatch(screen, /progressClassName="left-\[180px\]"/);
+});
+
+test('onboarding basic screen keeps the Figma helper until validation or duplicate feedback replaces it', () => {
+  const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
+
+  assert.match(screen, /!\s*hasNicknameMessage && \(/);
+  assert.match(screen, /2~10자 · 한글, 영문, 숫자 사용 가능/);
+  assert.match(screen, /hasNicknameMessage && \(/);
+  assert.match(screen, /id="onboarding-nickname-message"/);
+});
+
+test('onboarding core Figma visual tokens are preserved', () => {
+  const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
+
+  assert.match(screen, /shadow-\[4px_4px_4px_0px_rgba\(0,0,0,0\.25\)\]/);
+  assert.match(screen, /tracking-\[-0\.34px\]/);
+  assert.match(screen, /top-\[147px\] text-\[26px\] font-extrabold leading-\[31px\] tracking-\[-1\.3px\]/);
+  assert.match(screen, /text-\[13px\] font-bold leading-\[17px\] tracking-\[-0\.13px\]/);
+  assert.match(screen, /bg-\[#ff8b3d\] text-\[17px\] font-extrabold leading-none tracking-normal text-white/);
+});

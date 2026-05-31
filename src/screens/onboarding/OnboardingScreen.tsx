@@ -49,8 +49,8 @@ export function OnboardingScreen(props: Props) {
           className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b0d]"
           style={{ transform: `scale(${onboardingCanvasScale})` }}
         >
-          <div className="absolute left-0 top-[196px] h-[656px] w-[393px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" />
-          <p className="absolute top-[70px] text-[17px] font-extrabold leading-none tracking-normal text-white" style={{ left: visualStep === 'interests' ? 171 : 165 }}>
+          <div className="absolute left-[-1px] top-[196px] h-[656px] w-[394px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3] shadow-[4px_4px_4px_0px_rgba(0,0,0,0.25)]" />
+          <p className="absolute top-[70px] text-[17px] font-extrabold leading-none tracking-[-0.34px] text-white" style={{ left: visualStep === 'interests' ? 171 : 165 }}>
             회원가입
           </p>
 
@@ -88,23 +88,23 @@ function ProgressHeader({
   title,
   subtitle,
   secondSubtitle,
-  progressClassName,
+  progressWidthClassName,
 }: {
   readonly question: string;
   readonly title: string;
   readonly subtitle: string;
   readonly secondSubtitle?: string;
-  readonly progressClassName: string;
+  readonly progressWidthClassName: string;
 }) {
   return (
     <>
       <p className="absolute left-[30px] top-[127px] text-[10px] font-black leading-[19.5px] tracking-[3px] text-[#fff1d1]">{question}</p>
-      <h1 className="absolute left-[28px] top-[141px] text-[26px] font-extrabold leading-[34px] tracking-normal text-white">{title}</h1>
-      <div className="absolute left-[24px] top-[235px] h-[6px] w-[345px] rounded-[3px] bg-[#2a2c30]" />
-      <div className={cn('absolute top-[235px] h-[6px] w-[190px] rounded-[3px] bg-[#ff8b0d]', progressClassName)} />
-      <p className="absolute left-[24px] top-[258px] text-[13px] font-bold leading-[19px] tracking-normal text-[#8e9095]">{subtitle}</p>
+      <h1 className="absolute left-[28px] top-[147px] text-[26px] font-extrabold leading-[31px] tracking-[-1.3px] text-white">{title}</h1>
+      <div className="absolute left-[24px] top-[235px] h-[6px] w-[345px] rounded-[3px] bg-[#f2e5d3]" />
+      <div className={cn('absolute left-[24px] top-[235px] h-[6px] rounded-[3px] bg-[#ff8b3d]', progressWidthClassName)} />
+      <p className="absolute left-[24px] top-[258px] text-[13px] font-bold leading-[17px] tracking-[-0.13px] text-[#8e9095]">{subtitle}</p>
       {secondSubtitle && (
-        <p className="absolute left-[24px] top-[277px] text-[13px] font-bold leading-[19px] tracking-normal text-[#8e9095]">{secondSubtitle}</p>
+        <p className="absolute left-[24px] top-[277px] text-[13px] font-bold leading-[17px] tracking-[-0.13px] text-[#8e9095]">{secondSubtitle}</p>
       )}
     </>
   );
@@ -136,10 +136,15 @@ function BasicStep({
         question="QUESTION 1"
         title="기본 정보를 알려주세요"
         subtitle="본인에 대해 소개해주세요! 외부에는 공개되지 않아요."
-        progressClassName="left-[24px]"
+        progressWidthClassName="w-[115px]"
       />
 
       <label className="absolute left-[22px] top-[307px] text-[14px] font-extrabold leading-none tracking-normal" htmlFor="onboarding-nickname">닉네임</label>
+      {!hasNicknameMessage && (
+        <p id="onboarding-nickname-message" className="absolute left-[89px] top-[308px] text-[12px] font-bold leading-[17px] tracking-normal text-[#d4be91]">
+          2~10자 · 한글, 영문, 숫자 사용 가능
+        </p>
+      )}
       {hasNicknameMessage && (
         <p
           id="onboarding-nickname-message"
@@ -245,7 +250,7 @@ function BasicStep({
         onClick={onNext}
         disabled={!basicStepComplete || props.isProcessing}
         aria-label={basicStepComplete ? '관심사 선택으로 이동' : '필수 기본 정보와 닉네임 중복 확인 완료 후 이동 가능'}
-        className="absolute left-[24px] top-[752px] h-[56px] w-[345px] rounded-[28px] bg-[#ff8b0d] text-[17px] font-extrabold leading-none tracking-normal text-[#121316] disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-[24px] top-[752px] h-[56px] w-[345px] rounded-[28px] bg-[#ff8b3d] text-[17px] font-extrabold leading-none tracking-normal text-white disabled:cursor-not-allowed disabled:opacity-55"
       >
         다음
       </button>
@@ -273,7 +278,7 @@ function InterestsStep({
         title="주요 관심사는 무엇인가요?"
         subtitle="고민매칭에 필요해요! 언제든 나중에 수정할 수 있어요."
         secondSubtitle="최소 1개 선택, 복수 선택 가능"
-        progressClassName="left-[180px]"
+        progressWidthClassName="w-[230px]"
       />
 
       <div
@@ -323,7 +328,7 @@ function InterestsStep({
         onClick={onNext}
         disabled={!canContinue || props.isProcessing}
         aria-label={canContinue ? '프로필 색상 선택으로 이동' : '관심 분야를 선택해야 이동 가능'}
-        className="absolute left-[130px] top-[752px] h-[56px] w-[239px] rounded-[28px] bg-[#ff8b0d] text-[17px] font-extrabold leading-none tracking-normal text-[#121316] disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-[130px] top-[752px] h-[56px] w-[239px] rounded-[28px] bg-[#ff8b3d] text-[17px] font-extrabold leading-none tracking-normal text-white disabled:cursor-not-allowed disabled:opacity-55"
       >
         다음
       </button>
@@ -343,7 +348,7 @@ function ProfileColorStep({
       <p className="absolute left-[30px] top-[127px] text-[10px] font-black leading-[19.5px] tracking-[3px] text-[#fff1d1]">CUSTOMIZING</p>
       <h1 className="absolute left-[28px] top-[147px] text-[26px] font-extrabold leading-[34px] tracking-normal text-white">프로필 설정을 해주세요</h1>
       <div className="absolute left-[24px] top-[235px] h-[6px] w-[345px] rounded-[3px] bg-[#f2e5d3]" />
-      <div className="absolute left-[24px] top-[235px] h-[6px] w-[346px] rounded-[3px] bg-[#ff8b3d]" />
+      <div className="absolute left-[24px] top-[235px] h-[6px] w-[345px] rounded-[3px] bg-[#ff8b3d]" />
 
       <h2 className="absolute left-[24px] top-[253px] text-[20px] font-black leading-7 tracking-normal text-[#545454]">프로필 색상을 골라주세요</h2>
       <p className="absolute left-[24px] top-[289px] w-[345px] text-[13px] font-normal leading-[18px] tracking-normal text-[#8b847a]">
