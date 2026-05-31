@@ -2,8 +2,9 @@ import type { TouchEvent, UIEvent, WheelEvent } from 'react';
 
 const WHEEL_SCROLL_END_DELAY_MS = 120;
 const SCROLL_SNAP_THRESHOLD_PX = 42;
+const PEEK_PROGRESS_DISTANCE_PX = 84;
 const BOTTOM_EDGE_EPSILON_PX = 1;
-const SETTLE_TRANSITION = 'transform 160ms ease-out';
+const SETTLE_TRANSITION = 'transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)';
 const SCROLL_DIRECTION_DOWN = 'down';
 const SCROLL_DIRECTION_UP = 'up';
 
@@ -95,7 +96,7 @@ export function peekHeaderLayoutForState(state: PeekHeaderScrollState): PeekHead
   }
 
   const targetCollapsed = state.accumulatedDelta > 0;
-  const progress = Math.min(1, Math.abs(state.accumulatedDelta) / SCROLL_SNAP_THRESHOLD_PX);
+  const progress = smoothstep(Math.min(1, Math.abs(state.accumulatedDelta) / PEEK_PROGRESS_DISTANCE_PX));
   const startProgress = progressForCollapsedState(state.gestureStartCollapsed);
   const targetProgress = progressForCollapsedState(targetCollapsed);
 
@@ -177,7 +178,7 @@ function handlePeekHeaderScroll(event: UIEvent<HTMLElement>) {
     { maxScrollTop: Math.max(0, scroller.scrollHeight - scroller.clientHeight) },
   );
   writeScrollState(scroller, nextState);
-  schedulePeekHeaderLayout(scroller, peekHeaderLayoutForState(nextState), false);
+  schedulePeekHeaderLayout(scroller, peekHeaderLayoutForState(nextState), currentState.collapsed !== nextState.collapsed);
   scheduleScrollEnd(scroller);
 }
 
@@ -295,6 +296,10 @@ function progressForCollapsedState(collapsed: boolean) {
 
 function interpolate(start: number, end: number, progress: number) {
   return start + (end - start) * progress;
+}
+
+function smoothstep(progress: number) {
+  return progress * progress * (3 - 2 * progress);
 }
 
 function requestPeekHeaderFrame(callback: FrameRequestCallback) {

@@ -30,7 +30,7 @@ test('peek header scroll policy exposes intermediate layout before accumulated t
   assert.equal(second.lastScrollTop, 41);
   assert.equal(second.accumulatedDelta, 41);
   assert.equal(second.gestureStartCollapsed, false);
-  assert.equal(layout.progress, 0.5);
+  assert.equal(layout.progress, 0.15625);
   assert.equal(layout.collapsed, false);
   assert.equal(layout.isTrackingGesture, true);
 });
