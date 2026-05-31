@@ -14,7 +14,8 @@ import type {
 
 const rankingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 const rankingCanvasMinHeight = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) * 852 / 393)';
-const viewerRankCardTop = `min(693px, calc((100dvh - var(--qling-space-nav-height) - 79px) / (${rankingCanvasScale})))`;
+const rankingSheetReadyHeight = `min(452px, max(372px, calc((100dvh - var(--qling-space-nav-height)) / (${rankingCanvasScale}) - 400px)))`;
+const viewerRankCardTop = `min(773px, calc((100dvh - var(--qling-space-nav-height) - 79px) / (${rankingCanvasScale})))`;
 const qlingNotoSansKrStyle = { fontFamily: '"Qling Noto Sans KR"' } as const;
 
 const rankingAssetUrlByName = {
@@ -281,10 +282,13 @@ function RankingSheet({
 }) {
   const rows = period?.entries.filter(entry => entry.rank >= 4).slice(0, 7) ?? [];
   return (
-    <section className={cn(
-      'absolute left-0 w-full rounded-t-[26px] bg-white shadow-[0_-5px_8px_rgb(128_87_33/0.1)]',
-      loading ? 'top-[400px] h-[452px]' : 'top-[400px] h-[372px]',
-    )}>
+    <section
+      className={cn(
+        'absolute left-0 w-full rounded-t-[26px] bg-white shadow-[0_-5px_8px_rgb(128_87_33/0.1)]',
+        loading ? 'top-[400px] h-[452px]' : 'top-[400px]',
+      )}
+      style={loading ? undefined : { height: rankingSheetReadyHeight }}
+    >
       {loading ? (
         <FigmaTabLoading label="순위를 불러오는 중" className="left-[177px] top-[73px] translate-x-0" />
       ) : (

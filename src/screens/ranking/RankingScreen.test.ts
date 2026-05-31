@@ -174,7 +174,15 @@ test('viewer rank card stays above the shell bottom navigation on shorter iPhone
   assert.match(html, /aria-label="내 순위 24위"/);
   assert.doesNotMatch(html, /chevron-right\.svg/);
   assert.doesNotMatch(html, /top-\[693px\]/);
-  assert.match(html, /top:min\(693px, calc\(\(100dvh - var\(--qling-space-nav-height\) - 79px\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\)\)/);
+  assert.match(html, /top:min\(773px, calc\(\(100dvh - var\(--qling-space-nav-height\) - 79px\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\)\)/);
+});
+
+test('ready ranking sheet stretches toward the bottom navigation on taller viewports', () => {
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
+
+  assert.match(html, /전체 랭킹/);
+  assert.doesNotMatch(html, /top-\[400px\] h-\[372px\]/);
+  assert.match(html, /style="height:min\(452px, max\(372px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 400px\)\)\)"/);
 });
 
 test('ranking loading state uses the same width-only canvas scale', () => {
