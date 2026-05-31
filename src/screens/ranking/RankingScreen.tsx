@@ -1,4 +1,4 @@
-import { UserRound } from 'lucide-react';
+import { CircleUserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
@@ -12,7 +12,18 @@ import type {
   ViewerRankingDisplayEntry,
 } from './contract';
 
-const rankingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+const rankingCanvasScale = 'min(calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px), calc((100dvh - var(--qling-space-nav-height) - var(--qling-space-safe-bottom)) / 772px))';
+
+const rankingAssetUrlByName = {
+  crownFirst: new URL('../../../assets/ranking/crown-first.svg', import.meta.url).href,
+  crownSecond: new URL('../../../assets/ranking/crown-second.svg', import.meta.url).href,
+  crownThird: new URL('../../../assets/ranking/crown-third.svg', import.meta.url).href,
+  heart: new URL('../../../assets/ranking/heart.svg', import.meta.url).href,
+  heartLight: new URL('../../../assets/ranking/heart-white.svg', import.meta.url).href,
+  rankUp: new URL('../../../assets/ranking/rank-up.svg', import.meta.url).href,
+  rankDown: new URL('../../../assets/ranking/rank-down.svg', import.meta.url).href,
+  chevronRight: new URL('../../../assets/ranking/chevron-right.svg', import.meta.url).href,
+} as const;
 
 export function RankingScreen(props: RankingScreenProps) {
   const [mode, setMode] = useState<RankingMode>('monthly');
@@ -68,7 +79,7 @@ function RankingFrame({ children }: { readonly children: ReactNode }) {
   return (
     <section
       aria-label="순위"
-      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d] qling-figma-font"
+      className="-mx-[var(--qling-space-shell-x)] -mt-6 h-full min-h-0 overflow-hidden bg-[#ff8b3d] qling-figma-font"
     >
       <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden" data-measure="ranking-responsive-canvas">
         <div
@@ -108,9 +119,9 @@ function RankingHero({
         type="button"
         aria-label="마이페이지"
         onClick={onOpenMyPage}
-        className="absolute left-[336px] top-[52px] flex h-[36px] w-[36px] items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+        className="absolute left-[333.5px] top-[53.5px] flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
       >
-        <UserRound className="h-[25px] w-[25px]" strokeWidth={2.1} aria-hidden="true" />
+        <CircleUserRound className="h-[25px] w-[25px]" aria-hidden="true" />
       </button>
       <SegmentedControl mode={mode} onChange={onChange} disabled={loading} />
     </div>
@@ -188,21 +199,24 @@ function TopRank({
   const layout = {
     first: {
       avatar: 'left-[163px] top-[200px] h-[69px] w-[69px]',
-      crown: 'left-[177px] top-[170px] h-0 w-0 border-l-[21px] border-r-[21px] border-b-[24px] border-l-transparent border-r-transparent border-b-[#ffd956]',
+      crown: 'left-[177px] top-[170px] h-6 w-[42px]',
+      crownUrl: rankingAssetUrlByName.crownFirst,
       name: 'left-[136px] top-[274px] w-[120px] text-[15px] leading-5',
       hearts: 'left-[172px] top-[296px]',
       shadow: 'left-[171px] top-[252px] h-[23px] w-[53px]',
     },
     second: {
       avatar: 'left-[50px] top-[230px] h-[52px] w-[52px]',
-      crown: 'left-[61px] top-[209px] h-0 w-0 border-l-[15px] border-r-[15px] border-b-[17px] border-l-transparent border-r-transparent border-b-[#ffd956]',
+      crown: 'left-[61px] top-[209px] h-[17px] w-[30px]',
+      crownUrl: rankingAssetUrlByName.crownSecond,
       name: 'left-[16px] top-[290px] w-[120px] text-[13px] leading-[17px]',
       hearts: 'left-[56px] top-[312px]',
       shadow: 'left-[55px] top-[269px] h-[18px] w-[42px]',
     },
     third: {
       avatar: 'left-[289px] top-[245px] h-[52px] w-[52px]',
-      crown: 'left-[301px] top-[223px] h-0 w-0 border-l-[15px] border-r-[15px] border-b-[17px] border-l-transparent border-r-transparent border-b-[#8a4d1f]',
+      crown: 'left-[301px] top-[223px] h-[17px] w-[30px]',
+      crownUrl: rankingAssetUrlByName.crownThird,
       name: 'left-[255px] top-[305px] w-[120px] text-[13px] leading-[17px]',
       hearts: 'left-[298px] top-[327px]',
       shadow: 'left-[294px] top-[284px] h-[18px] w-[42px]',
@@ -213,7 +227,7 @@ function TopRank({
   return (
     <div className="absolute left-0 top-0 z-10 text-center text-white" data-measure={`ranking-top-${place}`}>
       <div className={cn('absolute rounded-[50%] bg-[#b35a1c]/35 blur-[0.2px]', item.shadow)} />
-      <div className={cn('absolute', item.crown)} />
+      <img src={item.crownUrl} alt="" className={cn('absolute block', item.crown)} />
       <img
         src={profileImageUrlForColor(entry.profileColor)}
         alt=""
@@ -221,7 +235,7 @@ function TopRank({
         data-measure={`ranking-profile-${place}`}
       />
       <div className={cn('absolute truncate font-bold font-["Qling_Noto_Sans_KR"]', item.name)}>{entry.nickname || '-'}</div>
-      <HeartCount className={cn('absolute text-white', item.hearts)} heartCount={entry.heartCount} />
+      <HeartCount className={cn('absolute text-white', item.hearts)} heartCount={entry.heartCount} size="small" tone="light" />
     </div>
   );
 }
@@ -257,18 +271,16 @@ function RankingSheet({
 }) {
   const rows = period?.entries.filter(entry => entry.rank >= 4).slice(0, 7) ?? [];
   return (
-    <section className="absolute left-0 top-[400px] h-[372px] w-full rounded-t-[26px] bg-white shadow-[0_-5px_8px_rgb(128_87_33/0.1)]">
+    <section className={cn(
+      'absolute left-0 w-full rounded-t-[26px] bg-white shadow-[0_-5px_8px_rgb(128_87_33/0.1)]',
+      loading ? 'top-[380px] h-[392px]' : 'top-[400px] h-[372px]',
+    )}>
       <h2 className="absolute left-5 top-5 text-[14px] font-bold leading-[18px] text-[#191f28] font-['Qling_Noto_Sans_KR']">
         전체 랭킹
       </h2>
-      <div className="absolute right-[34px] top-[22px] text-right text-[12px] font-medium leading-4 text-[#8b95a1] font-['Qling_Noto_Sans_KR']">
+      <div className="absolute left-[373px] top-[22px] w-[120px] -translate-x-full text-right text-[12px] font-medium leading-4 text-[#8b95a1] font-['Qling_Noto_Sans_KR']">
         받은 ♥ 기준
       </div>
-      <span className="absolute right-[18px] top-[24px] h-[13px] w-[3px]" aria-hidden="true">
-        <span className="absolute left-0 top-0 h-[3px] w-[3px] rounded-full bg-[#8b95a1]" />
-        <span className="absolute left-0 top-[5px] h-[3px] w-[3px] rounded-full bg-[#8b95a1]" />
-        <span className="absolute left-0 top-[10px] h-[3px] w-[3px] rounded-full bg-[#8b95a1]" />
-      </span>
       {loading ? (
         <LoadingSpinner />
       ) : rows.length > 0 ? (
@@ -328,15 +340,34 @@ function ViewerRankCard({
       </span>
       <HeartCount className="shrink-0 text-[#191f28]" heartCount={viewer.heartCount} />
       <RankDelta value={viewer.rankDelta} compact />
-      <span className="text-[24px] leading-none text-[#c5ccd3]" aria-hidden="true">›</span>
+      <img src={rankingAssetUrlByName.chevronRight} alt="" className="h-[10px] w-[5px] shrink-0" aria-hidden="true" />
     </div>
   );
 }
 
-function HeartCount({ heartCount, className }: { readonly heartCount: number; readonly className?: string }) {
+function HeartCount({
+  heartCount,
+  className,
+  size = 'default',
+  tone = 'dark',
+}: {
+  readonly heartCount: number;
+  readonly className?: string;
+  readonly size?: 'default' | 'small';
+  readonly tone?: 'dark' | 'light';
+}) {
   return (
-    <span className={cn('inline-flex items-center gap-1 overflow-hidden text-[13px] font-bold leading-[17px] font-["Qling_Noto_Sans_KR"]', className)}>
-      <span className="text-[#ff4b68]" aria-hidden="true">♥</span>
+    <span className={cn(
+      'inline-flex items-center overflow-hidden font-bold font-["Qling_Noto_Sans_KR"]',
+      size === 'small' ? 'gap-1 text-[13px] leading-[17px]' : 'gap-[5px] text-[15px] leading-5',
+      className,
+    )}>
+      <img
+        src={tone === 'light' ? rankingAssetUrlByName.heartLight : rankingAssetUrlByName.heart}
+        alt=""
+        className={cn('shrink-0', size === 'small' ? 'h-3 w-[13px]' : 'h-[13.3px] w-[14px]')}
+        aria-hidden="true"
+      />
       <span>{heartCount}</span>
     </span>
   );
@@ -350,17 +381,23 @@ function RankDelta({
   readonly compact?: boolean;
 }) {
   if (value === 0) {
-    return <span className={cn('shrink-0 text-center text-[13px] font-bold text-[#c5ccd3]', compact ? 'w-6' : 'w-9')}>-</span>;
+    return <span className={cn('shrink-0 text-center text-[13px] font-bold leading-[17px] text-[#c5ccd3]', compact ? 'w-6' : 'w-9')}>–</span>;
   }
 
   const isUp = value > 0;
   return (
     <span className={cn(
-      'shrink-0 text-right text-[11px] font-bold leading-[14px] font-["Qling_Noto_Sans_KR"]',
-      compact ? 'w-7' : 'w-9',
+      'inline-flex h-4 shrink-0 items-center justify-end gap-0.5 overflow-hidden text-right text-[11px] font-bold leading-[14px] font-["Qling_Noto_Sans_KR"]',
+      compact ? '' : 'w-9',
       isUp ? 'text-[#f2664b]' : 'text-[#3182f6]',
     )}>
-      {isUp ? '▲' : '▼'} {Math.abs(value)}
+      <img
+        src={isUp ? rankingAssetUrlByName.rankUp : rankingAssetUrlByName.rankDown}
+        alt=""
+        className="h-[7px] w-[10px] shrink-0"
+        aria-hidden="true"
+      />
+      <span>{Math.abs(value)}</span>
     </span>
   );
 }
