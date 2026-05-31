@@ -212,7 +212,7 @@ function TopRank({
       crown: 'left-[177px] top-[170px] h-6 w-[42px]',
       crownUrl: rankingAssetUrlByName.crownFirst,
       name: 'left-[136px] top-[274px] w-[120px] text-[15px] leading-5',
-      hearts: 'left-[172px] top-[296px]',
+      hearts: 'left-[136px] top-[296px] w-[120px]',
       ellipse: 'left-[171px] top-[252px] h-[23px] w-[53px]',
       ellipseUrl: rankingAssetUrlByName.bigEllipse,
     },
@@ -221,7 +221,7 @@ function TopRank({
       crown: 'left-[61px] top-[209px] h-[17px] w-[30px]',
       crownUrl: rankingAssetUrlByName.crownSecond,
       name: 'left-[16px] top-[290px] w-[120px] text-[13px] leading-[17px]',
-      hearts: 'left-[56px] top-[312px]',
+      hearts: 'left-[16px] top-[312px] w-[120px]',
       ellipse: 'left-[55px] top-[269px] h-[18px] w-[42px]',
       ellipseUrl: rankingAssetUrlByName.smallEllipse,
     },
@@ -230,7 +230,7 @@ function TopRank({
       crown: 'left-[301px] top-[223px] h-[17px] w-[30px]',
       crownUrl: rankingAssetUrlByName.crownThird,
       name: 'left-[255px] top-[305px] w-[120px] text-[13px] leading-[17px]',
-      hearts: 'left-[298px] top-[327px]',
+      hearts: 'left-[255px] top-[327px] w-[120px]',
       ellipse: 'left-[294px] top-[284px] h-[18px] w-[42px]',
       ellipseUrl: rankingAssetUrlByName.smallEllipse,
     },
@@ -240,19 +240,17 @@ function TopRank({
   return (
     <div className="pointer-events-none absolute left-0 top-0 z-10 h-[406px] w-[393px] text-center text-white" data-measure={`ranking-top-${place}`}>
       <img src={item.ellipseUrl} alt="" aria-hidden="true" className={cn('absolute block max-w-none', item.ellipse)} />
+      <img src={item.crownUrl} alt="" className={cn('absolute block max-w-none', item.crown)} />
       {entry && (
-        <>
-          <img src={item.crownUrl} alt="" className={cn('absolute block max-w-none', item.crown)} />
-          <img
-            src={profileImageUrlForColor(entry.profileColor)}
-            alt=""
-            className={cn('absolute max-w-none rounded-full', item.avatar)}
-            data-measure={`ranking-profile-${place}`}
-          />
-          <div className={cn('absolute truncate font-bold', item.name)} style={qlingNotoSansKrStyle}>{entry.nickname || '-'}</div>
-          <HeartCount className={cn('absolute text-white', item.hearts)} heartCount={entry.heartCount} size="small" tone="light" />
-        </>
+        <img
+          src={profileImageUrlForColor(entry.profileColor)}
+          alt=""
+          className={cn('absolute max-w-none rounded-full', item.avatar)}
+          data-measure={`ranking-profile-${place}`}
+        />
       )}
+      <div className={cn('absolute truncate font-bold', item.name)} style={qlingNotoSansKrStyle}>{entry?.nickname || '-'}</div>
+      <HeartCount className={cn('absolute justify-center text-white', item.hearts)} heartCount={entry?.heartCount ?? '-'} size="small" tone="light" />
     </div>
   );
 }
@@ -368,7 +366,7 @@ function HeartCount({
   size = 'default',
   tone = 'dark',
 }: {
-  readonly heartCount: number;
+  readonly heartCount: number | string;
   readonly className?: string;
   readonly size?: 'default' | 'small';
   readonly tone?: 'dark' | 'light';

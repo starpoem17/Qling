@@ -97,7 +97,7 @@ test('ranking text preserves Figma font weights after class merging', () => {
   })));
 
   assert.match(html, /class="absolute truncate font-bold left-\[136px\] top-\[274px\] w-\[120px\] text-\[15px\] leading-5" style="font-family:&quot;Qling Noto Sans KR&quot;">User 1/);
-  assert.match(html, /class="inline-flex items-center overflow-hidden font-bold gap-1 text-\[13px\] leading-\[17px\] absolute text-white left-\[172px\] top-\[296px\]" style="font-family:&quot;Qling Noto Sans KR&quot;/);
+  assert.match(html, /class="inline-flex items-center overflow-hidden font-bold gap-1 text-\[13px\] leading-\[17px\] absolute justify-center text-white left-\[136px\] top-\[296px\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;/);
   assert.match(html, /class="block truncate text-\[15px\] font-medium leading-5 text-\[#191f28\]" style="font-family:&quot;Qling Noto Sans KR&quot;">User 4/);
   assert.match(html, /class="mt-0\.5 block truncate text-\[11\.5px\] font-medium leading-\[15px\] text-\[#8b95a1\]" style="font-family:&quot;Qling Noto Sans KR&quot;">답변 4 · 채택 0/);
   assert.match(html, /class="inline-flex items-center overflow-hidden font-bold gap-\[5px\] text-\[15px\] leading-5 shrink-0 text-\[#191f28\]" style="font-family:&quot;Qling Noto Sans KR&quot;/);
@@ -129,7 +129,7 @@ test('top ranking avatars and crowns are present in static markup', () => {
   assert.match(source, /left-\[261px\] top-7 h-\[52px\] w-\[108px\] rounded-t-\[16px\] bg-white\/20/);
 });
 
-test('empty second and third podium slots keep only ellipses', () => {
+test('empty second and third podium slots keep crowns ellipses and dash labels without avatars', () => {
   const rankings = period();
   const entries = rankings.entries.filter(item => item.rank !== 2 && item.rank !== 3);
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps({
@@ -149,8 +149,12 @@ test('empty second and third podium slots keep only ellipses', () => {
   assert.doesNotMatch(html, /data-measure="ranking-profile-third"/);
   assert.match(html, /absolute block max-w-none left-\[55px\] top-\[269px\] h-\[18px\] w-\[42px\]/);
   assert.match(html, /absolute block max-w-none left-\[294px\] top-\[284px\] h-\[18px\] w-\[42px\]/);
-  assert.doesNotMatch(html, /crown-second\.svg/);
-  assert.doesNotMatch(html, /crown-third\.svg/);
+  assert.match(html, /crown-second\.svg/);
+  assert.match(html, /crown-third\.svg/);
+  assert.match(html, /left-\[16px\] top-\[290px\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">-/);
+  assert.match(html, /left-\[255px\] top-\[305px\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">-/);
+  assert.match(html, /left-\[16px\] top-\[312px\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>-/);
+  assert.match(html, /left-\[255px\] top-\[327px\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>-/);
   assert.doesNotMatch(html, />User 2</);
   assert.doesNotMatch(html, />User 3</);
 });
