@@ -148,7 +148,7 @@
 
 .qling-write-form-main {
   padding: 0;
-  overflow: hidden;
+  overflow-y: auto;
   overscroll-behavior: contain;
   background: #fff1d1;
   -webkit-overflow-scrolling: touch;

@@ -88,15 +88,16 @@ test('write reply textarea starts at the visual placeholder position', () => {
   assert.doesNotMatch(html, /pt-\[63px\]/);
 });
 
-test('write reply screen uses Figma canvas positions without legacy scroll-bottom spacing', () => {
+test('write reply screen uses Figma canvas positions while keeping the send button above the shell bottom nav', () => {
   const html = renderToStaticMarkup(WriteFormScreen(baseProps()));
 
   assert.match(html, /w-\[393px\]/);
   assert.match(html, /h-\[852px\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.match(html, /min-height:calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \* 852 \/ 393\)/);
   assert.match(html, /top-\[227px\]/);
-  assert.match(html, /h-\[434px\]/);
-  assert.match(html, /top-\[684px\]/);
+  assert.match(html, /height:min\(434px, max\(240px, calc\(min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 88px\)\) - 250px\)\)\)/);
+  assert.match(html, /top:min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 88px\)\)/);
   assert.doesNotMatch(html, /100dvh-var\(--qling-space-scroll-bottom\)/);
   assert.doesNotMatch(html, /mt-6 flex h-12 w-\[267px\]/);
 });

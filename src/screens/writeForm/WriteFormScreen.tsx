@@ -2,19 +2,29 @@ import { ChevronDown, Pencil } from 'lucide-react';
 import { FigmaTopBar } from '../shared/ui';
 import type { WriteFormScreenProps } from './contract';
 
+const writeCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+const writeCanvasMinHeight = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) * 852 / 393)';
+const sendButtonTop = `min(684px, calc((100dvh - var(--qling-space-nav-height)) / (${writeCanvasScale}) - 88px))`;
+const inputAreaHeight = `min(434px, max(240px, calc(${sendButtonTop} - 250px)))`;
+
 export function WriteFormScreen(props: WriteFormScreenProps) {
   const isDisabled = Boolean(props.draft.submitDisabledReason);
   const validationMessage = props.draft.validation.status === 'invalid' && props.draft.value !== ''
     ? props.draft.validation.message
     : undefined;
-  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 
   return (
-    <section className="-mb-[var(--qling-space-scroll-bottom)] h-dvh overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+    <section
+      className="h-full min-h-0 overflow-hidden bg-[#fff1d1] text-[#2a2a2a]"
+      style={{ minHeight: writeCanvasMinHeight }}
+    >
+      <div
+        className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"
+        style={{ minHeight: writeCanvasMinHeight }}
+      >
         <div
           className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1]"
-          style={{ transform: `scale(${canvasScale})` }}
+          style={{ transform: `scale(${writeCanvasScale})` }}
         >
       {FigmaTopBar({ title: '답변 작성', onBack: props.onBack, backLabel: '답변하기로 돌아가기' })}
 
@@ -43,7 +53,10 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
         </button>
       </section>
 
-      <label className="absolute left-5 right-5 top-[227px] block h-[434px] overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]">
+      <label
+        className="absolute left-5 right-5 top-[227px] block overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
+        style={{ height: inputAreaHeight }}
+      >
         <span className="sr-only">답변 작성</span>
         <textarea
           value={props.draft.value}
@@ -83,7 +96,8 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           deliveryId: props.originalWorry.deliveryId,
           worryId: props.originalWorry.worryId,
         })}
-        className="absolute left-1/2 top-[684px] flex h-12 w-[267px] -translate-x-1/2 items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold leading-5 text-[#fff5eb] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-1/2 flex h-12 w-[267px] -translate-x-1/2 items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold leading-5 text-[#fff5eb] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
+        style={{ top: sendButtonTop }}
       >
         답변 전송
       </button>
