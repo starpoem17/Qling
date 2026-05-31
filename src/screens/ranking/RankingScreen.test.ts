@@ -81,6 +81,29 @@ test('ranking segmented control preserves Figma font weights after class merging
   assert.match(source, /mode === 'total' \? 'font-bold text-\[#f26c0f\]' : 'font-medium text-white'/);
 });
 
+test('ranking text preserves Figma font weights after class merging', () => {
+  const rankings = period();
+  const entries = rankings.entries.map(item => item.rank === 4 ? { ...item, rankDelta: 2 } : item);
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps({
+    state: {
+      status: 'ready',
+      monthly: { ...rankings, entries },
+      total: { ...rankings, entries },
+      season: {
+        monthLabel: '5월 시즌',
+        daysUntilMonthEnd: 1,
+      },
+    },
+  })));
+
+  assert.match(html, /class="absolute truncate font-bold left-\[136px\] top-\[274px\] w-\[120px\] text-\[15px\] leading-5" style="font-family:&quot;Qling Noto Sans KR&quot;">User 1/);
+  assert.match(html, /class="inline-flex items-center overflow-hidden font-bold gap-1 text-\[13px\] leading-\[17px\] absolute text-white left-\[172px\] top-\[296px\]" style="font-family:&quot;Qling Noto Sans KR&quot;/);
+  assert.match(html, /class="block truncate text-\[15px\] font-medium leading-5 text-\[#191f28\]" style="font-family:&quot;Qling Noto Sans KR&quot;">User 4/);
+  assert.match(html, /class="mt-0\.5 block truncate text-\[11\.5px\] font-medium leading-\[15px\] text-\[#8b95a1\]" style="font-family:&quot;Qling Noto Sans KR&quot;">답변 4 · 채택 0/);
+  assert.match(html, /class="inline-flex items-center overflow-hidden font-bold gap-\[5px\] text-\[15px\] leading-5 shrink-0 text-\[#191f28\]" style="font-family:&quot;Qling Noto Sans KR&quot;/);
+  assert.match(html, /class="inline-flex h-4 shrink-0 items-center justify-end gap-0\.5 overflow-hidden text-right text-\[11px\] font-bold leading-\[14px\] w-9 text-\[#f2664b\]" style="font-family:&quot;Qling Noto Sans KR&quot;/);
+});
+
 test('top ranking avatars and crowns are present in static markup', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
 

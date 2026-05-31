@@ -15,6 +15,7 @@ import type {
 const rankingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 const rankingCanvasMinHeight = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) * 852 / 393)';
 const viewerRankCardTop = `min(693px, calc((100dvh - var(--qling-space-nav-height) - 79px) / (${rankingCanvasScale})))`;
+const qlingNotoSansKrStyle = { fontFamily: '"Qling Noto Sans KR"' } as const;
 
 const rankingAssetUrlByName = {
   crownFirst: new URL('../../../assets/ranking/crown-first.svg', import.meta.url).href,
@@ -164,7 +165,7 @@ function SegmentedControl({
           'absolute left-1 top-1 h-9 w-[114px] rounded-full text-center text-[13px] leading-[17px] transition-colors focus:outline-none focus:ring-2 focus:ring-white disabled:cursor-default',
           mode === 'monthly' ? 'font-bold text-[#f26c0f]' : 'font-medium text-white',
         )}
-        style={{ fontFamily: '"Qling Noto Sans KR"' }}
+        style={qlingNotoSansKrStyle}
         data-measure="ranking-segmented-monthly"
       >
         이 달의 순위
@@ -178,7 +179,7 @@ function SegmentedControl({
           'absolute left-[118px] top-1 h-9 w-[114px] rounded-full text-center text-[13px] leading-[17px] transition-colors focus:outline-none focus:ring-2 focus:ring-white disabled:cursor-default',
           mode === 'total' ? 'font-bold text-[#f26c0f]' : 'font-medium text-white',
         )}
-        style={{ fontFamily: '"Qling Noto Sans KR"' }}
+        style={qlingNotoSansKrStyle}
         data-measure="ranking-segmented-total"
       >
         누적 순위
@@ -248,7 +249,7 @@ function TopRank({
         className={cn('absolute max-w-none rounded-full', item.avatar)}
         data-measure={`ranking-profile-${place}`}
       />
-      <div className={cn('absolute truncate font-bold font-["Qling_Noto_Sans_KR"]', item.name)}>{entry.nickname || '-'}</div>
+      <div className={cn('absolute truncate font-bold', item.name)} style={qlingNotoSansKrStyle}>{entry.nickname || '-'}</div>
       <HeartCount className={cn('absolute text-white', item.hearts)} heartCount={entry.heartCount} size="small" tone="light" />
     </div>
   );
@@ -318,8 +319,8 @@ function RankingRow({ entry }: { readonly entry: RankingDisplayEntry }) {
       </span>
       <img src={profileImageUrlForColor(entry.profileColor)} alt="" className="h-[38px] w-[38px] shrink-0 rounded-full" />
       <span className="min-w-0 flex-1 overflow-hidden">
-        <span className="block truncate text-[15px] font-medium leading-5 text-[#191f28] font-['Qling_Noto_Sans_KR']">{entry.nickname}</span>
-        <span className="mt-0.5 block truncate text-[11.5px] font-normal leading-[15px] text-[#8b95a1] font-['Qling_Noto_Sans_KR']">
+        <span className="block truncate text-[15px] font-medium leading-5 text-[#191f28]" style={qlingNotoSansKrStyle}>{entry.nickname}</span>
+        <span className="mt-0.5 block truncate text-[11.5px] font-medium leading-[15px] text-[#8b95a1]" style={qlingNotoSansKrStyle}>
           답변 {entry.replyCount} · 채택 {entry.adoptedCount}
         </span>
       </span>
@@ -373,10 +374,10 @@ function HeartCount({
 }) {
   return (
     <span className={cn(
-      'inline-flex items-center overflow-hidden font-bold font-["Qling_Noto_Sans_KR"]',
+      'inline-flex items-center overflow-hidden font-bold',
       size === 'small' ? 'gap-1 text-[13px] leading-[17px]' : 'gap-[5px] text-[15px] leading-5',
       className,
-    )}>
+    )} style={qlingNotoSansKrStyle}>
       <img
         src={tone === 'light' ? rankingAssetUrlByName.heartLight : rankingAssetUrlByName.heart}
         alt=""
@@ -396,16 +397,16 @@ function RankDelta({
   readonly compact?: boolean;
 }) {
   if (value === 0) {
-    return <span className={cn('shrink-0 text-center text-[13px] font-bold leading-[17px] text-[#c5ccd3]', compact ? 'w-6' : 'w-9')}>–</span>;
+    return <span className={cn('shrink-0 text-center text-[13px] font-bold leading-[17px] text-[#c5ccd3]', compact ? 'w-6' : 'w-9')} style={qlingNotoSansKrStyle}>–</span>;
   }
 
   const isUp = value > 0;
   return (
     <span className={cn(
-      'inline-flex h-4 shrink-0 items-center justify-end gap-0.5 overflow-hidden text-right text-[11px] font-bold leading-[14px] font-["Qling_Noto_Sans_KR"]',
+      'inline-flex h-4 shrink-0 items-center justify-end gap-0.5 overflow-hidden text-right text-[11px] font-bold leading-[14px]',
       compact ? '' : 'w-9',
       isUp ? 'text-[#f2664b]' : 'text-[#3182f6]',
-    )}>
+    )} style={qlingNotoSansKrStyle}>
       <img
         src={isUp ? rankingAssetUrlByName.rankUp : rankingAssetUrlByName.rankDown}
         alt=""
