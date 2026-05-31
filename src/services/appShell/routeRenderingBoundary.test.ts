@@ -125,10 +125,10 @@ test('locks App main scrolling for fixed-canvas routes', () => {
   const source = fs.readFileSync('src/App.tsx', 'utf8');
 
   assert.match(source, /routeBoundary\.mainScrollMode === 'document' && 'overflow-y-auto'/);
-  assert.match(source, /currentRoute === '순위' \|\| currentRoute === 'ranking' \|\| currentRoute === 'privacy_policy'[\s\S]*\? 'overflow-hidden'/);
+  assert.match(source, /currentRoute === '순위' \|\| currentRoute === 'ranking' \|\| currentRoute === 'privacy_policy' \|\| currentRoute === '마이페이지' \|\| currentRoute === 'my_page'[\s\S]*\? 'overflow-hidden'/);
   assert.ok(
     source.indexOf("routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto'")
-      < source.indexOf("currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy'"),
+      < source.indexOf("currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page'"),
   );
 });
 

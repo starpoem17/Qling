@@ -327,7 +327,7 @@ export default function App() {
               ? 'px-0 pt-0 pb-0 overflow-hidden bg-[#ff8b0d]'
               : 'pt-6',
             routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto',
-            currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy'
+            currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page'
               ? 'overflow-hidden'
               : undefined,
           ],

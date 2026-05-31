@@ -55,7 +55,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
   return (
     <section
       aria-label="마이페이지"
-      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-safe-bottom)] -mt-6 h-full min-h-[calc(100dvh-var(--qling-space-nav-height))] overflow-y-auto overflow-x-hidden bg-[#ff8b3d] text-[#1a1a1e] [-webkit-overflow-scrolling:touch]"
+      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-safe-bottom)] -mt-6 h-full min-h-[calc(100dvh-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d] text-[#1a1a1e]"
     >
       <div
         className="mx-auto flex w-full max-w-[480px] justify-center"

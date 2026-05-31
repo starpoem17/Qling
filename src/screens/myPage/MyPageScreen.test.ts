@@ -93,10 +93,11 @@ test('my-page renders colored profile svg at the existing profile image size', (
   assert.doesNotMatch(html, /aria-label="프로필 모티프" role="img"/);
 });
 
-test('my-page root uses a scaled Figma canvas with internal vertical scroll', () => {
+test('my-page root uses a fixed scaled Figma canvas without internal vertical scroll', () => {
   const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps()));
 
-  assert.match(html, /overflow-y-auto/);
+  assert.doesNotMatch(html, /overflow-y-auto/);
+  assert.match(html, /overflow-hidden/);
   assert.match(html, /data-measure="my-page-responsive-canvas"/);
   assert.match(html, /data-measure="my-page-screen"/);
   assert.match(html, /h-\[756px\] w-\[393px\]/);
