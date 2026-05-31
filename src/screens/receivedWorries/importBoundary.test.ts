@@ -65,11 +65,13 @@ test('received-worries container keeps service imports in the allowed boundary',
 
 test('received-worries top-left eye is presentational and my-page action is explicit', () => {
   const source = fs.readFileSync(presentationalScreenPath, 'utf8');
+  const sharedHeaderSource = fs.readFileSync(path.join(process.cwd(), 'src/screens/shared/QlingPeekHeader.tsx'), 'utf8');
 
-  assert.match(source, /role="presentation"/);
-  assert.match(source, /aria-hidden="true"/);
-  assert.match(source, /aria-label="마이페이지 열기"/);
-  assert.match(source, /onClick=\{props\.onOpenMyPage\}/);
+  assert.match(sharedHeaderSource, /role="presentation"/);
+  assert.match(sharedHeaderSource, /aria-hidden="true"/);
+  assert.match(sharedHeaderSource, /aria-label="마이페이지 열기"/);
+  assert.match(source, /QlingPeekHeader/);
+  assert.match(source, /onOpenMyPage=\{props\.onOpenMyPage\}/);
   assert.doesNotMatch(source, /10:46|status bar|battery|network|home indicator/);
 });
 

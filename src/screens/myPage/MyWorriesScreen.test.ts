@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Children, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { QlingPeekHeader } from '../shared/QlingPeekHeader';
 import { MyWorriesScreen } from './MyWorriesScreen';
 import type { MyWorriesScreenProps } from './contract';
 
@@ -70,11 +71,14 @@ test('my worries screen actions match PRD entry points', () => {
     },
   }));
 
-  const eye = findElementByTestId(tree, 'my-worries-top-left-eye');
-  assert.equal(eye.type, 'div');
-  assert.equal(typeof propsOf(eye).onClick, 'undefined');
+  const eye = findElement(tree, candidate => candidate.type === QlingPeekHeader);
+  assert.ok(eye);
+  assert.equal(eye.type, QlingPeekHeader);
+  assert.equal(propsOf(eye).eyeTestId, 'my-worries-top-left-eye');
 
-  click(findButtonByAriaLabel(tree, /마이페이지 열기/));
+  const openMyPage = propsOf(eye).onOpenMyPage;
+  assert.equal(typeof openMyPage, 'function');
+  (openMyPage as () => void)();
   click(findButtonByAriaLabel(tree, /고민 작성 화면으로 이동/));
 
   assert.equal(openedMyPage, true);
@@ -92,11 +96,11 @@ test('my worries write button stays outside the transformed full-bleed scroll wr
 });
 
 test('my worries my-page button aligns to the Figma header icon position', () => {
-  const tree = MyWorriesScreen(baseProps());
+  const html = renderToStaticMarkup(MyWorriesScreen(baseProps()));
 
-  const button = findButtonByAriaLabel(tree, /마이페이지 열기/);
-  assert.match(String(propsOf(button).className), /left-\[333\.5px\]/);
-  assert.match(String(propsOf(button).className), /top-\[53\.5px\]/);
+  assert.match(html, /aria-label="마이페이지 열기"/);
+  assert.match(html, /left-\[333\.5px\]/);
+  assert.match(html, /top-\[53\.5px\]/);
 });
 
 test('my worries empty state uses PRD copy without a separate empty CTA', () => {
