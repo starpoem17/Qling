@@ -18,6 +18,7 @@ export type PeekHeaderScrollState = {
   accumulatedDelta: number;
   canReveal: boolean;
   gestureStartCollapsed: boolean | null;
+  gestureStartProgress: number | null;
 };
 
 export const initialPeekHeaderScrollState: PeekHeaderScrollState = {
@@ -26,6 +27,7 @@ export const initialPeekHeaderScrollState: PeekHeaderScrollState = {
   accumulatedDelta: 0,
   canReveal: false,
   gestureStartCollapsed: null,
+  gestureStartProgress: null,
 };
 
 export type PeekHeaderLayout = {
@@ -67,6 +69,7 @@ export function nextPeekHeaderScrollState(
       accumulatedDelta: 0,
       canReveal: nextScrollTop === 0,
       gestureStartCollapsed: null,
+      gestureStartProgress: null,
     };
   }
 
@@ -75,6 +78,9 @@ export function nextPeekHeaderScrollState(
   const gestureStartCollapsed = sameDirection && state.gestureStartCollapsed !== null
     ? state.gestureStartCollapsed
     : state.collapsed;
+  const gestureStartProgress = sameDirection && state.gestureStartProgress !== null
+    ? state.gestureStartProgress
+    : peekHeaderLayoutForState(state).progress;
 
   return {
     ...state,
@@ -82,6 +88,7 @@ export function nextPeekHeaderScrollState(
     accumulatedDelta,
     canReveal: nextScrollTop === 0,
     gestureStartCollapsed,
+    gestureStartProgress,
   };
 }
 
@@ -92,7 +99,7 @@ export function peekHeaderLayoutForState(state: PeekHeaderScrollState): PeekHead
 
   const targetCollapsed = state.accumulatedDelta > 0;
   const progress = smoothstep(Math.min(1, Math.abs(state.accumulatedDelta) / PEEK_PROGRESS_DISTANCE_PX));
-  const startProgress = progressForCollapsedState(state.gestureStartCollapsed);
+  const startProgress = state.gestureStartProgress ?? progressForCollapsedState(state.gestureStartCollapsed);
   const targetProgress = progressForCollapsedState(targetCollapsed);
 
   return {
@@ -110,6 +117,7 @@ export function settlePeekHeaderScrollState(state: PeekHeaderScrollState): PeekH
       accumulatedDelta: 0,
       canReveal: false,
       gestureStartCollapsed: null,
+      gestureStartProgress: null,
     };
   }
 
@@ -118,6 +126,7 @@ export function settlePeekHeaderScrollState(state: PeekHeaderScrollState): PeekH
       ...state,
       accumulatedDelta: 0,
       canReveal: false,
+      gestureStartProgress: null,
     };
   }
 
@@ -131,6 +140,7 @@ export function settlePeekHeaderScrollState(state: PeekHeaderScrollState): PeekH
     accumulatedDelta: 0,
     canReveal: false,
     gestureStartCollapsed: null,
+    gestureStartProgress: null,
   };
 }
 
@@ -229,6 +239,7 @@ function readScrollState(element: HTMLElement): PeekHeaderScrollState {
     accumulatedDelta: Number(element.dataset.qlingPeekHeaderAccumulatedDelta ?? '0'),
     canReveal: element.dataset.qlingPeekHeaderCanReveal === 'true',
     gestureStartCollapsed: readOptionalBoolean(element.dataset.qlingPeekHeaderGestureStartCollapsed),
+    gestureStartProgress: readOptionalNumber(element.dataset.qlingPeekHeaderGestureStartProgress),
   };
 }
 
@@ -241,6 +252,11 @@ function writeScrollState(element: HTMLElement, state: PeekHeaderScrollState) {
     delete element.dataset.qlingPeekHeaderGestureStartCollapsed;
   } else {
     element.dataset.qlingPeekHeaderGestureStartCollapsed = String(state.gestureStartCollapsed);
+  }
+  if (state.gestureStartProgress === null) {
+    delete element.dataset.qlingPeekHeaderGestureStartProgress;
+  } else {
+    element.dataset.qlingPeekHeaderGestureStartProgress = String(state.gestureStartProgress);
   }
 }
 
@@ -371,4 +387,10 @@ function readOptionalBoolean(value: string | undefined) {
   if (value === 'true') return true;
   if (value === 'false') return false;
   return null;
+}
+
+function readOptionalNumber(value: string | undefined) {
+  if (value === undefined) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }

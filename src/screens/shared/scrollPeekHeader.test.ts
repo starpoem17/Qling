@@ -121,6 +121,20 @@ test('peek header scroll policy resets accumulated distance when direction chang
   assert.equal(downward.gestureStartCollapsed, false);
 });
 
+test('peek header scroll policy keeps visual progress continuous when touch direction reverses', () => {
+  const partial = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 42);
+  const partialLayout = peekHeaderLayoutForState(partial);
+  const reversed = nextPeekHeaderScrollState(partial, 41);
+  const reversedLayout = peekHeaderLayoutForState(reversed);
+
+  assert.equal(partialLayout.progress, 0.5);
+  assert.equal(reversed.gestureStartProgress, 0.5);
+  assert.equal(reversed.accumulatedDelta, -1);
+  assert.equal(reversedLayout.progress < partialLayout.progress, true);
+  assert.equal(reversedLayout.progress > 0.49, true);
+  assert.equal(reversedLayout.isTrackingGesture, false);
+});
+
 test('peek header scroll policy settles below threshold back to the gesture start state', () => {
   const partial = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 21);
   const settled = settlePeekHeaderScrollState(partial);
