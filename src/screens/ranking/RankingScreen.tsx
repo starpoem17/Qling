@@ -12,7 +12,7 @@ import type {
   ViewerRankingDisplayEntry,
 } from './contract';
 
-const rankingCanvasScale = 'min(calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px), calc((100dvh - var(--qling-space-nav-height) - var(--qling-space-safe-bottom)) / 772px))';
+const rankingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 
 const rankingAssetUrlByName = {
   crownFirst: new URL('../../../assets/ranking/crown-first.svg', import.meta.url).href,
