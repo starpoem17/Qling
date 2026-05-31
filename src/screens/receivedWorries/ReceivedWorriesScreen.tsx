@@ -3,9 +3,9 @@ import type { KeyboardEvent, MouseEvent } from 'react';
 import {
   EmptyState,
   ErrorState,
-  LoadingState,
   QlingCard,
 } from '../shared/ui';
+import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import type { ReceivedWorriesScreenProps } from './contract';
 
 export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
@@ -40,7 +40,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
           type="button"
           aria-label="마이페이지 열기"
           onClick={props.onOpenMyPage}
-          className="absolute left-[333.5px] top-[50.5px] flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute left-[333.5px] top-[53.5px] flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
         >
           <CircleUserRound className="h-[25px] w-[25px]" aria-hidden="true" />
         </button>
@@ -50,10 +50,10 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
 
   if (props.state.status === 'loading') {
     return (
-      <div>
+      <div className="min-h-full bg-[#ff8b3d]">
         {header}
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-100px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
-          <LoadingState title="고민을 불러오고 있어요" message={props.state.label} />
+        <section className="qling-received-worries-font relative -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
+          <FigmaTabLoading label={props.state.label} />
         </section>
       </div>
     );
@@ -61,9 +61,9 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
 
   if (props.state.status === 'error') {
     return (
-      <div>
+      <div className="min-h-full bg-[#ff8b3d]">
         {header}
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-100px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
           <ErrorState title="답변 피드를 불러오지 못했어요" message={props.state.message} />
         </section>
       </div>
@@ -72,9 +72,9 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
 
   if (props.state.status === 'empty') {
     return (
-      <div>
+      <div className="min-h-full bg-[#ff8b3d]">
         {header}
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-100px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
           <EmptyState title={props.state.message} />
         </section>
       </div>
@@ -82,10 +82,10 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   }
 
   return (
-    <div>
+    <div className="min-h-full bg-[#ff8b3d]">
       {header}
       <section
-        className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-100px)] rounded-t-[32px] bg-[#fff1d1] px-4 pb-4 pt-5"
+        className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pb-4 pt-5"
         aria-label="받은 고민 목록"
       >
         <div className="grid gap-[14px]">

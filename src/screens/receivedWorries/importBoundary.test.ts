@@ -100,7 +100,7 @@ test('received-worries loading empty and privacy source stay PRD-scoped', () => 
   const source = fs.readFileSync(presentationalScreenPath, 'utf8');
   const contractSource = fs.readFileSync(path.join(process.cwd(), 'src/screens/receivedWorries/contract.ts'), 'utf8');
 
-  assert.match(source, /LoadingState/);
+  assert.match(source, /FigmaTabLoading/);
   assert.doesNotMatch(source, /skeleton|placeholder/i);
   assert.match(source, /<EmptyState title=\{props\.state\.message\}/);
   for (const forbidden of ['nickname', 'gender', 'age', 'interests', 'senderUid', 'authorUid', 'publisher']) {

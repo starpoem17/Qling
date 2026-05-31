@@ -104,18 +104,22 @@ test('received-worries empty state renders exact PRD copy without extra helper t
   assert.doesNotMatch(html, /고민 쓰기|다시 시도|네트워크/);
 });
 
-test('received-worries loading state renders the shared spinner status without skeleton UI', () => {
+test('received-worries loading state renders the Figma spinner status without visible copy', () => {
   const html = renderToStaticMarkup(ReceivedWorriesScreen(baseProps({
     state: { status: 'loading', label: '답변할 고민을 불러오는 중이에요.' },
     items: [],
   })));
 
   assert.match(html, /role="status"/);
-  assert.match(html, /aria-label="고민을 불러오고 있어요"/);
+  assert.match(html, /aria-live="polite"/);
+  assert.match(html, /data-testid="figma-tab-loading-indicator"/);
+  assert.match(html, /left-1\/2 top-\[306px\] h-10 w-10/);
   assert.match(html, /답변할 고민을 불러오는 중이에요\./);
+  assert.doesNotMatch(html, /고민을 불러오고 있어요/);
   assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
   assert.match(html, /h-\[100px\]/);
-  assert.match(html, /min-h-\[calc\(100%-100px\)\]/);
+  assert.match(html, /bg-\[#ff8b3d\]/);
+  assert.match(html, /min-h-\[calc\(100dvh-180px\)\]/);
   assert.doesNotMatch(html, /100dvh-120px-var\(--qling-space-nav-height\)/);
   assert.doesNotMatch(html, /100dvh-120px-var\(--qling-space-scroll-bottom\)/);
 });

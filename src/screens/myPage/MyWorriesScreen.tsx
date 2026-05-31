@@ -2,9 +2,9 @@ import { CircleUserRound, Heart, Send } from 'lucide-react';
 import {
   EmptyState,
   ErrorState,
-  LoadingState,
   QlingCard,
 } from '../shared/ui';
+import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import type { MyWorriesScreenProps } from './contract';
 
 export function MyWorriesScreen(props: MyWorriesScreenProps) {
@@ -51,31 +51,31 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
       type="button"
       aria-label="고민 작성 화면으로 이동"
       onClick={props.onWriteWorry}
-      className="fixed bottom-[calc(var(--qling-space-nav-height)+1.5rem)] left-1/2 z-40 ml-[119px] flex h-[59.5px] w-[59.5px] items-center justify-center rounded-full bg-[#ff8b3d] text-white shadow-[0_8px_18px_rgb(42_42_42/0.20)] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-white"
+      className="fixed bottom-[calc(var(--qling-space-nav-height)+29.5px)] left-1/2 z-40 ml-[105.5px] flex h-[59.5px] w-[59.5px] items-center justify-center rounded-full bg-[#ff8b3d] text-white shadow-[0_8px_18px_rgb(42_42_42/0.20)] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-white"
     >
       <Send className="h-7 w-7" aria-hidden="true" />
     </button>
   );
 
   return (
-    <div>
+    <div className="min-h-full bg-[#ff8b3d]">
       {header}
 
       {props.state.status === 'loading' ? (
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-100px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
-          <LoadingState title="나의 고민을 불러오는 중" message={props.state.label} />
+        <section className="qling-received-worries-font relative -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
+          <FigmaTabLoading label={props.state.label} />
         </section>
       ) : props.state.status === 'error' ? (
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-100px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
           <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
         </section>
       ) : props.state.status === 'empty' ? (
-        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-100px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
+        <section className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5">
           <EmptyState title={props.state.message} />
         </section>
       ) : (
         <section
-          className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100%-100px)] rounded-t-[32px] bg-[#fff1d1] px-4 pb-4 pt-5"
+          className="qling-received-worries-font -mx-[var(--qling-space-shell-x)] min-h-[calc(100dvh-180px)] rounded-t-[32px] bg-[#fff1d1] px-4 pb-4 pt-5"
           aria-label="나의 고민 목록"
         >
           <div className="grid gap-[14px]">

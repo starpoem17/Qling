@@ -101,15 +101,19 @@ test('my worries empty state uses PRD copy without a separate empty CTA', () => 
   assert.equal((html.match(/고민 작성 화면으로 이동/g) ?? []).length, 1);
 });
 
-test('my worries loading state renders the shared spinner status without skeleton UI', () => {
+test('my worries loading state renders the Figma spinner status without visible copy', () => {
   const html = renderToStaticMarkup(MyWorriesScreen(baseProps({
     state: { status: 'loading', label: '작성한 고민을 불러오고 있습니다.' },
     items: [],
   })));
 
   assert.match(html, /role="status"/);
-  assert.match(html, /aria-label="나의 고민을 불러오는 중"/);
+  assert.match(html, /aria-live="polite"/);
+  assert.match(html, /data-testid="figma-tab-loading-indicator"/);
+  assert.match(html, /left-1\/2 top-\[306px\] h-10 w-10/);
   assert.match(html, /작성한 고민을 불러오고 있습니다\./);
+  assert.doesNotMatch(html, /나의 고민을 불러오는 중/);
+  assert.match(html, /bg-\[#ff8b3d\]/);
   assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
 });
 
