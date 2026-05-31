@@ -1,6 +1,6 @@
 import type { TouchEvent, UIEvent, WheelEvent } from 'react';
 
-const DEFAULT_SCROLL_THRESHOLD_PX = 10;
+const DEFAULT_SCROLL_THRESHOLD_PX = 6;
 
 export type PeekHeaderScrollState = {
   collapsed: boolean;
@@ -22,6 +22,8 @@ export function nextPeekHeaderScrollState(
   threshold = DEFAULT_SCROLL_THRESHOLD_PX,
 ): PeekHeaderScrollState {
   const nextScrollTop = Math.max(0, scrollTop);
+  if (nextScrollTop === 0) return initialPeekHeaderScrollState;
+
   const delta = nextScrollTop - state.lastScrollTop;
   if (delta === 0) return state;
 
