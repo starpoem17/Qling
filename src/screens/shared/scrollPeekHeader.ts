@@ -51,10 +51,13 @@ export function nextPeekHeaderScrollState(
   bounds?: PeekHeaderScrollBounds,
 ): PeekHeaderScrollState {
   const nextScrollTop = Math.max(0, scrollTop);
-  if (nextScrollTop === 0) return initialPeekHeaderScrollState;
-
   const delta = nextScrollTop - state.lastScrollTop;
-  if (delta === 0) return state;
+  if (delta === 0) {
+    return nextScrollTop === 0
+      ? { ...state, canReveal: true }
+      : state;
+  }
+
   const wasAtBottom = bounds !== undefined
     && state.lastScrollTop >= Math.max(0, bounds.maxScrollTop) - BOTTOM_EDGE_EPSILON_PX;
   if (wasAtBottom && delta < 0 && inputDirection !== SCROLL_DIRECTION_UP) {
@@ -62,6 +65,7 @@ export function nextPeekHeaderScrollState(
       ...state,
       lastScrollTop: nextScrollTop,
       accumulatedDelta: 0,
+      canReveal: nextScrollTop === 0,
       gestureStartCollapsed: null,
     };
   }
@@ -72,21 +76,12 @@ export function nextPeekHeaderScrollState(
     ? state.gestureStartCollapsed
     : state.collapsed;
 
-  if (Math.abs(accumulatedDelta) < SCROLL_SNAP_THRESHOLD_PX) {
-    return {
-      ...state,
-      lastScrollTop: nextScrollTop,
-      accumulatedDelta,
-      gestureStartCollapsed,
-    };
-  }
-
   return {
-    collapsed: delta > 0,
+    ...state,
     lastScrollTop: nextScrollTop,
-    accumulatedDelta: 0,
-    canReveal: false,
-    gestureStartCollapsed: null,
+    accumulatedDelta,
+    canReveal: nextScrollTop === 0,
+    gestureStartCollapsed,
   };
 }
 
@@ -108,15 +103,30 @@ export function peekHeaderLayoutForState(state: PeekHeaderScrollState): PeekHead
 }
 
 export function settlePeekHeaderScrollState(state: PeekHeaderScrollState): PeekHeaderScrollState {
+  if (state.canReveal) {
+    return {
+      collapsed: false,
+      lastScrollTop: state.lastScrollTop,
+      accumulatedDelta: 0,
+      canReveal: false,
+      gestureStartCollapsed: null,
+    };
+  }
+
   if (state.gestureStartCollapsed === null) {
     return {
       ...state,
       accumulatedDelta: 0,
+      canReveal: false,
     };
   }
 
+  const collapsed = Math.abs(state.accumulatedDelta) >= SCROLL_SNAP_THRESHOLD_PX
+    ? state.accumulatedDelta > 0
+    : state.gestureStartCollapsed;
+
   return {
-    collapsed: state.gestureStartCollapsed,
+    collapsed,
     lastScrollTop: state.lastScrollTop,
     accumulatedDelta: 0,
     canReveal: false,
@@ -178,8 +188,8 @@ function handlePeekHeaderScroll(event: UIEvent<HTMLElement>) {
     { maxScrollTop: Math.max(0, scroller.scrollHeight - scroller.clientHeight) },
   );
   writeScrollState(scroller, nextState);
-  schedulePeekHeaderLayout(scroller, peekHeaderLayoutForState(nextState), currentState.collapsed !== nextState.collapsed);
-  scheduleScrollEnd(scroller);
+  schedulePeekHeaderLayout(scroller, peekHeaderLayoutForState(nextState), false);
+  if (!isTouchActive(scroller)) scheduleScrollEnd(scroller);
 }
 
 function handlePeekHeaderWheel(event: WheelEvent<HTMLElement>) {
@@ -190,6 +200,8 @@ function handlePeekHeaderTouchStart(event: TouchEvent<HTMLElement>) {
   const touch = event.touches[0];
   if (!touch) return;
   event.currentTarget.dataset.qlingPeekHeaderTouchY = String(touch.clientY);
+  event.currentTarget.dataset.qlingPeekHeaderTouchActive = 'true';
+  clearScrollEnd(event.currentTarget);
 }
 
 function handlePeekHeaderTouchMove(event: TouchEvent<HTMLElement>) {
@@ -205,6 +217,8 @@ function handlePeekHeaderTouchMove(event: TouchEvent<HTMLElement>) {
 }
 
 function handlePeekHeaderTouchEnd(event: TouchEvent<HTMLElement>) {
+  delete event.currentTarget.dataset.qlingPeekHeaderTouchActive;
+  delete event.currentTarget.dataset.qlingPeekHeaderTouchY;
   settlePeekHeaderScroll(event.currentTarget);
 }
 
@@ -340,6 +354,10 @@ function writeScrollInputDirection(element: HTMLElement, direction: ScrollInputD
 
 function clearScrollInputDirection(element: HTMLElement) {
   delete element.dataset.qlingPeekHeaderInputDirection;
+}
+
+function isTouchActive(element: HTMLElement) {
+  return element.dataset.qlingPeekHeaderTouchActive === 'true';
 }
 
 function readOptionalBoolean(value: string | undefined) {
