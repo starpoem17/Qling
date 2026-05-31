@@ -1,13 +1,12 @@
 import type { TouchEvent, UIEvent, WheelEvent } from 'react';
 
-const SCROLL_SNAP_THRESHOLD_PX = 64;
 const WHEEL_SCROLL_END_DELAY_MS = 120;
-const EXPANDED_HEADER_HEIGHT_PX = 100;
-const COLLAPSED_HEADER_HEIGHT_PX = 16;
-const EXPANDED_CONTENT_HEIGHT_PX = 752;
-const COLLAPSED_CONTENT_HEIGHT_PX = 836;
+const SCROLL_SNAP_THRESHOLD_PX = 42;
+const SETTLE_TRANSITION = 'transform 160ms ease-out';
 
 const scrollEndTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
+const pendingLayouts = new WeakMap<HTMLElement, PendingPeekHeaderLayout>();
+const layoutFrames = new WeakMap<HTMLElement, number>();
 
 export type PeekHeaderScrollState = {
   collapsed: boolean;
@@ -26,9 +25,13 @@ export const initialPeekHeaderScrollState: PeekHeaderScrollState = {
 };
 
 export type PeekHeaderLayout = {
-  headerHeight: number;
-  contentHeight: number;
+  progress: number;
+  collapsed: boolean;
   isTrackingGesture: boolean;
+};
+
+type PendingPeekHeaderLayout = PeekHeaderLayout & {
+  commitState: boolean;
 };
 
 export function nextPeekHeaderScrollState(
@@ -72,14 +75,12 @@ export function peekHeaderLayoutForState(state: PeekHeaderScrollState): PeekHead
 
   const targetCollapsed = state.accumulatedDelta > 0;
   const progress = Math.min(1, Math.abs(state.accumulatedDelta) / SCROLL_SNAP_THRESHOLD_PX);
-  const startHeaderHeight = heightForHeaderState(state.gestureStartCollapsed);
-  const targetHeaderHeight = heightForHeaderState(targetCollapsed);
-  const startContentHeight = heightForContentState(state.gestureStartCollapsed);
-  const targetContentHeight = heightForContentState(targetCollapsed);
+  const startProgress = progressForCollapsedState(state.gestureStartCollapsed);
+  const targetProgress = progressForCollapsedState(targetCollapsed);
 
   return {
-    headerHeight: interpolate(startHeaderHeight, targetHeaderHeight, progress),
-    contentHeight: interpolate(startContentHeight, targetContentHeight, progress),
+    progress: interpolate(startProgress, targetProgress, progress),
+    collapsed: state.collapsed,
     isTrackingGesture: targetCollapsed !== state.gestureStartCollapsed,
   };
 }
@@ -124,7 +125,7 @@ function handlePeekHeaderScroll(event: UIEvent<HTMLElement>) {
   const currentState = readScrollState(scroller);
   const nextState = nextPeekHeaderScrollState(currentState, scroller.scrollTop);
   writeScrollState(scroller, nextState);
-  applyPeekHeaderLayout(scroller, peekHeaderLayoutForState(nextState));
+  schedulePeekHeaderLayout(scroller, peekHeaderLayoutForState(nextState), false);
   scheduleScrollEnd(scroller);
 }
 
@@ -175,27 +176,43 @@ function writeScrollState(element: HTMLElement, state: PeekHeaderScrollState) {
   }
 }
 
-function applyPeekHeaderLayout(scroller: HTMLElement, layout: PeekHeaderLayout) {
+function schedulePeekHeaderLayout(scroller: HTMLElement, layout: PeekHeaderLayout, commitState: boolean) {
+  pendingLayouts.set(scroller, { ...layout, commitState });
+  if (layoutFrames.has(scroller)) return;
+
+  const frame = requestPeekHeaderFrame(() => {
+    layoutFrames.delete(scroller);
+    const pendingLayout = pendingLayouts.get(scroller);
+    if (!pendingLayout) return;
+    pendingLayouts.delete(scroller);
+    applyPeekHeaderLayout(scroller, pendingLayout);
+  });
+  layoutFrames.set(scroller, frame);
+}
+
+function applyPeekHeaderLayout(scroller: HTMLElement, layout: PendingPeekHeaderLayout) {
   const header = scroller.previousElementSibling;
   if (!(header instanceof HTMLElement)) return;
+  const headerContent = header.querySelector<HTMLElement>('[data-qling-peek-header-content]');
 
-  const isCollapsed = layout.headerHeight === COLLAPSED_HEADER_HEIGHT_PX;
-  header.dataset.headerState = isCollapsed ? 'collapsed' : 'expanded';
-  header.classList.toggle('h-[16px]', isCollapsed);
-  header.classList.toggle('h-[100px]', !isCollapsed);
-  scroller.classList.toggle('h-[836px]', isCollapsed);
-  scroller.classList.toggle('h-[752px]', !isCollapsed);
-  header.style.transition = layout.isTrackingGesture ? 'none' : '';
-  scroller.style.transition = layout.isTrackingGesture ? 'none' : '';
-  header.style.height = `${layout.headerHeight}px`;
-  scroller.style.height = `${layout.contentHeight}px`;
+  if (layout.commitState) {
+    const state = layout.collapsed ? 'collapsed' : 'expanded';
+    header.dataset.headerState = state;
+    scroller.dataset.headerState = state;
+  }
+
+  const transition = !layout.commitState || layout.isTrackingGesture || prefersReducedMotion() ? 'none' : SETTLE_TRANSITION;
+  if (headerContent) headerContent.style.transition = transition;
+  scroller.style.transition = transition;
+  header.style.setProperty('--qling-peek-progress', String(layout.progress));
+  scroller.style.setProperty('--qling-peek-progress', String(layout.progress));
 }
 
 function settlePeekHeaderScroll(scroller: HTMLElement) {
   clearScrollEnd(scroller);
   const settledState = settlePeekHeaderScrollState(readScrollState(scroller));
   writeScrollState(scroller, settledState);
-  applyPeekHeaderLayout(scroller, peekHeaderLayoutForState(settledState));
+  schedulePeekHeaderLayout(scroller, peekHeaderLayoutForState(settledState), true);
 }
 
 function scheduleScrollEnd(scroller: HTMLElement) {
@@ -212,22 +229,29 @@ function clearScrollEnd(scroller: HTMLElement) {
 
 function layoutForCollapsedState(collapsed: boolean, isTrackingGesture: boolean): PeekHeaderLayout {
   return {
-    headerHeight: heightForHeaderState(collapsed),
-    contentHeight: heightForContentState(collapsed),
+    progress: progressForCollapsedState(collapsed),
+    collapsed,
     isTrackingGesture,
   };
 }
 
-function heightForHeaderState(collapsed: boolean) {
-  return collapsed ? COLLAPSED_HEADER_HEIGHT_PX : EXPANDED_HEADER_HEIGHT_PX;
-}
-
-function heightForContentState(collapsed: boolean) {
-  return collapsed ? COLLAPSED_CONTENT_HEIGHT_PX : EXPANDED_CONTENT_HEIGHT_PX;
+function progressForCollapsedState(collapsed: boolean) {
+  return collapsed ? 1 : 0;
 }
 
 function interpolate(start: number, end: number, progress: number) {
   return start + (end - start) * progress;
+}
+
+function requestPeekHeaderFrame(callback: FrameRequestCallback) {
+  if (typeof requestAnimationFrame === 'function') return requestAnimationFrame(callback);
+  return setTimeout(() => callback(Date.now()), 16) as unknown as number;
+}
+
+function prefersReducedMotion() {
+  return typeof window !== 'undefined'
+    && typeof window.matchMedia === 'function'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 function readOptionalBoolean(value: string | undefined) {

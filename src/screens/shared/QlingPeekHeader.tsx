@@ -1,4 +1,5 @@
 import { CircleUserRound } from 'lucide-react';
+import type { CSSProperties } from 'react';
 
 type QlingPeekHeaderProps = {
   isCollapsed: boolean;
@@ -8,12 +9,21 @@ type QlingPeekHeaderProps = {
 };
 
 export function QlingPeekHeader(props: QlingPeekHeaderProps) {
+  const headerStyle = {
+    '--qling-peek-progress': props.isCollapsed ? '1' : '0',
+  } as CSSProperties;
+
   return (
     <header
-      className={`${props.isCollapsed ? 'h-[16px]' : 'h-[100px]'} overflow-hidden bg-[#ff8b3d] transition-[height] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none`}
+      className="h-[100px] overflow-hidden bg-[#ff8b3d]"
       data-header-state={props.isCollapsed ? 'collapsed' : 'expanded'}
+      style={headerStyle}
     >
-      <div className="relative mx-auto h-[100px] w-full max-w-[393px]">
+      <div
+        data-qling-peek-header-content="true"
+        className="relative mx-auto h-[100px] w-full max-w-[393px] transform-gpu"
+        style={{ transform: 'translateY(calc(var(--qling-peek-progress, 0) * -84px))' }}
+      >
         <div
           role="presentation"
           aria-hidden="true"
