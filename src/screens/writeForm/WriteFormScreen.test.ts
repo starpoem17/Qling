@@ -91,6 +91,9 @@ test('write reply textarea starts at the visual placeholder position', () => {
 test('write reply screen uses Figma canvas positions without legacy scroll-bottom spacing', () => {
   const html = renderToStaticMarkup(WriteFormScreen(baseProps()));
 
+  assert.match(html, /w-\[393px\]/);
+  assert.match(html, /h-\[852px\]/);
+  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
   assert.match(html, /top-\[227px\]/);
   assert.match(html, /h-\[434px\]/);
   assert.match(html, /top-\[684px\]/);

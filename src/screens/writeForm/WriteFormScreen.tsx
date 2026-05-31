@@ -7,9 +7,15 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
   const validationMessage = props.draft.validation.status === 'invalid' && props.draft.value !== ''
     ? props.draft.validation.message
     : undefined;
+  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 
   return (
-    <div className="relative h-full bg-[#fff1d1] text-[#2a2a2a]">
+    <section className="-mb-[var(--qling-space-scroll-bottom)] h-dvh overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
+      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+        <div
+          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1]"
+          style={{ transform: `scale(${canvasScale})` }}
+        >
       {FigmaTopBar({ title: '답변 작성', onBack: props.onBack, backLabel: '답변하기로 돌아가기' })}
 
       <section className="absolute left-4 right-4 top-[127px] h-[79px] overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
@@ -83,7 +89,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
       </button>
 
       {props.isOriginalOverlayOpen && (
-        <div className="fixed inset-0 z-[80] flex justify-center bg-black/30" role="presentation">
+        <div className="absolute inset-0 z-[80] flex justify-center bg-black/30" role="presentation">
           <section
             role="dialog"
             aria-modal="true"
@@ -125,7 +131,9 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           </section>
         </div>
       )}
-    </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
