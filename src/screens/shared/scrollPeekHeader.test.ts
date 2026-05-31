@@ -10,40 +10,51 @@ import {
   nextPeekHeaderScrollState,
 } from './scrollPeekHeader';
 
-test('peek header scroll policy collapses after tiny upward content scroll', () => {
+test('peek header scroll policy keeps state for tiny upward content scroll', () => {
   const state = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 1);
 
-  assert.equal(state.collapsed, true);
+  assert.equal(state.collapsed, false);
   assert.equal(state.lastScrollTop, 1);
-  assert.equal(state.accumulatedDelta, 0);
+  assert.equal(state.accumulatedDelta, 1);
 });
 
-test('peek header scroll policy keeps collapsed during repeated upward input', () => {
-  const collapsed = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 1);
-  const repeated = nextPeekHeaderScrollState(collapsed, 2);
+test('peek header scroll policy keeps state before accumulated threshold', () => {
+  const first = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 32);
+  const second = nextPeekHeaderScrollState(first, 63);
 
-  assert.equal(repeated.collapsed, true);
-  assert.equal(repeated.lastScrollTop, 2);
-  assert.equal(repeated.accumulatedDelta, 0);
+  assert.equal(second.collapsed, false);
+  assert.equal(second.lastScrollTop, 63);
+  assert.equal(second.accumulatedDelta, 63);
 });
 
-test('peek header scroll policy expands after tiny downward input away from scroll top', () => {
-  const collapsed = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 12);
-  const expanded = nextPeekHeaderScrollState(collapsed, 11);
+test('peek header scroll policy collapses after accumulated upward threshold', () => {
+  const partial = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 32);
+  const collapsed = nextPeekHeaderScrollState(partial, 64);
 
+  assert.equal(collapsed.collapsed, true);
+  assert.equal(collapsed.lastScrollTop, 64);
+  assert.equal(collapsed.accumulatedDelta, 0);
+});
+
+test('peek header scroll policy expands after accumulated downward threshold', () => {
+  const collapsed = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 128);
+  const partial = nextPeekHeaderScrollState(collapsed, 96);
+  const expanded = nextPeekHeaderScrollState(partial, 64);
+
+  assert.equal(partial.collapsed, true);
+  assert.equal(partial.accumulatedDelta, -32);
   assert.equal(expanded.collapsed, false);
-  assert.equal(expanded.lastScrollTop, 11);
+  assert.equal(expanded.lastScrollTop, 64);
   assert.equal(expanded.accumulatedDelta, 0);
 });
 
-test('peek header scroll policy keeps expanded during repeated downward input', () => {
-  const collapsed = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 12);
-  const expanded = nextPeekHeaderScrollState(collapsed, 11);
-  const repeated = nextPeekHeaderScrollState(expanded, 10);
+test('peek header scroll policy resets accumulated distance when direction changes', () => {
+  const upward = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 32);
+  const downward = nextPeekHeaderScrollState(upward, 16);
 
-  assert.equal(repeated.collapsed, false);
-  assert.equal(repeated.lastScrollTop, 10);
-  assert.equal(repeated.accumulatedDelta, 0);
+  assert.equal(downward.collapsed, false);
+  assert.equal(downward.lastScrollTop, 16);
+  assert.equal(downward.accumulatedDelta, -16);
 });
 
 test('peek header scroll policy expands at scroll top without reveal input', () => {

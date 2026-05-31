@@ -1,5 +1,7 @@
 import type { TouchEvent, UIEvent, WheelEvent } from 'react';
 
+const SCROLL_SNAP_THRESHOLD_PX = 64;
+
 export type PeekHeaderScrollState = {
   collapsed: boolean;
   lastScrollTop: number;
@@ -23,6 +25,16 @@ export function nextPeekHeaderScrollState(
 
   const delta = nextScrollTop - state.lastScrollTop;
   if (delta === 0) return state;
+
+  const sameDirection = Math.sign(delta) === Math.sign(state.accumulatedDelta);
+  const accumulatedDelta = sameDirection ? state.accumulatedDelta + delta : delta;
+  if (Math.abs(accumulatedDelta) < SCROLL_SNAP_THRESHOLD_PX) {
+    return {
+      ...state,
+      lastScrollTop: nextScrollTop,
+      accumulatedDelta,
+    };
+  }
 
   return {
     collapsed: delta > 0,
@@ -58,9 +70,7 @@ function handlePeekHeaderScroll(event: UIEvent<HTMLElement>) {
 }
 
 function handlePeekHeaderWheel(event: WheelEvent<HTMLElement>) {
-  const scroller = event.currentTarget;
-  if (event.deltaY === 0) return;
-  setPeekHeaderCollapsed(scroller, event.deltaY > 0);
+  void event;
 }
 
 function handlePeekHeaderTouchStart(event: TouchEvent<HTMLElement>) {
@@ -78,7 +88,6 @@ function handlePeekHeaderTouchMove(event: TouchEvent<HTMLElement>) {
   scroller.dataset.qlingPeekHeaderTouchY = String(touch.clientY);
 
   if (touch.clientY === previousY) return;
-  setPeekHeaderCollapsed(scroller, touch.clientY < previousY);
 }
 
 function readScrollState(element: HTMLElement): PeekHeaderScrollState {
@@ -106,22 +115,4 @@ function applyPeekHeaderState(scroller: HTMLElement, isCollapsed: boolean) {
   header.classList.toggle('h-[100px]', !isCollapsed);
   scroller.classList.toggle('h-[836px]', isCollapsed);
   scroller.classList.toggle('h-[752px]', !isCollapsed);
-}
-
-function setPeekHeaderCollapsed(scroller: HTMLElement, isCollapsed: boolean) {
-  const currentState = readScrollState(scroller);
-  const nextState: PeekHeaderScrollState = {
-    collapsed: isCollapsed,
-    lastScrollTop: scroller.scrollTop,
-    accumulatedDelta: 0,
-    canReveal: false,
-  };
-
-  if (currentState.collapsed === nextState.collapsed) {
-    writeScrollState(scroller, nextState);
-    return;
-  }
-
-  writeScrollState(scroller, nextState);
-  applyPeekHeaderState(scroller, nextState.collapsed);
 }
