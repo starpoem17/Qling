@@ -84,9 +84,9 @@ test('ranking segmented control preserves Figma font weights after class merging
 test('top ranking avatars and crowns are present in static markup', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
 
-  assert.match(html, /class="absolute left-0 top-0 z-10 h-\[406px\] w-\[393px\] text-center text-white" data-measure="ranking-top-first"/);
-  assert.match(html, /class="absolute left-0 top-0 z-10 h-\[406px\] w-\[393px\] text-center text-white" data-measure="ranking-top-second"/);
-  assert.match(html, /class="absolute left-0 top-0 z-10 h-\[406px\] w-\[393px\] text-center text-white" data-measure="ranking-top-third"/);
+  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[406px\] w-\[393px\] text-center text-white" data-measure="ranking-top-first"/);
+  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[406px\] w-\[393px\] text-center text-white" data-measure="ranking-top-second"/);
+  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[406px\] w-\[393px\] text-center text-white" data-measure="ranking-top-third"/);
   assert.match(html, /data-measure="ranking-profile-first"/);
   assert.match(html, /data-measure="ranking-profile-second"/);
   assert.match(html, /data-measure="ranking-profile-third"/);

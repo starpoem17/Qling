@@ -239,7 +239,7 @@ function TopRank({
   const item = layout[place];
 
   return (
-    <div className="absolute left-0 top-0 z-10 h-[406px] w-[393px] text-center text-white" data-measure={`ranking-top-${place}`}>
+    <div className="pointer-events-none absolute left-0 top-0 z-10 h-[406px] w-[393px] text-center text-white" data-measure={`ranking-top-${place}`}>
       <img src={item.ellipseUrl} alt="" aria-hidden="true" className={cn('absolute block max-w-none', item.ellipse)} />
       <img src={item.crownUrl} alt="" className={cn('absolute block max-w-none', item.crown)} />
       <img
