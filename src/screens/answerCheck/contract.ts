@@ -7,6 +7,7 @@ export type AnswerCheckScreenState =
 
 export type AnswerCheckWorryProps = {
   readonly worryId: string;
+  readonly summaryText: string;
   readonly bodyText: string;
   readonly categoryLabel: string;
   readonly createdAtLabel: string;

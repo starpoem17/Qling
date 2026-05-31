@@ -9,6 +9,7 @@ export function mapWorryToAnswerCheckProps(params: {
 }): AnswerCheckWorryProps {
   return {
     worryId: params.worry.id,
+    summaryText: fallbackSummary(params.worry.content),
     bodyText: params.worry.content,
     categoryLabel: firstUserFacingCategory(params.worry.categories),
     createdAtLabel: formatDisplayDate(params.worry.createdAt, { now: params.now }).label,
@@ -61,4 +62,8 @@ function firstUserFacingCategory(categories: readonly string[]): string {
   return categories.find((category): category is (typeof WORRY_CATEGORIES)[number] => (
     (WORRY_CATEGORIES as readonly string[]).includes(category)
   )) ?? '잡담';
+}
+
+function fallbackSummary(content: string): string {
+  return `${Array.from(content).slice(0, 20).join('')}...`;
 }

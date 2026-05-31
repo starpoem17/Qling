@@ -9,7 +9,8 @@ function baseProps(overrides: Partial<AnswerCheckScreenProps> = {}): AnswerCheck
     state: { status: 'ready' },
     worry: {
       worryId: 'worry-1',
-      bodyText: '내 고민 본문',
+      summaryText: '내 고민 본문...',
+      bodyText: '내 고민 본문 원문',
       categoryLabel: '외모',
       createdAtLabel: '2026.05.02',
     },
@@ -54,7 +55,8 @@ test('answer check renders one worry and multiple answer cards', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps()));
 
   assert.match(html, /답변 확인/);
-  assert.match(html, /내 고민 본문/);
+  assert.match(html, /내 고민 본문\.\.\./);
+  assert.match(html, /내 고민 본문 원문/);
   assert.match(html, /첫 번째 답변 본문/);
   assert.match(html, /두 번째 답변 본문/);
 });
@@ -80,7 +82,8 @@ test('answer check loading state matches the Figma loading shell', () => {
 test('zero replies state shows only my worry without empty copy', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({ replies: [] })));
 
-  assert.match(html, /내 고민 본문/);
+  assert.match(html, /내 고민 본문\.\.\./);
+  assert.match(html, /내 고민 본문 원문/);
   assert.doesNotMatch(html, /아직 답변이 없어요/);
   assert.doesNotMatch(html, /첫 고민을 남겨보세요/);
   assert.equal((html.match(/도착한 답변<\/p>/g) ?? []).length, 0);
@@ -95,6 +98,23 @@ test('answer check cards use Figma-like card internals without the old helper la
   assert.match(html, /text-\[12px\] font-bold leading-6 tracking-\[-0\.36px\]/);
   assert.doesNotMatch(html, />내 고민<\/p>/);
   assert.doesNotMatch(html, />도착한 답변<\/p>/);
+});
+
+test('worry card renders summary and original body in separate Figma text styles', () => {
+  const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
+    worry: {
+      worryId: 'worry-long',
+      summaryText: '01234567890123456789...',
+      bodyText: '012345678901234567890123456789 원문 전체',
+      categoryLabel: '외모',
+      createdAtLabel: '2026.05.02',
+    },
+  })));
+
+  assert.match(html, /01234567890123456789\.\.\./);
+  assert.match(html, /012345678901234567890123456789 원문 전체/);
+  assert.match(html, /text-\[16px\] font-extrabold leading-6 tracking-\[-0\.48px\]/);
+  assert.match(html, /text-\[12px\] font-bold leading-6 tracking-\[-0\.36px\]/);
 });
 
 test('answer check DOM does not render answer writer private data', () => {
@@ -117,8 +137,31 @@ test('screen exposes separate like dislike and comment actions', () => {
   assert.match(html, /aria-label="싫어요"/);
   assert.match(html, /aria-label="코멘트"/);
   assert.match(html, /my_concerns\/good\.svg/);
+  assert.match(html, /my_concerns\/good_activate\.svg/);
   assert.match(html, /my_concerns\/bad\.svg/);
   assert.match(html, /my_concerns\/comment\.svg/);
+  assert.match(html, /my_concerns\/comment_activate\.svg/);
+  assert.doesNotMatch(html, /rotate-180/);
+  assert.doesNotMatch(html, /sepia saturate|hue-rotate/);
+});
+
+test('disliked answers use the active bad asset without rotating the icon', () => {
+  const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
+    replies: [{
+      replyId: 'reply-disliked',
+      bodyText: '싫어요 답변 본문',
+      createdAtLabel: '1분 전',
+      feedbackState: 'disliked',
+      canLike: false,
+      canDislike: true,
+      canComment: false,
+      isFeedbackProcessing: false,
+      isCommentProcessing: false,
+    }],
+  })));
+
+  assert.match(html, /my_concerns\/bad_activate\.svg/);
+  assert.doesNotMatch(html, /rotate-180/);
 });
 
 test('saved publisher comment appears under the answer card divider', () => {

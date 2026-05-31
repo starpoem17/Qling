@@ -36,6 +36,7 @@ test('maps one worry and multiple replies without answer writer private fields',
   const json = JSON.stringify(mapped);
 
   assert.equal(mapped.worry.worryId, 'worry-1');
+  assert.equal(mapped.worry.summaryText, '내 고민 본문...');
   assert.equal(mapped.worry.bodyText, '내 고민 본문');
   assert.equal(mapped.replies[0].replyId, 'reply-1');
   assert.equal(mapped.replies[0].bodyText, '답변 본문');
@@ -56,6 +57,15 @@ test('maps empty reply list to no answer cards while preserving worry props', ()
   const mapped = mapRepliesToAnswerCheckProps({ replies: [] });
 
   assert.deepEqual(mapped, []);
+});
+
+test('maps worry summary with the my-worries 20-character fallback policy', () => {
+  const mapped = mapWorryToAnswerCheckProps({
+    worry: worryItem({ content: '012345678901234567890123456789' }),
+  });
+
+  assert.equal(mapped.summaryText, '01234567890123456789...');
+  assert.equal(mapped.bodyText, '012345678901234567890123456789');
 });
 
 test('maps local hidden reply and feedback states', () => {

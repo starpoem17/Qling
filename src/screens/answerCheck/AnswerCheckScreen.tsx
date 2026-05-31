@@ -6,8 +6,11 @@ import type { AnswerCheckReplyProps, AnswerCheckScreenProps } from './contract';
 const activeIndicatorUrl = new URL('../../../assets/loading/figma-progress-active.svg', import.meta.url).href;
 const trackUrl = new URL('../../../assets/loading/figma-progress-track.svg', import.meta.url).href;
 const goodIconUrl = new URL('../../../assets/my_concerns/good.svg', import.meta.url).href;
+const goodActiveIconUrl = new URL('../../../assets/my_concerns/good_activate.svg', import.meta.url).href;
 const badIconUrl = new URL('../../../assets/my_concerns/bad.svg', import.meta.url).href;
+const badActiveIconUrl = new URL('../../../assets/my_concerns/bad_activate.svg', import.meta.url).href;
 const commentIconUrl = new URL('../../../assets/my_concerns/comment.svg', import.meta.url).href;
+const commentActiveIconUrl = new URL('../../../assets/my_concerns/comment_activate.svg', import.meta.url).href;
 
 export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
   if (props.state.status === 'loading') {
@@ -28,6 +31,7 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
         <WorryCard
           categoryLabel={props.worry.categoryLabel}
           createdAtLabel={props.worry.createdAtLabel}
+          summaryText={props.worry.summaryText}
           bodyText={props.worry.bodyText}
         />
       )}
@@ -126,10 +130,12 @@ function AnswerCheckFrame({ onBack, children }: { readonly onBack: () => void; r
 function WorryCard({
   categoryLabel,
   createdAtLabel,
+  summaryText,
   bodyText,
 }: {
   readonly categoryLabel: string;
   readonly createdAtLabel: string;
+  readonly summaryText: string;
   readonly bodyText: string;
 }) {
   return (
@@ -143,9 +149,12 @@ function WorryCard({
         </time>
       </div>
       <p className="mt-[14px] whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
-        {bodyText}
+        {summaryText}
       </p>
       <div className="mt-[10px] h-px rounded-[3px] bg-[#c2c4c8]" />
+      <p className="mt-[13px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
+        {bodyText}
+      </p>
     </section>
   );
 }
@@ -187,6 +196,7 @@ function AnswerCard({
         <FeedbackAction
           label="좋아요"
           iconUrl={goodIconUrl}
+          activeIconUrl={goodActiveIconUrl}
           selected={liked}
           disabled={!reply.canLike || reply.isFeedbackProcessing}
           onClick={() => onLike(reply.replyId)}
@@ -196,15 +206,17 @@ function AnswerCard({
         <FeedbackAction
           label="싫어요"
           iconUrl={badIconUrl}
+          activeIconUrl={badActiveIconUrl}
           selected={disliked}
           disabled={!reply.canDislike || reply.isFeedbackProcessing}
           onClick={() => onDislike(reply.replyId)}
           className="h-[28px] w-[17px]"
-          iconClassName="h-[17px] w-[17px] rotate-180"
+          iconClassName="h-[17px] w-[17px]"
         />
         <FeedbackAction
           label="코멘트"
           iconUrl={commentIconUrl}
+          activeIconUrl={commentActiveIconUrl}
           selected={commentActive}
           disabled={!reply.canComment || reply.isCommentProcessing}
           onClick={() => onOpenComment(reply.replyId)}
@@ -237,6 +249,7 @@ function AnswerCard({
 function FeedbackAction({
   label,
   iconUrl,
+  activeIconUrl,
   selected,
   disabled,
   onClick,
@@ -245,6 +258,7 @@ function FeedbackAction({
 }: {
   readonly label: string;
   readonly iconUrl: string;
+  readonly activeIconUrl: string;
   readonly selected: boolean;
   readonly disabled: boolean;
   readonly onClick: () => void;
@@ -264,15 +278,11 @@ function FeedbackAction({
       )}
     >
       <img
-        src={iconUrl}
+        src={selected ? activeIconUrl : iconUrl}
         alt=""
         aria-hidden="true"
         draggable={false}
-        className={cn(
-          'object-contain',
-          selected && 'filter sepia saturate-[4] hue-rotate-[335deg]',
-          iconClassName,
-        )}
+        className={cn('object-contain', iconClassName)}
       />
     </button>
   );
