@@ -13,6 +13,7 @@ import type {
 } from './contract';
 
 const rankingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+const viewerRankCardTop = `min(693px, calc((100dvh - var(--qling-space-nav-height) - 79px) / (${rankingCanvasScale})))`;
 
 const rankingAssetUrlByName = {
   crownFirst: new URL('../../../assets/ranking/crown-first.svg', import.meta.url).href,
@@ -324,7 +325,8 @@ function ViewerRankCard({
 }) {
   return (
     <div
-      className="absolute left-4 top-[693px] flex h-[70px] w-[361px] items-center gap-[18px] overflow-hidden rounded-[18px] bg-[#ffe3cb] py-[11px] pl-[14px] pr-4 text-left shadow-[0_8px_22px_rgb(128_87_33/0.16)]"
+      className="absolute left-4 flex h-[70px] w-[361px] items-center gap-[18px] overflow-hidden rounded-[18px] bg-[#ffe3cb] py-[11px] pl-[14px] pr-4 text-left shadow-[0_8px_22px_rgb(128_87_33/0.16)]"
+      style={{ top: viewerRankCardTop }}
       aria-label={`내 순위 ${viewer.rank}위`}
     >
       <span className="flex h-[46px] w-[46px] shrink-0 flex-col items-center justify-center rounded-[13px] bg-[#34c759] text-white shadow-[2px_3px_4px_rgb(0_0_0/0.25)]">

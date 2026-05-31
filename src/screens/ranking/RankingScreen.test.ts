@@ -55,8 +55,16 @@ test('ranking screen scales the Figma canvas by width only like the other tab sc
   assert.match(html, /data-measure="ranking-screen"/);
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
-  assert.doesNotMatch(html, /100dvh - var\(--qling-space-nav-height\)/);
+  assert.doesNotMatch(html, /transform:scale\(min\(/);
   assert.doesNotMatch(html, /var\(--qling-space-safe-bottom\)\) \/ 772px/);
+});
+
+test('viewer rank card stays above the shell bottom navigation on shorter iPhone viewports', () => {
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
+
+  assert.match(html, /aria-label="내 순위 24위"/);
+  assert.doesNotMatch(html, /top-\[693px\]/);
+  assert.match(html, /top:min\(693px, calc\(\(100dvh - var\(--qling-space-nav-height\) - 79px\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\)\)/);
 });
 
 test('ranking loading state uses the same width-only canvas scale', () => {
