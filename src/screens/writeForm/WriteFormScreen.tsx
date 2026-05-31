@@ -101,7 +101,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="write-reply-original-title"
-            className="absolute top-[251px] flex h-[440px] w-[393px] max-w-full flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_12px_40px_rgb(0_0_0/0.18)]"
+            className="absolute top-[224px] flex h-[440px] w-[393px] max-w-full flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_12px_40px_rgb(0_0_0/0.18)]"
           >
             <div className="relative h-11 shrink-0 border-b border-[#c2c4c8]">
               <h2 id="write-reply-original-title" className="absolute left-1/2 top-3 -translate-x-1/2 text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] text-[#2a2a2a]">

@@ -59,6 +59,7 @@ test('write reply original overlay keeps only the original body scrollable', () 
   assert.match(html, /mt-\[13px\] min-h-0 flex-1 overflow-y-auto px-\[6px\] pb-4/);
   assert.match(html, /text-xs font-bold leading-6 tracking-\[-0\.36px\]/);
   assert.match(html, /shrink-0 pb-\[37px\] pt-\[8px\]/);
+  assert.match(html, /top-\[224px\]/);
 });
 
 test('write reply screen renders visual pencil placeholder only for an empty draft', () => {
