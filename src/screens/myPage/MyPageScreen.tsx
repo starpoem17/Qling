@@ -338,7 +338,7 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
 export function EditInterestsScreen(props: EditInterestsProps) {
   const hasValidationError = Boolean(props.validationMessages.interests);
   const orderedCategoryOptions = editInterestsFigmaOrder.filter(category => props.categoryOptions.includes(category));
-  const editInterestsCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+  const editInterestsCanvasScale = 'min(calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px), calc(100dvh / 852px))';
 
   return (
     <section

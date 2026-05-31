@@ -320,7 +320,7 @@ test('edit interests screen renders fixed three-column chip grid and exact zero-
   assert.match(html, /h-\[852px\]/);
   assert.match(html, /w-\[393px\]/);
   assert.match(html, /origin-top/);
-  assert.match(html, /calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)/);
+  assert.match(html, /min\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\), calc\(100dvh \/ 852px\)\)/);
   assert.match(html, /grid-cols-3/);
   assert.match(html, /w-\[103px\]/);
   assert.match(html, /h-\[44px\]/);
