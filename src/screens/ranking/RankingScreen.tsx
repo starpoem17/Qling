@@ -20,6 +20,8 @@ const rankingAssetUrlByName = {
   crownFirst: new URL('../../../assets/ranking/crown-first.svg', import.meta.url).href,
   crownSecond: new URL('../../../assets/ranking/crown-second.svg', import.meta.url).href,
   crownThird: new URL('../../../assets/ranking/crown-third.svg', import.meta.url).href,
+  bigEllipse: new URL('../../../assets/ranking/big_ellipse.svg', import.meta.url).href,
+  smallEllipse: new URL('../../../assets/ranking/small_ellipse.svg', import.meta.url).href,
   heart: new URL('../../../assets/ranking/heart.svg', import.meta.url).href,
   heartLight: new URL('../../../assets/ranking/heart-white.svg', import.meta.url).href,
   rankUp: new URL('../../../assets/ranking/rank-up.svg', import.meta.url).href,
@@ -159,9 +161,10 @@ function SegmentedControl({
         onClick={() => onChange('monthly')}
         aria-pressed={mode === 'monthly'}
         className={cn(
-          'absolute left-1 top-1 h-9 w-[114px] rounded-full text-center text-[13px] font-bold leading-[17px] transition-colors focus:outline-none focus:ring-2 focus:ring-white disabled:cursor-default font-["Qling_Noto_Sans_KR"]',
-          mode === 'monthly' ? 'text-[#f26c0f]' : 'text-white',
+          'absolute left-1 top-1 h-9 w-[114px] rounded-full text-center text-[13px] leading-[17px] transition-colors focus:outline-none focus:ring-2 focus:ring-white disabled:cursor-default',
+          mode === 'monthly' ? 'font-bold text-[#f26c0f]' : 'font-medium text-white',
         )}
+        style={{ fontFamily: '"Qling Noto Sans KR"' }}
         data-measure="ranking-segmented-monthly"
       >
         이 달의 순위
@@ -172,9 +175,10 @@ function SegmentedControl({
         onClick={() => onChange('total')}
         aria-pressed={mode === 'total'}
         className={cn(
-          'absolute left-[118px] top-1 h-9 w-[114px] rounded-full text-center text-[13px] font-medium leading-[17px] transition-colors focus:outline-none focus:ring-2 focus:ring-white disabled:cursor-default font-["Qling_Noto_Sans_KR"]',
-          mode === 'total' ? 'font-bold text-[#f26c0f]' : 'text-white',
+          'absolute left-[118px] top-1 h-9 w-[114px] rounded-full text-center text-[13px] leading-[17px] transition-colors focus:outline-none focus:ring-2 focus:ring-white disabled:cursor-default',
+          mode === 'total' ? 'font-bold text-[#f26c0f]' : 'font-medium text-white',
         )}
+        style={{ fontFamily: '"Qling Noto Sans KR"' }}
         data-measure="ranking-segmented-total"
       >
         누적 순위
@@ -210,7 +214,8 @@ function TopRank({
       crownUrl: rankingAssetUrlByName.crownFirst,
       name: 'left-[136px] top-[274px] w-[120px] text-[15px] leading-5',
       hearts: 'left-[172px] top-[296px]',
-      shadow: 'left-[171px] top-[252px] h-[23px] w-[53px]',
+      ellipse: 'left-[171px] top-[252px] h-[23px] w-[53px]',
+      ellipseUrl: rankingAssetUrlByName.bigEllipse,
     },
     second: {
       avatar: 'left-[50px] top-[230px] h-[52px] w-[52px]',
@@ -218,7 +223,8 @@ function TopRank({
       crownUrl: rankingAssetUrlByName.crownSecond,
       name: 'left-[16px] top-[290px] w-[120px] text-[13px] leading-[17px]',
       hearts: 'left-[56px] top-[312px]',
-      shadow: 'left-[55px] top-[269px] h-[18px] w-[42px]',
+      ellipse: 'left-[55px] top-[269px] h-[18px] w-[42px]',
+      ellipseUrl: rankingAssetUrlByName.smallEllipse,
     },
     third: {
       avatar: 'left-[289px] top-[245px] h-[52px] w-[52px]',
@@ -226,14 +232,15 @@ function TopRank({
       crownUrl: rankingAssetUrlByName.crownThird,
       name: 'left-[255px] top-[305px] w-[120px] text-[13px] leading-[17px]',
       hearts: 'left-[298px] top-[327px]',
-      shadow: 'left-[294px] top-[284px] h-[18px] w-[42px]',
+      ellipse: 'left-[294px] top-[284px] h-[18px] w-[42px]',
+      ellipseUrl: rankingAssetUrlByName.smallEllipse,
     },
   };
   const item = layout[place];
 
   return (
     <div className="absolute left-0 top-0 z-10 h-[406px] w-[393px] text-center text-white" data-measure={`ranking-top-${place}`}>
-      <div className={cn('absolute rounded-[50%] bg-[#b35a1c]/35 blur-[0.2px]', item.shadow)} />
+      <img src={item.ellipseUrl} alt="" aria-hidden="true" className={cn('absolute block max-w-none', item.ellipse)} />
       <img src={item.crownUrl} alt="" className={cn('absolute block max-w-none', item.crown)} />
       <img
         src={profileImageUrlForColor(entry.profileColor)}

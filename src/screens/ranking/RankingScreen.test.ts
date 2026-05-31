@@ -70,6 +70,17 @@ test('app ranking route wrapper preserves full shell height for iPhone clipping 
   assert.match(source, /key="ranking"[\s\S]*className="h-full min-h-0"/);
 });
 
+test('ranking segmented control preserves Figma font weights after class merging', () => {
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
+
+  assert.match(html, /font-bold[^"]*"[^>]*data-measure="ranking-segmented-monthly"/);
+  assert.match(html, /font-medium[^"]*"[^>]*data-measure="ranking-segmented-total"/);
+  assert.match(html, /font-family:&quot;Qling Noto Sans KR&quot;/);
+  assert.match(source, /mode === 'monthly' \? 'font-bold text-\[#f26c0f\]' : 'font-medium text-white'/);
+  assert.match(source, /mode === 'total' \? 'font-bold text-\[#f26c0f\]' : 'font-medium text-white'/);
+});
+
 test('top ranking avatars and crowns are present in static markup', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
 
@@ -79,11 +90,17 @@ test('top ranking avatars and crowns are present in static markup', () => {
   assert.match(html, /data-measure="ranking-profile-first"/);
   assert.match(html, /data-measure="ranking-profile-second"/);
   assert.match(html, /data-measure="ranking-profile-third"/);
+  assert.match(html, /big_ellipse\.svg/);
+  assert.match(html, /small_ellipse\.svg/);
+  assert.match(html, /absolute block max-w-none left-\[171px\] top-\[252px\] h-\[23px\] w-\[53px\]/);
+  assert.match(html, /absolute block max-w-none left-\[55px\] top-\[269px\] h-\[18px\] w-\[42px\]/);
+  assert.match(html, /absolute block max-w-none left-\[294px\] top-\[284px\] h-\[18px\] w-\[42px\]/);
   assert.match(html, /absolute block max-w-none left-\[177px\] top-\[170px\] h-6 w-\[42px\]/);
   assert.match(html, /absolute max-w-none rounded-full left-\[163px\] top-\[200px\] h-\[69px\] w-\[69px\]/);
   assert.match(html, /crown-first\.svg/);
   assert.match(html, /crown-second\.svg/);
   assert.match(html, /crown-third\.svg/);
+  assert.doesNotMatch(html, /bg-\[#b35a1c\]\/35/);
 });
 
 test('profile image generation recolors only the shared default profile background', () => {
