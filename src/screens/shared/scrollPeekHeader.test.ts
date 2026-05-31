@@ -8,6 +8,8 @@ import { QlingPeekHeader } from './QlingPeekHeader';
 import {
   initialPeekHeaderScrollState,
   nextPeekHeaderScrollState,
+  peekHeaderLayoutForState,
+  settlePeekHeaderScrollState,
 } from './scrollPeekHeader';
 
 test('peek header scroll policy keeps state for tiny upward content scroll', () => {
@@ -16,15 +18,21 @@ test('peek header scroll policy keeps state for tiny upward content scroll', () 
   assert.equal(state.collapsed, false);
   assert.equal(state.lastScrollTop, 1);
   assert.equal(state.accumulatedDelta, 1);
+  assert.equal(state.gestureStartCollapsed, false);
 });
 
-test('peek header scroll policy keeps state before accumulated threshold', () => {
+test('peek header scroll policy exposes intermediate layout before accumulated threshold', () => {
   const first = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 32);
   const second = nextPeekHeaderScrollState(first, 63);
+  const layout = peekHeaderLayoutForState(first);
 
   assert.equal(second.collapsed, false);
   assert.equal(second.lastScrollTop, 63);
   assert.equal(second.accumulatedDelta, 63);
+  assert.equal(second.gestureStartCollapsed, false);
+  assert.equal(layout.headerHeight, 58);
+  assert.equal(layout.contentHeight, 794);
+  assert.equal(layout.isTrackingGesture, true);
 });
 
 test('peek header scroll policy collapses after accumulated upward threshold', () => {
@@ -34,6 +42,7 @@ test('peek header scroll policy collapses after accumulated upward threshold', (
   assert.equal(collapsed.collapsed, true);
   assert.equal(collapsed.lastScrollTop, 64);
   assert.equal(collapsed.accumulatedDelta, 0);
+  assert.equal(collapsed.gestureStartCollapsed, null);
 });
 
 test('peek header scroll policy expands after accumulated downward threshold', () => {
@@ -46,6 +55,7 @@ test('peek header scroll policy expands after accumulated downward threshold', (
   assert.equal(expanded.collapsed, false);
   assert.equal(expanded.lastScrollTop, 64);
   assert.equal(expanded.accumulatedDelta, 0);
+  assert.equal(expanded.gestureStartCollapsed, null);
 });
 
 test('peek header scroll policy resets accumulated distance when direction changes', () => {
@@ -55,6 +65,31 @@ test('peek header scroll policy resets accumulated distance when direction chang
   assert.equal(downward.collapsed, false);
   assert.equal(downward.lastScrollTop, 16);
   assert.equal(downward.accumulatedDelta, -16);
+  assert.equal(downward.gestureStartCollapsed, false);
+});
+
+test('peek header scroll policy settles below threshold back to the gesture start state', () => {
+  const partial = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 32);
+  const settled = settlePeekHeaderScrollState(partial);
+  const layout = peekHeaderLayoutForState(settled);
+
+  assert.equal(settled.collapsed, false);
+  assert.equal(settled.lastScrollTop, 32);
+  assert.equal(settled.accumulatedDelta, 0);
+  assert.equal(settled.gestureStartCollapsed, null);
+  assert.equal(layout.headerHeight, 100);
+  assert.equal(layout.contentHeight, 752);
+  assert.equal(layout.isTrackingGesture, false);
+});
+
+test('peek header scroll policy keeps threshold-crossed state after settle', () => {
+  const collapsed = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 64);
+  const settled = settlePeekHeaderScrollState(collapsed);
+
+  assert.equal(settled.collapsed, true);
+  assert.equal(settled.lastScrollTop, 64);
+  assert.equal(settled.accumulatedDelta, 0);
+  assert.equal(settled.gestureStartCollapsed, null);
 });
 
 test('peek header scroll policy expands at scroll top without reveal input', () => {
@@ -97,6 +132,7 @@ test('peek header screens preserve total canvas height with collapsed content he
     assert.match(source, /ease-\[cubic-bezier\(0\.22,1,0\.36,1\)\]/);
     assert.match(source, /onTouchStart/);
     assert.match(source, /onTouchMove/);
+    assert.match(source, /onTouchEnd/);
     assert.match(source, /onWheel/);
   }
 });

@@ -48,7 +48,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
             {header}
-            <section className={contentClassName} onScroll={scrollPeekHeader.onScroll} onTouchStart={scrollPeekHeader.onTouchStart} onTouchMove={scrollPeekHeader.onTouchMove} onWheel={scrollPeekHeader.onWheel}>
+            <section className={contentClassName} onScroll={scrollPeekHeader.onScroll} onTouchStart={scrollPeekHeader.onTouchStart} onTouchMove={scrollPeekHeader.onTouchMove} onTouchEnd={scrollPeekHeader.onTouchEnd} onWheel={scrollPeekHeader.onWheel}>
               <ErrorState title="답변 피드를 불러오지 못했어요" message={props.state.message} />
             </section>
           </div>
@@ -63,7 +63,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
             {header}
-            <section className={contentClassName} onScroll={scrollPeekHeader.onScroll} onTouchStart={scrollPeekHeader.onTouchStart} onTouchMove={scrollPeekHeader.onTouchMove} onWheel={scrollPeekHeader.onWheel}>
+            <section className={contentClassName} onScroll={scrollPeekHeader.onScroll} onTouchStart={scrollPeekHeader.onTouchStart} onTouchMove={scrollPeekHeader.onTouchMove} onTouchEnd={scrollPeekHeader.onTouchEnd} onWheel={scrollPeekHeader.onWheel}>
               <EmptyState title={props.state.message} />
             </section>
           </div>
@@ -83,6 +83,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
             onScroll={scrollPeekHeader.onScroll}
             onTouchStart={scrollPeekHeader.onTouchStart}
             onTouchMove={scrollPeekHeader.onTouchMove}
+            onTouchEnd={scrollPeekHeader.onTouchEnd}
             onWheel={scrollPeekHeader.onWheel}
           >
             <div className="grid gap-[14px]">

@@ -50,11 +50,11 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
                 <FigmaTabLoading label={props.state.label} />
               </section>
             ) : props.state.status === 'error' ? (
-              <section className={contentClassName} onScroll={scrollPeekHeader.onScroll} onTouchStart={scrollPeekHeader.onTouchStart} onTouchMove={scrollPeekHeader.onTouchMove} onWheel={scrollPeekHeader.onWheel}>
+              <section className={contentClassName} onScroll={scrollPeekHeader.onScroll} onTouchStart={scrollPeekHeader.onTouchStart} onTouchMove={scrollPeekHeader.onTouchMove} onTouchEnd={scrollPeekHeader.onTouchEnd} onWheel={scrollPeekHeader.onWheel}>
                 <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
               </section>
             ) : props.state.status === 'empty' ? (
-              <section className={contentClassName} onScroll={scrollPeekHeader.onScroll} onTouchStart={scrollPeekHeader.onTouchStart} onTouchMove={scrollPeekHeader.onTouchMove} onWheel={scrollPeekHeader.onWheel}>
+              <section className={contentClassName} onScroll={scrollPeekHeader.onScroll} onTouchStart={scrollPeekHeader.onTouchStart} onTouchMove={scrollPeekHeader.onTouchMove} onTouchEnd={scrollPeekHeader.onTouchEnd} onWheel={scrollPeekHeader.onWheel}>
                 <EmptyState title={props.state.message} />
               </section>
             ) : (
@@ -64,6 +64,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
                 onScroll={scrollPeekHeader.onScroll}
                 onTouchStart={scrollPeekHeader.onTouchStart}
                 onTouchMove={scrollPeekHeader.onTouchMove}
+                onTouchEnd={scrollPeekHeader.onTouchEnd}
                 onWheel={scrollPeekHeader.onWheel}
               >
                 <div className="grid gap-[14px]">
