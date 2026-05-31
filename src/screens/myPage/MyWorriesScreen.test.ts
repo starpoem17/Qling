@@ -131,7 +131,8 @@ test('my worries loading state renders the Figma spinner status without visible 
   assert.match(html, /mx-auto flex h-full w-full max-w-\[480px\] justify-center overflow-hidden/);
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
-  assert.match(html, /h-\[752px\] overflow-y-auto/);
+  assert.match(html, /h-\[752px\] overflow-hidden/);
+  assert.doesNotMatch(html, /h-\[752px\] overflow-y-auto/);
   assert.match(html, /bg-\[#ff8b3d\]/);
   assert.doesNotMatch(html, /w-\[100dvw\]/);
   assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);

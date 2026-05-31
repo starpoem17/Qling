@@ -16,6 +16,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
   const scrollPeekHeader = useScrollPeekHeader();
   const contentHeightClassName = scrollPeekHeader.isHeaderCollapsed ? 'h-[836px]' : 'h-[752px]';
   const contentClassName = `qling-received-worries-font ${contentHeightClassName} overflow-y-auto rounded-t-[32px] bg-[#fff1d1] px-4 pt-5 transition-[height] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] [-webkit-overflow-scrolling:touch] motion-reduce:transition-none`;
+  const loadingContentClassName = `qling-received-worries-font ${contentHeightClassName} overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5 transition-[height] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none`;
 
   const header = (
     <QlingPeekHeader
@@ -45,7 +46,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
             {header}
 
             {props.state.status === 'loading' ? (
-              <section className={`relative ${contentClassName}`} onScroll={scrollPeekHeader.onScroll} onTouchStart={scrollPeekHeader.onTouchStart} onTouchMove={scrollPeekHeader.onTouchMove} onWheel={scrollPeekHeader.onWheel}>
+              <section className={`relative ${loadingContentClassName}`}>
                 <FigmaTabLoading label={props.state.label} />
               </section>
             ) : props.state.status === 'error' ? (

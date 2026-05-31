@@ -123,7 +123,8 @@ test('received-worries loading state renders the Figma spinner status without vi
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
   assert.match(html, /h-\[100px\]/);
   assert.match(html, /bg-\[#ff8b3d\]/);
-  assert.match(html, /h-\[752px\] overflow-y-auto/);
+  assert.match(html, /h-\[752px\] overflow-hidden/);
+  assert.doesNotMatch(html, /h-\[752px\] overflow-y-auto/);
   assert.doesNotMatch(html, /w-\[100dvw\]/);
   assert.doesNotMatch(html, /min-h-\[calc\(100dvh-180px\)\]/);
   assert.doesNotMatch(html, /100dvh-120px-var\(--qling-space-nav-height\)/);
