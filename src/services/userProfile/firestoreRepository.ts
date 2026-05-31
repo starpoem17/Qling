@@ -18,6 +18,7 @@ function profileData(params: UserProfileWriteModel, timestamp: unknown) {
     gender: params.gender,
     age: params.age,
     interests: [...params.interests],
+    profileColor: params.profileColor,
     createdAt: timestamp,
     updatedAt: timestamp,
     lastActive: timestamp,

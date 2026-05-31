@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { WORRY_CATEGORIES, type WorryCategory } from '@midnight-radio/domain';
 import type { User } from 'firebase/auth';
+import { DEFAULT_PROFILE_COLOR, type ProfileColor } from '../../lib/profileColor';
 import {
   completeOnboardingViaApi,
   createExampleWorriesViaApi,
@@ -29,10 +30,11 @@ export function OnboardingContainer(props: Props) {
   const [gender, setGender] = useState<'male' | 'female' | ''>('');
   const [age, setAge] = useState('');
   const [selectedInterests, setSelectedInterests] = useState<WorryCategory[]>([]);
+  const [selectedProfileColor, setSelectedProfileColor] = useState<ProfileColor>(DEFAULT_PROFILE_COLOR);
   const [duplicateState, setDuplicateState] = useState<OnboardingDuplicateUiState>('idle');
   const [duplicateMessage, setDuplicateMessage] = useState<string | undefined>();
 
-  const draft = { nickname, gender, age, interests: selectedInterests };
+  const draft = { nickname, gender, age, interests: selectedInterests, profileColor: selectedProfileColor };
   const validation = validateOnboardingDraft(draft);
 
   const validationMessages: OnboardingScreenProps['validationMessages'] = {
@@ -40,6 +42,7 @@ export function OnboardingContainer(props: Props) {
     gender: !validation.gender.valid ? validation.gender.message : undefined,
     age: validation.age.valid === false ? validation.age.message : undefined,
     interests: !validation.interests.valid ? validation.interests.message : undefined,
+    profileColor: !validation.profileColor.valid ? validation.profileColor.message : undefined,
   };
 
   const disabled = !canSubmitOnboarding({ draft, duplicateState });
@@ -71,6 +74,7 @@ export function OnboardingContainer(props: Props) {
           gender: gender === '' ? 'female' : gender,
           age: validation.age.valid ? validation.age.age : 0,
           interests: selectedInterests,
+          profileColor: selectedProfileColor,
         },
         deps: {
           completeOnboarding: completeOnboardingViaApi,
@@ -86,7 +90,7 @@ export function OnboardingContainer(props: Props) {
 
   return (
     <OnboardingScreen
-      values={{ nickname, gender, age, selectedInterests }}
+      values={{ nickname, gender, age, selectedInterests, selectedProfileColor }}
       validationMessages={validationMessages}
       duplicateCheck={{ state: duplicateState, message: duplicateMessage }}
       isProcessing={props.isProcessing}
@@ -105,6 +109,7 @@ export function OnboardingContainer(props: Props) {
           ? current.filter(item => item !== category)
           : [...current, category]);
       }}
+      onProfileColorChange={setSelectedProfileColor}
       onDuplicateCheck={handleDuplicateCheck}
       onContinue={() => undefined}
       onSubmit={handleSubmit}

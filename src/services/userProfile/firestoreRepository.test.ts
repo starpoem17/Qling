@@ -69,6 +69,7 @@ const profile = {
   gender: 'female' as const,
   age: 20,
   interests: ['워라밸'] as const,
+  profileColor: '#FF8B3D' as const,
 };
 
 test('real repository reserves nickname under nicknameReservations/{normalizedNickname}', async () => {
@@ -261,6 +262,7 @@ test('real repository completeOnboarding writes server-owned profile fields afte
   assert.equal(written?.age, 20);
   assert.equal(written?.gender, 'female');
   assert.deepEqual(written?.interests, ['워라밸']);
+  assert.equal(written?.profileColor, '#FF8B3D');
   assert.ok(Object.hasOwn(written ?? {}, 'createdAt'));
   assert.ok(Object.hasOwn(written ?? {}, 'updatedAt'));
   assert.ok(Object.hasOwn(written ?? {}, 'lastActive'));

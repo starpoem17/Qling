@@ -1,5 +1,5 @@
 import type { WorryCategory } from '@midnight-radio/domain';
-import type { GenderValue } from './profileValidation';
+import type { GenderValue, ProfileColor } from './profileValidation';
 
 export type NicknameReservationStatus =
   | 'available'
@@ -26,6 +26,7 @@ export type CompleteOnboardingInput = {
   readonly gender: GenderValue;
   readonly age: number;
   readonly interests: readonly WorryCategory[];
+  readonly profileColor: ProfileColor;
 };
 
 export type UserProfileWriteModel = CompleteOnboardingInput & {

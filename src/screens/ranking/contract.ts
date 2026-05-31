@@ -5,6 +5,7 @@ export type RankingDisplayEntry = {
   readonly uid: string;
   readonly nickname: string;
   readonly heartCount: number;
+  readonly profileColor: string;
 };
 
 export type RankingScreenState =

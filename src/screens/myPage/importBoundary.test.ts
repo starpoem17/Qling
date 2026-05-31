@@ -47,7 +47,7 @@ test('MyPageScreen uses shared Phase 14 primitives without browser global URL re
   ]) {
     assert.match(source, new RegExp(primitive));
   }
-  assert.match(source, /defaultProfileImageUrl/);
+  assert.match(source, /profileImageUrlForColor/);
   assert.doesNotMatch(source, /ProfileMotif/);
   assert.doesNotMatch(source, /new URL/);
   assert.equal(source.includes('window.location'), false);

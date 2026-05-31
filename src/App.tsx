@@ -65,6 +65,7 @@ interface UserProfile {
   gender: string;
   age?: number;
   interests: string[];
+  profileColor?: string;
   helpedCount?: number;
   createdAt?: unknown;
   onboardingCompletedAt?: unknown;

@@ -9,7 +9,7 @@ import {
   QlingCard,
   QlingDialog,
   SettingsRow,
-  defaultProfileImageUrl,
+  profileImageUrlForColor,
 } from '../shared/ui';
 import type {
   ConfirmationProps,
@@ -59,7 +59,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
       <FigmaTopBar title="마이페이지" onBack={props.onBack} backLabel="이전 화면으로 돌아가기" tone="light" />
 
       <QlingCard className="mx-auto flex h-[93px] max-w-[353px] items-center gap-[19px] rounded-[24px] border-0 px-[17px] py-[14px]">
-        <DefaultProfileImage label={props.profile.profileMotif.label} />
+        <DefaultProfileImage label={props.profile.profileMotif.label} profileColor={props.profile.profileMotif.profileColor} />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -128,10 +128,10 @@ export function MyPageScreen(props: MyPageScreenProps) {
   );
 }
 
-function DefaultProfileImage({ label }: { readonly label: string }) {
+function DefaultProfileImage({ label, profileColor }: { readonly label: string; readonly profileColor: string }) {
   return (
     <img
-      src={defaultProfileImageUrl}
+      src={profileImageUrlForColor(profileColor)}
       alt={label}
       className="h-16 w-16 shrink-0 rounded-full"
       draggable={false}

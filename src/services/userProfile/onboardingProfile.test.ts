@@ -33,6 +33,7 @@ test('valid onboarding produces profile persistence contract', async () => {
       gender: 'female',
       age: '14',
       interests: ['워라밸', '취업'],
+      profileColor: '#B49BE8',
     },
     repository: repo,
   });
@@ -45,6 +46,7 @@ test('valid onboarding produces profile persistence contract', async () => {
     gender: 'female',
     age: 14,
     interests: ['워라밸', '취업'],
+    profileColor: '#B49BE8',
   });
 });
 
@@ -54,6 +56,7 @@ test('invalid required fields, duplicate nickname, and network states cannot sub
     gender: 'female',
     age: '20',
     interests: ['워라밸'],
+    profileColor: '#FF8B3D',
   };
   assert.equal(canSubmitOnboarding({ draft: validDraft, duplicateState: 'idle' }), false);
   assert.equal(canSubmitOnboarding({ draft: validDraft, duplicateState: 'duplicate' }), false);
@@ -93,6 +96,7 @@ test('invalid draft does not persist profile', async () => {
       gender: 'female',
       age: '13',
       interests: ['워라밸'],
+      profileColor: '#FF8B3D',
     },
     repository: repo,
   });
@@ -111,8 +115,31 @@ test('validation uses domain category values and keeps 워라밸 selected', () =
     gender: 'female',
     age: '20',
     interests: ['워라밸', '워라벨'],
+    profileColor: '#FF8B3D',
   });
 
   assert.equal(validation.valid, true);
   assert.deepEqual(validation.interests, { valid: true, interests: ['워라밸'] });
+});
+
+test('invalid profile color blocks onboarding persistence', async () => {
+  const repo = repository();
+  const result = await completeOnboarding({
+    uid: 'user-1',
+    draft: {
+      nickname: '라미',
+      gender: 'female',
+      age: '20',
+      interests: ['워라밸'],
+      profileColor: '#ff8b3d',
+    },
+    repository: repo,
+  });
+
+  assert.deepEqual(result, {
+    status: 'invalid',
+    code: 'invalid_profile',
+    message: '온보딩 필수 입력값을 확인해주세요.',
+  });
+  assert.deepEqual(repo.writes, []);
 });

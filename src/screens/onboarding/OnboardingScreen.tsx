@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { Check, CheckCircle2 } from 'lucide-react';
 import type { WorryCategory } from '@midnight-radio/domain';
 import { cn } from '../../lib/utils';
+import { PROFILE_COLOR_OPTIONS, type ProfileColor } from '../../lib/profileColor';
 import {
   ONBOARDING_INTEREST_GRID,
+  ONBOARDING_PROFILE_COLOR_GRID,
   orderOnboardingInterestCategories,
   type OnboardingScreenProps,
 } from './contract';
@@ -17,7 +19,7 @@ const genderOptions = [
   { value: 'female', label: '여성' },
 ] as const;
 
-type VisualStep = 'basic' | 'interests';
+type VisualStep = 'basic' | 'interests' | 'profileColor';
 
 export function OnboardingScreen(props: Props) {
   const [visualStep, setVisualStep] = useState<VisualStep>('basic');
@@ -57,11 +59,17 @@ export function OnboardingScreen(props: Props) {
             basicStepComplete={basicStepComplete}
             onNext={handleBasicNext}
           />
-        ) : (
+        ) : visualStep === 'interests' ? (
           <InterestsStep
             props={props}
             orderedCategoryOptions={orderedCategoryOptions}
             onPrevious={() => setVisualStep('basic')}
+            onNext={() => setVisualStep('profileColor')}
+          />
+        ) : (
+          <ProfileColorStep
+            props={props}
+            onPrevious={() => setVisualStep('interests')}
           />
         )}
       </div>
@@ -243,11 +251,15 @@ function InterestsStep({
   props,
   orderedCategoryOptions,
   onPrevious,
+  onNext,
 }: {
   readonly props: Props;
   readonly orderedCategoryOptions: readonly WorryCategory[];
   readonly onPrevious: () => void;
+  readonly onNext: () => void;
 }) {
+  const canContinue = !props.validationMessages.interests && props.values.selectedInterests.length > 0;
+
   return (
     <>
       <ProgressHeader
@@ -302,14 +314,131 @@ function InterestsStep({
       </button>
       <button
         type="button"
+        onClick={onNext}
+        disabled={!canContinue || props.isProcessing}
+        aria-label={canContinue ? '프로필 색상 선택으로 이동' : '관심 분야를 선택해야 이동 가능'}
+        className="absolute left-[130px] top-[752px] h-[56px] w-[239px] rounded-[28px] bg-[#ff8b0d] text-[17px] font-extrabold leading-none tracking-normal text-[#121316] disabled:cursor-not-allowed disabled:opacity-55"
+      >
+        다음
+      </button>
+    </>
+  );
+}
+
+function ProfileColorStep({
+  props,
+  onPrevious,
+}: {
+  readonly props: Props;
+  readonly onPrevious: () => void;
+}) {
+  return (
+    <>
+      <p className="absolute left-[30px] top-[127px] text-[10px] font-black leading-[19.5px] tracking-[3px] text-[#fff1d1]">CUSTOMIZING</p>
+      <h1 className="absolute left-[28px] top-[147px] text-[26px] font-extrabold leading-[34px] tracking-normal text-white">프로필 설정을 해주세요</h1>
+      <div className="absolute left-[24px] top-[235px] h-[6px] w-[345px] rounded-[3px] bg-[#f2e5d3]" />
+      <div className="absolute left-[24px] top-[235px] h-[6px] w-[346px] rounded-[3px] bg-[#ff8b3d]" />
+
+      <h2 className="absolute left-[24px] top-[253px] text-[20px] font-black leading-7 tracking-normal text-[#545454]">프로필 색상을 골라주세요</h2>
+      <p className="absolute left-[24px] top-[289px] w-[345px] text-[13px] font-normal leading-[18px] tracking-normal text-[#8b847a]">
+        나를 표현할 색을 골라보세요. 익명이지만, 나만의 색이 생겨요.
+      </p>
+
+      <div className="absolute left-[112px] top-[343px] h-[168px] w-[168px] rounded-full bg-[rgb(255_255_255/0.7)]" />
+      <div className="absolute left-[138px] top-[371px] h-[116px] w-[116px] drop-shadow-[6px_8px_0_rgba(128,87,33,0.18)]">
+        <ProfileAvatarPreview color={props.values.selectedProfileColor} />
+      </div>
+
+      <div
+        className="absolute left-[54px] top-[549px] grid w-[286px] grid-cols-5 gap-x-[14px] gap-y-[20px]"
+        aria-label="프로필 색상 선택"
+        data-columns={ONBOARDING_PROFILE_COLOR_GRID.columns}
+      >
+        {PROFILE_COLOR_OPTIONS.map(color => (
+          <ProfileColorSwatch
+            key={color}
+            color={color}
+            selected={props.values.selectedProfileColor === color}
+            disabled={props.isProcessing}
+            onSelect={() => props.onProfileColorChange(color)}
+          />
+        ))}
+      </div>
+      {props.validationMessages.profileColor && (
+        <p className="absolute left-[54px] top-[683px] text-[13px] font-bold text-[#ea4335]" role="alert">
+          {props.validationMessages.profileColor}
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={onPrevious}
+        disabled={props.isProcessing}
+        className="absolute left-[24px] top-[752px] h-[56px] w-[100px] rounded-[28px] border-[1.4px] border-[#efe2d0] bg-white text-[16px] font-bold leading-none tracking-normal text-[#8b847a] disabled:cursor-not-allowed disabled:opacity-55"
+      >
+        이전
+      </button>
+      <button
+        type="button"
         onClick={props.onSubmit}
         disabled={props.disabled || props.isProcessing}
         aria-label={props.disabled ? '필수 정보를 완료해야 온보딩 완료 가능' : '온보딩 완료'}
         aria-busy={props.isProcessing || undefined}
-        className="absolute left-[130px] top-[752px] h-[56px] w-[239px] rounded-[28px] bg-[#ff8b0d] text-[17px] font-extrabold leading-none tracking-normal text-[#121316] disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-[130px] top-[752px] h-[56px] w-[239px] rounded-[28px] bg-[#ff8b3d] text-[17px] font-extrabold leading-none tracking-normal text-white disabled:cursor-not-allowed disabled:opacity-55"
       >
         {props.isProcessing ? '처리 중' : '완료'}
       </button>
     </>
+  );
+}
+
+function ProfileColorSwatch({
+  color,
+  selected,
+  disabled,
+  onSelect,
+}: {
+  readonly color: ProfileColor;
+  readonly selected: boolean;
+  readonly disabled: boolean;
+  readonly onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={disabled}
+      aria-pressed={selected}
+      aria-label={`프로필 색상 ${color}`}
+      className={cn(
+        'relative h-[46px] w-[46px] rounded-full border-[3px] border-white transition-transform focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 focus:ring-offset-[#fff7e3] disabled:cursor-not-allowed disabled:opacity-55',
+        selected && 'ring-[3px] ring-[#ff8b3d] ring-offset-0',
+      )}
+      style={{ backgroundColor: color }}
+    >
+      {selected && <Check className="absolute left-[9px] top-[8px] h-7 w-7 text-white" strokeWidth={2.4} aria-hidden="true" />}
+    </button>
+  );
+}
+
+function ProfileAvatarPreview({ color }: { readonly color: ProfileColor }) {
+  return (
+    <svg width="116" height="116" viewBox="0 0 108 108" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="block h-full w-full">
+      <circle cx="54" cy="54" r="54" fill={color} />
+      <path d="M51.6143 55.3327C51.7625 70.315 46.9722 72.7348 41.2459 72.7348C35.5195 72.7348 30.5003 69.4912 30.8774 55.3327C31.2544 41.1742 35.5195 37.9307 41.2459 37.9307C46.9722 37.9307 51.4662 40.3505 51.6143 55.3327Z" fill="#FFF5EB" />
+      <mask id="onboarding-profile-eye-left" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="30" y="37" width="23" height="36">
+        <path d="M52.1308 55.1012C52.2826 70.2817 47.3732 72.7336 41.5044 72.7336C35.6355 72.7336 30.4915 69.4471 30.8779 55.1012C31.2643 40.7553 35.6355 37.4688 41.5044 37.4688C47.3732 37.4688 51.979 39.9206 52.1308 55.1012Z" fill="#FFF5EB" />
+      </mask>
+      <g mask="url(#onboarding-profile-eye-left)">
+        <path d="M55.527 55.8039C55.527 62.8958 51.972 68.6449 47.5868 68.6449C43.2015 68.6449 39.6465 65.3867 39.6465 55.8039C39.6465 48.712 43.2015 42.9629 47.5868 42.9629C51.972 42.9629 55.527 48.712 55.527 55.8039Z" fill="#1A1A1A" />
+      </g>
+      <path d="M76.7204 55.3327C76.8754 70.315 71.8624 72.7348 65.8697 72.7348C59.877 72.7348 54.6244 69.4912 55.0189 55.3327C55.4135 41.1742 59.877 37.9307 65.8697 37.9307C71.8624 37.9307 76.5654 40.3505 76.7204 55.3327Z" fill="#FFF5EB" />
+      <mask id="onboarding-profile-eye-right" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="55" y="37" width="22" height="36">
+        <path d="M76.7187 55.1012C76.8705 70.2817 71.9611 72.7336 66.0923 72.7336C60.2234 72.7336 55.0794 69.4471 55.4658 55.1012C55.8522 40.7553 60.2234 37.4688 66.0923 37.4688C71.9611 37.4688 76.5669 39.9206 76.7187 55.1012Z" fill="#FFF5EB" />
+      </mask>
+      <g mask="url(#onboarding-profile-eye-right)">
+        <path d="M80.113 55.8039C80.113 62.8958 76.558 68.6449 72.1727 68.6449C67.7874 68.6449 64.2324 65.3867 64.2324 55.8039C64.2324 48.712 67.7874 42.9629 72.1727 42.9629C76.558 42.9629 80.113 48.712 80.113 55.8039Z" fill="#1A1A1A" />
+      </g>
+    </svg>
   );
 }

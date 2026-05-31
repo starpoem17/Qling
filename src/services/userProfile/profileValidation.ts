@@ -1,4 +1,11 @@
 import { WORRY_CATEGORY_SET, type WorryCategory } from '@midnight-radio/domain';
+export {
+  DEFAULT_PROFILE_COLOR,
+  PROFILE_COLOR_OPTIONS,
+  isValidProfileColor,
+  normalizeProfileColor,
+  type ProfileColor,
+} from '../../lib/profileColor';
 
 export const NICKNAME_VALIDATION_MESSAGES = {
   required: '닉네임을 입력해주세요.',

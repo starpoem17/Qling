@@ -3,8 +3,12 @@ import assert from 'node:assert/strict';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import {
   AGE_VALIDATION_MESSAGES,
+  DEFAULT_PROFILE_COLOR,
   NICKNAME_VALIDATION_MESSAGES,
+  PROFILE_COLOR_OPTIONS,
+  isValidProfileColor,
   normalizeInterests,
+  normalizeProfileColor,
   normalizedNicknameKey,
   validateAge,
   validateNickname,
@@ -88,4 +92,17 @@ test('age validation requires numeric 14 through 99 inclusive', () => {
 test('interests normalize through domain categories and preserve 워라밸', () => {
   assert.ok(WORRY_CATEGORIES.includes('워라밸'));
   assert.deepEqual(normalizeInterests(['워라밸', '없는값', '워라밸', '취업']), ['워라밸', '취업']);
+});
+
+test('profile color validation allows only PRD uppercase color options', () => {
+  assert.equal(DEFAULT_PROFILE_COLOR, '#FF8B3D');
+  assert.equal(PROFILE_COLOR_OPTIONS.length, 10);
+  for (const color of PROFILE_COLOR_OPTIONS) {
+    assert.equal(isValidProfileColor(color), true);
+  }
+  assert.equal(isValidProfileColor('#ff8b3d'), false);
+  assert.equal(isValidProfileColor('#FFFFFF'), false);
+  assert.equal(isValidProfileColor(123), false);
+  assert.equal(normalizeProfileColor(undefined), DEFAULT_PROFILE_COLOR);
+  assert.equal(normalizeProfileColor('#4FB8C9'), '#4FB8C9');
 });

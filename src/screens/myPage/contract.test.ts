@@ -23,6 +23,7 @@ test('my-page summary limits nickname to profile summary and labels helpedCount 
       profileMotif: {
         kind: 'visual-only',
         label: 'Profile motif',
+        profileColor: '#FF8B3D',
       },
     },
     answerPreviewItems: [],
@@ -62,7 +63,7 @@ test('my-page contract keeps profile motif visual-only with no avatar data field
     nickname: 'Profile user',
     helpedCount: 0,
     helpedCountLabel: HELPED_COUNT_LABEL,
-    profileMotif: { kind: 'visual-only', label: 'Profile motif' },
+    profileMotif: { kind: 'visual-only', label: 'Profile motif', profileColor: '#FF8B3D' },
   });
 
   for (const forbidden of ['avatarUrl', 'avatarUpload', 'avatarImageData']) {

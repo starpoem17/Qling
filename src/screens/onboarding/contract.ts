@@ -1,4 +1,5 @@
 import type { WorryCategory } from '@midnight-radio/domain';
+import type { ProfileColor } from '../../lib/profileColor';
 import type { FieldValidationMessages, ProcessingState } from '../shared/contract';
 
 export const ONBOARDING_INTEREST_CATEGORY_ORDER = [
@@ -41,6 +42,14 @@ export const ONBOARDING_INTEREST_GRID = {
   textLetterSpacingPx: 0,
 } as const;
 
+export const ONBOARDING_PROFILE_COLOR_GRID = {
+  columns: 5,
+  swatchSizePx: 46,
+  swatchRadiusPx: 23,
+  columnGapPx: 14,
+  rowGapPx: 20,
+} as const;
+
 export function orderOnboardingInterestCategories(
   categoryOptions: readonly WorryCategory[],
 ): WorryCategory[] {
@@ -67,7 +76,7 @@ export type OnboardingDuplicateCheckState = (typeof ONBOARDING_DUPLICATE_CHECK_S
 
 export type OnboardingGenderValue = 'male' | 'female' | '';
 
-export type OnboardingField = 'nickname' | 'gender' | 'age' | 'interests';
+export type OnboardingField = 'nickname' | 'gender' | 'age' | 'interests' | 'profileColor';
 
 export type OnboardingBasicValues = {
   readonly nickname: string;
@@ -79,8 +88,12 @@ export type OnboardingInterestsValues = {
   readonly selectedInterests: readonly WorryCategory[];
 };
 
+export type OnboardingProfileColorValues = {
+  readonly selectedProfileColor: ProfileColor;
+};
+
 export type OnboardingScreenProps = ProcessingState & {
-  readonly values: OnboardingBasicValues & OnboardingInterestsValues;
+  readonly values: OnboardingBasicValues & OnboardingInterestsValues & OnboardingProfileColorValues;
   readonly validationMessages: FieldValidationMessages<OnboardingField>;
   readonly duplicateCheck: {
     readonly state: OnboardingDuplicateCheckState;
@@ -90,6 +103,7 @@ export type OnboardingScreenProps = ProcessingState & {
   readonly onGenderChange: (value: Exclude<OnboardingGenderValue, ''>) => void;
   readonly onAgeChange: (value: string) => void;
   readonly onInterestToggle: (value: WorryCategory) => void;
+  readonly onProfileColorChange: (value: ProfileColor) => void;
   readonly onDuplicateCheck: () => void;
   readonly onContinue: () => void;
   readonly onSubmit: () => void;

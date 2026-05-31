@@ -59,6 +59,7 @@ service cloud.firestore {
         'gender',
         'age',
         'interests',
+        'profileColor',
         'createdAt',
         'updatedAt',
         'lastActive',
@@ -119,9 +120,24 @@ service cloud.firestore {
       return value is int && value >= 14 && value <= 99;
     }
 
+    function isAllowedProfileColor(value) {
+      return value == '#FF8B3D'
+        || value == '#FFB36B'
+        || value == '#FFD24A'
+        || value == '#B8D968'
+        || value == '#7FD6A8'
+        || value == '#6FA8F0'
+        || value == '#B49BE8'
+        || value == '#F2A6C2'
+        || value == '#FF8585'
+        || value == '#4FB8C9';
+    }
+
     function safeProfileCreateValuesAreValid() {
       return ('age' in request.resource.data)
         && isAllowedAge(request.resource.data.age)
+        && ('profileColor' in request.resource.data)
+        && isAllowedProfileColor(request.resource.data.profileColor)
         && (!('gender' in request.resource.data) || isAllowedGender(request.resource.data.gender));
     }
 
@@ -133,7 +149,8 @@ service cloud.firestore {
         && (
           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['age'])
           || isAllowedAge(request.resource.data.age)
-        );
+        )
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['profileColor']);
     }
 
     function existingUserIsNotDeleted() {

@@ -1,4 +1,5 @@
 import type { RankingEntry, RankingFeedbackDoc, RankingResponse, RankingUserDoc } from './types';
+import { normalizeProfileColor } from '../userProfile/profileValidation';
 
 const RANKING_LIMIT = 15;
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
@@ -25,11 +26,13 @@ export function composeRankingResponse(params: {
     monthly: rankEntries([...monthlyCounts].map(([uid, heartCount]) => ({
       uid,
       nickname: displayNickname(usersByUid.get(uid)),
+      profileColor: normalizeProfileColor(usersByUid.get(uid)?.profileColor),
       heartCount,
     }))),
     total: rankEntries(activeUsers.map(user => ({
       uid: user.uid,
       nickname: displayNickname(user),
+      profileColor: normalizeProfileColor(user.profileColor),
       heartCount: numericHeartCount(user.helpedCount),
     })).filter(entry => entry.heartCount > 0)),
   };

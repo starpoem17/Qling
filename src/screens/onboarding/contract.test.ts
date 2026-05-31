@@ -4,6 +4,7 @@ import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import {
   ONBOARDING_INTEREST_CATEGORY_ORDER,
   ONBOARDING_INTEREST_GRID,
+  ONBOARDING_PROFILE_COLOR_GRID,
   ONBOARDING_DUPLICATE_CHECK_STATES,
   orderOnboardingInterestCategories,
   type OnboardingScreenProps,
@@ -16,6 +17,7 @@ test('onboarding contract includes required field values, validation, and event 
       gender: '',
       age: '',
       selectedInterests: [WORRY_CATEGORIES[0]],
+      selectedProfileColor: '#FF8B3D',
     },
     validationMessages: {
       nickname: 'Required',
@@ -31,6 +33,7 @@ test('onboarding contract includes required field values, validation, and event 
     onGenderChange: () => undefined,
     onAgeChange: () => undefined,
     onInterestToggle: () => undefined,
+    onProfileColorChange: () => undefined,
     onDuplicateCheck: () => undefined,
     onContinue: () => undefined,
     onSubmit: () => undefined,
@@ -39,6 +42,7 @@ test('onboarding contract includes required field values, validation, and event 
   assert.equal(typeof props.values.nickname, 'string');
   assert.equal(typeof props.values.age, 'string');
   assert.deepEqual(props.values.selectedInterests, [WORRY_CATEGORIES[0]]);
+  assert.equal(props.values.selectedProfileColor, '#FF8B3D');
   assert.equal(typeof props.onDuplicateCheck, 'function');
   assert.equal(typeof props.onSubmit, 'function');
 });
@@ -101,6 +105,7 @@ test('onboarding contract has no implementation object or design default nicknam
       gender: 'female',
       age: '20',
       selectedInterests: [],
+      selectedProfileColor: '#FF8B3D',
     },
     validationMessages: {},
     duplicateCheck: {
@@ -113,6 +118,7 @@ test('onboarding contract has no implementation object or design default nicknam
     onGenderChange: () => undefined,
     onAgeChange: () => undefined,
     onInterestToggle: () => undefined,
+    onProfileColorChange: () => undefined,
     onDuplicateCheck: () => undefined,
     onContinue: () => undefined,
     onSubmit: () => undefined,
@@ -121,4 +127,14 @@ test('onboarding contract has no implementation object or design default nicknam
   assert.notEqual(props.values.nickname, '\ub77c\ubbf8');
   assert.equal(Object.hasOwn(props, 'nicknameReservation'), false);
   assert.equal(Object.hasOwn(props, 'apiClient'), false);
+});
+
+test('onboarding profile color grid follows the Figma swatch contract', () => {
+  assert.deepEqual(ONBOARDING_PROFILE_COLOR_GRID, {
+    columns: 5,
+    swatchSizePx: 46,
+    swatchRadiusPx: 23,
+    columnGapPx: 14,
+    rowGapPx: 20,
+  });
 });

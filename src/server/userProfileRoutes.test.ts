@@ -147,6 +147,7 @@ test('onboarding profile route persists required age, gender, interests, and nic
         gender: 'female',
         age: 99,
         interests: ['워라밸'],
+        profileColor: '#4FB8C9',
       });
       return { status: 'completed', profile: params };
     },
@@ -160,6 +161,7 @@ test('onboarding profile route persists required age, gender, interests, and nic
     gender: 'female',
     age: 99,
     interests: ['워라밸', '워라벨'],
+    profileColor: '#4FB8C9',
   });
   assert.equal(res.statusCode, 200);
   assert.equal((res.body as { status: string }).status, 'completed');
@@ -185,6 +187,32 @@ test('onboarding profile route rejects invalid required fields before persistenc
     gender: 'female',
     age: 13,
     interests: ['워라밸'],
+  });
+  assert.equal(res.statusCode, 400);
+  assert.equal(called, false);
+});
+
+test('onboarding profile route rejects invalid profile color before persistence', async () => {
+  let called = false;
+  const route = captureRoutes({
+    async reserveNickname() {
+      throw new Error('unused');
+    },
+    async completeOnboarding() {
+      called = true;
+      throw new Error('should not persist');
+    },
+    async updateInterests() {
+      throw new Error('unused');
+    },
+  });
+
+  const res = await route.call('/api/users/me/onboarding-profile', {
+    nickname: '라미',
+    gender: 'female',
+    age: 20,
+    interests: ['워라밸'],
+    profileColor: '#ff8b3d',
   });
   assert.equal(res.statusCode, 400);
   assert.equal(called, false);

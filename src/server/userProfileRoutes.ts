@@ -4,7 +4,7 @@ import type { Firestore } from 'firebase-admin/firestore';
 import { createRequireActiveFirebaseAuth, parseBearerToken, type ActiveAuthenticatedRequest } from './auth';
 import { completeOnboarding, reserveNickname } from '../services/userProfile/onboardingProfile';
 import { updateMyInterests } from '../services/userProfile/profileInterests';
-import { validateAge, validateNickname, isValidGender, normalizeInterests } from '../services/userProfile/profileValidation';
+import { validateAge, validateNickname, isValidGender, isValidProfileColor, normalizeInterests } from '../services/userProfile/profileValidation';
 import { createUserProfileFirestoreRepository } from '../services/userProfile/firestoreRepository';
 import type { UserProfileRepository } from '../services/userProfile/types';
 
@@ -84,8 +84,9 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
     const ageValidation = validateAge(String(req.body?.age ?? ''));
     const gender = typeof req.body?.gender === 'string' && isValidGender(req.body.gender) ? req.body.gender : '';
     const interests = normalizeInterests(Array.isArray(req.body?.interests) ? req.body.interests : []);
+    const profileColor = isValidProfileColor(req.body?.profileColor) ? req.body.profileColor : '';
 
-    if (!nicknameValidation.valid || !ageValidation.valid || !gender || interests.length === 0) {
+    if (!nicknameValidation.valid || !ageValidation.valid || !gender || interests.length === 0 || !profileColor) {
       res.status(400).json({
         error: {
           code: 'invalid_profile',
@@ -103,6 +104,7 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
         gender,
         age: String(ageValidation.age),
         interests,
+        profileColor,
       },
       repository,
     }));

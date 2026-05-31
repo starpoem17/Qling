@@ -26,6 +26,7 @@ type MyPageProfile = {
   readonly interests?: readonly string[];
   readonly age?: number;
   readonly helpedCount?: number;
+  readonly profileColor?: unknown;
 };
 
 export type MyPageContainerProps = {

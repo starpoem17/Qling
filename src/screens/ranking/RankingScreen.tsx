@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import defaultProfileUrl from '../../../assets/profile/default_profile.svg';
 import { cn } from '../../lib/utils';
-import { ErrorState, LoadingState } from '../shared/ui';
+import { DEFAULT_PROFILE_COLOR } from '../../lib/profileColor';
+import { ErrorState, LoadingState, profileImageUrlForColor } from '../shared/ui';
 import type { RankingDisplayEntry, RankingMode, RankingScreenProps } from './contract';
 
 export function RankingScreen(props: RankingScreenProps) {
@@ -33,6 +33,7 @@ export function RankingScreen(props: RankingScreenProps) {
     uid: `empty-top-${rank}`,
     nickname: '-',
     heartCount: 0,
+    profileColor: DEFAULT_PROFILE_COLOR,
   });
   const lowerEntries = displayEntries.filter(entry => entry.rank >= 4).slice(0, 12);
 
@@ -140,7 +141,7 @@ function TopRank({
       </div>
       <div className="h-[18px] truncate text-[15px] font-bold leading-[18px] qling-figma-font-strong">{entry.nickname}</div>
       <img
-        src={defaultProfileUrl}
+        src={profileImageUrlForColor(entry.profileColor)}
         alt=""
         className="absolute left-0 top-[55px] h-20 w-20 rounded-full"
         data-measure={`ranking-profile-${place}`}
@@ -174,6 +175,7 @@ function RankingRows({ entries }: { readonly entries: readonly RankingDisplayEnt
       uid: `empty-${rank}`,
       nickname: '',
       heartCount: 0,
+      profileColor: DEFAULT_PROFILE_COLOR,
     };
   });
 

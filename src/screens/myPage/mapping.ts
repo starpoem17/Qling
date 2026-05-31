@@ -7,6 +7,7 @@ import type {
 } from './contract';
 import { HELPED_COUNT_LABEL } from './contract';
 import type { MyWorryListItem, ReplyReadModelItem } from '../../services/myWorries';
+import { normalizeProfileColor } from '../../lib/profileColor';
 import { formatDisplayDate, type DisplayDateInput, type DisplayDateOptions } from '../shared/displayDate';
 
 export type MyPageProfileInput = {
@@ -14,6 +15,7 @@ export type MyPageProfileInput = {
   readonly interests?: readonly string[];
   readonly age?: number;
   readonly helpedCount?: number;
+  readonly profileColor?: unknown;
 };
 
 export function mapProfileToMyPageSummary(profile: MyPageProfileInput | null): MyPageProfileSummaryProps {
@@ -24,6 +26,7 @@ export function mapProfileToMyPageSummary(profile: MyPageProfileInput | null): M
     profileMotif: {
       kind: 'visual-only',
       label: 'Profile motif',
+      profileColor: normalizeProfileColor(profile?.profileColor),
     },
   };
 }

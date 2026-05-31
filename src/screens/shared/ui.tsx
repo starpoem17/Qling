@@ -1,5 +1,6 @@
 import { useId, type ReactNode } from 'react';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
+import { normalizeProfileColor } from '../../lib/profileColor';
 import {
   AlertCircle,
   CheckCircle2,
@@ -225,6 +226,12 @@ const bottomNavIconUrlByState: Record<
 };
 
 export const defaultProfileImageUrl = new URL('../../../assets/profile/default_profile.svg', import.meta.url).href;
+
+export function profileImageUrlForColor(profileColor: unknown): string {
+  const color = normalizeProfileColor(profileColor);
+  const svg = `<svg width="108" height="108" viewBox="0 0 108 108" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="54" cy="54" r="54" fill="${color}"/><path d="M51.6143 55.3327C51.7625 70.315 46.9722 72.7348 41.2459 72.7348C35.5195 72.7348 30.5003 69.4912 30.8774 55.3327C31.2544 41.1742 35.5195 37.9307 41.2459 37.9307C46.9722 37.9307 51.4662 40.3505 51.6143 55.3327Z" fill="#FFF5EB"/><mask id="mask0_346_383" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="30" y="37" width="23" height="36"><path d="M52.1308 55.1012C52.2826 70.2817 47.3732 72.7336 41.5044 72.7336C35.6355 72.7336 30.4915 69.4471 30.8779 55.1012C31.2643 40.7553 35.6355 37.4688 41.5044 37.4688C47.3732 37.4688 51.979 39.9206 52.1308 55.1012Z" fill="#FFF5EB"/></mask><g mask="url(#mask0_346_383)"><path d="M55.527 55.8039C55.527 62.8958 51.972 68.6449 47.5868 68.6449C43.2015 68.6449 39.6465 65.3867 39.6465 55.8039C39.6465 48.712 43.2015 42.9629 47.5868 42.9629C51.972 42.9629 55.527 48.712 55.527 55.8039Z" fill="#1A1A1A"/></g><path d="M76.7204 55.3327C76.8754 70.315 71.8624 72.7348 65.8697 72.7348C59.877 72.7348 54.6244 69.4912 55.0189 55.3327C55.4135 41.1742 59.877 37.9307 65.8697 37.9307C71.8624 37.9307 76.5654 40.3505 76.7204 55.3327Z" fill="#FFF5EB"/><mask id="mask1_346_383" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="55" y="37" width="22" height="36"><path d="M76.7187 55.1012C76.8705 70.2817 71.9611 72.7336 66.0923 72.7336C60.2234 72.7336 55.0794 69.4471 55.4658 55.1012C55.8522 40.7553 60.2234 37.4688 66.0923 37.4688C71.9611 37.4688 76.5669 39.9206 76.7187 55.1012Z" fill="#FFF5EB"/></mask><g mask="url(#mask1_346_383)"><path d="M80.113 55.8039C80.113 62.8958 76.558 68.6449 72.1727 68.6449C67.7874 68.6449 64.2324 65.3867 64.2324 55.8039C64.2324 48.712 67.7874 42.9629 72.1727 42.9629C76.558 42.9629 80.113 48.712 80.113 55.8039Z" fill="#1A1A1A"/></g></svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
 
 export function ContentSheet({ children, className }: { readonly children: ReactNode; readonly className?: string }) {
   return (

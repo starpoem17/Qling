@@ -10,6 +10,7 @@ export type MyPageProfileSummaryProps = {
   readonly profileMotif: {
     readonly kind: 'visual-only';
     readonly label: string;
+    readonly profileColor: string;
   };
 };
 

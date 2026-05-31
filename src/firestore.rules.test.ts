@@ -24,6 +24,7 @@ const safeProfile = (uid: string) => ({
   gender: 'female',
   age: 20,
   interests: ['career'],
+  profileColor: '#FF8B3D',
   createdAt: new Date(),
   lastActive: new Date(),
 });
@@ -170,6 +171,14 @@ describe('profile and token transition', () => {
     await assertSucceeds(dbFor('recipient').doc('users/recipient').set({ ...safeProfile('recipient'), age: 99 }));
   });
 
+  test('first-time own profile create requires allowed profile color', async () => {
+    const { profileColor: _profileColor, ...withoutProfileColor } = safeProfile('author');
+    await assertFails(dbFor('author').doc('users/author').set(withoutProfileColor));
+    await assertFails(dbFor('author').doc('users/author').set({ ...safeProfile('author'), profileColor: '#ff8b3d' }));
+    await assertFails(dbFor('author').doc('users/author').set({ ...safeProfile('author'), profileColor: '#FFFFFF' }));
+    await assertSucceeds(dbFor('author').doc('users/author').set({ ...safeProfile('author'), profileColor: '#4FB8C9' }));
+  });
+
   test('own profile create and gender update require PRD gender enum', async () => {
     await assertFails(dbFor('author').doc('users/author').set({
       ...safeProfile('author'),
@@ -252,6 +261,7 @@ describe('profile and token transition', () => {
     await assertFails(dbFor('author').doc('users/author').update({ age: 13 }));
     await assertFails(dbFor('author').doc('users/author').update({ age: 100 }));
     await assertFails(dbFor('author').doc('users/author').update({ age: '21' }));
+    await assertFails(dbFor('author').doc('users/author').update({ profileColor: '#4FB8C9' }));
   });
 
   test('safe update succeeds when existing activeDeliveryCount is preserved', async () => {

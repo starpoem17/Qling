@@ -16,6 +16,7 @@ const validDraft: OnboardingDraft = {
   gender: 'female',
   age: '20',
   interests: ['워라밸'],
+  profileColor: '#FF8B3D',
 };
 
 function canSubmit(draft: OnboardingDraft, duplicateState: OnboardingDuplicateUiState) {
@@ -59,11 +60,11 @@ test('onboarding side effects complete profile then examples then route completi
   const result = await submitAvailableOnboarding({
     user: { uid: 'user-1' } as never,
     disabled: false,
-    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['워라밸'] },
+    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['워라밸'], profileColor: '#FF8B3D' },
     deps: {
       async completeOnboarding() {
         calls.push('completeOnboarding');
-        return { status: 'completed', profile: { uid: 'user-1', nickname: '라미', normalizedNickname: '라미', gender: 'female', age: 20, interests: ['워라밸'] } };
+        return { status: 'completed', profile: { uid: 'user-1', nickname: '라미', normalizedNickname: '라미', gender: 'female', age: 20, interests: ['워라밸'], profileColor: '#FF8B3D' } };
       },
       async createExamples() {
         calls.push('createExamples');
@@ -86,7 +87,7 @@ test('profile completion failure does not create examples or route transition', 
   const result = await submitAvailableOnboarding({
     user: { uid: 'user-1' } as never,
     disabled: false,
-    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['워라밸'] },
+    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['워라밸'], profileColor: '#FF8B3D' },
     deps: {
       async completeOnboarding() {
         calls.push('completeOnboarding');
@@ -113,11 +114,11 @@ test('example creation failure blocks route transition under current implementat
   const result = await submitAvailableOnboarding({
     user: { uid: 'user-1' } as never,
     disabled: false,
-    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['워라밸'] },
+    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['워라밸'], profileColor: '#FF8B3D' },
     deps: {
       async completeOnboarding() {
         calls.push('completeOnboarding');
-        return { status: 'completed', profile: { uid: 'user-1', nickname: '라미', normalizedNickname: '라미', gender: 'female', age: 20, interests: ['워라밸'] } };
+        return { status: 'completed', profile: { uid: 'user-1', nickname: '라미', normalizedNickname: '라미', gender: 'female', age: 20, interests: ['워라밸'], profileColor: '#FF8B3D' } };
       },
       async createExamples() {
         calls.push('createExamples');
@@ -141,7 +142,7 @@ test('disabled submission is blocked before API side effects', async () => {
   const result = await submitAvailableOnboarding({
     user: { uid: 'user-1' } as never,
     disabled: true,
-    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['워라밸'] },
+    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['워라밸'], profileColor: '#FF8B3D' },
     deps: {
       async completeOnboarding() {
         calls.push('completeOnboarding');

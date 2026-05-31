@@ -12,7 +12,7 @@ function baseMyPageProps(overrides: Partial<MyPageScreenProps> = {}): MyPageScre
       nickname: '라미',
       helpedCount: 314,
       helpedCountLabel: HELPED_COUNT_LABEL,
-      profileMotif: { kind: 'visual-only', label: '프로필 모티프' },
+      profileMotif: { kind: 'visual-only', label: '프로필 모티프', profileColor: '#FF8B3D' },
     },
     answerPreviewItems: [{
       replyId: 'reply-1',
@@ -69,7 +69,7 @@ test('my-page profile summary does not render private profile fields or interest
       nickname: '본인닉네임',
       helpedCount: 2,
       helpedCountLabel: HELPED_COUNT_LABEL,
-      profileMotif: { kind: 'visual-only', label: '프로필 모티프' },
+      profileMotif: { kind: 'visual-only', label: '프로필 모티프', profileColor: '#FF8B3D' },
       gender: '여성',
       ageLabel: '33세',
       interests: ['취업'],
@@ -83,10 +83,11 @@ test('my-page profile summary does not render private profile fields or interest
   }
 });
 
-test('my-page renders default profile svg at the existing profile image size', () => {
+test('my-page renders colored profile svg at the existing profile image size', () => {
   const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps()));
 
-  assert.match(html, /assets\/profile\/default_profile\.svg/);
+  assert.match(html, /data:image\/svg\+xml/);
+  assert.match(decodeURIComponent(html), /fill="#FF8B3D"/);
   assert.match(html, /alt="프로필 모티프"/);
   assert.match(html, /class="h-16 w-16 shrink-0 rounded-full"/);
   assert.doesNotMatch(html, /aria-label="프로필 모티프" role="img"/);

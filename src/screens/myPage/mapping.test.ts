@@ -22,11 +22,18 @@ test('profile mapping uses safe helpedCount fallback and visual-only motif', () 
   assert.equal(summary.helpedCount, 0);
   assert.equal(summary.helpedCountLabel, '받은 하트');
   assert.equal(summary.profileMotif.kind, 'visual-only');
+  assert.equal(summary.profileMotif.profileColor, '#FF8B3D');
   assert.equal(missing.nickname, '나');
+  assert.equal(missing.profileMotif.profileColor, '#FF8B3D');
   assert.equal(negative.helpedCount, 0);
   assert.equal(Object.hasOwn(summary, 'avatarUrl'), false);
   assert.equal(Object.hasOwn(summary, 'ageLabel'), false);
   assert.equal(Object.hasOwn(summary, 'interests'), false);
+});
+
+test('profile mapping normalizes profile color with legacy fallback', () => {
+  assert.equal(mapProfileToMyPageSummary({ profileColor: '#4FB8C9' }).profileMotif.profileColor, '#4FB8C9');
+  assert.equal(mapProfileToMyPageSummary({ profileColor: '#ff8b3d' }).profileMotif.profileColor, '#FF8B3D');
 });
 
 test('push mapping distinguishes browser permission states', () => {

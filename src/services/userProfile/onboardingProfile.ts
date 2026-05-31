@@ -1,10 +1,12 @@
 import type { WorryCategory } from '@midnight-radio/domain';
 import {
   isValidGender,
+  isValidProfileColor,
   normalizeInterests,
   validateAge,
   validateNickname,
   type GenderValue,
+  type ProfileColor,
 } from './profileValidation';
 import type {
   CompleteOnboardingResult,
@@ -17,6 +19,7 @@ export type OnboardingDraft = {
   readonly gender: string;
   readonly age: string;
   readonly interests: readonly string[];
+  readonly profileColor: string;
 };
 
 export type OnboardingDuplicateUiState =
@@ -33,9 +36,10 @@ export function validateOnboardingDraft(draft: OnboardingDraft) {
   const age = validateAge(draft.age);
   const genderValid = isValidGender(draft.gender);
   const interests = normalizeInterests(draft.interests);
+  const profileColorValid = isValidProfileColor(draft.profileColor);
 
   return {
-    valid: nickname.valid && age.valid && genderValid && interests.length > 0,
+    valid: nickname.valid && age.valid && genderValid && interests.length > 0 && profileColorValid,
     nickname,
     age,
     gender: genderValid
@@ -44,6 +48,9 @@ export function validateOnboardingDraft(draft: OnboardingDraft) {
     interests: interests.length > 0
       ? { valid: true as const, interests }
       : { valid: false as const, message: '관심 분야를 1개 이상 선택해주세요.' },
+    profileColor: profileColorValid
+      ? { valid: true as const, profileColor: draft.profileColor as ProfileColor }
+      : { valid: false as const, message: '프로필 색상을 선택해주세요.' },
   };
 }
 
@@ -91,7 +98,7 @@ export async function completeOnboarding(params: {
   readonly repository: NicknameReservationRepository;
 }): Promise<CompleteOnboardingResult> {
   const validation = validateOnboardingDraft(params.draft);
-  if (!validation.valid || !validation.nickname.valid || !validation.age.valid || !validation.gender.valid || !validation.interests.valid) {
+  if (!validation.valid || !validation.nickname.valid || !validation.age.valid || !validation.gender.valid || !validation.interests.valid || !validation.profileColor.valid) {
     return {
       status: 'invalid',
       code: 'invalid_profile',
@@ -106,5 +113,6 @@ export async function completeOnboarding(params: {
     gender: validation.gender.gender,
     age: validation.age.age,
     interests: validation.interests.interests as WorryCategory[],
+    profileColor: validation.profileColor.profileColor,
   });
 }

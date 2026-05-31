@@ -4,7 +4,7 @@ import { composeRankingResponse } from './policy';
 import type { RankingFeedbackDoc, RankingUserDoc } from './types';
 
 const users: RankingUserDoc[] = [
-  { uid: 'first', nickname: 'Starpoem', helpedCount: 9999 },
+  { uid: 'first', nickname: 'Starpoem', helpedCount: 9999, profileColor: '#4FB8C9' },
   { uid: 'second', nickname: 'Might_Guy', helpedCount: 888 },
   { uid: 'third', nickname: 'Hangyeol', helpedCount: 77 },
   { uid: 'same-a', nickname: '가나다', helpedCount: 10 },
@@ -70,4 +70,18 @@ test('rankings are capped at fifteen displayed users', () => {
 
   assert.equal(result.total.length, 15);
   assert.equal(result.total.at(-1)?.uid, 'user-14');
+});
+
+test('rankings include normalized profile color with legacy fallback', () => {
+  const result = composeRankingResponse({
+    users: [
+      { uid: 'colored', nickname: '컬러', helpedCount: 2, profileColor: '#B49BE8' },
+      { uid: 'legacy', nickname: '레거시', helpedCount: 1 },
+    ],
+    feedbacks: [],
+    now: new Date('2026-05-15T12:00:00.000Z'),
+  });
+
+  assert.equal(result.total[0]?.profileColor, '#B49BE8');
+  assert.equal(result.total[1]?.profileColor, '#FF8B3D');
 });

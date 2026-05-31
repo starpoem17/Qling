@@ -3,6 +3,7 @@ export type RankingEntry = {
   readonly uid: string;
   readonly nickname: string;
   readonly heartCount: number;
+  readonly profileColor: string;
 };
 
 export type RankingResponse = {
@@ -14,6 +15,7 @@ export type RankingUserDoc = {
   readonly uid: string;
   readonly nickname?: unknown;
   readonly helpedCount?: unknown;
+  readonly profileColor?: unknown;
   readonly deleted?: unknown;
   readonly status?: unknown;
   readonly inactive?: unknown;
