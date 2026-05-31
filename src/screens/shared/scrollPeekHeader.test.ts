@@ -58,6 +58,31 @@ test('peek header scroll policy expands after accumulated downward threshold', (
   assert.equal(expanded.gestureStartCollapsed, null);
 });
 
+test('peek header scroll policy ignores bottom bounce while input direction is downward', () => {
+  const collapsed = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 42);
+  const bounced = nextPeekHeaderScrollState(collapsed, 20, 'down');
+
+  assert.equal(bounced.collapsed, true);
+  assert.equal(bounced.lastScrollTop, 20);
+  assert.equal(bounced.accumulatedDelta, 0);
+  assert.equal(bounced.gestureStartCollapsed, null);
+});
+
+test('peek header scroll policy allows upward input to reveal even near the bottom', () => {
+  const collapsed = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 84);
+  const partial = nextPeekHeaderScrollState(collapsed, 63, 'up');
+  const expanded = nextPeekHeaderScrollState(partial, 42, 'up');
+
+  assert.equal(partial.collapsed, true);
+  assert.equal(partial.lastScrollTop, 63);
+  assert.equal(partial.accumulatedDelta, -21);
+  assert.equal(partial.gestureStartCollapsed, true);
+  assert.equal(expanded.collapsed, false);
+  assert.equal(expanded.lastScrollTop, 42);
+  assert.equal(expanded.accumulatedDelta, 0);
+  assert.equal(expanded.gestureStartCollapsed, null);
+});
+
 test('peek header scroll policy resets accumulated distance when direction changes', () => {
   const upward = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 32);
   const downward = nextPeekHeaderScrollState(upward, 16);
@@ -138,5 +163,7 @@ test('peek header screens use transform layout without scroll-time height transi
     assert.match(source, /onTouchMove/);
     assert.match(source, /onTouchEnd/);
     assert.match(source, /onWheel/);
+    assert.match(source, /blockLoadingScroll/);
+    assert.match(source, /touch-none overscroll-none overflow-hidden/);
   }
 });

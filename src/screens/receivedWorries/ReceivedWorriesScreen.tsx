@@ -1,4 +1,4 @@
-import type { KeyboardEvent, MouseEvent } from 'react';
+import type { KeyboardEvent, MouseEvent, TouchEvent, WheelEvent } from 'react';
 import type { CSSProperties } from 'react';
 import {
   EmptyState,
@@ -17,7 +17,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
   const scrollPeekHeader = useScrollPeekHeader();
   const contentClassName = 'qling-received-worries-font h-[836px] overflow-y-auto rounded-t-[32px] bg-[#fff1d1] px-4 pt-5 transform-gpu [-webkit-overflow-scrolling:touch]';
-  const loadingContentClassName = 'qling-received-worries-font h-[752px] overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5';
+  const loadingContentClassName = 'qling-received-worries-font h-[752px] touch-none overscroll-none overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5';
   const contentStyle = {
     '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
     transform: 'translateY(calc(var(--qling-peek-progress, 0) * -84px))',
@@ -37,7 +37,11 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
             {header}
-            <section className={`relative ${loadingContentClassName}`}>
+            <section
+              className={`relative ${loadingContentClassName}`}
+              onWheel={blockLoadingScroll}
+              onTouchMove={blockLoadingScroll}
+            >
               <FigmaTabLoading label={props.state.label} />
             </section>
           </div>
@@ -156,4 +160,10 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
       </div>
     </section>
   );
+}
+
+function blockLoadingScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLElement>) {
+  const { preventDefault, stopPropagation } = event;
+  preventDefault.call(event);
+  stopPropagation.call(event);
 }

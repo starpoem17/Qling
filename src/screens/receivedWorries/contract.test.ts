@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import { ReceivedWorriesScreen } from './ReceivedWorriesScreen';
@@ -123,10 +125,17 @@ test('received-worries loading state renders the Figma spinner status without vi
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
   assert.match(html, /h-\[100px\]/);
   assert.match(html, /bg-\[#ff8b3d\]/);
-  assert.match(html, /h-\[752px\] overflow-hidden/);
+  assert.match(html, /h-\[752px\] touch-none overscroll-none overflow-hidden/);
   assert.doesNotMatch(html, /h-\[752px\] overflow-y-auto/);
   assert.doesNotMatch(html, /w-\[100dvw\]/);
   assert.doesNotMatch(html, /min-h-\[calc\(100dvh-180px\)\]/);
   assert.doesNotMatch(html, /100dvh-120px-var\(--qling-space-nav-height\)/);
   assert.doesNotMatch(html, /100dvh-120px-var\(--qling-space-scroll-bottom\)/);
+
+  const source = fs.readFileSync(path.join(process.cwd(), 'src/screens/receivedWorries/ReceivedWorriesScreen.tsx'), 'utf8');
+  const loadingBranch = source.slice(source.indexOf("props.state.status === 'loading'"), source.indexOf("if (props.state.status === 'error')"));
+  assert.match(loadingBranch, /onWheel=\{blockLoadingScroll\}/);
+  assert.match(loadingBranch, /onTouchMove=\{blockLoadingScroll\}/);
+  assert.doesNotMatch(loadingBranch, /scrollPeekHeader\.onScroll/);
+  assert.doesNotMatch(loadingBranch, /scrollPeekHeader\.onTouchStart/);
 });

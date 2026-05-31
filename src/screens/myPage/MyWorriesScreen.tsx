@@ -1,5 +1,5 @@
 import { Heart, Send } from 'lucide-react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, TouchEvent, WheelEvent } from 'react';
 import {
   EmptyState,
   ErrorState,
@@ -16,7 +16,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
   const scrollPeekHeader = useScrollPeekHeader();
   const contentClassName = 'qling-received-worries-font h-[836px] overflow-y-auto rounded-t-[32px] bg-[#fff1d1] px-4 pt-5 transform-gpu [-webkit-overflow-scrolling:touch]';
-  const loadingContentClassName = 'qling-received-worries-font h-[752px] overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5';
+  const loadingContentClassName = 'qling-received-worries-font h-[752px] touch-none overscroll-none overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5';
   const contentStyle = {
     '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
     transform: 'translateY(calc(var(--qling-peek-progress, 0) * -84px))',
@@ -50,7 +50,11 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
             {header}
 
             {props.state.status === 'loading' ? (
-              <section className={`relative ${loadingContentClassName}`}>
+              <section
+                className={`relative ${loadingContentClassName}`}
+                onWheel={blockLoadingScroll}
+                onTouchMove={blockLoadingScroll}
+              >
                 <FigmaTabLoading label={props.state.label} />
               </section>
             ) : props.state.status === 'error' ? (
@@ -113,4 +117,10 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
       {writeButton}
     </>
   );
+}
+
+function blockLoadingScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLElement>) {
+  const { preventDefault, stopPropagation } = event;
+  preventDefault.call(event);
+  stopPropagation.call(event);
 }

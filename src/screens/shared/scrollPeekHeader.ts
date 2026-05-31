@@ -3,6 +3,8 @@ import type { TouchEvent, UIEvent, WheelEvent } from 'react';
 const WHEEL_SCROLL_END_DELAY_MS = 120;
 const SCROLL_SNAP_THRESHOLD_PX = 42;
 const SETTLE_TRANSITION = 'transform 160ms ease-out';
+const SCROLL_DIRECTION_DOWN = 'down';
+const SCROLL_DIRECTION_UP = 'up';
 
 const scrollEndTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
 const pendingLayouts = new WeakMap<HTMLElement, PendingPeekHeaderLayout>();
@@ -34,15 +36,24 @@ type PendingPeekHeaderLayout = PeekHeaderLayout & {
   commitState: boolean;
 };
 
+type ScrollInputDirection = typeof SCROLL_DIRECTION_DOWN | typeof SCROLL_DIRECTION_UP | null;
+
 export function nextPeekHeaderScrollState(
   state: PeekHeaderScrollState,
   scrollTop: number,
+  inputDirection: ScrollInputDirection = null,
 ): PeekHeaderScrollState {
   const nextScrollTop = Math.max(0, scrollTop);
   if (nextScrollTop === 0) return initialPeekHeaderScrollState;
 
   const delta = nextScrollTop - state.lastScrollTop;
   if (delta === 0) return state;
+  if (delta < 0 && inputDirection === SCROLL_DIRECTION_DOWN) {
+    return {
+      ...state,
+      lastScrollTop: nextScrollTop,
+    };
+  }
 
   const sameDirection = Math.sign(delta) === Math.sign(state.accumulatedDelta);
   const accumulatedDelta = sameDirection ? state.accumulatedDelta + delta : delta;
@@ -123,14 +134,14 @@ export type PeekHeaderScrollHandlers = Pick<
 function handlePeekHeaderScroll(event: UIEvent<HTMLElement>) {
   const scroller = event.currentTarget;
   const currentState = readScrollState(scroller);
-  const nextState = nextPeekHeaderScrollState(currentState, scroller.scrollTop);
+  const nextState = nextPeekHeaderScrollState(currentState, scroller.scrollTop, readScrollInputDirection(scroller));
   writeScrollState(scroller, nextState);
   schedulePeekHeaderLayout(scroller, peekHeaderLayoutForState(nextState), false);
   scheduleScrollEnd(scroller);
 }
 
 function handlePeekHeaderWheel(event: WheelEvent<HTMLElement>) {
-  void event;
+  writeScrollInputDirection(event.currentTarget, directionFromDelta(event.deltaY));
 }
 
 function handlePeekHeaderTouchStart(event: TouchEvent<HTMLElement>) {
@@ -146,6 +157,7 @@ function handlePeekHeaderTouchMove(event: TouchEvent<HTMLElement>) {
   const scroller = event.currentTarget;
   const previousY = Number(scroller.dataset.qlingPeekHeaderTouchY ?? touch.clientY);
   scroller.dataset.qlingPeekHeaderTouchY = String(touch.clientY);
+  writeScrollInputDirection(scroller, directionFromDelta(previousY - touch.clientY));
 
   if (touch.clientY === previousY) return;
 }
@@ -212,6 +224,7 @@ function settlePeekHeaderScroll(scroller: HTMLElement) {
   clearScrollEnd(scroller);
   const settledState = settlePeekHeaderScrollState(readScrollState(scroller));
   writeScrollState(scroller, settledState);
+  clearScrollInputDirection(scroller);
   schedulePeekHeaderLayout(scroller, peekHeaderLayoutForState(settledState), true);
 }
 
@@ -252,6 +265,27 @@ function prefersReducedMotion() {
   return typeof window !== 'undefined'
     && typeof window.matchMedia === 'function'
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function directionFromDelta(delta: number): ScrollInputDirection {
+  if (delta > 0) return SCROLL_DIRECTION_DOWN;
+  if (delta < 0) return SCROLL_DIRECTION_UP;
+  return null;
+}
+
+function readScrollInputDirection(element: HTMLElement): ScrollInputDirection {
+  if (element.dataset.qlingPeekHeaderInputDirection === SCROLL_DIRECTION_DOWN) return SCROLL_DIRECTION_DOWN;
+  if (element.dataset.qlingPeekHeaderInputDirection === SCROLL_DIRECTION_UP) return SCROLL_DIRECTION_UP;
+  return null;
+}
+
+function writeScrollInputDirection(element: HTMLElement, direction: ScrollInputDirection) {
+  if (direction === null) return;
+  element.dataset.qlingPeekHeaderInputDirection = direction;
+}
+
+function clearScrollInputDirection(element: HTMLElement) {
+  delete element.dataset.qlingPeekHeaderInputDirection;
 }
 
 function readOptionalBoolean(value: string | undefined) {

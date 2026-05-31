@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import { Children, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { QlingPeekHeader } from '../shared/QlingPeekHeader';
@@ -131,11 +133,18 @@ test('my worries loading state renders the Figma spinner status without visible 
   assert.match(html, /mx-auto flex h-full w-full max-w-\[480px\] justify-center overflow-hidden/);
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
-  assert.match(html, /h-\[752px\] overflow-hidden/);
+  assert.match(html, /h-\[752px\] touch-none overscroll-none overflow-hidden/);
   assert.doesNotMatch(html, /h-\[752px\] overflow-y-auto/);
   assert.match(html, /bg-\[#ff8b3d\]/);
   assert.doesNotMatch(html, /w-\[100dvw\]/);
   assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
+
+  const source = fs.readFileSync(path.join(process.cwd(), 'src/screens/myPage/MyWorriesScreen.tsx'), 'utf8');
+  const loadingBranch = source.slice(source.indexOf("props.state.status === 'loading'"), source.indexOf("props.state.status === 'error'"));
+  assert.match(loadingBranch, /onWheel=\{blockLoadingScroll\}/);
+  assert.match(loadingBranch, /onTouchMove=\{blockLoadingScroll\}/);
+  assert.doesNotMatch(loadingBranch, /scrollPeekHeader\.onScroll/);
+  assert.doesNotMatch(loadingBranch, /scrollPeekHeader\.onTouchStart/);
 });
 
 test('my worries DOM does not render answer writer private data', () => {
