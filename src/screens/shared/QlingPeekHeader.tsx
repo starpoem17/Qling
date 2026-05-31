@@ -25,7 +25,7 @@ export function QlingPeekHeader(props: QlingPeekHeaderProps) {
       <div
         data-qling-peek-header-content="true"
         className="relative mx-auto h-[100px] w-full max-w-[393px] transform-gpu"
-        style={{ transform: 'translateY(calc(var(--qling-peek-progress, 0) * -84px))' }}
+        style={{ transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))' }}
       >
         <div
           role="presentation"

@@ -269,9 +269,11 @@ function applyPeekHeaderLayout(scroller: HTMLElement, layout: PendingPeekHeaderL
     scroller.dataset.headerState = state;
   }
 
-  const transition = !layout.commitState || layout.isTrackingGesture || prefersReducedMotion() ? 'none' : SETTLE_TRANSITION;
+  const shouldAnimateCommit = layout.commitState && !layout.isTrackingGesture && !prefersReducedMotion();
+  const transition = shouldAnimateCommit ? SETTLE_TRANSITION : 'none';
   if (headerContent) headerContent.style.transition = transition;
   scroller.style.transition = transition;
+  if (shouldAnimateCommit) forcePeekHeaderTransitionReady(headerContent, scroller);
   header.style.setProperty('--qling-peek-progress', String(layout.progress));
   scroller.style.setProperty('--qling-peek-progress', String(layout.progress));
 }
@@ -354,6 +356,11 @@ function writeScrollInputDirection(element: HTMLElement, direction: ScrollInputD
 
 function clearScrollInputDirection(element: HTMLElement) {
   delete element.dataset.qlingPeekHeaderInputDirection;
+}
+
+function forcePeekHeaderTransitionReady(headerContent: HTMLElement | null, scroller: HTMLElement) {
+  headerContent?.getBoundingClientRect();
+  scroller.getBoundingClientRect();
 }
 
 function isTouchActive(element: HTMLElement) {

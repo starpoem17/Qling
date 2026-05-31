@@ -23,7 +23,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
   const loadingContentClassName = 'qling-received-worries-font h-[752px] touch-none overscroll-none overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5';
   const contentStyle = {
     '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
-    transform: 'translateY(calc(var(--qling-peek-progress, 0) * -84px))',
+    transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))',
   } as CSSProperties;
 
   const header = (

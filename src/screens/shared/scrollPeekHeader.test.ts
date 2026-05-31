@@ -199,7 +199,7 @@ test('peek header renders fixed wrapper and transform-driven content', () => {
   assert.match(expanded, /--qling-peek-progress:0/);
   assert.match(collapsed, /--qling-peek-progress:1/);
   assert.match(expanded, /data-qling-peek-header-content="true"/);
-  assert.match(expanded, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -84px\)\)/);
+  assert.match(expanded, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
   assert.match(expanded, /aria-label="마이페이지 열기"/);
   assert.match(expanded, /role="presentation"/);
   assert.match(expanded, /aria-hidden="true"/);
@@ -226,6 +226,16 @@ test('peek header scroll handlers delay commit while touch is active', () => {
   assert.match(source, /settlePeekHeaderScroll\(event\.currentTarget\)/);
 });
 
+test('peek header commit layout primes transition before changing progress', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src/screens/shared/scrollPeekHeader.ts'), 'utf8');
+
+  assert.match(source, /const shouldAnimateCommit = layout\.commitState && !layout\.isTrackingGesture && !prefersReducedMotion\(\)/);
+  assert.match(source, /if \(shouldAnimateCommit\) forcePeekHeaderTransitionReady\(headerContent, scroller\)/);
+  assert.match(source, /function forcePeekHeaderTransitionReady/);
+  assert.match(source, /headerContent\?\.getBoundingClientRect\(\)/);
+  assert.match(source, /scroller\.getBoundingClientRect\(\)/);
+});
+
 test('peek header screens use transform layout without scroll-time height transitions', () => {
   const receivedSource = fs.readFileSync(path.join(process.cwd(), 'src/screens/receivedWorries/ReceivedWorriesScreen.tsx'), 'utf8');
   const myWorriesSource = fs.readFileSync(path.join(process.cwd(), 'src/screens/myPage/MyWorriesScreen.tsx'), 'utf8');
@@ -235,7 +245,7 @@ test('peek header screens use transform layout without scroll-time height transi
     assert.match(source, /h-\[836px\]/);
     assert.match(source, /h-\[752px\]/);
     assert.match(source, /--qling-peek-progress/);
-    assert.match(source, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -84px\)\)/);
+    assert.match(source, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
     assert.doesNotMatch(source, /contentHeightClassName/);
     assert.doesNotMatch(source, /transition-\[height\]/);
     assert.match(source, /PeekHeaderScrollArea/);
