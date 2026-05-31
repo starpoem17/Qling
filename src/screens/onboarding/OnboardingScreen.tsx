@@ -35,6 +35,7 @@ export function OnboardingScreen(props: Props) {
     && !props.validationMessages.age
     && props.duplicateCheck.state === 'available';
   const orderedCategoryOptions = orderOnboardingInterestCategories(props.categoryOptions);
+  const onboardingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 
   const handleBasicNext = () => {
     if (!basicStepComplete || props.isProcessing) return;
@@ -42,36 +43,41 @@ export function OnboardingScreen(props: Props) {
   };
 
   return (
-    <section className="mx-auto flex min-h-dvh w-full justify-center bg-[#ff8b0d] text-[#1a1a1a]">
-      <div className="relative h-[852px] w-[393px] shrink-0 overflow-hidden bg-[#ff8b0d]">
-        <div className="absolute left-0 top-[196px] h-[656px] w-[393px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" />
-        <p className="absolute top-[70px] text-[17px] font-extrabold leading-none tracking-normal text-white" style={{ left: visualStep === 'interests' ? 171 : 165 }}>
-          회원가입
-        </p>
+    <section className="h-full w-full overflow-hidden bg-[#fff7e3] text-[#1a1a1a]">
+      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden bg-[#fff7e3]">
+        <div
+          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b0d]"
+          style={{ transform: `scale(${onboardingCanvasScale})` }}
+        >
+          <div className="absolute left-0 top-[196px] h-[656px] w-[393px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" />
+          <p className="absolute top-[70px] text-[17px] font-extrabold leading-none tracking-normal text-white" style={{ left: visualStep === 'interests' ? 171 : 165 }}>
+            회원가입
+          </p>
 
-        {visualStep === 'basic' ? (
-          <BasicStep
-            props={props}
-            nicknameError={nicknameError}
-            duplicateMessage={duplicateMessage}
-            duplicateIsPositive={duplicateIsPositive}
-            duplicateButtonDisabled={duplicateButtonDisabled}
-            basicStepComplete={basicStepComplete}
-            onNext={handleBasicNext}
-          />
-        ) : visualStep === 'interests' ? (
-          <InterestsStep
-            props={props}
-            orderedCategoryOptions={orderedCategoryOptions}
-            onPrevious={() => setVisualStep('basic')}
-            onNext={() => setVisualStep('profileColor')}
-          />
-        ) : (
-          <ProfileColorStep
-            props={props}
-            onPrevious={() => setVisualStep('interests')}
-          />
-        )}
+          {visualStep === 'basic' ? (
+            <BasicStep
+              props={props}
+              nicknameError={nicknameError}
+              duplicateMessage={duplicateMessage}
+              duplicateIsPositive={duplicateIsPositive}
+              duplicateButtonDisabled={duplicateButtonDisabled}
+              basicStepComplete={basicStepComplete}
+              onNext={handleBasicNext}
+            />
+          ) : visualStep === 'interests' ? (
+            <InterestsStep
+              props={props}
+              orderedCategoryOptions={orderedCategoryOptions}
+              onPrevious={() => setVisualStep('basic')}
+              onNext={() => setVisualStep('profileColor')}
+            />
+          ) : (
+            <ProfileColorStep
+              props={props}
+              onPrevious={() => setVisualStep('interests')}
+            />
+          )}
+        </div>
       </div>
     </section>
   );

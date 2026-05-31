@@ -132,6 +132,14 @@ test('locks App main scrolling only for ranking routes', () => {
   );
 });
 
+test('onboarding flow removes App shell padding for responsive canvas routes', () => {
+  const source = fs.readFileSync('src/App.tsx', 'utf8');
+
+  assert.match(source, /routeBoundary\.routeGroup === 'onboarding flow'[\s\S]*\? 'px-0 pt-0 pb-0 overflow-hidden bg-\[#ff8b0d\]'/);
+  assert.doesNotMatch(source, /routeBoundary\.routeGroup === 'onboarding flow'[\s\S]*\? ["']pt-12["']/);
+  assert.match(source, /key="onboarding"[\s\S]*className="h-full"/);
+});
+
 test('keeps every bottom-navigation route on the content scroll policy', () => {
   for (const route of [
     'received_worries',

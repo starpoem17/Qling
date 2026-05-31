@@ -323,7 +323,9 @@ export default function App() {
         currentRoute === 'write_worry' || currentRoute === 'write_reply'
           ? 'qling-write-form-main'
           : [
-            routeBoundary.routeGroup === 'onboarding flow' ? "pt-12" : "pt-6",
+            routeBoundary.routeGroup === 'onboarding flow'
+              ? 'px-0 pt-0 pb-0 overflow-hidden bg-[#ff8b0d]'
+              : 'pt-6',
             routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto',
             currentRoute === '순위' || currentRoute === 'ranking'
               ? 'overflow-hidden'
@@ -359,7 +361,7 @@ export default function App() {
           
           {/* 1. Onboarding View */}
           {currentRoute === 'onboarding' && (
-            <motion.div key="onboarding" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div key="onboarding" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
               <OnboardingContainer
                 user={user}
                 isProcessing={isProcessing}

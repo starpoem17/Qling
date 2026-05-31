@@ -188,3 +188,14 @@ test('onboarding interests use a responsive three-column chip grid contract', ()
   assert.match(screen, /tracking-normal/);
   assert.doesNotMatch(screen, /flex flex-wrap gap-2/);
 });
+
+test('onboarding screen uses ranking-style responsive Figma canvas scaling', () => {
+  const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
+
+  assert.match(screen, /max-w-\[480px\]/);
+  assert.match(screen, /origin-top/);
+  assert.match(screen, /calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)/);
+  assert.match(screen, /scale\(\$\{onboardingCanvasScale\}\)/);
+  assert.match(screen, /h-\[852px\]/);
+  assert.match(screen, /w-\[393px\]/);
+});
