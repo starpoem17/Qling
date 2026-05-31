@@ -117,11 +117,15 @@ test('received-worries loading state renders the Figma spinner status without vi
   assert.match(html, /답변할 고민을 불러오는 중이에요\./);
   assert.doesNotMatch(html, /고민을 불러오고 있어요/);
   assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
-  assert.match(html, /left-1\/2 -mt-6 min-h-full w-\[100dvw\] max-w-\[var\(--qling-mobile-canvas-max-width\)\] -translate-x-1\/2 bg-\[#ff8b3d\]/);
+  assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] -mb-\[var\(--qling-space-scroll-bottom\)\] -mt-6 h-dvh overflow-hidden bg-\[#ff8b3d\]/);
+  assert.match(html, /mx-auto flex h-full w-full max-w-\[480px\] justify-center overflow-hidden/);
+  assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
+  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
   assert.match(html, /h-\[100px\]/);
   assert.match(html, /bg-\[#ff8b3d\]/);
-  assert.match(html, /min-h-\[calc\(100dvh-180px\)\]/);
-  assert.doesNotMatch(html, /-mx-\[var\(--qling-space-shell-x\)\]/);
+  assert.match(html, /h-\[752px\] overflow-y-auto/);
+  assert.doesNotMatch(html, /w-\[100dvw\]/);
+  assert.doesNotMatch(html, /min-h-\[calc\(100dvh-180px\)\]/);
   assert.doesNotMatch(html, /100dvh-120px-var\(--qling-space-nav-height\)/);
   assert.doesNotMatch(html, /100dvh-120px-var\(--qling-space-scroll-bottom\)/);
 });

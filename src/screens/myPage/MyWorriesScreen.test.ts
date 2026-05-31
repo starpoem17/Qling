@@ -84,8 +84,10 @@ test('my worries screen actions match PRD entry points', () => {
 test('my worries write button stays outside the transformed full-bleed scroll wrapper', () => {
   const html = renderToStaticMarkup(MyWorriesScreen(baseProps()));
 
-  assert.match(html, /-translate-x-1\/2 bg-\[#ff8b3d\]/);
-  assert.match(html, /<\/section><\/div><button[^>]+고민 작성 화면으로 이동/);
+  assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] -mb-\[var\(--qling-space-scroll-bottom\)\] -mt-6 h-dvh overflow-hidden bg-\[#ff8b3d\]/);
+  assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
+  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.match(html, /<\/section><button[^>]+고민 작성 화면으로 이동/);
   assert.match(html, /fixed bottom-\[calc\(var\(--qling-space-nav-height\)\+29\.5px\)\]/);
 });
 
@@ -121,9 +123,13 @@ test('my worries loading state renders the Figma spinner status without visible 
   assert.match(html, /left-1\/2 top-\[306px\] h-10 w-10/);
   assert.match(html, /작성한 고민을 불러오고 있습니다\./);
   assert.doesNotMatch(html, /나의 고민을 불러오는 중/);
-  assert.match(html, /left-1\/2 -mt-6 min-h-full w-\[100dvw\] max-w-\[var\(--qling-mobile-canvas-max-width\)\] -translate-x-1\/2 bg-\[#ff8b3d\]/);
+  assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] -mb-\[var\(--qling-space-scroll-bottom\)\] -mt-6 h-dvh overflow-hidden bg-\[#ff8b3d\]/);
+  assert.match(html, /mx-auto flex h-full w-full max-w-\[480px\] justify-center overflow-hidden/);
+  assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
+  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.match(html, /h-\[752px\] overflow-y-auto/);
   assert.match(html, /bg-\[#ff8b3d\]/);
-  assert.doesNotMatch(html, /-mx-\[var\(--qling-space-shell-x\)\]/);
+  assert.doesNotMatch(html, /w-\[100dvw\]/);
   assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
 });
 
