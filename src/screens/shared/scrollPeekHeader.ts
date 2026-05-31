@@ -2,6 +2,7 @@ import type { TouchEvent, UIEvent, WheelEvent } from 'react';
 
 const WHEEL_SCROLL_END_DELAY_MS = 120;
 const SCROLL_SNAP_THRESHOLD_PX = 42;
+const BOTTOM_EDGE_EPSILON_PX = 1;
 const SETTLE_TRANSITION = 'transform 160ms ease-out';
 const SCROLL_DIRECTION_DOWN = 'down';
 const SCROLL_DIRECTION_UP = 'up';
@@ -38,20 +39,29 @@ type PendingPeekHeaderLayout = PeekHeaderLayout & {
 
 type ScrollInputDirection = typeof SCROLL_DIRECTION_DOWN | typeof SCROLL_DIRECTION_UP | null;
 
+type PeekHeaderScrollBounds = {
+  maxScrollTop: number;
+};
+
 export function nextPeekHeaderScrollState(
   state: PeekHeaderScrollState,
   scrollTop: number,
   inputDirection: ScrollInputDirection = null,
+  bounds?: PeekHeaderScrollBounds,
 ): PeekHeaderScrollState {
   const nextScrollTop = Math.max(0, scrollTop);
   if (nextScrollTop === 0) return initialPeekHeaderScrollState;
 
   const delta = nextScrollTop - state.lastScrollTop;
   if (delta === 0) return state;
-  if (delta < 0 && inputDirection === SCROLL_DIRECTION_DOWN) {
+  const wasAtBottom = bounds !== undefined
+    && state.lastScrollTop >= Math.max(0, bounds.maxScrollTop) - BOTTOM_EDGE_EPSILON_PX;
+  if (wasAtBottom && delta < 0 && inputDirection !== SCROLL_DIRECTION_UP) {
     return {
       ...state,
       lastScrollTop: nextScrollTop,
+      accumulatedDelta: 0,
+      gestureStartCollapsed: null,
     };
   }
 
@@ -134,7 +144,12 @@ export type PeekHeaderScrollHandlers = Pick<
 function handlePeekHeaderScroll(event: UIEvent<HTMLElement>) {
   const scroller = event.currentTarget;
   const currentState = readScrollState(scroller);
-  const nextState = nextPeekHeaderScrollState(currentState, scroller.scrollTop, readScrollInputDirection(scroller));
+  const nextState = nextPeekHeaderScrollState(
+    currentState,
+    scroller.scrollTop,
+    readScrollInputDirection(scroller),
+    { maxScrollTop: Math.max(0, scroller.scrollHeight - scroller.clientHeight) },
+  );
   writeScrollState(scroller, nextState);
   schedulePeekHeaderLayout(scroller, peekHeaderLayoutForState(nextState), false);
   scheduleScrollEnd(scroller);
