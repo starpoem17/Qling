@@ -2,6 +2,7 @@ import { CircleUserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
+import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import { ErrorState, profileImageUrlForColor } from '../shared/ui';
 import type {
   RankingDisplayEntry,
@@ -30,19 +31,14 @@ const rankingAssetUrlByName = {
 
 export function RankingScreen(props: RankingScreenProps) {
   const [mode, setMode] = useState<RankingMode>('monthly');
-  const season = props.state.status === 'ready'
-    ? props.state.season
-    : { monthLabel: '', daysUntilMonthEnd: 0 };
 
   if (props.state.status === 'loading') {
     return (
       <RankingFrame>
         <RankingHero
           mode={mode}
-          seasonLabel={season.monthLabel || '랭킹을 불러오는 중'}
           onChange={setMode}
           onOpenMyPage={props.onOpenMyPage}
-          loading
         />
         <LoadingPodium />
         <RankingSheet loading />
@@ -104,14 +100,12 @@ function RankingFrame({ children }: { readonly children: ReactNode }) {
 
 function RankingHero({
   mode,
-  seasonLabel,
-  loading = false,
+  seasonLabel = null,
   onChange,
   onOpenMyPage,
 }: {
   readonly mode: RankingMode;
-  readonly seasonLabel: string;
-  readonly loading?: boolean;
+  readonly seasonLabel?: string | null;
   readonly onChange: (mode: RankingMode) => void;
   readonly onOpenMyPage: () => void;
 }) {
@@ -120,9 +114,11 @@ function RankingHero({
       <h1 className="absolute left-6 top-[56px] text-[24px] font-black leading-[31px] font-['Qling_Noto_Sans_KR_Black']">
         랭킹
       </h1>
-      <p className="absolute left-6 top-[90px] text-[12px] font-medium leading-4 opacity-85 font-['Qling_Noto_Sans_KR']">
-        {seasonLabel}
-      </p>
+      {seasonLabel && (
+        <p className="absolute left-6 top-[90px] text-[12px] font-medium leading-4 opacity-85 font-['Qling_Noto_Sans_KR']">
+          {seasonLabel}
+        </p>
+      )}
       <button
         type="button"
         aria-label="마이페이지"
@@ -131,7 +127,7 @@ function RankingHero({
       >
         <CircleUserRound className="h-[25px] w-[25px]" aria-hidden="true" />
       </button>
-      <SegmentedControl mode={mode} onChange={onChange} disabled={loading} />
+      <SegmentedControl mode={mode} onChange={onChange} />
     </div>
   );
 }
@@ -258,8 +254,7 @@ function TopRank({
 function LoadingPodium() {
   return (
     <>
-      <Podium topOffset={306} />
-      <LoadingSpinner />
+      <Podium topOffset={326} />
     </>
   );
 }
@@ -288,24 +283,28 @@ function RankingSheet({
   return (
     <section className={cn(
       'absolute left-0 w-full rounded-t-[26px] bg-white shadow-[0_-5px_8px_rgb(128_87_33/0.1)]',
-      loading ? 'top-[380px] h-[392px]' : 'top-[400px] h-[372px]',
+      loading ? 'top-[400px] h-[452px]' : 'top-[400px] h-[372px]',
     )}>
-      <h2 className="absolute left-5 top-5 text-[14px] font-bold leading-[18px] text-[#191f28] font-['Qling_Noto_Sans_KR']">
-        전체 랭킹
-      </h2>
-      <div className="absolute left-[373px] top-[22px] w-[120px] -translate-x-full text-right text-[12px] font-medium leading-4 text-[#8b95a1] font-['Qling_Noto_Sans_KR']">
-        받은 ♥ 기준
-      </div>
       {loading ? (
-        <LoadingSpinner />
-      ) : rows.length > 0 ? (
-        <ol className="absolute left-0 top-12 flex w-full flex-col overflow-hidden px-5">
-          {rows.map(entry => <RankingRow key={entry.uid} entry={entry} />)}
-        </ol>
+        <FigmaTabLoading label="순위를 불러오는 중" className="left-[177px] top-[73px] translate-x-0" />
       ) : (
-        <div className="absolute left-0 top-[156px] w-full text-center text-[14px] font-medium text-[#8b95a1]">
-          아직 순위가 없어요.
-        </div>
+        <>
+          <h2 className="absolute left-5 top-5 text-[14px] font-bold leading-[18px] text-[#191f28] font-['Qling_Noto_Sans_KR']">
+            전체 랭킹
+          </h2>
+          <div className="absolute left-[373px] top-[22px] w-[120px] -translate-x-full text-right text-[12px] font-medium leading-4 text-[#8b95a1] font-['Qling_Noto_Sans_KR']">
+            받은 ♥ 기준
+          </div>
+          {rows.length > 0 ? (
+            <ol className="absolute left-0 top-12 flex w-full flex-col overflow-hidden px-5">
+              {rows.map(entry => <RankingRow key={entry.uid} entry={entry} />)}
+            </ol>
+          ) : (
+            <div className="absolute left-0 top-[156px] w-full text-center text-[14px] font-medium text-[#8b95a1]">
+              아직 순위가 없어요.
+            </div>
+          )}
+        </>
       )}
     </section>
   );
@@ -414,14 +413,5 @@ function RankDelta({
       />
       <span>{Math.abs(value)}</span>
     </span>
-  );
-}
-
-function LoadingSpinner() {
-  return (
-    <div className="absolute left-[177px] top-[453px] h-10 w-10" role="status" aria-label="순위를 불러오는 중">
-      <span className="absolute inset-0 rounded-full border-[3px] border-[#d9d5ca]" />
-      <span className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-[#ff8b3d] border-r-[#ff8b3d]" />
-    </div>
   );
 }

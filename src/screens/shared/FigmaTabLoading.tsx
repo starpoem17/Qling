@@ -1,12 +1,20 @@
+import { cn } from '../../lib/utils';
+
 const activeIndicatorUrl = new URL('../../../assets/loading/figma-progress-active.svg', import.meta.url).href;
 const trackUrl = new URL('../../../assets/loading/figma-progress-track.svg', import.meta.url).href;
 
-export function FigmaTabLoading({ label }: { readonly label: string }) {
+export function FigmaTabLoading({
+  label,
+  className,
+}: {
+  readonly label: string;
+  readonly className?: string;
+}) {
   return (
     <span
       role="status"
       aria-live="polite"
-      className="absolute left-1/2 top-[306px] h-10 w-10 -translate-x-1/2"
+      className={cn('absolute left-1/2 top-[306px] h-10 w-10 -translate-x-1/2', className)}
       data-testid="figma-tab-loading-indicator"
     >
       <span className="block h-full w-full animate-spin" aria-hidden="true">

@@ -181,8 +181,18 @@ test('ranking loading state uses the same width-only canvas scale', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps({
     state: { status: 'loading' },
   })));
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
 
   assert.match(html, /data-measure="ranking-screen"/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.match(html, /top-\[400px\] h-\[452px\]/);
+  assert.match(html, /data-testid="figma-tab-loading-indicator"/);
+  assert.match(html, /left-\[177px\] top-\[73px\] translate-x-0/);
+  assert.doesNotMatch(html, /랭킹을 불러오는 중/);
+  assert.doesNotMatch(html, /5월 시즌|마감|누적 시즌/);
+  assert.doesNotMatch(html, /전체 랭킹|받은 ♥ 기준/);
+  assert.doesNotMatch(html, /disabled=""/);
+  assert.doesNotMatch(source, /function LoadingSpinner/);
+  assert.doesNotMatch(source, /border-t-\[#ff8b3d\]|border-r-\[#ff8b3d\]/);
   assert.doesNotMatch(html, /100dvh - var\(--qling-space-nav-height\)/);
 });
