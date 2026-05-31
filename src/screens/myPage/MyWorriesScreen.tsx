@@ -1,13 +1,14 @@
 import { Heart } from 'lucide-react';
-import type { CSSProperties, TouchEvent, UIEvent, WheelEvent } from 'react';
+import type { CSSProperties, TouchEvent, WheelEvent } from 'react';
 import {
   EmptyState,
   ErrorState,
   QlingCard,
 } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
+import { PeekHeaderScrollArea } from '../shared/PeekHeaderScrollArea';
 import { QlingPeekHeader } from '../shared/QlingPeekHeader';
-import { armPeekHeaderScrollAfterLayout, isPeekHeaderScrollReady, useScrollPeekHeader } from '../shared/scrollPeekHeader';
+import { useScrollPeekHeader } from '../shared/scrollPeekHeader';
 import type { MyWorriesScreenProps } from './contract';
 
 const writeWorryIconUrl = new URL('../../../assets/my_concerns/send.svg', import.meta.url).href;
@@ -18,7 +19,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
   const scrollPeekHeader = useScrollPeekHeader();
-  const contentClassName = 'qling-received-worries-font h-[836px] touch-none overscroll-none overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5 transform-gpu';
+  const contentClassName = 'qling-received-worries-font h-[836px] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5 transform-gpu';
   const loadingContentClassName = 'qling-received-worries-font h-[752px] touch-none overscroll-none overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5';
   const contentStyle = {
     '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
@@ -62,25 +63,19 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
                 <FigmaTabLoading label={props.state.label} />
               </section>
             ) : props.state.status === 'error' ? (
-              <section ref={armPeekHeaderScrollAfterLayout} className={contentClassName} data-header-state="expanded" style={contentStyle} onScroll={event => handleReadyScroll(event, scrollPeekHeader.onScroll)} onTouchStart={event => handleReadyTouchStart(event, scrollPeekHeader.onTouchStart)} onTouchMove={event => handleReadyTouchMove(event, scrollPeekHeader.onTouchMove)} onTouchEnd={event => handleReadyTouchEnd(event, scrollPeekHeader.onTouchEnd)} onWheel={event => handleReadyWheel(event, scrollPeekHeader.onWheel)}>
+              <PeekHeaderScrollArea className={contentClassName} style={contentStyle} resetKey="my-worries-error">
                 <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
-              </section>
+              </PeekHeaderScrollArea>
             ) : props.state.status === 'empty' ? (
-              <section ref={armPeekHeaderScrollAfterLayout} className={contentClassName} data-header-state="expanded" style={contentStyle} onScroll={event => handleReadyScroll(event, scrollPeekHeader.onScroll)} onTouchStart={event => handleReadyTouchStart(event, scrollPeekHeader.onTouchStart)} onTouchMove={event => handleReadyTouchMove(event, scrollPeekHeader.onTouchMove)} onTouchEnd={event => handleReadyTouchEnd(event, scrollPeekHeader.onTouchEnd)} onWheel={event => handleReadyWheel(event, scrollPeekHeader.onWheel)}>
+              <PeekHeaderScrollArea className={contentClassName} style={contentStyle} resetKey="my-worries-empty">
                 <EmptyState title={props.state.message} />
-              </section>
+              </PeekHeaderScrollArea>
             ) : (
-              <section
-                ref={armPeekHeaderScrollAfterLayout}
+              <PeekHeaderScrollArea
                 className={`${contentClassName} pb-[calc(108px+env(safe-area-inset-bottom,0px))]`}
-                data-header-state="expanded"
                 style={contentStyle}
-                aria-label="나의 고민 목록"
-                onScroll={event => handleReadyScroll(event, scrollPeekHeader.onScroll)}
-                onTouchStart={event => handleReadyTouchStart(event, scrollPeekHeader.onTouchStart)}
-                onTouchMove={event => handleReadyTouchMove(event, scrollPeekHeader.onTouchMove)}
-                onTouchEnd={event => handleReadyTouchEnd(event, scrollPeekHeader.onTouchEnd)}
-                onWheel={event => handleReadyWheel(event, scrollPeekHeader.onWheel)}
+                ariaLabel="나의 고민 목록"
+                resetKey="my-worries-ready"
               >
                 <div className="grid gap-[14px]">
                 {props.items.map(worry => (
@@ -113,7 +108,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
                   </button>
                 ))}
                 </div>
-              </section>
+              </PeekHeaderScrollArea>
             )}
             {writeButton}
           </div>
@@ -127,35 +122,4 @@ function blockLoadingScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLElem
   const { preventDefault, stopPropagation } = event;
   preventDefault.call(event);
   stopPropagation.call(event);
-}
-
-function handleReadyScroll(event: UIEvent<HTMLElement>, handler: (event: UIEvent<HTMLElement>) => void) {
-  if (!isPeekHeaderScrollReady(event.currentTarget)) return;
-  handler(event);
-}
-
-function handleReadyTouchStart(event: TouchEvent<HTMLElement>, handler: (event: TouchEvent<HTMLElement>) => void) {
-  if (!isPeekHeaderScrollReady(event.currentTarget)) return;
-  handler(event);
-}
-
-function handleReadyTouchMove(event: TouchEvent<HTMLElement>, handler: (event: TouchEvent<HTMLElement>) => void) {
-  if (!isPeekHeaderScrollReady(event.currentTarget)) {
-    blockLoadingScroll(event);
-    return;
-  }
-  handler(event);
-}
-
-function handleReadyTouchEnd(event: TouchEvent<HTMLElement>, handler: (event: TouchEvent<HTMLElement>) => void) {
-  if (!isPeekHeaderScrollReady(event.currentTarget)) return;
-  handler(event);
-}
-
-function handleReadyWheel(event: WheelEvent<HTMLElement>, handler: (event: WheelEvent<HTMLElement>) => void) {
-  if (!isPeekHeaderScrollReady(event.currentTarget)) {
-    blockLoadingScroll(event);
-    return;
-  }
-  handler(event);
 }

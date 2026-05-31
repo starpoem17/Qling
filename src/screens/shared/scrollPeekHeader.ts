@@ -10,7 +10,6 @@ const SCROLL_DIRECTION_UP = 'up';
 const scrollEndTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
 const pendingLayouts = new WeakMap<HTMLElement, PendingPeekHeaderLayout>();
 const layoutFrames = new WeakMap<HTMLElement, number>();
-const scrollReadyFrames = new WeakMap<HTMLElement, number>();
 
 export type PeekHeaderScrollState = {
   collapsed: boolean;
@@ -159,41 +158,6 @@ export function resetPeekHeaderScrollElement(scroller: HTMLElement) {
   scroller.dataset.headerState = 'expanded';
   scroller.style.transition = 'none';
   scroller.style.setProperty('--qling-peek-progress', '0');
-}
-
-export function armPeekHeaderScrollAfterLayout(scroller: HTMLElement | null) {
-  if (!scroller) return;
-
-  const readyFrame = scrollReadyFrames.get(scroller);
-  if (readyFrame !== undefined) {
-    cancelPeekHeaderFrame(readyFrame);
-    scrollReadyFrames.delete(scroller);
-  }
-
-  resetPeekHeaderScrollElement(scroller);
-  scroller.dataset.qlingPeekHeaderScrollReady = 'false';
-  scroller.classList.remove('overflow-y-auto', '[-webkit-overflow-scrolling:touch]');
-  scroller.classList.add('touch-none', 'overscroll-none', 'overflow-hidden');
-  scroller.style.overflowY = 'hidden';
-  scroller.style.touchAction = 'none';
-  scroller.style.overscrollBehavior = 'none';
-  scroller.style.removeProperty('-webkit-overflow-scrolling');
-
-  const frame = requestPeekHeaderFrame(() => {
-    scrollReadyFrames.delete(scroller);
-    scroller.dataset.qlingPeekHeaderScrollReady = 'true';
-    scroller.classList.remove('touch-none', 'overscroll-none', 'overflow-hidden');
-    scroller.classList.add('overflow-y-auto', '[-webkit-overflow-scrolling:touch]');
-    scroller.style.overflowY = 'auto';
-    scroller.style.touchAction = '';
-    scroller.style.overscrollBehavior = '';
-    scroller.style.setProperty('-webkit-overflow-scrolling', 'touch');
-  });
-  scrollReadyFrames.set(scroller, frame);
-}
-
-export function isPeekHeaderScrollReady(scroller: HTMLElement) {
-  return scroller.dataset.qlingPeekHeaderScrollReady === 'true';
 }
 
 type PeekHeaderHandlers = ReturnType<typeof useScrollPeekHeader>;

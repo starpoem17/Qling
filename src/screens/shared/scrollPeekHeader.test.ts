@@ -172,6 +172,7 @@ test('peek header blocks header-started scroll gestures without changing my-page
 test('peek header screens use transform layout without scroll-time height transitions', () => {
   const receivedSource = fs.readFileSync(path.join(process.cwd(), 'src/screens/receivedWorries/ReceivedWorriesScreen.tsx'), 'utf8');
   const myWorriesSource = fs.readFileSync(path.join(process.cwd(), 'src/screens/myPage/MyWorriesScreen.tsx'), 'utf8');
+  const scrollAreaSource = fs.readFileSync(path.join(process.cwd(), 'src/screens/shared/PeekHeaderScrollArea.tsx'), 'utf8');
 
   for (const source of [receivedSource, myWorriesSource]) {
     assert.match(source, /h-\[836px\]/);
@@ -180,11 +181,18 @@ test('peek header screens use transform layout without scroll-time height transi
     assert.match(source, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -84px\)\)/);
     assert.doesNotMatch(source, /contentHeightClassName/);
     assert.doesNotMatch(source, /transition-\[height\]/);
-    assert.match(source, /onTouchStart/);
-    assert.match(source, /onTouchMove/);
-    assert.match(source, /onTouchEnd/);
-    assert.match(source, /onWheel/);
+    assert.match(source, /PeekHeaderScrollArea/);
     assert.match(source, /blockLoadingScroll/);
     assert.match(source, /touch-none overscroll-none overflow-hidden/);
   }
+
+  assert.match(scrollAreaSource, /useState\(false\)/);
+  assert.match(scrollAreaSource, /resetPeekHeaderScrollElement\(scroller\)/);
+  assert.match(scrollAreaSource, /requestPeekHeaderReadyFrame\(\(\) => setIsScrollReady\(true\)\)/);
+  assert.match(scrollAreaSource, /isScrollReady\s*\?\s*'overflow-y-auto/);
+  assert.match(scrollAreaSource, /onTouchStart/);
+  assert.match(scrollAreaSource, /onTouchMove/);
+  assert.match(scrollAreaSource, /onTouchEnd/);
+  assert.match(scrollAreaSource, /onWheel/);
+  assert.match(scrollAreaSource, /blockScroll\(event\)/);
 });
