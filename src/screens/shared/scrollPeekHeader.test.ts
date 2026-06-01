@@ -76,7 +76,8 @@ test('peek header scroll policy expands on settle after accumulated downward thr
 
 test('peek header scroll policy ignores bottom bounce while input direction is downward', () => {
   const collapsed = settlePeekHeaderScrollState(nextPeekHeaderScrollState(initialPeekHeaderScrollState, 42));
-  const bounced = nextPeekHeaderScrollState(collapsed, 20, 'down', { maxScrollTop: 42 });
+  const nearBottom = nextPeekHeaderScrollState(collapsed, 42, 'down', { maxScrollTop: 42 }, 100);
+  const bounced = nextPeekHeaderScrollState(nearBottom, 20, 'down', { maxScrollTop: 42 }, 150);
 
   assert.equal(bounced.collapsed, true);
   assert.equal(bounced.lastScrollTop, 20);
@@ -86,7 +87,8 @@ test('peek header scroll policy ignores bottom bounce while input direction is d
 
 test('peek header scroll policy ignores bottom bounce without upward input direction', () => {
   const collapsed = settlePeekHeaderScrollState(nextPeekHeaderScrollState(initialPeekHeaderScrollState, 42));
-  const bounced = nextPeekHeaderScrollState(collapsed, 20, null, { maxScrollTop: 42 });
+  const nearBottom = nextPeekHeaderScrollState(collapsed, 42, null, { maxScrollTop: 42 }, 100);
+  const bounced = nextPeekHeaderScrollState(nearBottom, 20, null, { maxScrollTop: 42 }, 150);
 
   assert.equal(bounced.collapsed, true);
   assert.equal(bounced.lastScrollTop, 20);
@@ -94,21 +96,56 @@ test('peek header scroll policy ignores bottom bounce without upward input direc
   assert.equal(bounced.gestureStartCollapsed, null);
 });
 
-test('peek header scroll policy allows upward input to reveal even near the bottom', () => {
+test('peek header scroll policy ignores bottom bounce before reaching exact max scroll', () => {
   const collapsed = settlePeekHeaderScrollState(nextPeekHeaderScrollState(initialPeekHeaderScrollState, 84));
-  const partial = nextPeekHeaderScrollState(collapsed, 63, 'up', { maxScrollTop: 84 });
-  const pending = nextPeekHeaderScrollState(partial, 42, 'up', { maxScrollTop: 84 });
+  const nearBottom = nextPeekHeaderScrollState(collapsed, 960, 'down', { maxScrollTop: 1000 }, 100);
+  const bounced = nextPeekHeaderScrollState(nearBottom, 900, 'down', { maxScrollTop: 1000 }, 150);
+  const settled = settlePeekHeaderScrollState(bounced);
+
+  assert.equal(bounced.collapsed, true);
+  assert.equal(bounced.lastScrollTop, 900);
+  assert.equal(bounced.accumulatedDelta, 0);
+  assert.equal(bounced.gestureStartCollapsed, null);
+  assert.equal(settled.collapsed, true);
+});
+
+test('peek header scroll policy ignores bottom bounce even with upward input direction', () => {
+  const collapsed = settlePeekHeaderScrollState(nextPeekHeaderScrollState(initialPeekHeaderScrollState, 84));
+  const nearBottom = nextPeekHeaderScrollState(collapsed, 960, 'down', { maxScrollTop: 1000 }, 100);
+  const bounced = nextPeekHeaderScrollState(nearBottom, 900, 'up', { maxScrollTop: 1000 }, 150);
+  const settled = settlePeekHeaderScrollState(bounced);
+
+  assert.equal(bounced.collapsed, true);
+  assert.equal(bounced.lastScrollTop, 900);
+  assert.equal(bounced.accumulatedDelta, 0);
+  assert.equal(bounced.gestureStartCollapsed, null);
+  assert.equal(settled.collapsed, true);
+});
+
+test('peek header scroll policy resumes reveal after leaving bottom rebound zone', () => {
+  const collapsed = settlePeekHeaderScrollState(nextPeekHeaderScrollState(initialPeekHeaderScrollState, 84));
+  const nearBottom = nextPeekHeaderScrollState(collapsed, 124, 'down', { maxScrollTop: 164 }, 100);
+  const bouncedOutsideZone = nextPeekHeaderScrollState(nearBottom, 80, 'up', { maxScrollTop: 164 }, 150);
+  const pending = nextPeekHeaderScrollState(bouncedOutsideZone, 38, 'up', { maxScrollTop: 164 }, 170);
   const expanded = settlePeekHeaderScrollState(pending);
 
-  assert.equal(partial.collapsed, true);
-  assert.equal(partial.lastScrollTop, 63);
-  assert.equal(partial.accumulatedDelta, -21);
-  assert.equal(partial.gestureStartCollapsed, true);
-  assert.equal(expanded.collapsed, false);
+  assert.equal(bouncedOutsideZone.collapsed, true);
+  assert.equal(bouncedOutsideZone.lastScrollTop, 80);
+  assert.equal(bouncedOutsideZone.accumulatedDelta, 0);
   assert.equal(pending.collapsed, true);
-  assert.equal(expanded.lastScrollTop, 42);
-  assert.equal(expanded.accumulatedDelta, 0);
-  assert.equal(expanded.gestureStartCollapsed, null);
+  assert.equal(pending.accumulatedDelta, -42);
+  assert.equal(pending.gestureStartCollapsed, true);
+  assert.equal(expanded.collapsed, false);
+});
+
+test('peek header scroll policy does not suppress upward scroll when header is expanded', () => {
+  const nearBottom = nextPeekHeaderScrollState(initialPeekHeaderScrollState, 124, 'down', { maxScrollTop: 164 }, 100);
+  const upward = nextPeekHeaderScrollState(nearBottom, 82, 'up', { maxScrollTop: 164 }, 150);
+
+  assert.equal(upward.collapsed, false);
+  assert.equal(upward.lastScrollTop, 82);
+  assert.equal(upward.accumulatedDelta, -42);
+  assert.equal(upward.gestureStartCollapsed, false);
 });
 
 test('peek header scroll policy resets accumulated distance when direction changes', () => {
@@ -192,6 +229,18 @@ test('peek header scroll policy expands at scroll top on settle', () => {
   assert.equal(settled.accumulatedDelta, 0);
   assert.equal(settled.canReveal, false);
   assert.equal(settled.gestureStartCollapsed, null);
+});
+
+test('peek header scroll policy preserves scroll-top reveal even after recent bottom zone entry', () => {
+  const collapsed = settlePeekHeaderScrollState(nextPeekHeaderScrollState(initialPeekHeaderScrollState, 84));
+  const nearBottom = nextPeekHeaderScrollState(collapsed, 124, 'down', { maxScrollTop: 164 }, 100);
+  const atTop = nextPeekHeaderScrollState(nearBottom, 0, 'up', { maxScrollTop: 164 }, 150);
+  const settled = settlePeekHeaderScrollState(atTop);
+
+  assert.equal(atTop.collapsed, true);
+  assert.equal(atTop.lastScrollTop, 0);
+  assert.equal(atTop.canReveal, true);
+  assert.equal(settled.collapsed, false);
 });
 
 test('peek header renders fixed wrapper and transform-driven content', () => {
