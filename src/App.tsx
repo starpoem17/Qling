@@ -55,6 +55,7 @@ import {
 import { LoadingShellScreen } from './screens/loadingShell/LoadingShellScreen';
 import { LoginScreen } from './screens/loadingShell/LoginScreen';
 import { ChatScreen } from './screens/chat/ChatScreen';
+import { ChatRoomContainer } from './screens/chat/ChatRoomContainer';
 import { RankingContainer } from './screens/ranking/RankingContainer';
 
 // --- Types ---
@@ -486,8 +487,18 @@ export default function App() {
           )}
 
           {(currentRoute === '채팅' || currentRoute === 'chat') && (
-            <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
               <ChatScreen />
+            </motion.div>
+          )}
+
+          {currentRoute === 'chat_room' && typeof view === 'object' && view.route === 'chat_room' && (
+            <motion.div key="chat_room" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="h-full">
+              <ChatRoomContainer
+                user={user}
+                chatId={view.chatId}
+                setView={setView}
+              />
             </motion.div>
           )}
 

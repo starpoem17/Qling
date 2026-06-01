@@ -28,6 +28,7 @@ import { registerAnswerFeedRoutes } from "./src/server/answerFeedRoutes";
 import { registerPolicyRoutes } from "./src/server/policyRoutes";
 import { registerVersionRoutes } from "./src/server/versionRoutes";
 import { registerRankingRoutes } from "./src/server/rankingRoutes";
+import { registerChatRoutes } from "./src/server/chatRoutes";
 
 // Read client config to get database ID
 const clientConfigPath = path.join(process.cwd(), 'firebase-applet-config.json');
@@ -143,6 +144,19 @@ async function startServer() {
     registerRankingRoutes(app, {
       db,
       auth: getAuth(),
+    });
+    registerChatRoutes(app, {
+      db,
+      messaging,
+      auth: getAuth(),
+      moderationProvider: chatContent => processSimpleModerationResponse(
+        chatContent,
+        content => fetchFromOpenAI(`You are a moderator for a Korean anonymous worry-sharing app.
+1. Check if the chat message is inappropriate, abusive, violent, or spam.
+2. Return JSON exactly like this:
+   - If bad: { "status": "rejected", "reason": "부적절한 표현이 감지되었습니다." }
+   - If good: { "status": "approved" }`, content)
+      ).then(result => result.body),
     });
   } else {
     app.post('/api/worries/publish', (_req, res) => {

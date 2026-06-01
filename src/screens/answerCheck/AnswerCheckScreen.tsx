@@ -48,9 +48,19 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
             onCommentChange={props.onCommentChange}
             onCommentSubmit={props.onCommentSubmit}
             onCommentClose={props.onCommentClose}
+            onStartChat={props.onStartChat}
           />
         ))}
       </div>
+
+      {props.likeActionPopup && (
+        <LikeActionPopup
+          replyId={props.likeActionPopup.replyId}
+          onClose={props.onCloseLikeActionPopup}
+          onOpenComment={props.onOpenComment}
+          onStartChat={props.onStartChat}
+        />
+      )}
     </AnswerCheckFrame>
   );
 }
@@ -168,6 +178,7 @@ function AnswerCard({
   onCommentChange,
   onCommentSubmit,
   onCommentClose,
+  onStartChat,
 }: {
   readonly reply: AnswerCheckReplyProps;
   readonly commentDialog: AnswerCheckScreenProps['commentDialog'];
@@ -177,6 +188,7 @@ function AnswerCard({
   readonly onCommentChange: (value: string) => void;
   readonly onCommentSubmit: () => void;
   readonly onCommentClose: () => void;
+  readonly onStartChat: (replyId: string) => void;
 }) {
   const liked = reply.feedbackState === 'liked';
   const disliked = reply.feedbackState === 'disliked';
@@ -193,6 +205,16 @@ function AnswerCard({
         {reply.bodyText}
       </p>
       <div className="mt-[5px] flex items-center justify-end gap-[5px]">
+        {reply.canChat && (
+          <button
+            type="button"
+            aria-label="1대1 대화하기"
+            onClick={() => onStartChat(reply.replyId)}
+            className="mr-1 inline-flex h-[28px] items-center justify-center rounded-[8px] bg-[#ff8b3d] px-2 font-['Qling_Figma_Inter'] text-[11px] font-bold leading-normal text-white transition-colors hover:bg-[#e56f22] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]/50"
+          >
+            1:1 대화
+          </button>
+        )}
         <FeedbackAction
           label="좋아요"
           iconUrl={goodIconUrl}
@@ -345,6 +367,53 @@ function InlineCommentEditor({
         >
           제출
         </button>
+      </div>
+    </div>
+  );
+}
+
+function LikeActionPopup({
+  replyId,
+  onClose,
+  onOpenComment,
+  onStartChat,
+}: {
+  readonly replyId: string;
+  readonly onClose: () => void;
+  readonly onOpenComment: (replyId: string) => void;
+  readonly onStartChat: (replyId: string) => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-[24px]">
+      <div className="w-full max-w-[345px] overflow-hidden rounded-[20px] bg-white shadow-[0_4px_10px_rgb(0_0_0/0.25)]">
+        <div className="flex flex-col py-2">
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              onOpenComment(replyId);
+            }}
+            className="w-full px-[24px] py-[16px] text-center font-['Qling_Figma_Inter'] text-[16px] font-bold leading-[19px] text-[#2a2a2a] transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+          >
+            코멘트 남기기
+          </button>
+          <div className="h-px w-full bg-[#f2f2f2]" />
+          <button
+            type="button"
+            onClick={() => onStartChat(replyId)}
+            className="w-full px-[24px] py-[16px] text-center font-['Qling_Figma_Inter'] text-[16px] font-bold leading-[19px] text-[#ff8b3d] transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+          >
+            1대1 대화하기
+          </button>
+          <div className="h-px w-full bg-[#f2f2f2]" />
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full px-[24px] py-[16px] text-center font-['Qling_Figma_Inter'] text-[16px] font-bold leading-[19px] text-[#b8b8b8] transition-colors hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+          >
+            아무것도 안하기
+          </button>
+        </div>
       </div>
     </div>
   );

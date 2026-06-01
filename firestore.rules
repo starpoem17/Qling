@@ -296,6 +296,19 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    match /chats/{chatId} {
+      allow read: if isNotDeletedSelf()
+        && ('participants' in resource.data)
+        && (request.auth.uid in resource.data.participants);
+      allow create, update, delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isNotDeletedSelf()
+          && (request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants);
+        allow create, update, delete: if false;
+      }
+    }
+
     match /test/connection {
       allow read: if true;
     }

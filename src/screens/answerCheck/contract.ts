@@ -22,6 +22,7 @@ export type AnswerCheckReplyProps = {
   readonly canLike: boolean;
   readonly canDislike: boolean;
   readonly canComment: boolean;
+  readonly canChat: boolean;
   readonly isFeedbackProcessing: boolean;
   readonly isCommentProcessing: boolean;
 };
@@ -35,11 +36,16 @@ export type AnswerCheckCommentDialogProps = {
   readonly moderationMessage?: string;
 };
 
+export type AnswerCheckLikeActionPopupProps = {
+  readonly replyId: string;
+};
+
 export type AnswerCheckScreenProps = {
   readonly state: AnswerCheckScreenState;
   readonly worry: AnswerCheckWorryProps | null;
   readonly replies: readonly AnswerCheckReplyProps[];
   readonly commentDialog: AnswerCheckCommentDialogProps | null;
+  readonly likeActionPopup: AnswerCheckLikeActionPopupProps | null;
   readonly onBack: () => void;
   readonly onLike: (replyId: string) => void;
   readonly onDislike: (replyId: string) => void;
@@ -47,4 +53,6 @@ export type AnswerCheckScreenProps = {
   readonly onCommentChange: (value: string) => void;
   readonly onCommentSubmit: () => void;
   readonly onCommentClose: () => void;
+  readonly onCloseLikeActionPopup: () => void;
+  readonly onStartChat: (replyId: string) => void;
 };

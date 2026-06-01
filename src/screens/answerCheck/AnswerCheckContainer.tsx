@@ -36,6 +36,8 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
   const [localFeedbackByReplyId, setLocalFeedbackByReplyId] = useState(new Map<string, 'helpful' | 'not_helpful'>());
   const [commentDialog, setCommentDialog] = useState<CommentDialogState | null>(null);
 
+  const [likeActionPopup, setLikeActionPopup] = useState<{ replyId: string } | null>(null);
+
   const worry = useMemo(
     () => myWorries.find(item => item.id === worryId) ?? null,
     [myWorries, worryId],
@@ -116,10 +118,11 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
         validationMessage: validation?.status === 'validation_error' ? validation.message : undefined,
         moderationMessage: commentDialog.moderationMessage,
       } : null}
+      likeActionPopup={likeActionPopup}
       onBack={() => props.setView(backRouteForRoute({ route: 'answer_check', worryId: worryId ?? '' }))}
       onLike={async replyId => {
         const result = await submitFeedback(replyId, 'helpful');
-        if (result?.status === 'saved') openComment(replyId);
+        if (result?.status === 'saved') setLikeActionPopup({ replyId });
       }}
       onDislike={async replyId => {
         const result = await submitFeedback(replyId, 'not_helpful');
@@ -137,6 +140,11 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
         if (result?.status === 'saved') closeComment();
       }}
       onCommentClose={closeComment}
+      onCloseLikeActionPopup={() => setLikeActionPopup(null)}
+      onStartChat={(replyId) => {
+        setLikeActionPopup(null);
+        props.setView({ route: 'chat_room', replyId });
+      }}
     />
   );
 }

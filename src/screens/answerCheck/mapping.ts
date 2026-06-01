@@ -36,6 +36,7 @@ export function mapReplyToAnswerCheckProps(params: {
     canLike: params.reply.feedback !== 'not_helpful',
     canDislike: params.reply.feedback !== 'helpful',
     canComment: params.reply.feedback !== 'not_helpful' && !params.reply.publisherComment,
+    canChat: params.reply.feedback === 'helpful',
     isFeedbackProcessing: params.processingReplyIds?.has(params.reply.id) ?? false,
     isCommentProcessing: params.processingReplyIds?.has(params.reply.id) ?? false,
   };
