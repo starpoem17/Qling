@@ -21,6 +21,7 @@ test('PRD active deliveries appear with worry content and delivery id', () => {
       {
         id: 'worry1',
         content: 'content',
+        summaryText: 'llm summary',
         matchingCategories: ['취업'],
         createdAt: { toMillis: () => 1 },
       },
@@ -33,6 +34,7 @@ test('PRD active deliveries appear with worry content and delivery id', () => {
   assert.equal(items[0].authorUid, 'author');
   assert.equal(items[0].recipientUid, 'recipient');
   assert.equal(items[0].originalContent, 'content');
+  assert.equal(items[0].summaryText, 'llm summary');
   assert.equal(items[0].hasUnread, true);
 });
 
@@ -320,6 +322,7 @@ test('adapter preserves PRD identity fields for reply form compatibility', () =>
     recipientUid: 'recipient',
     originalContent: 'content',
     refinedContent: 'content',
+    summaryText: 'summary',
     categories: ['잡담'],
     createdAt: null,
     status: 'active',
@@ -333,6 +336,7 @@ test('adapter preserves PRD identity fields for reply form compatibility', () =>
   assert.equal(letter.authorUid, 'author');
   assert.equal(letter.recipientUid, 'recipient');
   assert.equal(letter.source, 'prd_delivery');
+  assert.equal(letter.summaryText, 'summary');
   assert.equal(letter.hasUnread, true);
 });
 

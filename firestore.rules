@@ -231,6 +231,10 @@ service cloud.firestore {
       allow read, create, update, delete: if false;
     }
 
+    match /summaryFailureLogs/{logId} {
+      allow read, create, update, delete: if false;
+    }
+
     match /pushLogs/{logId} {
       allow read, create, update, delete: if false;
     }

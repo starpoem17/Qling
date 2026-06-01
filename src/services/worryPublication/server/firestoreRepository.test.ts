@@ -8,7 +8,7 @@ import type {
   WorryWriteModel,
 } from './types';
 
-type CollectionName = 'users' | 'deliveries' | 'worries' | 'deliveryBatches' | 'moderationLogs';
+type CollectionName = 'users' | 'deliveries' | 'worries' | 'deliveryBatches' | 'moderationLogs' | 'summaryFailureLogs';
 
 interface FakeRef {
   collectionName: CollectionName;
@@ -38,6 +38,7 @@ function createFakeFirestore(initial?: {
     worries: {},
     deliveryBatches: {},
     moderationLogs: {},
+    summaryFailureLogs: {},
   };
   const transactionReads: string[] = [];
 
@@ -107,6 +108,10 @@ function buildCommitModels(recipientUids = ['a', 'b', 'c', 'd', 'e']) {
     id: 'worry1',
     authorUid: 'author',
     content: 'content',
+    summaryText: 'content',
+    summaryStatus: 'original',
+    summaryGeneratedBy: 'none',
+    summaryUpdatedAt: 'ts',
     status: 'active',
     rawCategories: ['취업'],
     validCategories: ['취업'],

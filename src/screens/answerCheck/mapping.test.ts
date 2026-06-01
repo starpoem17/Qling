@@ -9,6 +9,7 @@ test('maps one worry and multiple replies without answer writer private fields',
   const worry = worryItem({
     id: 'worry-1',
     content: '내 고민 본문',
+    summaryText: 'LLM 고민 요약',
     categories: ['외모'],
     authorUid: 'publisher-internal-uid',
     publisherNickname: '고민작성자닉',
@@ -36,7 +37,7 @@ test('maps one worry and multiple replies without answer writer private fields',
   const json = JSON.stringify(mapped);
 
   assert.equal(mapped.worry.worryId, 'worry-1');
-  assert.equal(mapped.worry.summaryText, '내 고민 본문...');
+  assert.equal(mapped.worry.summaryText, 'LLM 고민 요약');
   assert.equal(mapped.worry.bodyText, '내 고민 본문');
   assert.equal(mapped.replies[0].replyId, 'reply-1');
   assert.equal(mapped.replies[0].bodyText, '답변 본문');
@@ -59,12 +60,12 @@ test('maps empty reply list to no answer cards while preserving worry props', ()
   assert.deepEqual(mapped, []);
 });
 
-test('maps worry summary with the my-worries 20-character fallback policy', () => {
+test('maps saved worry summary before the legacy 20-character fallback policy', () => {
   const mapped = mapWorryToAnswerCheckProps({
-    worry: worryItem({ content: '012345678901234567890123456789' }),
+    worry: worryItem({ content: '012345678901234567890123456789', summaryText: '저장된 요약' }),
   });
 
-  assert.equal(mapped.summaryText, '01234567890123456789...');
+  assert.equal(mapped.summaryText, '저장된 요약');
   assert.equal(mapped.bodyText, '012345678901234567890123456789');
 });
 

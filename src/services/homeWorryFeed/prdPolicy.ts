@@ -18,12 +18,23 @@ export interface PrdDeliveryDoc {
 export interface PrdWorryDoc {
   id: string;
   content?: string;
+  summaryText?: unknown;
   matchingCategories?: unknown;
   validCategories?: unknown;
   createdAt?: HomeWorryFeedTimestamp | null;
   status?: string;
   hiddenAt?: unknown;
   deletedAt?: unknown;
+}
+
+function legacySummary(content: string): string {
+  return `${Array.from(content).slice(0, 20).join('')}...`;
+}
+
+function summaryTextForWorry(worry: PrdWorryDoc): string {
+  return typeof worry.summaryText === 'string' && worry.summaryText.trim()
+    ? worry.summaryText
+    : legacySummary(worry.content ?? '');
 }
 
 export interface DeliveryReadStateDoc {
@@ -75,6 +86,7 @@ export function selectVisibleAnswerFeedItems(params: {
       recipientUid: delivery.recipientUid,
       originalContent: worry.content,
       refinedContent: worry.content,
+      summaryText: summaryTextForWorry(worry),
       categories: matchingCategories.length > 0 ? matchingCategories : validCategories,
       createdAt: worry.createdAt ?? null,
       status: 'active' as const,
@@ -102,6 +114,7 @@ export function adaptPrdAnswerFeedItemToHomeWorryFeedLetter(
     receiverId: item.recipientUid,
     originalContent: item.originalContent,
     refinedContent: item.refinedContent,
+    summaryText: item.summaryText,
     categories: item.categories,
     category: item.categories[0],
     createdAt: item.createdAt,

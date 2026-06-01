@@ -23,6 +23,7 @@ test('answer feed API client fetches authenticated endpoint response', async () 
           recipientUid: 'recipient',
           originalContent: 'content',
           refinedContent: 'content',
+          summaryText: 'summary',
           categories: ['진로'],
           createdAt: { seconds: 1 },
           status: 'active',
@@ -37,6 +38,7 @@ test('answer feed API client fetches authenticated endpoint response', async () 
   assert.equal(capturedAuth, 'Bearer token');
   assert.equal(result.status, 'ok');
   assert.equal(result.status === 'ok' ? result.items[0].deliveryId : '', 'delivery1');
+  assert.equal(result.status === 'ok' ? result.items[0].summaryText : '', 'summary');
   assert.deepEqual(result.status === 'ok' ? result.items[0].createdAt : null, { seconds: 1 });
 });
 

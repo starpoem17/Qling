@@ -13,6 +13,7 @@ test('maps a PRD feed letter to the received-worries screen item contract', () =
     receiverId: 'recipient-1',
     originalContent: 'Original worry',
     refinedContent: 'Visible worry body',
+    summaryText: 'LLM summary',
     category: WORRY_CATEGORIES[1],
     createdAt: { toMillis: () => new Date(2026, 4, 19, 10, 0, 0).getTime() },
     source: 'prd_delivery',
@@ -25,8 +26,8 @@ test('maps a PRD feed letter to the received-worries screen item contract', () =
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
     category: WORRY_CATEGORIES[1],
-    previewText: 'Visible worry body',
-    bodyText: 'Visible worry body',
+    previewText: 'LLM summary',
+    bodyText: 'LLM summary',
     receivedAt: {
       label: '2시간 전',
       isoValue: new Date(2026, 4, 19, 10, 0, 0).toISOString(),

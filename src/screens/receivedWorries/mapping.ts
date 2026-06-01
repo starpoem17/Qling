@@ -35,8 +35,8 @@ export function mapHomeWorryFeedLetterToReceivedWorryFeedItem(
     deliveryId: worry.deliveryId,
     worryId: worry.worryId,
     category: categoryForFeedItem(worry),
-    previewText: worry.refinedContent,
-    bodyText: worry.refinedContent,
+    previewText: worry.summaryText || worry.refinedContent,
+    bodyText: worry.summaryText || worry.refinedContent,
     receivedAt: displayDateFromTimestamp(worry.createdAt, options),
     isUnread: worry.hasUnread === true,
   };

@@ -64,6 +64,10 @@ export interface WorryWriteModel {
   id: string;
   authorUid: string;
   content: string;
+  summaryText: string;
+  summaryStatus: 'original' | 'llm_generated' | 'fallback_truncated';
+  summaryGeneratedBy: 'none' | 'llm';
+  summaryUpdatedAt: ServerTimestampValue;
   status: 'active';
   rawCategories: string[];
   validCategories: string[];
@@ -79,6 +83,19 @@ export interface WorryWriteModel {
   createdAt: ServerTimestampValue;
   updatedAt: ServerTimestampValue;
   lastDeliveryCreatedAt: ServerTimestampValue;
+}
+
+export interface SummaryFailureLogWriteModel {
+  id: string;
+  worryId: string;
+  status: 'failed';
+  attemptCount: number;
+  failureReason: string;
+  firstResponseText: string | null;
+  retryResponseText: string | null;
+  provider: string;
+  model: string;
+  createdAt: ServerTimestampValue;
 }
 
 export interface DeliveryBatchWriteModel {
@@ -127,6 +144,7 @@ export interface InitialWorryPublicationRepository {
     worryId: string;
     batchId: string;
     moderationLogId: string;
+    summaryFailureLogId: string;
   };
 
   fetchRecipientCandidates(params: {
@@ -142,6 +160,7 @@ export interface InitialWorryPublicationRepository {
   commitInitialWorryPublication(params: {
     worry: WorryWriteModel;
     moderationLog: ModerationLogWriteModel;
+    summaryFailureLog?: SummaryFailureLogWriteModel;
     batch: DeliveryBatchWriteModel;
     deliveries: DeliveryWriteModel[];
     selectedRecipientUids: string[];
@@ -150,6 +169,7 @@ export interface InitialWorryPublicationRepository {
 }
 
 export type WorryModerationProvider = (content: string, strictRetry?: boolean) => Promise<unknown>;
+export type WorrySummaryProvider = (content: string, strictRetry?: boolean) => Promise<unknown>;
 
 export type ServerPublishWorryResult =
   | { status: 'published'; worryId: string; deliveryIds: string[]; moderationLogId: string }

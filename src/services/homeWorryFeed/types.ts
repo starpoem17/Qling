@@ -14,6 +14,7 @@ export interface HomeWorryFeedLetter {
   receiverId: string;
   originalContent: string;
   refinedContent: string;
+  summaryText?: string;
   categories?: string[];
   category?: string;
   createdAt?: HomeWorryFeedTimestamp | null;
@@ -34,6 +35,7 @@ export interface PrdAnswerFeedItem {
   recipientUid: string;
   originalContent: string;
   refinedContent: string;
+  summaryText: string;
   categories: string[];
   createdAt: HomeWorryFeedTimestamp | null;
   status: 'active';

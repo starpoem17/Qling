@@ -12,7 +12,7 @@ import fs from "fs";
 import {
   processSimpleModerationResponse,
 } from "./src/server/moderationResponses";
-import { fetchFromOpenAI, moderateAndInferWorryCategories } from "./src/server/moderationProvider";
+import { fetchFromOpenAI, moderateAndInferWorryCategories, summarizeWorryContent } from "./src/server/moderationProvider";
 import { registerWorryRoutes } from "./src/server/worryRoutes";
 import { registerReplyRoutes } from "./src/server/replyRoutes";
 import { registerReadStateRoutes } from "./src/server/readStateRoutes";
@@ -76,6 +76,7 @@ async function startServer() {
       messaging,
       auth: getAuth(),
       moderationProvider: moderateAndInferWorryCategories,
+      summaryProvider: summarizeWorryContent,
     });
     registerReplyRoutes(app, {
       db,

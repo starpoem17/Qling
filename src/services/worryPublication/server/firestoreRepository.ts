@@ -67,6 +67,7 @@ export function createInitialWorryPublicationRepository(params: {
         worryId: db.collection('worries').doc().id,
         batchId: db.collection('deliveryBatches').doc().id,
         moderationLogId: db.collection('moderationLogs').doc().id,
+        summaryFailureLogId: db.collection('summaryFailureLogs').doc().id,
       };
     },
 
@@ -119,6 +120,12 @@ export function createInitialWorryPublicationRepository(params: {
           db.collection('moderationLogs').doc(moderationLog.id),
           withoutId(moderationLog)
         );
+        if (params.summaryFailureLog) {
+          transaction.set(
+            db.collection('summaryFailureLogs').doc(params.summaryFailureLog.id),
+            withoutId(params.summaryFailureLog)
+          );
+        }
         transaction.set(db.collection('worries').doc(worry.id), withoutId(worry));
         transaction.set(db.collection('deliveryBatches').doc(batch.id), withoutId(batch));
 

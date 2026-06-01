@@ -60,6 +60,7 @@ test('my-page mapping preserves canonical 워라밸 category value', () => {
     receiverId: 'receiver',
     originalContent: 'original',
     refinedContent: 'refined',
+    summaryText: '고민 요약',
     isRead: false,
     feedback: undefined,
     categories: ['워라밸'],
@@ -82,6 +83,7 @@ test('reply and worry read models map to list props without example labels', () 
     receiverId: 'receiver',
     originalContent: 'original',
     refinedContent: 'refined',
+    summaryText: '고민 요약',
     isRead: false,
     hasUnread: true,
     feedback: 'helpful',
@@ -95,6 +97,7 @@ test('reply and worry read models map to list props without example labels', () 
       id: 'worry-1',
       authorUid: 'user-1',
       content: '01234567890123456789 extra private original',
+      summaryText: '내 고민 요약',
       categories: [WORRY_CATEGORIES[1], WORRY_CATEGORIES[2]],
       createdAt: null,
       humanReplyCount: 2,
@@ -103,14 +106,14 @@ test('reply and worry read models map to list props without example labels', () 
   });
 
   assert.equal(answerItem.previewText, 'refined');
-  assert.equal(answerItem.originalWorryPreview, 'original');
+  assert.equal(answerItem.originalWorryPreview, '고민 요약');
   assert.equal(answerItem.feedbackLabel, '받은 하트');
   assert.equal(answerItem.feedbackComment, '고마워요');
   assert.equal(answerItem.hasReceivedHeart, true);
   assert.equal(answerItem.categoryLabel, '자존감');
   assert.match(answerItem.accessibilityLabel, /내가 쓴 답변/);
   assert.match(answerItem.accessibilityLabel, /피드백 받은 하트/);
-  assert.equal(worryItem.summaryText, '01234567890123456789...');
+  assert.equal(worryItem.summaryText, '내 고민 요약');
   assert.match(worryItem.accessibilityLabel, /카테고리 진로/);
   assert.equal(worryItem.categoryLabel, WORRY_CATEGORIES[1]);
   assert.equal(worryItem.replyCountLabel, '2명이 답변했어요');
@@ -188,6 +191,7 @@ test('my worry mapping uses shared display date, first valid category, fallback 
     id: 'worry-1',
     authorUid: 'user-1',
     content: '01234567890123456789 extra',
+    summaryText: '저장된 요약',
     categories: ['invalid', '외로움', '취업'],
     createdAt: { toMillis: () => new Date(2026, 4, 19, 11, 55, 0).getTime() },
     humanReplyCount: 0,
@@ -198,7 +202,7 @@ test('my worry mapping uses shared display date, first valid category, fallback 
 
   assert.equal(item.categoryLabel, '외로움');
   assert.equal(item.createdAtLabel, '5분 전');
-  assert.equal(item.summaryText, '01234567890123456789...');
+  assert.equal(item.summaryText, '저장된 요약');
   assert.equal(item.replyCountLabel, '아직 답변이 없어요.');
   assert.match(item.accessibilityLabel, /작성일 5분 전/);
 });

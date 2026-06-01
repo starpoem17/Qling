@@ -26,6 +26,16 @@ function sortNewestFirst<T extends { createdAt?: TimestampLike | null }>(items: 
   return [...items].sort((a, b) => timestampMillis(b.createdAt) - timestampMillis(a.createdAt));
 }
 
+function legacySummary(content: string): string {
+  return `${Array.from(content).slice(0, 20).join('')}...`;
+}
+
+function summaryTextForWorry(worry: Pick<PrdWorryDoc, 'content' | 'summaryText'>): string {
+  return typeof worry.summaryText === 'string' && worry.summaryText.trim()
+    ? worry.summaryText
+    : legacySummary(worry.content ?? '');
+}
+
 export function isHiddenWorry(worry: Pick<PrdWorryDoc, 'status' | 'hiddenAt'>): boolean {
   return worry.status === 'hidden'
     || worry.status === 'deleted'
@@ -57,6 +67,7 @@ export function selectVisibleMyWorries(params: {
       id: worry.id,
       authorUid: worry.authorUid,
       content: worry.content,
+      summaryText: summaryTextForWorry(worry),
       status: worry.status,
       categories: matchingCategories.length > 0
         ? matchingCategories
@@ -135,6 +146,7 @@ export function adaptPrdReplies(
     const feedback = feedbacksByReplyId?.get(reply.id);
     const sourceWorry = worriesById?.get(reply.worryId);
     const sourceWorryContent = typeof sourceWorry?.content === 'string' ? sourceWorry.content : undefined;
+    const sourceWorrySummary = sourceWorry ? summaryTextForWorry(sourceWorry) : undefined;
 
     return [{
       id: reply.id,
@@ -150,6 +162,7 @@ export function adaptPrdReplies(
       receiverId: reply.authorUid,
       originalContent: sourceWorryContent ?? reply.content,
       refinedContent: reply.content,
+      summaryText: sourceWorrySummary,
       replyTo: reply.worryId,
       replyToContent: sourceWorryContent,
       isRead: readStatesByReplyId ? readStatesByReplyId.has(reply.id) : true,

@@ -20,6 +20,7 @@ test('own worries are included by authorUid and other users worries are excluded
       id: 'mine-new',
       authorUid: 'me',
       content: 'my newer worry',
+      summaryText: 'newer summary',
       matchingCategories: ['career'],
       createdAt: ts(2),
     },
@@ -43,6 +44,7 @@ test('own worries are included by authorUid and other users worries are excluded
   const selected = selectMyWorries({ worries, userUid: 'me' });
 
   assert.deepEqual(selected.map(worry => worry.id), ['mine-new', 'mine-old']);
+  assert.equal(selected[0].summaryText, 'newer summary');
   assert.deepEqual(selected.map(worry => worry.source), ['prd_worries', 'prd_worries']);
   assert.deepEqual(selected[1].categories, ['family']);
   assert.equal(selected[1].humanReplyCount, 1);
@@ -197,7 +199,7 @@ test('my given replies excludes hidden deleted or missing source worries when so
     prdReply({ id: 'missing-source', worryId: 'missing-worry', authorUid: 'author', replierUid: 'me' }),
   ];
   const worriesById = new Map<string, PrdWorryDoc>([
-    ['visible-worry', { id: 'visible-worry', content: 'visible original' }],
+    ['visible-worry', { id: 'visible-worry', content: 'visible original', summaryText: 'visible summary' }],
     ['hidden-worry', { id: 'hidden-worry', content: 'hidden original', status: 'hidden' }],
     ['deleted-worry', { id: 'deleted-worry', content: 'deleted original', deletedAt: {} }],
   ]);
@@ -206,6 +208,7 @@ test('my given replies excludes hidden deleted or missing source worries when so
 
   assert.deepEqual(selected.map(reply => reply.id), ['visible']);
   assert.equal(selected[0].originalContent, 'visible original');
+  assert.equal(selected[0].summaryText, 'visible summary');
   assert.equal(selected[0].replyToContent, 'visible original');
 });
 

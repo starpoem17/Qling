@@ -4,6 +4,7 @@ export {
   normalizeWorryModerationForPublication,
   moderateWorryForPublication,
 } from './moderation';
+export { createWorrySummary } from './summary';
 export {
   selectInitialWorryRecipients,
   isEligiblePhase1HumanCandidate,
@@ -15,4 +16,5 @@ export type {
   Phase1HumanCandidate,
   ServerPublishWorryResult,
   WorryModerationProvider,
+  WorrySummaryProvider,
 } from './types';

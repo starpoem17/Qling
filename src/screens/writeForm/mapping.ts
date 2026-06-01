@@ -44,13 +44,13 @@ export function mapSelectedWorryToOriginalWorrySummary(
     deliveryId: worry.deliveryId,
     worryId: worry.worryId,
     category: firstValidCategory(worry.categories, worry.category),
-    summaryText: buildUserFacingSummary(originalBodyText),
+    summaryText: worry.summaryText || buildLegacySummary(originalBodyText),
     originalBodyText,
     receivedAt: displayDateFromTimestamp(worry.createdAt, options),
   };
 }
 
-export function buildUserFacingSummary(originalBodyText: string): string {
+export function buildLegacySummary(originalBodyText: string): string {
   return `${Array.from(originalBodyText).slice(0, 20).join('')}...`;
 }
 

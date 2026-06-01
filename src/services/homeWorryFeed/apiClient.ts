@@ -21,6 +21,7 @@ function toPrdAnswerFeedItem(value: unknown): PrdAnswerFeedItem | null {
     || typeof item.recipientUid !== 'string'
     || typeof item.originalContent !== 'string'
     || typeof item.refinedContent !== 'string'
+    || typeof item.summaryText !== 'string'
     || !isStringArray(item.categories)
     || item.status !== 'active'
     || item.source !== 'prd_delivery'
@@ -37,6 +38,7 @@ function toPrdAnswerFeedItem(value: unknown): PrdAnswerFeedItem | null {
     recipientUid: item.recipientUid,
     originalContent: item.originalContent,
     refinedContent: item.refinedContent,
+    summaryText: item.summaryText,
     categories: item.categories,
     createdAt: item.createdAt && typeof item.createdAt === 'object'
       ? item.createdAt as PrdAnswerFeedItem['createdAt']

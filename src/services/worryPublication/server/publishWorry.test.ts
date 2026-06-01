@@ -9,6 +9,7 @@ import type {
   DeliveryBatchWriteModel,
   DeliveryWriteModel,
   ModerationLogWriteModel,
+  SummaryFailureLogWriteModel,
   Phase1HumanCandidate,
   WorryWriteModel,
 } from './types';
@@ -69,6 +70,7 @@ function createFakeRepository(candidates: Phase1HumanCandidate[]): InitialWorryP
     worry: WorryWriteModel;
     batch: DeliveryBatchWriteModel;
     deliveries: DeliveryWriteModel[];
+    summaryFailureLog?: SummaryFailureLogWriteModel;
     selectedRecipientUids: string[];
   };
 } {
@@ -79,6 +81,7 @@ function createFakeRepository(candidates: Phase1HumanCandidate[]): InitialWorryP
       worryId: 'worry1',
       batchId: 'batch1',
       moderationLogId: 'mod1',
+      summaryFailureLogId: 'summary-log1',
     }),
     fetchRecipientCandidates: async params => {
       assert.equal(params.authorUid, 'author');
@@ -95,6 +98,7 @@ function createFakeRepository(candidates: Phase1HumanCandidate[]): InitialWorryP
         worry: params.worry,
         batch: params.batch,
         deliveries: params.deliveries,
+        summaryFailureLog: params.summaryFailureLog,
         selectedRecipientUids: params.selectedRecipientUids,
       };
       assert.equal(params.worry.id, 'worry1');
@@ -121,6 +125,7 @@ function createFakeRepository(candidates: Phase1HumanCandidate[]): InitialWorryP
       worry: WorryWriteModel;
       batch: DeliveryBatchWriteModel;
       deliveries: DeliveryWriteModel[];
+      summaryFailureLog?: SummaryFailureLogWriteModel;
       selectedRecipientUids: string[];
     };
   };
@@ -148,6 +153,9 @@ test('happy path creates canonical worry batch deliveries and moderation log', a
   assert.equal(repo.lastCommit?.batch.randomCount, 1);
   assert.equal(repo.lastCommit?.worry.authorUid, 'author');
   assert.equal(repo.lastCommit?.worry.content, '고민');
+  assert.equal(repo.lastCommit?.worry.summaryText, '고민');
+  assert.equal(repo.lastCommit?.worry.summaryStatus, 'original');
+  assert.equal(repo.lastCommit?.worry.summaryGeneratedBy, 'none');
   assert.equal(repo.lastCommit?.deliveries.every(delivery => (
     delivery.recipientUid
     && delivery.authorUid === 'author'
@@ -155,6 +163,72 @@ test('happy path creates canonical worry batch deliveries and moderation log', a
     && delivery.status === 'active'
     && delivery.answeredAt === null
   )), true);
+});
+
+test('long approved worry stores generated LLM summary', async () => {
+  repo = createFakeRepository(['a', 'b', 'c', 'd', 'e'].map(uid => candidate(uid)));
+  const result = await publishWorryOnServer({
+    db: createFakeDb() as never,
+    messaging: null,
+    author: { uid: 'author', gender: 'female', interests: ['취업'] },
+    content: '012345678901234567890123456789',
+    moderationProvider: async () => ({ status: 'approved', categories: ['취업'] }),
+    summaryProvider: async () => 'LLM 요약',
+    repository: repo,
+  });
+
+  assert.equal(result.status, 'published');
+  assert.equal(repo.lastCommit?.worry.summaryText, 'LLM 요약');
+  assert.equal(repo.lastCommit?.worry.summaryStatus, 'llm_generated');
+  assert.equal(repo.lastCommit?.worry.summaryGeneratedBy, 'llm');
+  assert.equal(repo.lastCommit?.summaryFailureLog, undefined);
+});
+
+test('long approved worry retries overlong summary once', async () => {
+  repo = createFakeRepository(['a', 'b', 'c', 'd', 'e'].map(uid => candidate(uid)));
+  const calls: boolean[] = [];
+  const result = await publishWorryOnServer({
+    db: createFakeDb() as never,
+    messaging: null,
+    author: { uid: 'author', gender: 'female', interests: ['취업'] },
+    content: '012345678901234567890123456789',
+    moderationProvider: async () => ({ status: 'approved', categories: ['취업'] }),
+    summaryProvider: async (_content, strictRetry) => {
+      calls.push(Boolean(strictRetry));
+      return strictRetry ? { summaryText: '재요약' } : '012345678901234567890';
+    },
+    repository: repo,
+  });
+
+  assert.equal(result.status, 'published');
+  assert.deepEqual(calls, [false, true]);
+  assert.equal(repo.lastCommit?.worry.summaryText, '재요약');
+  assert.equal(repo.lastCommit?.worry.summaryStatus, 'llm_generated');
+});
+
+test('summary failure stores fallback summary and debug log without blocking publish', async () => {
+  repo = createFakeRepository(['a', 'b', 'c', 'd', 'e'].map(uid => candidate(uid)));
+  const result = await publishWorryOnServer({
+    db: createFakeDb() as never,
+    messaging: null,
+    author: { uid: 'author', gender: 'female', interests: ['취업'] },
+    content: '012345678901234567890123456789',
+    moderationProvider: async () => ({ status: 'approved', categories: ['취업'] }),
+    summaryProvider: async (_content, strictRetry) => strictRetry
+      ? { summaryText: '012345678901234567890' }
+      : '012345678901234567890',
+    repository: repo,
+  });
+
+  assert.equal(result.status, 'published');
+  assert.equal(repo.lastCommit?.worry.summaryText, '01234567890123456789...');
+  assert.equal(repo.lastCommit?.worry.summaryStatus, 'fallback_truncated');
+  assert.equal(repo.lastCommit?.worry.summaryGeneratedBy, 'none');
+  assert.equal(repo.lastCommit?.summaryFailureLog?.worryId, 'worry1');
+  assert.equal(repo.lastCommit?.summaryFailureLog?.attemptCount, 2);
+  assert.equal(repo.lastCommit?.summaryFailureLog?.failureReason, 'summary_too_long_or_invalid');
+  assert.equal(repo.lastCommit?.summaryFailureLog?.firstResponseText, '012345678901234567890');
+  assert.equal(repo.lastCommit?.summaryFailureLog?.retryResponseText, '{"summaryText":"012345678901234567890"}');
 });
 
 test('published canonical shape appears in my worries and active answer feed read models', async () => {
@@ -187,11 +261,13 @@ test('published canonical shape appears in my worries and active answer feed rea
     id: item.id,
     authorUid: item.authorUid,
     content: item.content,
+    summaryText: item.summaryText,
     source: item.source,
   })), [{
     id: 'worry1',
     authorUid: 'author',
     content: 'read model content',
+    summaryText: 'read model content',
     source: 'prd_worries',
   }]);
   assert.deepEqual(answerFeedItems.map(item => ({
@@ -200,6 +276,7 @@ test('published canonical shape appears in my worries and active answer feed rea
     authorUid: item.authorUid,
     recipientUid: item.recipientUid,
     originalContent: item.originalContent,
+    summaryText: item.summaryText,
     status: item.status,
   })), [{
     deliveryId: delivery.id,
@@ -207,6 +284,7 @@ test('published canonical shape appears in my worries and active answer feed rea
     authorUid: 'author',
     recipientUid: delivery.recipientUid,
     originalContent: 'read model content',
+    summaryText: 'read model content',
     status: 'active',
   }]);
 });

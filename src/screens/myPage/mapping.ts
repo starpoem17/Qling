@@ -52,7 +52,7 @@ function dateLabel(value: DisplayDateInput, options?: DisplayDateOptions): strin
 export function mapMyGivenReplyToListItem(reply: ReplyReadModelItem, _selectedReplyId?: string, options?: DisplayDateOptions): MyAnswerListItemProps {
   const feedbackLabel = reply.feedback === 'helpful' ? '받은 하트' : undefined;
   const feedbackComment = reply.feedback === 'helpful' ? reply.publisherComment?.trim() : undefined;
-  const originalWorryPreview = reply.replyToContent ?? reply.originalContent;
+  const originalWorryPreview = reply.summaryText ?? fallbackSummary(reply.replyToContent ?? reply.originalContent);
   const categoryLabel = firstUserFacingCategory((reply as ReplyReadModelItem & {
     readonly categories?: readonly string[];
     readonly validCategories?: readonly string[];
@@ -88,7 +88,7 @@ export function mapMyWorryToListItem(params: {
 }): MyWorryListItemProps {
   const replyCount = params.worry.humanReplyCount ?? 0;
   const categoryLabel = firstUserFacingCategory(params.worry.categories);
-  const summaryText = fallbackSummary(params.worry.content);
+  const summaryText = params.worry.summaryText || fallbackSummary(params.worry.content);
   const createdAtLabel = dateLabel(params.worry.createdAt, params.options);
   const replyCountLabel = replyCountLabelForCount(replyCount);
 

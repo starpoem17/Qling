@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import { CONTENT_MAX_LENGTH, validateDraftContent } from '../../services/validation/content';
 import type { SelectedReceivedWorry } from '../receivedWorries/ReceivedWorriesContainer';
-import { buildUserFacingSummary, buildWriteDraftContract, mapSelectedWorryToOriginalWorrySummary } from './mapping';
+import { buildLegacySummary, buildWriteDraftContract, mapSelectedWorryToOriginalWorrySummary } from './mapping';
 
 const now = new Date(2026, 4, 19, 12, 0, 0);
 
@@ -15,6 +15,7 @@ test('maps selected delivery data to original worry summary props', () => {
     categories: ['invalid-category', WORRY_CATEGORIES[3]],
     originalContent: 'Original worry body',
     refinedContent: 'LLM summary',
+    summaryText: 'LLM summary',
     createdAt: { toMillis: () => new Date(2026, 4, 18, 23, 59, 0).getTime() },
   } as SelectedReceivedWorry, { now });
 
@@ -22,7 +23,7 @@ test('maps selected delivery data to original worry summary props', () => {
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
     category: WORRY_CATEGORIES[3],
-    summaryText: 'Original worry body...',
+    summaryText: 'LLM summary',
     originalBodyText: 'Original worry body',
     receivedAt: {
       label: '2026.05.18',
@@ -66,27 +67,28 @@ test('reply summary uses shared local display date formatter', () => {
   }, { now })?.receivedAt?.label, '2026.05.17');
 });
 
-test('reply summary fallback uses original first 20 characters plus ellipsis', () => {
-  assert.equal(buildUserFacingSummary('01234567890123456789extra'), '01234567890123456789...');
-  assert.equal(buildUserFacingSummary('짧은 원문'), '짧은 원문...');
-  assert.equal(buildUserFacingSummary(''), '...');
+test('legacy reply summary fallback uses original first 20 characters plus ellipsis', () => {
+  assert.equal(buildLegacySummary('01234567890123456789extra'), '01234567890123456789...');
+  assert.equal(buildLegacySummary('짧은 원문'), '짧은 원문...');
+  assert.equal(buildLegacySummary(''), '...');
 });
 
-test('reply summary ignores refined content and always falls back to original first 20 characters', () => {
+test('reply summary uses saved LLM summary instead of original truncation', () => {
   const summary = mapSelectedWorryToOriginalWorrySummary({
     deliveryId: 'delivery-1',
     worryId: 'worry-1',
     category: WORRY_CATEGORIES[0],
     originalContent: '01234567890123456789 원문 전체',
     refinedContent: 'LLM이 만든 별도 요약',
+    summaryText: '저장된 요약',
     createdAt: null,
   } as SelectedReceivedWorry);
 
-  assert.equal(summary?.summaryText, '01234567890123456789...');
+  assert.equal(summary?.summaryText, '저장된 요약');
   assert.equal(summary?.originalBodyText, '01234567890123456789 원문 전체');
 });
 
-test('reply summary mapping keeps original body out of the default summary field', () => {
+test('reply summary mapping falls back only when saved summary is missing', () => {
   const summary = mapSelectedWorryToOriginalWorrySummary({
     deliveryId: 'delivery-1',
     worryId: 'worry-1',

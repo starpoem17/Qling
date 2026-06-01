@@ -11,6 +11,7 @@ import {
   serverTimestamp,
 } from './firestoreRepository';
 import { selectInitialWorryRecipients } from './recipientSelection';
+import { createWorrySummary } from './summary';
 import { validateWorryContent } from './validation';
 import { sendNewWorryPushesAfterCommit } from './pushLogs';
 import type {
@@ -22,6 +23,7 @@ import type {
   SelectedPhase1Recipient,
   ServerPublishWorryResult,
   WorryModerationProvider,
+  WorrySummaryProvider,
   WorryWriteModel,
 } from './types';
 
@@ -73,6 +75,9 @@ function buildWorry(params: {
   moderationLogId: string;
   authorUid: string;
   content: string;
+  summaryText: string;
+  summaryStatus: WorryWriteModel['summaryStatus'];
+  summaryGeneratedBy: WorryWriteModel['summaryGeneratedBy'];
   rawCategories: string[];
   validCategories: string[];
   invalidCategories: string[];
@@ -84,6 +89,10 @@ function buildWorry(params: {
     id: params.worryId,
     authorUid: params.authorUid,
     content: params.content,
+    summaryText: params.summaryText,
+    summaryStatus: params.summaryStatus,
+    summaryGeneratedBy: params.summaryGeneratedBy,
+    summaryUpdatedAt: timestamp,
     status: 'active',
     rawCategories: params.rawCategories,
     validCategories: params.validCategories,
@@ -161,6 +170,7 @@ export async function publishWorryOnServer(params: {
   author: Phase1AuthorProfile;
   content: unknown;
   moderationProvider: WorryModerationProvider;
+  summaryProvider?: WorrySummaryProvider;
   now?: () => Date;
   random?: () => number;
   repository?: InitialWorryPublicationRepository;
@@ -225,6 +235,13 @@ export async function publishWorryOnServer(params: {
     };
   }
 
+  const summary = await createWorrySummary({
+    content: validation.content,
+    worryId: ids.worryId,
+    failureLogId: ids.summaryFailureLogId,
+    provider: params.summaryProvider,
+  });
+
   const candidates = await repository.fetchRecipientCandidates({
     authorUid: params.author.uid,
     minimumCandidateCount: 5,
@@ -266,6 +283,9 @@ export async function publishWorryOnServer(params: {
     moderationLogId: ids.moderationLogId,
     authorUid: params.author.uid,
     content: validation.content,
+    summaryText: summary.summaryText,
+    summaryStatus: summary.summaryStatus,
+    summaryGeneratedBy: summary.summaryGeneratedBy,
     rawCategories: moderation.rawCategories,
     validCategories: moderation.validCategories,
     invalidCategories: moderation.invalidCategories,
@@ -284,6 +304,7 @@ export async function publishWorryOnServer(params: {
     const committed = await repository.commitInitialWorryPublication({
       worry,
       moderationLog,
+      summaryFailureLog: summary.failureLog,
       batch,
       deliveries,
       selectedRecipientUids: selection.recipients.map(recipient => recipient.uid),

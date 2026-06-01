@@ -42,7 +42,7 @@ export function mapReplyToDetailProps(params: {
   const originalWorry: ReplyDetailWorryProps = {
     worryId: params.reply.worryId ?? '',
     category: '잡담',
-    summaryText: params.reply.replyToContent ?? params.originalWorryFallback ?? params.reply.originalContent,
+    summaryText: params.reply.summaryText ?? params.reply.replyToContent ?? params.originalWorryFallback ?? params.reply.originalContent,
     bodyText: params.reply.replyToContent ?? params.originalWorryFallback ?? params.reply.originalContent,
     date: { label: dateLabel(params.reply.createdAt) },
     isUnread: params.reply.hasUnread,

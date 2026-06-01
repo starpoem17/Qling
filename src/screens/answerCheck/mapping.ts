@@ -9,7 +9,7 @@ export function mapWorryToAnswerCheckProps(params: {
 }): AnswerCheckWorryProps {
   return {
     worryId: params.worry.id,
-    summaryText: fallbackSummary(params.worry.content),
+    summaryText: params.worry.summaryText || fallbackSummary(params.worry.content),
     bodyText: params.worry.content,
     categoryLabel: firstUserFacingCategory(params.worry.categories),
     createdAtLabel: formatDisplayDate(params.worry.createdAt, { now: params.now }).label,

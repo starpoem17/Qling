@@ -8,6 +8,7 @@ export interface MyWorryListItem {
   id: string;
   authorUid: string;
   content: string;
+  summaryText?: string;
   status?: string;
   hiddenAt?: unknown;
   categories: string[];
@@ -20,6 +21,7 @@ export interface PrdWorryDoc {
   id: string;
   authorUid?: string;
   content?: string;
+  summaryText?: unknown;
   status?: string;
   hiddenAt?: unknown;
   deletedAt?: unknown;
@@ -80,6 +82,7 @@ export interface ReplyReadModelItem {
   receiverId: string;
   originalContent: string;
   refinedContent: string;
+  summaryText?: string;
   replyTo?: string;
   replyToContent?: string;
   isRead: boolean;

@@ -6,6 +6,7 @@ import { createRequireFirebaseAuth, type AuthenticatedRequest } from './auth';
 import {
   publishWorryOnServer,
   type WorryModerationProvider,
+  type WorrySummaryProvider,
 } from '../services/worryPublication/server';
 
 function sendPublicationResult(res: express.Response, result: Awaited<ReturnType<typeof publishWorryOnServer>>) {
@@ -38,6 +39,7 @@ export function registerWorryRoutes(app: express.Express, deps: {
   messaging: Messaging | null;
   auth: Auth;
   moderationProvider: WorryModerationProvider;
+  summaryProvider?: WorrySummaryProvider;
   publishWorry?: typeof publishWorryOnServer;
 }): void {
   if (!deps.db) {
@@ -70,6 +72,7 @@ export function registerWorryRoutes(app: express.Express, deps: {
           },
           content: req.body?.content,
           moderationProvider: deps.moderationProvider,
+          summaryProvider: deps.summaryProvider,
         });
 
         sendPublicationResult(res, result);

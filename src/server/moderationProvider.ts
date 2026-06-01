@@ -40,6 +40,43 @@ export async function fetchFromOpenAI(systemInstruction: string, userContent: st
   return JSON.parse(textContent);
 }
 
+async function fetchTextFromOpenAI(systemInstruction: string, userContent: string) {
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY is not defined in .env file');
+  }
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: MODERATION_MODEL,
+      messages: [
+        { role: 'system', content: systemInstruction },
+        { role: 'user', content: userContent },
+      ],
+      temperature: 0.1,
+      max_completion_tokens: 100,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenAI API Error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  let textContent = data.choices?.[0]?.message?.content || '';
+  if (textContent.includes('```')) {
+    textContent = textContent.replace(/```json|```/g, '').trim();
+  }
+
+  return textContent;
+}
+
 export async function moderateAndInferWorryCategories(content: string, strictRetry = false): Promise<unknown> {
   const systemInstruction = `You are a moderator and category inference engine for a Korean anonymous worry-sharing app.
 Use ONLY this fixed category vocabulary:
@@ -67,4 +104,22 @@ Decision policy:
 ${strictRetry ? '8. This is a retry because the previous answer had invalid JSON or invalid shape. Return valid JSON only.' : ''}`;
 
   return fetchFromOpenAI(systemInstruction, content);
+}
+
+export async function summarizeWorryContent(content: string, strictRetry = false): Promise<unknown> {
+  const systemInstruction = `You summarize Korean anonymous worry posts for user-facing cards.
+Return ONLY one Korean single-line summary.
+The returned summary MUST be 20 characters or fewer, counting spaces and punctuation.
+Do not include markdown, explanations, labels, quotes, or extra text.
+${strictRetry ? 'This is a retry because the previous summary was invalid or longer than 20 characters. Return a valid summary of 20 characters or fewer.' : ''}`;
+
+  const text = await fetchTextFromOpenAI(systemInstruction, content);
+  const trimmed = text.trim();
+  if (!trimmed.startsWith('{')) return trimmed;
+
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return trimmed;
+  }
 }
