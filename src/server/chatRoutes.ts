@@ -154,13 +154,16 @@ export function registerChatRoutes(app: express.Express, deps: {
           });
 
           const recipientUid = chatData.participants.find((p: string) => p !== uid);
+          if (!recipientUid) {
+            throw new Error('OPPONENT_LEFT');
+          }
+
           const updates: any = {
             lastMessageAt: FieldValue.serverTimestamp(),
             lastMessageText: content
           };
-          if (recipientUid) {
-            updates[`unreadCounts.${recipientUid}`] = FieldValue.increment(1);
-          }
+          
+          updates[`unreadCounts.${recipientUid}`] = FieldValue.increment(1);
 
           transaction.update(chatRef, updates);
         }).then(() => {
@@ -187,6 +190,10 @@ export function registerChatRoutes(app: express.Express, deps: {
           }
           if (err.message === 'NOT_FOUND') {
             res.status(404).json({ error: { code: 'not_found', message: 'Chat not found' } });
+            return;
+          }
+          if (err.message === 'OPPONENT_LEFT') {
+            res.status(403).json({ error: { code: 'chat_closed', message: '상대방이 채팅방을 나갔습니다.' } });
             return;
           }
           if (err.message === 'FORBIDDEN') {
@@ -238,6 +245,43 @@ export function registerChatRoutes(app: express.Express, deps: {
       } catch (error) {
         console.error('Failed to mark chat as read:', error);
         res.status(500).json({ error: { code: 'internal_error', message: 'Failed to mark chat as read.' } });
+      }
+    }
+  );
+
+  // Leave chat
+  app.post(
+    '/api/chats/:chatId/leave',
+    createRequireActiveFirebaseAuth({ auth: deps.auth, db: deps.db }),
+    async (req, res) => {
+      try {
+        const authReq = req as ActiveAuthenticatedRequest;
+        const uid = authReq.auth.uid;
+        const { chatId } = req.params;
+
+        const db = deps.db as Firestore;
+        const chatRef = db.collection('chats').doc(chatId);
+        
+        await db.runTransaction(async (transaction) => {
+          const chatDoc = await transaction.get(chatRef);
+          if (!chatDoc.exists) return;
+          
+          const chatData = chatDoc.data()!;
+          if (!chatData.participants.includes(uid)) return;
+
+          // Remove the user from participants
+          transaction.update(chatRef, {
+            participants: FieldValue.arrayRemove(uid),
+            // Optionally, mark chat closed if both leave or something, but arrayRemove is enough
+            // because firestore rules will deny read to this user, hiding it.
+            status: chatData.participants.length <= 1 ? 'closed' : chatData.status,
+          });
+        });
+
+        res.status(200).json({ status: 'success' });
+      } catch (error) {
+        console.error('Failed to leave chat:', error);
+        res.status(500).json({ error: { code: 'internal_error', message: 'Failed to leave chat.' } });
       }
     }
   );

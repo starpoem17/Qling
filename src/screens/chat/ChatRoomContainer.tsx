@@ -127,14 +127,33 @@ export function ChatRoomContainer({
     }
   };
 
+  const handleLeaveChat = async () => {
+    if (!user || !chatId) return;
+    try {
+      const token = await user.getIdToken();
+      await fetch(`/api/chats/${chatId}/leave`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      alert('채팅방을 나갔습니다.');
+      setView({ route: 'chat' });
+    } catch (err) {
+      console.error('Failed to leave chat:', err);
+      alert('오류가 발생했습니다.');
+    }
+  };
+
   return (
     <ChatRoomScreen
       loading={loading}
       error={error}
       messages={messages}
       opponent={opponent}
-      onBack={() => setView('chat')}
+      onBack={() => setView({ route: 'chat' })}
       onSendMessage={handleSendMessage}
+      onLeaveChat={handleLeaveChat}
     />
   );
 }
