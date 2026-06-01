@@ -108,16 +108,31 @@ test('my worries my-page button aligns to the Figma header icon position', () =>
   assert.match(html, /top-\[53\.5px\]/);
 });
 
-test('my worries empty state uses PRD copy without a separate empty CTA', () => {
+test('my worries empty state renders Figma copy in a non-scroll static card', () => {
   const html = renderToStaticMarkup(MyWorriesScreen(baseProps({
     state: { status: 'empty', message: '첫 고민을 남겨보세요.' },
     items: [],
   })));
 
-  assert.match(html, /첫 고민을 남겨보세요\./);
+  assert.match(html, /첫 고민을 올려보세요!/);
+  assert.match(html, /오른쪽 아래 버튼으로 고민을 작성할 수 있어요/);
+  assert.doesNotMatch(html, /첫 고민을 남겨보세요\./);
   assert.match(html, /고민 작성 화면으로 이동/);
   assert.doesNotMatch(html, /고민 쓰기/);
   assert.equal((html.match(/고민 작성 화면으로 이동/g) ?? []).length, 1);
+  assert.match(html, /h-\[733px\] touch-none overscroll-none overflow-hidden rounded-t-\[32px\] bg-\[#fff1d1\] px-4 pt-\[30px\]/);
+  assert.match(html, /h-\[168px\] w-full overflow-hidden rounded-\[18px\]/);
+  assert.match(html, /absolute left-\[18px\] top-\[60px\] w-\[325px\]/);
+  assert.doesNotMatch(html, /나의 고민 목록/);
+  assert.doesNotMatch(html, /overflow-y-auto/);
+
+  const source = fs.readFileSync(path.join(process.cwd(), 'src/screens/myPage/MyWorriesScreen.tsx'), 'utf8');
+  const emptyStart = source.indexOf("props.state.status === 'empty'");
+  const emptyBranch = source.slice(emptyStart, source.indexOf('            ) : (', emptyStart));
+  assert.match(emptyBranch, /onWheel=\{blockLoadingScroll\}/);
+  assert.match(emptyBranch, /onTouchMove=\{blockLoadingScroll\}/);
+  assert.doesNotMatch(emptyBranch, /PeekHeaderScrollArea/);
+  assert.doesNotMatch(emptyBranch, /overflow-y-auto/);
 });
 
 test('my worries loading state renders the Figma spinner status without visible copy', () => {

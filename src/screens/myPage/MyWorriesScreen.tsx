@@ -1,7 +1,6 @@
 import { Heart } from 'lucide-react';
 import type { CSSProperties, TouchEvent, WheelEvent } from 'react';
 import {
-  EmptyState,
   ErrorState,
   QlingCard,
 } from '../shared/ui';
@@ -67,9 +66,20 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
                 <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
               </PeekHeaderScrollArea>
             ) : props.state.status === 'empty' ? (
-              <PeekHeaderScrollArea className={contentClassName} style={contentStyle} resetKey="my-worries-empty">
-                <EmptyState title={props.state.message} />
-              </PeekHeaderScrollArea>
+              <section
+                className="qling-received-worries-font h-[733px] touch-none overscroll-none overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-[30px]"
+                aria-label="나의 고민 빈 상태"
+                onWheel={blockLoadingScroll}
+                onTouchMove={blockLoadingScroll}
+              >
+                <QlingCard className="relative h-[168px] w-full overflow-hidden rounded-[18px] border-0 bg-white p-0 shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
+                  <p className="absolute left-[18px] top-[60px] w-[325px] break-words text-[16px] font-extrabold leading-6 tracking-[-0.03em] text-[#2a2a2a]">
+                    첫 고민을 올려보세요!
+                    <br />
+                    오른쪽 아래 버튼으로 고민을 작성할 수 있어요
+                  </p>
+                </QlingCard>
+              </section>
             ) : (
               <PeekHeaderScrollArea
                 className={`${contentClassName} pb-[calc(108px+env(safe-area-inset-bottom,0px))]`}

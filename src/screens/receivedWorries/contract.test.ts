@@ -94,16 +94,31 @@ test('received-worries contract exposes my-page intent without reply duplicate i
   assert.equal(Object.keys(callbacks).includes('onReply'), false);
 });
 
-test('received-worries empty state renders exact PRD copy without extra helper text', () => {
+test('received-worries empty state renders Figma copy in a non-scroll static card', () => {
   const html = renderToStaticMarkup(ReceivedWorriesScreen(baseProps({
     state: { status: 'empty', message: '지금은 도착한 고민이 없어요.' },
     items: [],
   })));
 
-  assert.match(html, /지금은 도착한 고민이 없어요\./);
-  assert.equal((html.match(/지금은 도착한 고민이 없어요\./g) ?? []).length, 1);
+  assert.match(html, /다른 사람들의 고민을 기다리는 중이에요/);
+  assert.equal((html.match(/다른 사람들의 고민을 기다리는 중이에요/g) ?? []).length, 1);
+  assert.doesNotMatch(html, /지금은 도착한 고민이 없어요\./);
   assert.doesNotMatch(html, /첫 고민을 남겨보세요/);
   assert.doesNotMatch(html, /고민 쓰기|다시 시도|네트워크/);
+  assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
+  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.match(html, /h-\[752px\] touch-none overscroll-none overflow-hidden rounded-t-\[32px\] bg-\[#fff1d1\] px-4 pt-5/);
+  assert.match(html, /h-\[135px\] w-full items-center justify-center overflow-hidden rounded-\[18px\]/);
+  assert.doesNotMatch(html, /받은 고민 목록/);
+  assert.doesNotMatch(html, /overflow-y-auto/);
+
+  const source = fs.readFileSync(path.join(process.cwd(), 'src/screens/receivedWorries/ReceivedWorriesScreen.tsx'), 'utf8');
+  const emptyStart = source.indexOf("props.state.status === 'empty'");
+  const emptyBranch = source.slice(emptyStart, source.indexOf('\n  return (', emptyStart));
+  assert.match(emptyBranch, /onWheel=\{blockLoadingScroll\}/);
+  assert.match(emptyBranch, /onTouchMove=\{blockLoadingScroll\}/);
+  assert.doesNotMatch(emptyBranch, /PeekHeaderScrollArea/);
+  assert.doesNotMatch(emptyBranch, /overflow-y-auto/);
 });
 
 test('received-worries loading state renders the Figma spinner status without visible copy', () => {
