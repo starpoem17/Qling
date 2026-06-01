@@ -5,10 +5,10 @@ import type { AnswerCheckReplyProps, AnswerCheckScreenProps } from './contract';
 
 const activeIndicatorUrl = new URL('../../../assets/loading/figma-progress-active.svg', import.meta.url).href;
 const trackUrl = new URL('../../../assets/loading/figma-progress-track.svg', import.meta.url).href;
-const goodIconUrl = new URL('../../../assets/my_concerns/good.png', import.meta.url).href;
-const goodActiveIconUrl = new URL('../../../assets/my_concerns/good_activate.png', import.meta.url).href;
-const badIconUrl = new URL('../../../assets/my_concerns/bad.png', import.meta.url).href;
-const badActiveIconUrl = new URL('../../../assets/my_concerns/bad_activate.png', import.meta.url).href;
+const goodIconUrl = new URL('../../../assets/my_concerns/good.svg', import.meta.url).href;
+const goodActiveIconUrl = new URL('../../../assets/my_concerns/good_activate.svg', import.meta.url).href;
+const badIconUrl = new URL('../../../assets/my_concerns/bad.svg', import.meta.url).href;
+const badActiveIconUrl = new URL('../../../assets/my_concerns/bad_activate.svg', import.meta.url).href;
 
 export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
   if (props.state.status === 'loading') {
@@ -121,7 +121,7 @@ function AnswerCheckFrame({ onBack, children }: { readonly onBack: () => void; r
             aria-label="답변 확인 내용"
           >
             <div className="grid gap-[22px]">
-            {children}
+              {children}
             </div>
           </div>
         </div>
@@ -142,20 +142,20 @@ function WorryCard({
   readonly bodyText: string;
 }) {
   return (
-    <section className="relative h-[300px] overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
-      <div>
-        <span className="absolute left-[18px] top-[11px] inline-flex shrink-0 items-start overflow-hidden rounded-[999px] bg-[#ffe4cc] px-3 py-[5px] font-['Qling_Figma_Inter'] text-[11px] font-bold leading-normal text-[#ff8b3d]">
+    <section className="overflow-hidden rounded-[18px] bg-white px-[19px] pb-[24px] pt-[11px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
+      <div className="flex min-w-0 items-start gap-[18px]">
+        <span className="inline-flex shrink-0 items-start overflow-hidden rounded-[999px] bg-[#ffe4cc] px-3 py-[5px] font-['Qling_Figma_Inter'] text-[11px] font-bold leading-normal text-[#ff8b3d]">
           {categoryLabel}
         </span>
-        <time className="absolute left-[80px] top-[17px] text-[12px] font-semibold leading-none tracking-[-0.36px] text-[#b8b8b8]">
+        <time className="pt-[6px] text-[12px] font-semibold leading-none tracking-[-0.36px] text-[#b8b8b8]">
           {createdAtLabel}
         </time>
       </div>
-      <p className="absolute left-[19px] top-[44px] w-[325px] whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
+      <p className="mt-[14px] whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
         {summaryText}
       </p>
-      <div className="absolute left-[15px] top-[99px] h-[0.7px] w-[332px] rounded-[3px] bg-[#c2c4c8]" />
-      <p className="absolute left-[19px] top-[112px] w-[325px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
+      <div className="mt-[10px] h-[0.7px] rounded-[3px] bg-[#c2c4c8]" />
+      <p className="mt-[13px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
         {bodyText}
       </p>
     </section>
@@ -186,23 +186,21 @@ function AnswerCard({
   const hasComment = typeof reply.publisherComment === 'string' && reply.publisherComment.trim().length > 0;
   const showAfterLikeActions = liked && !hasComment && !commentDialog;
   const showDivider = showAfterLikeActions || hasComment || commentDialog;
-  const cardHeightClassName = showDivider ? 'min-h-[281px]' : 'h-[233px]';
 
   return (
     <section className={cn(
-      'relative overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
-      cardHeightClassName,
-      commentDialog ? 'pb-[18px]' : undefined,
+      'overflow-hidden rounded-[18px] bg-white px-[19px] pt-[17px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
+      showAfterLikeActions ? 'pb-0' : 'pb-[20px]',
     )}>
       {reply.createdAtLabel && (
-        <time className="absolute left-[19px] top-[17px] block text-[12px] font-semibold leading-none tracking-[-0.36px] text-[#b8b8b8]">
+        <time className="block text-[12px] font-semibold leading-none tracking-[-0.36px] text-[#b8b8b8]">
           {reply.createdAtLabel}
         </time>
       )}
-      <p className="absolute left-[19px] top-[43px] w-[325px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
+      <p className="mt-[15px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
         {reply.bodyText}
       </p>
-      <div className="absolute left-[289px] top-[194px] flex h-[25px] w-[54px] items-start justify-between">
+      <div className="mt-[12px] flex items-center justify-end gap-3">
         <FeedbackAction
           label="좋아요"
           iconUrl={goodIconUrl}
@@ -210,8 +208,8 @@ function AnswerCard({
           selected={liked}
           disabled={!reply.canLike || reply.isFeedbackProcessing}
           onClick={() => onLike(reply.replyId)}
-          className="h-6 w-6"
-          iconClassName="h-6 w-6"
+          className="h-5 w-5"
+          iconClassName="h-5 w-5"
         />
         <FeedbackAction
           label="싫어요"
@@ -220,13 +218,13 @@ function AnswerCard({
           selected={disliked}
           disabled={!reply.canDislike || reply.isFeedbackProcessing}
           onClick={() => onDislike(reply.replyId)}
-          className="h-6 w-6"
-          iconClassName="h-6 w-6"
+          className="h-5 w-5"
+          iconClassName="h-5 w-5"
         />
       </div>
-      {showDivider && <div className="absolute left-[15px] top-[230px] h-[0.7px] w-[332px] rounded-[3px] bg-[#c2c4c8]" />}
+      {showDivider && <div className="mt-[10px] h-[0.7px] rounded-[3px] bg-[#c2c4c8]" />}
       {showAfterLikeActions && (
-        <div className="absolute bottom-0 left-0 grid h-[50px] w-full grid-cols-2 overflow-hidden rounded-b-[18px] bg-gradient-to-b from-white via-[#f7e9cb]/20 to-white text-[12px] font-bold leading-6 tracking-[-0.36px] text-black">
+        <div className="relative -mx-[19px] mt-0 grid h-[50px] grid-cols-2 overflow-hidden rounded-b-[18px] bg-gradient-to-b from-white via-[#f7e9cb]/20 to-white text-[12px] font-bold leading-6 tracking-[-0.36px] text-black">
           <button
             type="button"
             onClick={() => undefined}
@@ -234,7 +232,7 @@ function AnswerCard({
           >
             채팅 시작
           </button>
-          <div className="absolute left-[181px] top-[3px] h-[45px] w-px rounded-[3px] bg-[#c2c4c8]" aria-hidden="true" />
+          <div className="absolute left-1/2 top-[3px] h-[45px] w-px -translate-x-1/2 rounded-[3px] bg-[#c2c4c8]" aria-hidden="true" />
           <button
             type="button"
             disabled={!reply.canOneLineReply || reply.isCommentProcessing}
@@ -246,23 +244,21 @@ function AnswerCard({
         </div>
       )}
       {hasComment && (
-        <p className="absolute left-[19px] top-[242px] w-[325px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
+        <p className="mt-[12px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
           {reply.publisherComment}
         </p>
       )}
       {commentDialog && (
-        <div className="absolute left-[19px] top-[242px] w-[325px]">
-          <InlineCommentEditor
-            draft={commentDialog.draft}
-            maxLength={commentDialog.maxLength}
-            validationMessage={commentDialog.validationMessage}
-            moderationMessage={commentDialog.moderationMessage}
-            feedbackState={commentDialog.feedbackState}
-            onChange={onCommentChange}
-            onSubmit={onCommentSubmit}
-            onClose={onCommentClose}
-          />
-        </div>
+        <InlineCommentEditor
+          draft={commentDialog.draft}
+          maxLength={commentDialog.maxLength}
+          validationMessage={commentDialog.validationMessage}
+          moderationMessage={commentDialog.moderationMessage}
+          feedbackState={commentDialog.feedbackState}
+          onChange={onCommentChange}
+          onSubmit={onCommentSubmit}
+          onClose={onCommentClose}
+        />
       )}
     </section>
   );
@@ -332,7 +328,7 @@ function InlineCommentEditor({
   const label = feedbackState === 'liked' ? '한 줄 답변 입력' : '싫어요 코멘트 입력';
 
   return (
-    <div aria-label={label}>
+    <div className="mt-[12px]" aria-label={label}>
       {moderationMessage && (
         <p className="mb-2 whitespace-pre-wrap text-[12px] font-bold leading-[18px] tracking-[-0.36px] text-[var(--qling-color-danger)]">
           {moderationMessage}
