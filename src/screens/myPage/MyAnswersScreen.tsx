@@ -1,50 +1,167 @@
-import { Heart } from 'lucide-react';
-import { EmptyState, ErrorState, FigmaTopBar, LoadingState, SuccessBadge } from '../shared/ui';
+import { Heart, MessageSquare } from 'lucide-react';
+import type { CSSProperties, ReactNode, TouchEvent, WheelEvent } from 'react';
+import { EmptyState, ErrorState, SuccessBadge } from '../shared/ui';
+import { FigmaTabLoading } from '../shared/FigmaTabLoading';
+import { PeekHeaderScrollArea } from '../shared/PeekHeaderScrollArea';
+import { useScrollPeekHeader } from '../shared/scrollPeekHeader';
 import type { MyAnswersScreenProps } from './contract';
 
 export function MyAnswersScreen(props: MyAnswersScreenProps) {
-  return (
-    <div className="relative -mx-[var(--qling-space-shell-x)] -mt-6 min-h-full bg-[#ff8b3d] px-4 pb-8 pt-[127px] text-[#1a1a1a]">
-      <FigmaTopBar title="내가 쓴 답변" onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
+  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+  const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
+  const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font text-[#1a1a1e]';
+  const scrollPeekHeader = useScrollPeekHeader();
+  const headerStyle = {
+    '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
+  } as CSSProperties;
+  const listStyle = {
+    '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
+    transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))',
+  } as CSSProperties;
 
-      <div className="space-y-[19px]">
-        {props.state.status === 'loading' && <LoadingState title={props.state.label} />}
-        {props.state.status === 'error' && <ErrorState title="내가 쓴 답변을 불러오지 못했어요." message={props.state.message} />}
-        {props.state.status === 'empty' && (
-          <EmptyState title="아직 내가 보낸 위로가 없어요." message={props.state.message} />
-        )}
-        {props.state.status === 'ready' && props.items.map(reply => (
-          <article
-            key={reply.replyId}
-            aria-label={reply.accessibilityLabel}
-            className="block w-full rounded-2xl bg-white px-[18px] pb-[19px] pt-[11px] text-left shadow-[0_4px_4px_rgb(0_0_0/0.25)]"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-[9px]">
-                {reply.categoryLabel && (
-                  <span className="rounded-full bg-[#ffe4cc] px-3 py-[5px] text-[11px] font-bold leading-[13px] text-[#ff8b3d]">
-                    {reply.categoryLabel}
-                  </span>
-                )}
-                {reply.dateLabel && <span className="text-xs font-semibold leading-[15px] text-[#b8b8b8]">{reply.dateLabel}</span>}
-                {reply.isUnread && <SuccessBadge label="새 반응" />}
+  return (
+    <section className={screenClassName}>
+      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+        <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
+          <MyAnswersHeader onBack={props.onBack} style={headerStyle} />
+
+          {props.state.status === 'loading' ? (
+            <section
+              className="absolute left-0 top-[100px] h-[752px] w-[393px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
+              onWheel={blockLockedScroll}
+              onTouchMove={blockLockedScroll}
+            >
+              <FigmaTabLoading label={props.state.label} />
+            </section>
+          ) : props.state.status === 'error' ? (
+            <section
+              className="absolute left-0 top-[100px] h-[752px] w-[393px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
+              onWheel={blockLockedScroll}
+              onTouchMove={blockLockedScroll}
+            >
+              <MyAnswersStateCard>
+                <ErrorState title="내가 쓴 답변을 불러오지 못했어요." message={props.state.message} />
+              </MyAnswersStateCard>
+            </section>
+          ) : props.state.status === 'empty' ? (
+            <section
+              className="absolute left-0 top-[100px] h-[752px] w-[393px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
+              onWheel={blockLockedScroll}
+              onTouchMove={blockLockedScroll}
+            >
+              <MyAnswersStateCard>
+                <EmptyState title="아직 내가 보낸 위로가 없어요." message={props.state.message} />
+              </MyAnswersStateCard>
+            </section>
+          ) : (
+            <PeekHeaderScrollArea
+              className="absolute left-0 top-[100px] h-[840px] w-[393px] px-4 pb-[calc(108px+env(safe-area-inset-bottom,0px))] pt-[27px] transform-gpu"
+              style={listStyle}
+              ariaLabel="내가 쓴 답변 목록"
+              resetKey="my-answers-ready"
+            >
+              <div className="grid gap-[19px]">
+                {props.items.map(reply => <MyAnswerCard key={reply.replyId} reply={reply} />)}
               </div>
-              {reply.hasReceivedHeart && <Heart className="mt-0.5 h-5 w-5 shrink-0 fill-[#e94335] text-[#e94335]" aria-hidden="true" />}
-            </div>
-            <p className="mt-3 whitespace-pre-wrap break-words text-[15px] font-extrabold leading-6 text-[#2a2a2a]">
-              {reply.originalWorryPreview}
-            </p>
-            <p className="mt-[14px] whitespace-pre-wrap break-words border-t border-[#d9d9d9] pt-[13px] text-xs font-semibold leading-[19px] text-[#2a2a2a]">
-              {reply.previewText}
-            </p>
-            {reply.feedbackComment && (
-              <p className="mt-3 whitespace-pre-wrap break-words border-t border-[#eeeeee] pt-2 text-xs font-semibold leading-5 text-[#77716b]">
-                {reply.feedbackComment}
-              </p>
-            )}
-          </article>
-        ))}
+            </PeekHeaderScrollArea>
+          )}
+        </div>
       </div>
+    </section>
+  );
+}
+
+function MyAnswersHeader({
+  onBack,
+  style,
+}: {
+  readonly onBack: () => void;
+  readonly style: CSSProperties;
+}) {
+  return (
+    <header
+      className="absolute left-0 top-0 z-10 h-[100px] w-[393px] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
+      style={style}
+      onTouchMove={blockLockedScroll}
+      onWheel={blockLockedScroll}
+    >
+      <div
+        className="relative h-[100px] w-[393px] transform-gpu"
+        data-qling-peek-header-content="true"
+        style={{ transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))' }}
+      >
+        <button
+          type="button"
+          aria-label="마이페이지로 돌아가기"
+          onClick={onBack}
+          className="absolute left-[16px] top-[45px] flex h-[45px] w-[24px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          <span aria-hidden="true">‹</span>
+        </button>
+        <h1 className="absolute left-0 top-[60px] w-full text-center text-[17px] font-extrabold leading-none tracking-[-0.02em] text-white">
+          내가 쓴 답변
+        </h1>
+      </div>
+    </header>
+  );
+}
+
+function MyAnswersStateCard({ children }: { readonly children: ReactNode }) {
+  return (
+    <div className="rounded-[18px] bg-white px-[18px] py-8 shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
+      {children}
     </div>
   );
+}
+
+function MyAnswerCard({ reply }: { readonly reply: MyAnswersScreenProps['items'][number] }) {
+  const hasComment = Boolean(reply.feedbackComment);
+
+  return (
+    <article
+      aria-label={reply.accessibilityLabel}
+      className="relative block w-full rounded-[18px] bg-white px-[18px] pb-[19px] pt-[11px] text-left shadow-[0_4px_4px_rgb(0_0_0/0.25)]"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          {reply.categoryLabel && (
+            <span className="inline-flex shrink-0 rounded-full bg-[#ffe4cc] px-3 py-[5px] text-[11px] font-bold leading-normal text-[#ff8b3d]">
+              {reply.categoryLabel}
+            </span>
+          )}
+          {reply.dateLabel && <span className="text-[12px] font-semibold leading-[23px] text-[#b8b8b8]">{reply.dateLabel}</span>}
+          {reply.isUnread && <SuccessBadge label="새 반응" />}
+        </div>
+        {reply.hasReceivedHeart && <Heart className="mt-0.5 h-5 w-5 shrink-0 fill-[#e94335] text-[#e94335]" aria-hidden="true" />}
+      </div>
+      <p className="mt-[21px] whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 tracking-[-0.03em] text-[#2a2a2a]">
+        {reply.originalWorryPreview}
+      </p>
+      <p className="mt-[14px] whitespace-pre-wrap break-words border-t border-[#c2c4c8] pt-[13px] text-[13px] font-semibold leading-[1.45] tracking-[-0.04em] text-[#1a1a1e]">
+        {reply.previewText}
+      </p>
+      {reply.feedbackComment && (
+        <p className="mt-3 whitespace-pre-wrap break-words border-t border-[#c2c4c8] pt-[9px] text-[13px] font-semibold leading-[1.45] tracking-[-0.04em] text-[#1a1a1e]">
+          {reply.feedbackComment}
+        </p>
+      )}
+      {hasComment && (
+        <button
+          type="button"
+          aria-label="익명 채팅 시작하기"
+          onClick={() => undefined}
+          className="mt-[15px] flex h-[35px] w-full items-center justify-center gap-[9px] rounded-[12px] bg-[#34c759] text-[15px] font-bold leading-none tracking-[-0.01em] text-white transition-colors hover:bg-[#2fbd52] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#34c759]"
+        >
+          <MessageSquare className="h-5 w-5 fill-white text-white" aria-hidden="true" />
+          <span>익명 채팅 시작하기</span>
+        </button>
+      )}
+    </article>
+  );
+}
+
+function blockLockedScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLElement>) {
+  const { preventDefault, stopPropagation } = event;
+  preventDefault.call(event);
+  stopPropagation.call(event);
 }
