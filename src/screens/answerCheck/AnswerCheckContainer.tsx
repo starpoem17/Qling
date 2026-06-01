@@ -143,9 +143,30 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
       }}
       onCommentClose={closeComment}
       onCloseLikeActionPopup={() => setLikeActionPopup(null)}
-      onStartChat={(replyId) => {
+      onStartChat={async (replyId) => {
         setLikeActionPopup(null);
-        props.setView({ route: 'chat_room', replyId });
+        props.setFilterAlert('채팅방을 생성하고 있습니다...');
+        try {
+          const token = await props.user?.getIdToken();
+          const res = await fetch('/api/chats/create', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ worryId, replyId }),
+          });
+          const data = await res.json();
+          if (res.ok && data.chatId) {
+            props.setFilterAlert('');
+            props.setView({ route: 'chat_room', chatId: data.chatId });
+          } else {
+            props.setFilterAlert(data.error || '채팅방 생성 실패');
+          }
+        } catch (err) {
+          console.error(err);
+          props.setFilterAlert('네트워크 오류가 발생했습니다.');
+        }
       }}
     />
   );

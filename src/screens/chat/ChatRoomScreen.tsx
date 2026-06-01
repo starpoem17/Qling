@@ -27,6 +27,7 @@ export function ChatRoomScreen({
   const [draft, setDraft] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 
@@ -81,9 +82,35 @@ export function ChatRoomScreen({
           className="relative min-h-[852px] w-[393px] shrink-0 origin-top bg-[#fff1d1] flex flex-col"
           style={{ transform: `scale(${canvasScale})` }}
         >
-          <FigmaTopBar title={opponent?.nickname || '대화방'} onBack={onBack} backLabel="뒤로가기" />
+          <FigmaTopBar 
+            title={opponent?.nickname || '대화방'} 
+            onBack={onBack} 
+            backLabel="뒤로가기" 
+            rightComponent={
+              <div className="relative">
+                <button 
+                  type="button" 
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="p-2 text-[#2a2a2a] hover:bg-black/5 rounded-full"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="1"></circle>
+                    <circle cx="12" cy="5" r="1"></circle>
+                    <circle cx="12" cy="19" r="1"></circle>
+                  </svg>
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-[150px] bg-white rounded-[12px] shadow-[0_4px_10px_rgb(0_0_0/0.15)] overflow-hidden z-30">
+                    <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={() => setMenuOpen(false)}>알림 끄기</button>
+                    <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={() => setMenuOpen(false)}>채팅방 나가기</button>
+                    <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={() => setMenuOpen(false)}>신고하기</button>
+                  </div>
+                )}
+              </div>
+            }
+          />
           
-          <div className="flex-1 overflow-y-auto pt-[127px] pb-[80px] px-[24px] scrollbar-hide">
+          <div className="flex-1 overflow-y-auto pt-[127px] pb-[80px] px-[24px] scrollbar-hide" onClick={() => setMenuOpen(false)}>
             {messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-[14px] font-bold text-[#b8b8b8]">
                 첫 메시지를 보내보세요!

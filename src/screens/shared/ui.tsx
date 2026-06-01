@@ -253,6 +253,7 @@ export function FigmaTopBar({
   readonly onBack: () => void;
   readonly backLabel: string;
   readonly tone?: 'dark' | 'light';
+  readonly rightComponent?: ReactNode;
 }) {
   const textClassName = tone === 'light' ? 'text-white' : 'text-[#2a2a2a]';
   const hoverClassName = tone === 'light'
@@ -283,6 +284,11 @@ export function FigmaTopBar({
       >
         {title}
       </h1>
+      {rightComponent && (
+        <div className="absolute right-[14px] top-[49px] flex h-[44px] items-center">
+          {rightComponent}
+        </div>
+      )}
     </div>
   );
 }

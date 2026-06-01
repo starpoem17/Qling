@@ -70,7 +70,11 @@ export function registerChatRoutes(app: express.Express, deps: {
             createdAt: FieldValue.serverTimestamp(),
             lastMessageAt: null,
             lastMessageText: '',
-            status: 'active'
+            status: 'active',
+            unreadCounts: {
+              [replyData.authorUid]: 0,
+              [replyData.replierUid]: 0,
+            }
           });
         }
 
@@ -131,10 +135,16 @@ export function registerChatRoutes(app: express.Express, deps: {
             createdAt: FieldValue.serverTimestamp(),
           });
 
-          transaction.update(chatRef, {
+          const recipientUid = chatData.participants.find((p: string) => p !== uid);
+          const updates: any = {
             lastMessageAt: FieldValue.serverTimestamp(),
             lastMessageText: content
-          });
+          };
+          if (recipientUid) {
+            updates[`unreadCounts.${recipientUid}`] = FieldValue.increment(1);
+          }
+
+          transaction.update(chatRef, updates);
         }).then(() => {
           res.status(200).json({ status: 'published' });
           
@@ -177,6 +187,39 @@ export function registerChatRoutes(app: express.Express, deps: {
         if (!res.headersSent) {
           res.status(500).json({ error: { code: 'internal_error', message: 'Failed to send message.' } });
         }
+      }
+    }
+  );
+
+  // Mark chat as read
+  app.post(
+    '/api/chats/:chatId/read',
+    createRequireActiveFirebaseAuth({ auth: deps.auth, db: deps.db }),
+    async (req, res) => {
+      try {
+        const authReq = req as ActiveAuthenticatedRequest;
+        const uid = authReq.auth.uid;
+        const { chatId } = req.params;
+
+        const db = deps.db as Firestore;
+        const chatRef = db.collection('chats').doc(chatId);
+        
+        await db.runTransaction(async (transaction) => {
+          const chatDoc = await transaction.get(chatRef);
+          if (!chatDoc.exists) return;
+          
+          const chatData = chatDoc.data()!;
+          if (!chatData.participants.includes(uid)) return;
+
+          transaction.update(chatRef, {
+            [`unreadCounts.${uid}`]: 0
+          });
+        });
+
+        res.status(200).json({ status: 'success' });
+      } catch (error) {
+        console.error('Failed to mark chat as read:', error);
+        res.status(500).json({ error: { code: 'internal_error', message: 'Failed to mark chat as read.' } });
       }
     }
   );

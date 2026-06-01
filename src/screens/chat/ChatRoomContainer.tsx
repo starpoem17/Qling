@@ -22,6 +22,15 @@ export function ChatRoomContainer({
   useEffect(() => {
     if (!user || !chatId) return;
 
+    user.getIdToken().then(token => {
+      fetch(`/api/chats/${chatId}/read`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).catch(err => console.error('Failed to mark chat as read:', err));
+    }).catch(err => console.error('Failed to get token:', err));
+
     // Listen to chat doc to get participants
     const unsubscribeChat = onSnapshot(
       doc(db, 'chats', chatId),
