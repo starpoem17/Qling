@@ -109,7 +109,7 @@ export function BottomNavigation({
       className="h-[80px] w-full shrink-0 bg-[#fff5eb] qling-figma-font"
     >
       <div className="relative mx-auto h-full w-full max-w-[480px]" data-measure="bottom-nav-frame">
-        {tabs.map(({ tab, label }) => {
+        {tabs.map(({ tab, label, unreadCount }) => {
           const isActive = activeTab === tab;
           const item = itemByTab[tab];
           return (
@@ -125,15 +125,22 @@ export function BottomNavigation({
               )}
               style={{ left: `calc(100% * ${item.centerX} / 393)` }}
             >
-              <BottomNavAssetIcon
-                icon={item.icon}
-                active={isActive}
-                left={item.iconLeft}
-                top={item.iconTop}
-                width={item.iconWidth}
-                height={item.iconHeight}
-                measureId={`bottom-nav-${tab}-icon`}
-              />
+              <div className="relative">
+                <BottomNavAssetIcon
+                  icon={item.icon}
+                  active={isActive}
+                  left={item.iconLeft}
+                  top={item.iconTop}
+                  width={item.iconWidth}
+                  height={item.iconHeight}
+                  measureId={`bottom-nav-${tab}-icon`}
+                />
+                {(unreadCount ?? 0) > 0 && (
+                  <span className="absolute top-[8px] right-[16px] flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-sm z-10">
+                    {unreadCount! > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </div>
               <span
                 className="absolute left-1/2 top-[57.44px] flex h-[13.333px] w-12 -translate-x-1/2 -translate-y-1/2 flex-col justify-center whitespace-nowrap text-center font-['Qling_Noto_Sans_KR'] text-[12px] font-bold leading-[13.333px] tracking-[-0.24px]"
                 data-measure={`bottom-nav-${tab}-label`}

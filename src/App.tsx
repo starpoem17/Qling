@@ -58,6 +58,7 @@ import { ChatScreen } from './screens/chat/ChatScreen';
 import { ChatListContainer } from './screens/chat/ChatListContainer';
 import { ChatRoomContainer } from './screens/chat/ChatRoomContainer';
 import { RankingContainer } from './screens/ranking/RankingContainer';
+import { useTotalUnreadCount } from './services/chat/useTotalUnreadCount';
 
 // --- Types ---
 interface UserProfile {
@@ -108,6 +109,8 @@ export default function App() {
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+
+  const totalChatUnreadCount = useTotalUnreadCount(user);
 
   const {
     notificationPermission,
@@ -317,7 +320,11 @@ export default function App() {
     <MobileAppShell
       bottomNavigation={routeBoundary.mountsBottomNavigation && (
         <BottomNavigation
-          tabs={PRD_APP_TABS.map(tab => ({ tab, label: tab }))}
+          tabs={PRD_APP_TABS.map(tab => ({ 
+            tab, 
+            label: tab,
+            unreadCount: tab === '채팅' ? totalChatUnreadCount : 0
+          }))}
           activeTab={routeBoundary.authenticatedTab}
           onSelectTab={(tab) => setView(tab)}
         />

@@ -22,6 +22,7 @@ export type BottomNavigationTab = '답변하기' | '나의 고민' | '채팅' | 
 export type BottomNavigationItem = {
   readonly tab: BottomNavigationTab;
   readonly label: BottomNavigationTab;
+  readonly unreadCount?: number;
 };
 
 export type BottomNavigationProps = {
