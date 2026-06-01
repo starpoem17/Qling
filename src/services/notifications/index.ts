@@ -144,22 +144,20 @@ async function sendPrdNotificationAfterCommit(params: {
       try {
         await params.messaging.send({
           token,
-          notification: { title: params.title, body: params.body },
-          data: { title: params.title, body: params.body, url: '/' },
+          data: {
+            title: params.title,
+            body: params.body,
+            url: '/',
+            kind: params.kind,
+            sourceId: params.sourceId,
+            sourceType: params.sourceType,
+            ...(params.sourceReason ? { sourceReason: params.sourceReason } : {}),
+          },
           android: {
             priority: 'high',
-            notification: { channelId: 'qling-main', priority: 'max' },
           },
           webpush: {
             headers: { Urgency: 'high' },
-            fcmOptions: { link: '/' },
-            notification: {
-              icon: '/pwa-192x192.png',
-              badge: '/pwa-192x192.png',
-              tag: `qling-${params.kind}`,
-              renotify: true,
-              requireInteraction: true,
-            },
           },
         });
 

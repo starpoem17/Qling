@@ -81,6 +81,36 @@ test('new_worry sends and writes sent', async () => {
   assert.equal(db.logs[0].status, 'sent');
 });
 
+test('push payload is data-only so the service worker owns notification display', async () => {
+  const db = createDb();
+  const sends: unknown[] = [];
+  await sendNewReplyNotificationAfterCommit({
+    db: db as never,
+    messaging: { send: async message => { sends.push(message); return 'message-id'; } } as never,
+    targetUid: 'author',
+    sourceId: 'reply-1',
+  });
+
+  assert.equal(sends.length, 1);
+  const message = sends[0] as {
+    notification?: unknown;
+    data?: Record<string, string>;
+    webpush?: { notification?: unknown };
+    android?: { notification?: unknown };
+  };
+  assert.equal(message.notification, undefined);
+  assert.equal(message.webpush?.notification, undefined);
+  assert.equal(message.android?.notification, undefined);
+  assert.deepEqual(message.data, {
+    title: 'Qling',
+    body: '보낸 고민에 답장이 도착했습니다.',
+    url: '/',
+    kind: 'new_reply',
+    sourceId: 'reply-1',
+    sourceType: 'reply',
+  });
+});
+
 test('new_reply sends and writes common schema', async () => {
   const db = createDb();
   await sendNewReplyNotificationAfterCommit({
