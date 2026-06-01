@@ -219,7 +219,7 @@ function AnswerCard({
           disabled={!reply.canDislike || reply.isFeedbackProcessing}
           onClick={() => onDislike(reply.replyId)}
           className="h-5 w-5"
-          iconClassName="h-5 w-5"
+          iconClassName="h-5 w-5 translate-y-px"
         />
       </div>
       {showDivider && <div className="mt-[10px] h-[0.7px] rounded-[3px] bg-[#c2c4c8]" />}
@@ -339,7 +339,7 @@ function InlineCommentEditor({
         onChange={event => onChange(event.target.value)}
         maxLength={maxLength}
         aria-label={label}
-        placeholder="My example comment."
+        placeholder="한 줄 답변을 남겨주세요"
         className="min-h-[48px] w-full resize-none rounded-[8px] border border-[#c2c4c8] bg-white px-3 py-2 text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a] outline-none placeholder:text-[#b8b8b8] focus:border-[#ff8b3d] focus:ring-2 focus:ring-[#ff8b3d]/20"
       />
       {validationMessage && (

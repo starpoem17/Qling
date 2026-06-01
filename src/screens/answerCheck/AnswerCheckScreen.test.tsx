@@ -145,6 +145,7 @@ test('screen exposes like and dislike actions without the old comment action', (
   assert.match(html, /my_concerns\/good_activate\.svg/);
   assert.match(html, /my_concerns\/bad\.svg/);
   assert.match(html, /h-5 w-5/);
+  assert.match(html, /h-5 w-5 translate-y-px/);
   assert.doesNotMatch(html, /my_concerns\/good\.png/);
   assert.doesNotMatch(html, /my_concerns\/comment\.svg/);
   assert.doesNotMatch(html, /my_concerns\/comment_activate\.svg/);
@@ -226,6 +227,7 @@ test('disliked answers use the active bad asset without rotating the icon', () =
   })));
 
   assert.match(html, /my_concerns\/bad_activate\.svg/);
+  assert.match(html, /h-5 w-5 translate-y-px/);
   assert.doesNotMatch(html, /rotate-180/);
 });
 
@@ -253,7 +255,8 @@ test('one-line reply editor supports submit and cancel callbacks', () => {
 
   assert.match(html, /한 줄 답변 입력/);
   assert.match(html, /textarea/);
-  assert.match(html, /My example comment\./);
+  assert.match(html, /한 줄 답변을 남겨주세요/);
+  assert.doesNotMatch(html, /My example comment/);
   assert.match(html, /취소/);
   assert.match(html, /제출/);
   assert.match(html, /코멘트를 입력해 주세요\./);
@@ -273,10 +276,11 @@ test('one-line reply editor copy appears only while entry is open', () => {
     },
   })));
 
-  for (const dialogOnlyCopy of ['My example comment.', '취소', '제출']) {
+  for (const dialogOnlyCopy of ['한 줄 답변을 남겨주세요', '취소', '제출']) {
     assert.equal(closedHtml.includes(dialogOnlyCopy), false);
     assert.equal(openHtml.includes(dialogOnlyCopy), true);
   }
+  assert.equal(openHtml.includes('My example comment'), false);
   assert.equal(closedHtml.includes('코멘트 남기기'), false);
   assert.equal(openHtml.includes('코멘트 남기기'), false);
 });
