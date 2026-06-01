@@ -110,7 +110,9 @@ export default function App() {
   const {
     notificationPermission,
     pushRegistrationStatus,
+    pushDisabledForCurrentDevice,
     requestNotificationPermission,
+    disablePushRegistrationForCurrentDevice,
     resetPushRegistrationOnSignOut,
   } = usePushRegistration({ user, loading });
 
@@ -403,7 +405,9 @@ export default function App() {
                 setFilterAlert={setFilterAlert}
                 notificationPermission={notificationPermission}
                 pushRegistrationStatus={pushRegistrationStatus}
+                pushDisabledForCurrentDevice={pushDisabledForCurrentDevice}
                 requestNotificationPermission={requestNotificationPermission}
+                disablePushRegistrationForCurrentDevice={disablePushRegistrationForCurrentDevice}
                 resetPushRegistrationOnSignOut={resetPushRegistrationOnSignOut}
                 onAccountDeleted={handleAccountDeleted}
               />

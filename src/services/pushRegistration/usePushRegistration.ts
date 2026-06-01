@@ -3,6 +3,39 @@ import { createProductionPushRegistrationAdapters, isInstalledPWA } from './adap
 import { createPushRegistrationLifecycle } from './internalLifecycle';
 import type { PushRegistrationStatus, PushRegistrationUser } from './types';
 
+export const pushDisabledStorageKey = (uid: string) => `qling_push_disabled_${uid}`;
+
+export interface PushDisabledStorageLike {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+}
+
+const getLocalStorage = (): PushDisabledStorageLike | null => (
+  typeof localStorage === 'undefined' ? null : localStorage
+);
+
+export const readPushDisabledForCurrentDeviceFromStorage = (
+  storage: PushDisabledStorageLike | null,
+  user: PushRegistrationUser | null
+) => {
+  if (!user || !storage) return false;
+  return storage.getItem(pushDisabledStorageKey(user.uid)) === 'true';
+};
+
+export const writePushDisabledForCurrentDeviceToStorage = (
+  storage: PushDisabledStorageLike | null,
+  user: PushRegistrationUser | null,
+  disabled: boolean
+) => {
+  if (!user || !storage) return;
+  if (disabled) {
+    storage.setItem(pushDisabledStorageKey(user.uid), 'true');
+    return;
+  }
+  storage.removeItem(pushDisabledStorageKey(user.uid));
+};
+
 export function usePushRegistration({
   user,
   loading,
@@ -16,12 +49,17 @@ export function usePushRegistration({
   );
   const [pushRegistrationStatus, setPushRegistrationStatus] = useState<PushRegistrationStatus>('idle');
   const [fcmDebugToken, setFcmDebugToken] = useState<string>('');
+  const [pushDisabledForCurrentDevice, setPushDisabledForCurrentDevice] = useState(false);
   const pushRegistrationStatusRef = useRef(pushRegistrationStatus);
   const installedPwaAttemptedUidRef = useRef<string | null>(null);
 
   useEffect(() => {
     pushRegistrationStatusRef.current = pushRegistrationStatus;
   }, [pushRegistrationStatus]);
+
+  useEffect(() => {
+    setPushDisabledForCurrentDevice(readPushDisabledForCurrentDeviceFromStorage(getLocalStorage(), user));
+  }, [user]);
 
   const lifecycle = useMemo(() => createPushRegistrationLifecycle({
     adapters,
@@ -35,19 +73,24 @@ export function usePushRegistration({
 
   const requestNotificationPermission = useCallback(
     () => {
-      if (user) {
-        localStorage.removeItem(`qling_push_disabled_${user.uid}`);
-      }
+      writePushDisabledForCurrentDeviceToStorage(getLocalStorage(), user, false);
+      setPushDisabledForCurrentDevice(false);
       return lifecycle.requestNotificationPermission(user);
     },
     [lifecycle, user]
   );
 
-  const resetPushRegistrationOnSignOut = useCallback(async () => {
-    if (user) {
-      localStorage.setItem(`qling_push_disabled_${user.uid}`, 'true');
-    }
+  const disablePushRegistrationForCurrentDevice = useCallback(async () => {
+    writePushDisabledForCurrentDeviceToStorage(getLocalStorage(), user, true);
+    setPushDisabledForCurrentDevice(Boolean(user));
     await lifecycle.cleanupStoredPushToken();
+    setPushDisabledForCurrentDevice(Boolean(user));
+    installedPwaAttemptedUidRef.current = null;
+  }, [lifecycle, user]);
+
+  const resetPushRegistrationOnSignOut = useCallback(async () => {
+    await lifecycle.cleanupStoredPushToken();
+    setPushDisabledForCurrentDevice(false);
     installedPwaAttemptedUidRef.current = null;
   }, [lifecycle, user]);
 
@@ -71,7 +114,8 @@ export function usePushRegistration({
       }
 
       if (user) {
-        if (localStorage.getItem(`qling_push_disabled_${user.uid}`) === 'true') {
+        if (readPushDisabledForCurrentDeviceFromStorage(getLocalStorage(), user)) {
+          setPushDisabledForCurrentDevice(true);
           return;
         }
         await lifecycle.maybeRecoverPushRegistration(user, 'app-foreground');
@@ -103,19 +147,19 @@ export function usePushRegistration({
       return;
     }
 
-    if (localStorage.getItem(`qling_push_disabled_${user.uid}`) === 'true') {
+    if (pushDisabledForCurrentDevice) {
       return;
     }
 
     void lifecycle.maybeRecoverPushRegistration(user, 'signed-in-stable');
-  }, [user, loading, notificationPermission, lifecycle]);
+  }, [user, loading, notificationPermission, lifecycle, pushDisabledForCurrentDevice]);
 
   useEffect(() => {
     if (!user || loading || notificationPermission !== 'granted' || !isInstalledPWA()) {
       return;
     }
 
-    if (localStorage.getItem(`qling_push_disabled_${user.uid}`) === 'true') {
+    if (pushDisabledForCurrentDevice) {
       return;
     }
 
@@ -125,13 +169,15 @@ export function usePushRegistration({
 
     installedPwaAttemptedUidRef.current = user.uid;
     void lifecycle.maybeRecoverPushRegistration(user, 'installed-pwa-initial');
-  }, [user, loading, notificationPermission, lifecycle]);
+  }, [user, loading, notificationPermission, lifecycle, pushDisabledForCurrentDevice]);
 
   return {
     notificationPermission,
     pushRegistrationStatus,
+    pushDisabledForCurrentDevice,
     fcmDebugToken,
     requestNotificationPermission,
+    disablePushRegistrationForCurrentDevice,
     resetPushRegistrationOnSignOut,
   };
 }

@@ -37,7 +37,9 @@ export type MyPageContainerProps = {
   readonly setFilterAlert: (message: string) => void;
   readonly notificationPermission: NotificationPermission | 'unsupported';
   readonly pushRegistrationStatus: string;
+  readonly pushDisabledForCurrentDevice: boolean;
   readonly requestNotificationPermission: () => void | Promise<void>;
+  readonly disablePushRegistrationForCurrentDevice: () => Promise<void>;
   readonly resetPushRegistrationOnSignOut: () => Promise<void>;
   readonly onAccountDeleted: () => void;
 };
@@ -200,6 +202,7 @@ export function MyPageContainer(props: MyPageContainerProps) {
   const pushStatus = mapPushStatus({
     permission: props.notificationPermission,
     registrationStatus: props.pushRegistrationStatus,
+    disabledForCurrentDevice: props.pushDisabledForCurrentDevice,
   });
   return (
     <MyPageScreen
@@ -213,7 +216,7 @@ export function MyPageContainer(props: MyPageContainerProps) {
             await props.requestNotificationPermission();
             return;
           }
-          await props.resetPushRegistrationOnSignOut();
+          await props.disablePushRegistrationForCurrentDevice();
         },
       }}
       logoutConfirmation={{

@@ -48,6 +48,27 @@ test('push mapping distinguishes browser permission states', () => {
   assert.match(mapPushStatus({ permission: 'denied' }).message ?? '', /브라우저 설정/);
 });
 
+test('push mapping lets current-device opt-out override granted permission', () => {
+  const status = mapPushStatus({
+    permission: 'granted',
+    disabledForCurrentDevice: true,
+  });
+
+  assert.equal(status.status, 'default');
+  assert.equal(status.enabled, false);
+});
+
+test('push mapping lets current-device opt-out override registered status', () => {
+  const status = mapPushStatus({
+    permission: 'granted',
+    registrationStatus: 'registered',
+    disabledForCurrentDevice: true,
+  });
+
+  assert.equal(status.status, 'default');
+  assert.equal(status.enabled, false);
+});
+
 test('my-page mapping preserves canonical 워라밸 category value', () => {
   const answerItem = mapMyGivenReplyToListItem({
     id: 'reply-워라밸',

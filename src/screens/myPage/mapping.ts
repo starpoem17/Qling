@@ -34,8 +34,10 @@ export function mapProfileToMyPageSummary(profile: MyPageProfileInput | null): M
 export function mapPushStatus(params: {
   readonly permission?: NotificationPermission | 'unsupported';
   readonly registrationStatus?: string;
+  readonly disabledForCurrentDevice?: boolean;
 }): { status: PushPermissionStatus; enabled: boolean; message?: string } {
   if (params.permission === 'unsupported') return { status: 'unsupported', enabled: false, message: '이 브라우저는 알림을 지원하지 않습니다.' };
+  if (params.disabledForCurrentDevice) return { status: 'default', enabled: false, message: '켜면 앱 내 알림을 받을 수 있습니다.' };
   if (params.registrationStatus === 'registered') return { status: 'registered', enabled: true, message: '알림이 켜져 있습니다.' };
   if (params.registrationStatus === 'error') return { status: 'error', enabled: false, message: '알림 등록에 실패했습니다. 다시 켜서 등록을 시도할 수 있어요.' };
   if (params.permission === 'granted') return { status: 'granted', enabled: true, message: '알림 권한이 허용되어 있습니다.' };
