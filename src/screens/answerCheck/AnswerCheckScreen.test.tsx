@@ -92,8 +92,12 @@ test('zero replies state shows only my worry without empty copy', () => {
 test('answer check cards use Figma-like card internals without the old helper labels', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps()));
 
-  assert.match(html, /rounded-\[18px\] bg-white px-\[19px\]/);
+  assert.match(html, /absolute left-0 top-\[127px\] h-\[725px\] w-full overflow-y-auto/);
+  assert.match(html, /relative h-\[300px\] overflow-hidden rounded-\[18px\] bg-white/);
   assert.match(html, /shadow-\[0_4px_4px_rgb\(0_0_0\/0\.25\)\]/);
+  assert.match(html, /absolute left-\[18px\] top-\[11px\]/);
+  assert.match(html, /absolute left-\[80px\] top-\[17px\]/);
+  assert.match(html, /absolute left-\[15px\] top-\[99px\] h-\[0\.7px\] w-\[332px\]/);
   assert.match(html, /text-\[16px\] font-extrabold leading-6 tracking-\[-0\.48px\]/);
   assert.match(html, /text-\[12px\] font-bold leading-6 tracking-\[-0\.36px\]/);
   assert.doesNotMatch(html, />내 고민<\/p>/);
@@ -136,9 +140,10 @@ test('screen exposes like and dislike actions without the old comment action', (
   assert.match(html, /aria-label="좋아요"/);
   assert.match(html, /aria-label="싫어요"/);
   assert.doesNotMatch(html, /aria-label="코멘트"/);
-  assert.match(html, /my_concerns\/good\.svg/);
-  assert.match(html, /my_concerns\/good_activate\.svg/);
-  assert.match(html, /my_concerns\/bad\.svg/);
+  assert.match(html, /my_concerns\/good\.png/);
+  assert.match(html, /my_concerns\/good_activate\.png/);
+  assert.match(html, /my_concerns\/bad\.png/);
+  assert.match(html, /h-6 w-6/);
   assert.doesNotMatch(html, /my_concerns\/comment\.svg/);
   assert.doesNotMatch(html, /my_concerns\/comment_activate\.svg/);
   assert.doesNotMatch(html, /disabled:opacity-45/);
@@ -163,6 +168,10 @@ test('liked answer without a comment shows chat and one-line reply actions', () 
 
   assert.match(html, /채팅 시작/);
   assert.match(html, /한 줄 답변/);
+  assert.match(html, /min-h-\[281px\]/);
+  assert.match(html, /absolute left-\[15px\] top-\[230px\] h-\[0\.7px\] w-\[332px\]/);
+  assert.match(html, /absolute bottom-0 left-0 grid h-\[50px\] w-full/);
+  assert.match(html, /absolute left-\[181px\] top-\[3px\] h-\[45px\] w-px/);
   assert.match(html, /bg-gradient-to-b/);
   assert.match(html, /bg-\[#c2c4c8\]/);
 });
@@ -214,7 +223,7 @@ test('disliked answers use the active bad asset without rotating the icon', () =
     }],
   })));
 
-  assert.match(html, /my_concerns\/bad_activate\.svg/);
+  assert.match(html, /my_concerns\/bad_activate\.png/);
   assert.doesNotMatch(html, /rotate-180/);
 });
 
@@ -222,6 +231,7 @@ test('saved publisher comment appears under the answer card divider', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps()));
 
   assert.match(html, /고마웠어요/);
+  assert.match(html, /absolute left-\[19px\] top-\[242px\] w-\[325px\]/);
   assert.match(html, /bg-\[#c2c4c8\]/);
   assert.equal(html.includes('채팅 시작'), false);
   assert.equal(html.includes('한 줄 답변'), false);
