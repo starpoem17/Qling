@@ -12,9 +12,11 @@ type TokenDoc = { id: string; token: string; deleted?: boolean };
 function createDb(options: {
   user?: Record<string, unknown> | null;
   tokens?: TokenDoc[];
+  docs?: Record<string, Record<string, unknown> | undefined>;
 } = {}) {
   const logs: Record<string, unknown>[] = [];
   const tokens = options.tokens ?? [{ id: 'token-1', token: 'token-1' }];
+  const docs = options.docs ?? {};
   const db = {
     logs,
     tokens,
@@ -27,7 +29,21 @@ function createDb(options: {
           },
         };
       }
-      assert.equal(name, 'users');
+      if (name !== 'users') {
+        return {
+          doc(id: string) {
+            const data = docs[`${name}/${id}`];
+            return {
+              async get() {
+                return {
+                  exists: data !== undefined,
+                  data: () => data,
+                };
+              },
+            };
+          },
+        };
+      }
       return {
         doc(uid: string) {
           return {
@@ -66,7 +82,12 @@ function createDb(options: {
 }
 
 test('new_worry sends and writes sent', async () => {
-  const db = createDb();
+  const db = createDb({
+    docs: {
+      'deliveries/delivery-1': { worryId: 'worry-1' },
+      'worries/worry-1': { summaryText: '새 고민 요약' },
+    },
+  });
   const sends: unknown[] = [];
   await sendNewWorryNotificationAfterCommit({
     db: db as never,
@@ -77,12 +98,25 @@ test('new_worry sends and writes sent', async () => {
   });
 
   assert.equal(sends.length, 1);
+  assert.deepEqual((sends[0] as { data?: Record<string, string> }).data, {
+    title: '새로운 고민이 도착했어요',
+    body: '새 고민 요약',
+    url: '/',
+    kind: 'new_worry',
+    sourceId: 'delivery-1',
+    sourceType: 'delivery',
+  });
   assert.equal(db.logs[0].kind, 'new_worry');
   assert.equal(db.logs[0].status, 'sent');
 });
 
 test('push payload is data-only so the service worker owns notification display', async () => {
-  const db = createDb();
+  const db = createDb({
+    docs: {
+      'replies/reply-1': { worryId: 'worry-1' },
+      'worries/worry-1': { summaryText: '내 고민 요약' },
+    },
+  });
   const sends: unknown[] = [];
   await sendNewReplyNotificationAfterCommit({
     db: db as never,
@@ -102,8 +136,8 @@ test('push payload is data-only so the service worker owns notification display'
   assert.equal(message.webpush?.notification, undefined);
   assert.equal(message.android?.notification, undefined);
   assert.deepEqual(message.data, {
-    title: 'Qling',
-    body: '보낸 고민에 답장이 도착했습니다.',
+    title: '내 고민에 답장이 도착했어요',
+    body: '내 고민 요약',
     url: '/',
     kind: 'new_reply',
     sourceId: 'reply-1',
@@ -137,18 +171,51 @@ test('new_reply sends and writes common schema', async () => {
 });
 
 test('reply_liked sends and writes common schema', async () => {
-  const db = createDb();
+  const sends: unknown[] = [];
+  const db = createDb({
+    docs: {
+      'feedbacks/feedback-1': { worryId: 'worry-1' },
+      'worries/worry-1': { summaryText: '답변한 고민 요약' },
+    },
+  });
   await sendReplyLikedNotificationAfterCommit({
     db: db as never,
-    messaging: { send: async () => 'message-id' } as never,
+    messaging: { send: async message => { sends.push(message); return 'message-id'; } } as never,
     targetUid: 'replier',
     sourceId: 'feedback-1',
     sourceType: 'feedback',
   });
 
+  assert.deepEqual((sends[0] as { data?: Record<string, string> }).data, {
+    title: '내 답변이 도움이 되었어요',
+    body: '답변한 고민 요약',
+    url: '/',
+    kind: 'reply_liked',
+    sourceId: 'feedback-1',
+    sourceType: 'feedback',
+  });
   assert.equal(db.logs[0].kind, 'reply_liked');
   assert.equal(db.logs[0].sourceType, 'feedback');
   assert.equal(db.logs[0].status, 'sent');
+});
+
+test('reply_liked can resolve summary through reply id when feedback doc is absent', async () => {
+  const sends: unknown[] = [];
+  const db = createDb({
+    docs: {
+      'replies/reply-1': { worryId: 'worry-1' },
+      'worries/worry-1': { summaryText: '답변 원문 고민 요약' },
+    },
+  });
+  await sendReplyLikedNotificationAfterCommit({
+    db: db as never,
+    messaging: { send: async message => { sends.push(message); return 'message-id'; } } as never,
+    targetUid: 'replier',
+    sourceId: 'reply-1',
+    sourceType: 'feedback',
+  });
+
+  assert.equal((sends[0] as { data?: Record<string, string> }).data?.body, '답변 원문 고민 요약');
 });
 
 test('missing messaging writes failed and does not throw', async () => {

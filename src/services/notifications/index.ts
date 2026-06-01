@@ -39,6 +39,62 @@ function isInvalidPushTokenError(error: unknown) {
   return code !== null && INVALID_PUSH_TOKEN_ERROR_CODES.has(code);
 }
 
+function readSummaryText(data: FirebaseFirestore.DocumentData | undefined): string | null {
+  const summaryText = data?.summaryText;
+  if (typeof summaryText !== 'string') return null;
+
+  const trimmed = summaryText.trim();
+  return trimmed ? trimmed : null;
+}
+
+async function getWorrySummaryText(params: {
+  db: Firestore;
+  sourceId: string;
+  sourceType: SourceType;
+}): Promise<string | null> {
+  let worryId: string | null = null;
+
+  if (params.sourceType === 'worry') {
+    worryId = params.sourceId;
+  } else if (params.sourceType === 'delivery') {
+    const delivery = await params.db.collection('deliveries').doc(params.sourceId).get();
+    const data = delivery.data();
+    worryId = typeof data?.worryId === 'string' ? data.worryId : null;
+  } else if (params.sourceType === 'reply') {
+    const reply = await params.db.collection('replies').doc(params.sourceId).get();
+    const data = reply.data();
+    worryId = typeof data?.worryId === 'string' ? data.worryId : null;
+  } else if (params.sourceType === 'feedback') {
+    const feedback = await params.db.collection('feedbacks').doc(params.sourceId).get();
+    const feedbackData = feedback.data();
+    worryId = typeof feedbackData?.worryId === 'string' ? feedbackData.worryId : null;
+
+    if (!worryId) {
+      const reply = await params.db.collection('replies').doc(params.sourceId).get();
+      const replyData = reply.data();
+      worryId = typeof replyData?.worryId === 'string' ? replyData.worryId : null;
+    }
+  }
+
+  if (!worryId) return null;
+
+  const worry = await params.db.collection('worries').doc(worryId).get();
+  return readSummaryText(worry.data());
+}
+
+async function getNotificationBody(params: {
+  db: Firestore;
+  sourceId: string;
+  sourceType: SourceType;
+  fallbackBody: string;
+}): Promise<string> {
+  try {
+    return await getWorrySummaryText(params) ?? params.fallbackBody;
+  } catch {
+    return params.fallbackBody;
+  }
+}
+
 async function writePushLog(params: {
   db: Firestore;
   kind: PrdNotificationKind;
@@ -216,11 +272,18 @@ export async function sendNewWorryNotificationAfterCommit(params: {
   sourceType: 'worry' | 'delivery';
   sourceReason?: 'pass_replacement';
 }) {
+  const body = await getNotificationBody({
+    db: params.db,
+    sourceId: params.sourceId,
+    sourceType: params.sourceType,
+    fallbackBody: '새로운 고민이 도착했습니다.',
+  });
+
   return sendPrdNotificationAfterCommit({
     ...params,
     kind: 'new_worry',
-    title: 'Qling',
-    body: '새로운 고민이 도착했습니다.',
+    title: '새로운 고민이 도착했어요',
+    body,
   });
 }
 
@@ -231,12 +294,20 @@ export async function sendNewReplyNotificationAfterCommit(params: {
   sourceId: string;
   sourceType?: 'reply';
 }) {
+  const sourceType = params.sourceType ?? 'reply';
+  const body = await getNotificationBody({
+    db: params.db,
+    sourceId: params.sourceId,
+    sourceType,
+    fallbackBody: '보낸 고민에 답장이 도착했습니다.',
+  });
+
   return sendPrdNotificationAfterCommit({
     ...params,
     kind: 'new_reply',
-    sourceType: params.sourceType ?? 'reply',
-    title: 'Qling',
-    body: '보낸 고민에 답장이 도착했습니다.',
+    sourceType,
+    title: '내 고민에 답장이 도착했어요',
+    body,
   });
 }
 
@@ -247,11 +318,18 @@ export async function sendReplyLikedNotificationAfterCommit(params: {
   sourceId: string;
   sourceType: 'reply' | 'feedback';
 }) {
+  const body = await getNotificationBody({
+    db: params.db,
+    sourceId: params.sourceId,
+    sourceType: params.sourceType,
+    fallbackBody: '내 답장이 위로가 되었다는 답신이 왔어요.',
+  });
+
   return sendPrdNotificationAfterCommit({
     ...params,
     kind: 'reply_liked',
-    title: 'Qling',
-    body: '내 답장이 위로가 되었다는 답신이 왔어요.',
+    title: '내 답변이 도움이 되었어요',
+    body,
   });
 }
 
