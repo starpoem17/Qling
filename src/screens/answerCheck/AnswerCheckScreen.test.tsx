@@ -22,7 +22,7 @@ function baseProps(overrides: Partial<AnswerCheckScreenProps> = {}): AnswerCheck
         feedbackState: 'none',
         canLike: true,
         canDislike: true,
-        canComment: false,
+        canOneLineReply: false,
         isFeedbackProcessing: false,
         isCommentProcessing: false,
       },
@@ -34,7 +34,7 @@ function baseProps(overrides: Partial<AnswerCheckScreenProps> = {}): AnswerCheck
         feedbackState: 'liked',
         canLike: true,
         canDislike: false,
-        canComment: false,
+        canOneLineReply: false,
         isFeedbackProcessing: false,
         isCommentProcessing: false,
       },
@@ -43,7 +43,7 @@ function baseProps(overrides: Partial<AnswerCheckScreenProps> = {}): AnswerCheck
     onBack: () => undefined,
     onLike: () => undefined,
     onDislike: () => undefined,
-    onOpenComment: () => undefined,
+    onOpenOneLineReply: () => undefined,
     onCommentChange: () => undefined,
     onCommentSubmit: () => undefined,
     onCommentClose: () => undefined,
@@ -130,20 +130,73 @@ test('answer check DOM does not render answer writer private data', () => {
   }
 });
 
-test('screen exposes separate like dislike and comment actions', () => {
+test('screen exposes like and dislike actions without the old comment action', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps()));
 
   assert.match(html, /aria-label="좋아요"/);
   assert.match(html, /aria-label="싫어요"/);
-  assert.match(html, /aria-label="코멘트"/);
+  assert.doesNotMatch(html, /aria-label="코멘트"/);
   assert.match(html, /my_concerns\/good\.svg/);
   assert.match(html, /my_concerns\/good_activate\.svg/);
   assert.match(html, /my_concerns\/bad\.svg/);
-  assert.match(html, /my_concerns\/comment\.svg/);
-  assert.match(html, /my_concerns\/comment_activate\.svg/);
+  assert.doesNotMatch(html, /my_concerns\/comment\.svg/);
+  assert.doesNotMatch(html, /my_concerns\/comment_activate\.svg/);
   assert.doesNotMatch(html, /disabled:opacity-45/);
   assert.doesNotMatch(html, /rotate-180/);
   assert.doesNotMatch(html, /sepia saturate|hue-rotate/);
+});
+
+test('liked answer without a comment shows chat and one-line reply actions', () => {
+  const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
+    replies: [{
+      replyId: 'reply-liked',
+      bodyText: '좋아요 답변 본문',
+      createdAtLabel: '1분 전',
+      feedbackState: 'liked',
+      canLike: true,
+      canDislike: false,
+      canOneLineReply: true,
+      isFeedbackProcessing: false,
+      isCommentProcessing: false,
+    }],
+  })));
+
+  assert.match(html, /채팅 시작/);
+  assert.match(html, /한 줄 답변/);
+  assert.match(html, /bg-gradient-to-b/);
+  assert.match(html, /bg-\[#c2c4c8\]/);
+});
+
+test('none and disliked answers do not show chat or one-line reply actions', () => {
+  const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
+    replies: [
+      {
+        replyId: 'reply-none',
+        bodyText: '아직 선택 전',
+        createdAtLabel: '1분 전',
+        feedbackState: 'none',
+        canLike: true,
+        canDislike: true,
+        canOneLineReply: false,
+        isFeedbackProcessing: false,
+        isCommentProcessing: false,
+      },
+      {
+        replyId: 'reply-disliked',
+        bodyText: '싫어요 답변 본문',
+        createdAtLabel: '2분 전',
+        feedbackState: 'disliked',
+        canLike: false,
+        canDislike: true,
+        canOneLineReply: false,
+        isFeedbackProcessing: false,
+        isCommentProcessing: false,
+      },
+    ],
+  })));
+
+  assert.equal(html.includes('채팅 시작'), false);
+  assert.equal(html.includes('한 줄 답변'), false);
 });
 
 test('disliked answers use the active bad asset without rotating the icon', () => {
@@ -155,7 +208,7 @@ test('disliked answers use the active bad asset without rotating the icon', () =
       feedbackState: 'disliked',
       canLike: false,
       canDislike: true,
-      canComment: false,
+      canOneLineReply: false,
       isFeedbackProcessing: false,
       isCommentProcessing: false,
     }],
@@ -170,27 +223,34 @@ test('saved publisher comment appears under the answer card divider', () => {
 
   assert.match(html, /고마웠어요/);
   assert.match(html, /bg-\[#c2c4c8\]/);
+  assert.equal(html.includes('채팅 시작'), false);
+  assert.equal(html.includes('한 줄 답변'), false);
 });
 
-test('inline comment editor supports submit and skip close callbacks', () => {
+test('one-line reply editor supports submit and cancel callbacks', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
     commentDialog: {
       replyId: 'reply-1',
-      feedbackState: 'disliked',
+      feedbackState: 'liked',
       draft: 'private comment',
       maxLength: 1000,
+      validationMessage: '코멘트를 입력해 주세요.',
+      moderationMessage: '다시 작성해 주세요.',
     },
   })));
 
-  assert.match(html, /좋아요 코멘트 입력|싫어요 코멘트 입력/);
+  assert.match(html, /한 줄 답변 입력/);
   assert.match(html, /textarea/);
-  assert.match(html, /건너뛰기/);
+  assert.match(html, /My example comment\./);
+  assert.match(html, /취소/);
   assert.match(html, /제출/);
+  assert.match(html, /코멘트를 입력해 주세요\./);
+  assert.match(html, /다시 작성해 주세요\./);
   assert.doesNotMatch(html, /role="dialog"/);
   assert.doesNotMatch(html, /코멘트 남기기/);
 });
 
-test('inline comment editor copy appears only while comment entry is open', () => {
+test('one-line reply editor copy appears only while entry is open', () => {
   const closedHtml = renderToStaticMarkup(AnswerCheckScreen(baseProps({ commentDialog: null })));
   const openHtml = renderToStaticMarkup(AnswerCheckScreen(baseProps({
     commentDialog: {
@@ -201,7 +261,7 @@ test('inline comment editor copy appears only while comment entry is open', () =
     },
   })));
 
-  for (const dialogOnlyCopy of ['전하고 싶은 말을 남겨주세요.', '건너뛰기', '제출']) {
+  for (const dialogOnlyCopy of ['My example comment.', '취소', '제출']) {
     assert.equal(closedHtml.includes(dialogOnlyCopy), false);
     assert.equal(openHtml.includes(dialogOnlyCopy), true);
   }

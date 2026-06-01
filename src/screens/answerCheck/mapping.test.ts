@@ -86,7 +86,7 @@ test('maps local hidden reply and feedback states', () => {
   ]);
 });
 
-test('maps publisher comment and prevents adding a second comment', () => {
+test('maps publisher comment and prevents adding a one-line reply', () => {
   const mapped = mapRepliesToAnswerCheckProps({
     replies: [
       replyItem({
@@ -99,7 +99,25 @@ test('maps publisher comment and prevents adding a second comment', () => {
 
   assert.equal(mapped[0].publisherComment, '고마웠어요');
   assert.equal(mapped[0].feedbackState, 'liked');
-  assert.equal(mapped[0].canComment, false);
+  assert.equal(mapped[0].canOneLineReply, false);
+});
+
+test('allows one-line reply only for liked answers without a publisher comment', () => {
+  const mapped = mapRepliesToAnswerCheckProps({
+    replies: [
+      replyItem({ id: 'none' }),
+      replyItem({ id: 'liked', feedback: 'helpful' }),
+      replyItem({ id: 'disliked', feedback: 'not_helpful' }),
+      replyItem({ id: 'commented', feedback: 'helpful', publisherComment: '고마웠어요' }),
+    ],
+  });
+
+  assert.deepEqual(mapped.map(reply => [reply.replyId, reply.canOneLineReply]), [
+    ['none', false],
+    ['liked', true],
+    ['disliked', false],
+    ['commented', false],
+  ]);
 });
 
 function worryItem(overrides: Partial<MyWorryListItem>): MyWorryListItem {

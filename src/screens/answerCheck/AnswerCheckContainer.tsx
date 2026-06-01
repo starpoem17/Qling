@@ -34,6 +34,7 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
   const [hiddenReplyIds, setHiddenReplyIds] = useState<ReadonlySet<string>>(() => new Set());
   const [processingReplyIds, setProcessingReplyIds] = useState<ReadonlySet<string>>(() => new Set());
   const [localFeedbackByReplyId, setLocalFeedbackByReplyId] = useState(new Map<string, 'helpful' | 'not_helpful'>());
+  const [localCommentByReplyId, setLocalCommentByReplyId] = useState(new Map<string, string>());
   const [commentDialog, setCommentDialog] = useState<CommentDialogState | null>(null);
 
   const worry = useMemo(
@@ -44,8 +45,9 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
     () => repliesForWorry.map(reply => ({
       ...reply,
       feedback: localFeedbackByReplyId.get(reply.id) ?? reply.feedback,
+      publisherComment: localCommentByReplyId.get(reply.id) ?? reply.publisherComment,
     })),
-    [localFeedbackByReplyId, repliesForWorry],
+    [localCommentByReplyId, localFeedbackByReplyId, repliesForWorry],
   );
 
   const submitFeedback = async (replyId: string, feedbackType: 'helpful' | 'not_helpful', comment?: string) => {
@@ -61,6 +63,9 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
         return result;
       }
       setLocalFeedbackByReplyId(prev => new Map(prev).set(replyId, feedbackType));
+      if (typeof comment === 'string' && comment.trim().length > 0) {
+        setLocalCommentByReplyId(prev => new Map(prev).set(replyId, comment.trim()));
+      }
       return result;
     } catch (error) {
       console.error(error);
@@ -75,24 +80,19 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
     }
   };
 
-  const openComment = (replyId: string) => {
+  const openOneLineReply = (replyId: string) => {
     const reply = replies.find(item => item.id === replyId);
     const feedback = localFeedbackByReplyId.get(replyId) ?? reply?.feedback;
-    if (feedback !== 'helpful' && feedback !== 'not_helpful') return;
+    if (feedback !== 'helpful' || reply?.publisherComment) return;
     setCommentDialog({
       replyId,
-      feedbackState: feedback === 'helpful' ? 'liked' : 'disliked',
+      feedbackState: 'liked',
       draft: '',
     });
   };
 
   const closeComment = () => {
-    setCommentDialog(prev => {
-      if (prev?.feedbackState === 'disliked') {
-        setHiddenReplyIds(current => new Set(current).add(prev.replyId));
-      }
-      return null;
-    });
+    setCommentDialog(null);
   };
 
   const validation = commentDialog
@@ -118,14 +118,15 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
       } : null}
       onBack={() => props.setView(backRouteForRoute({ route: 'answer_check', worryId: worryId ?? '' }))}
       onLike={async replyId => {
-        const result = await submitFeedback(replyId, 'helpful');
-        if (result?.status === 'saved') openComment(replyId);
+        await submitFeedback(replyId, 'helpful');
       }}
       onDislike={async replyId => {
         const result = await submitFeedback(replyId, 'not_helpful');
-        if (result?.status === 'saved') openComment(replyId);
+        if (result?.status === 'saved') {
+          setHiddenReplyIds(current => new Set(current).add(replyId));
+        }
       }}
-      onOpenComment={openComment}
+      onOpenOneLineReply={openOneLineReply}
       onCommentChange={value => setCommentDialog(prev => prev ? { ...prev, draft: value, moderationMessage: undefined } : prev)}
       onCommentSubmit={async () => {
         if (!commentDialog || validation?.status !== 'valid') return;
