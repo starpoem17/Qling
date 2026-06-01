@@ -268,7 +268,7 @@ export default function App() {
   const currentAnswerCheckRoute = typeof view === 'object' && view.route === 'answer_check' ? view : null;
 
   useEffect(() => {
-    if (currentRoute !== 'write_worry' && currentRoute !== 'write_reply') return;
+    if (currentRoute !== 'write_worry' && currentRoute !== 'write_reply' && currentRoute !== 'answer_check') return;
 
     const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     const root = document.getElementById('root');

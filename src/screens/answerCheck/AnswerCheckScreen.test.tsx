@@ -259,7 +259,7 @@ test('one-line reply editor supports submit and cancel callbacks', () => {
   assert.doesNotMatch(html, /My example comment/);
   assert.match(html, /취소/);
   assert.match(html, /제출/);
-  assert.match(html, /코멘트를 입력해 주세요\./);
+  assert.doesNotMatch(html, /코멘트를 입력해 주세요\./);
   assert.match(html, /다시 작성해 주세요\./);
   assert.doesNotMatch(html, /role="dialog"/);
   assert.doesNotMatch(html, /코멘트 남기기/);

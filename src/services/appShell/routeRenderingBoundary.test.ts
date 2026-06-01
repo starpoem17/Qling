@@ -134,6 +134,15 @@ test('locks App main scrolling for fixed-canvas routes', () => {
   );
 });
 
+test('keeps answer check status bar background aligned with the cream route canvas', () => {
+  const source = fs.readFileSync('src/App.tsx', 'utf8');
+
+  assert.match(source, /currentRoute !== 'write_worry' && currentRoute !== 'write_reply' && currentRoute !== 'answer_check'/);
+  assert.match(source, /themeMeta\?\.setAttribute\('content', '#fff1d1'\)/);
+  assert.match(source, /document\.documentElement\.style\.backgroundColor = '#fff1d1'/);
+  assert.match(source, /document\.body\.style\.backgroundColor = '#fff1d1'/);
+});
+
 test('onboarding flow removes App shell padding for responsive canvas routes', () => {
   const source = fs.readFileSync('src/App.tsx', 'utf8');
 

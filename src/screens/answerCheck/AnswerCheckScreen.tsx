@@ -342,11 +342,6 @@ function InlineCommentEditor({
         placeholder="한 줄 답변을 남겨주세요"
         className="min-h-[48px] w-full resize-none rounded-[8px] border border-[#c2c4c8] bg-white px-3 py-2 text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a] outline-none placeholder:text-[#b8b8b8] focus:border-[#ff8b3d] focus:ring-2 focus:ring-[#ff8b3d]/20"
       />
-      {validationMessage && (
-        <p className="mt-1 text-[11px] font-bold leading-[16px] tracking-[-0.33px] text-[var(--qling-color-danger)]">
-          {validationMessage}
-        </p>
-      )}
       <div className="mt-2 flex justify-end gap-3 text-[12px] font-extrabold leading-5 tracking-[-0.36px]">
         <button
           type="button"
