@@ -161,7 +161,7 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
             props.setFilterAlert('');
             props.setView({ route: 'chat_room', chatId: data.chatId });
           } else {
-            props.setFilterAlert(data.error || '채팅방 생성 실패');
+            props.setFilterAlert(data.error?.message || '채팅방 생성에 실패했습니다.');
           }
         } catch (err) {
           console.error(err);

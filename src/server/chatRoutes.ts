@@ -45,7 +45,7 @@ export function registerChatRoutes(app: express.Express, deps: {
         const replyData = replyDoc.data()!;
         
         // Chat can only be created if feedback is helpful
-        if (replyData.feedback !== 'helpful') {
+        if (replyData.feedbackType !== 'like') {
           res.status(403).json({ error: { code: 'forbidden', message: 'Only liked replies can start a chat.' } });
           return;
         }
