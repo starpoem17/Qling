@@ -35,27 +35,34 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
       )}
 
       <div className="grid gap-[22px]" aria-label="도착한 답변 목록">
-        {props.replies.map(reply => (
-          <AnswerCard
-            key={reply.replyId}
-            reply={reply}
-            commentDialog={props.commentDialog?.replyId === reply.replyId ? props.commentDialog : null}
-            onLike={props.onLike}
-            onDislike={props.onDislike}
-            onOpenOneLineReply={props.onOpenOneLineReply}
-            onCommentChange={props.onCommentChange}
-            onCommentSubmit={props.onCommentSubmit}
-            onCommentClose={props.onCommentClose}
-            onStartChat={props.onStartChat}
-          />
-        ))}
+        {props.replies.length > 0 ? (
+          props.replies.map(reply => (
+            <AnswerCard
+              key={reply.replyId}
+              reply={reply}
+              commentDialog={props.commentDialog?.replyId === reply.replyId ? props.commentDialog : null}
+              onLike={props.onLike}
+              onDislike={props.onDislike}
+              onOpenOneLineReply={props.onOpenOneLineReply}
+              onCommentChange={props.onCommentChange}
+              onCommentSubmit={props.onCommentSubmit}
+              onCommentClose={props.onCommentClose}
+              onStartChat={props.onStartChat}
+            />
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20 text-[#b8b8b8]">
+            <span className="text-[14px] font-bold">아직 도착한 답변이 없어요!</span>
+            <span className="text-[12px] font-semibold mt-2">조금만 더 기다려주세요.</span>
+          </div>
+        )}
       </div>
 
       {props.likeActionPopup && (
         <LikeActionPopup
           replyId={props.likeActionPopup.replyId}
           onClose={props.onCloseLikeActionPopup}
-          onOpenComment={props.onOpenComment}
+          onOpenComment={props.onOpenOneLineReply}
           onStartChat={props.onStartChat}
         />
       )}

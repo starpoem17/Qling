@@ -247,6 +247,7 @@ export function FigmaTopBar({
   onBack,
   backLabel,
   tone = 'dark',
+  rightComponent,
 }: {
   readonly title: string;
   readonly titleAriaLabel?: string;
