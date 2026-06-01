@@ -21,7 +21,7 @@ export type AnswerCheckReplyProps = {
   readonly feedbackState: AnswerFeedbackState;
   readonly canLike: boolean;
   readonly canDislike: boolean;
-  readonly canComment: boolean;
+  readonly canOneLineReply: boolean;
   readonly canChat: boolean;
   readonly isFeedbackProcessing: boolean;
   readonly isCommentProcessing: boolean;
@@ -49,7 +49,7 @@ export type AnswerCheckScreenProps = {
   readonly onBack: () => void;
   readonly onLike: (replyId: string) => void;
   readonly onDislike: (replyId: string) => void;
-  readonly onOpenComment: (replyId: string) => void;
+  readonly onOpenOneLineReply: (replyId: string) => void;
   readonly onCommentChange: (value: string) => void;
   readonly onCommentSubmit: () => void;
   readonly onCommentClose: () => void;

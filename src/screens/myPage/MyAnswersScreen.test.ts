@@ -34,10 +34,67 @@ test('my answers screen renders same card format with heart and one small commen
   assert.match(html, /주변 친구들은/);
   assert.match(html, /누구나 그런 시기가/);
   assert.match(html, /힘이 됐어요/);
-  assert.match(html, /text-xs/);
+  assert.match(html, /익명 채팅 시작하기/);
   assert.match(html, /bg-\[#ff8b3d\]/);
   assert.match(html, /fill-\[#e94335\]/);
   assert.doesNotMatch(html, /내가 보낸 답변과 받은 반응을 확인합니다\./);
+});
+
+test('my answers screen uses the fixed 393px Figma canvas and ready-only peek scroll area', () => {
+  const html = renderToStaticMarkup(MyAnswersScreen(baseProps()));
+
+  assert.match(html, /h-\[852px\] w-\[393px\]/);
+  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.match(html, /aria-label="내가 쓴 답변 목록"/);
+  assert.match(html, /data-qling-peek-header-content="true"/);
+  assert.match(html, /transform:translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
+  assert.match(html, /<header[^>]*h-\[100px\][\s\S]*<section[^>]*aria-label="내가 쓴 답변 목록"/);
+  assert.match(html, /relative h-\[836px\][^"]*transform-gpu/);
+  assert.doesNotMatch(html, /absolute left-0 top-\[100px\]/);
+});
+
+test('my answers loading empty and error states keep the canvas locked without list scrolling', () => {
+  const loadingHtml = renderToStaticMarkup(MyAnswersScreen(baseProps({
+    state: { status: 'loading', label: '내가 쓴 답변을 불러오는 중입니다.' },
+    items: [],
+  })));
+  const emptyHtml = renderToStaticMarkup(MyAnswersScreen(baseProps({
+    state: { status: 'empty', message: '아직 내가 보낸 위로가 없어요.' },
+    items: [],
+  })));
+  const errorHtml = renderToStaticMarkup(MyAnswersScreen(baseProps({
+    state: { status: 'error', message: '네트워크 오류', canRetry: false },
+    items: [],
+  })));
+
+  for (const html of [loadingHtml, emptyHtml, errorHtml]) {
+    assert.match(html, /relative h-\[752px\] touch-none overscroll-none overflow-hidden/);
+    assert.doesNotMatch(html, /aria-label="내가 쓴 답변 목록"/);
+    assert.doesNotMatch(html, /absolute left-0 top-\[100px\]/);
+  }
+  assert.match(loadingHtml, /내가 쓴 답변을 불러오는 중입니다\./);
+  assert.match(emptyHtml, /아직 내가 보낸 위로가 없어요\./);
+  assert.match(errorHtml, /네트워크 오류/);
+});
+
+test('my answers chat start button appears only for replies with a comment', () => {
+  const html = renderToStaticMarkup(MyAnswersScreen(baseProps({
+    items: [
+      baseProps().items[0],
+      {
+        ...baseProps().items[0],
+        replyId: 'reply-without-comment',
+        deliveryId: 'delivery-without-comment',
+        worryId: 'worry-without-comment',
+        hasReceivedHeart: false,
+        feedbackLabel: undefined,
+        feedbackComment: undefined,
+        accessibilityLabel: '내가 쓴 답변, 카테고리 자존감, 피드백 없음',
+      },
+    ],
+  })));
+
+  assert.equal((html.match(/<button[^>]*aria-label="익명 채팅 시작하기"/g) ?? []).length, 1);
 });
 
 test('my answers screen does not make item cards navigate to detail routes', () => {

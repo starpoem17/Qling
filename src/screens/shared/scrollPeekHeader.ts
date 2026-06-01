@@ -3,7 +3,8 @@ import type { TouchEvent, UIEvent, WheelEvent } from 'react';
 const WHEEL_SCROLL_END_DELAY_MS = 120;
 const SCROLL_SNAP_THRESHOLD_PX = 42;
 const PEEK_PROGRESS_DISTANCE_PX = 84;
-const BOTTOM_EDGE_EPSILON_PX = 1;
+const BOTTOM_REBOUND_ZONE_PX = 64;
+const BOTTOM_REBOUND_WINDOW_MS = 200;
 const SETTLE_TRANSITION = 'transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)';
 const SCROLL_DIRECTION_DOWN = 'down';
 const SCROLL_DIRECTION_UP = 'up';
@@ -19,6 +20,7 @@ export type PeekHeaderScrollState = {
   canReveal: boolean;
   gestureStartCollapsed: boolean | null;
   gestureStartProgress: number | null;
+  lastNearBottomAtMs: number | null;
 };
 
 export const initialPeekHeaderScrollState: PeekHeaderScrollState = {
@@ -28,6 +30,7 @@ export const initialPeekHeaderScrollState: PeekHeaderScrollState = {
   canReveal: false,
   gestureStartCollapsed: null,
   gestureStartProgress: null,
+  lastNearBottomAtMs: null,
 };
 
 export type PeekHeaderLayout = {
@@ -49,27 +52,34 @@ type PeekHeaderScrollBounds = {
 export function nextPeekHeaderScrollState(
   state: PeekHeaderScrollState,
   scrollTop: number,
-  inputDirection: ScrollInputDirection = null,
+  _inputDirection: ScrollInputDirection = null,
   bounds?: PeekHeaderScrollBounds,
+  nowMs = 0,
 ): PeekHeaderScrollState {
   const nextScrollTop = Math.max(0, scrollTop);
   const delta = nextScrollTop - state.lastScrollTop;
+  const maxScrollTop = bounds === undefined ? null : Math.max(0, bounds.maxScrollTop);
+  const bottomZoneStart = maxScrollTop === null ? null : Math.max(0, maxScrollTop - BOTTOM_REBOUND_ZONE_PX);
+  const wasNearBottom = bottomZoneStart !== null && state.lastScrollTop >= bottomZoneStart;
+  const isNearBottom = bottomZoneStart !== null && nextScrollTop >= bottomZoneStart;
+  const lastNearBottomAtMs = isNearBottom ? nowMs : state.lastNearBottomAtMs;
   if (delta === 0) {
     return nextScrollTop === 0
-      ? { ...state, canReveal: true }
-      : state;
+      ? { ...state, canReveal: true, lastNearBottomAtMs }
+      : { ...state, lastNearBottomAtMs };
   }
 
-  const wasAtBottom = bounds !== undefined
-    && state.lastScrollTop >= Math.max(0, bounds.maxScrollTop) - BOTTOM_EDGE_EPSILON_PX;
-  if (wasAtBottom && delta < 0 && inputDirection !== SCROLL_DIRECTION_UP) {
+  const recentlyNearBottom = state.lastNearBottomAtMs !== null
+    && nowMs - state.lastNearBottomAtMs <= BOTTOM_REBOUND_WINDOW_MS;
+  if (state.collapsed && wasNearBottom && recentlyNearBottom && delta < 0 && nextScrollTop > 0) {
     return {
       ...state,
       lastScrollTop: nextScrollTop,
       accumulatedDelta: 0,
-      canReveal: nextScrollTop === 0,
+      canReveal: false,
       gestureStartCollapsed: null,
       gestureStartProgress: null,
+      lastNearBottomAtMs,
     };
   }
 
@@ -89,6 +99,7 @@ export function nextPeekHeaderScrollState(
     canReveal: nextScrollTop === 0,
     gestureStartCollapsed,
     gestureStartProgress,
+    lastNearBottomAtMs,
   };
 }
 
@@ -118,6 +129,7 @@ export function settlePeekHeaderScrollState(state: PeekHeaderScrollState): PeekH
       canReveal: false,
       gestureStartCollapsed: null,
       gestureStartProgress: null,
+      lastNearBottomAtMs: state.lastNearBottomAtMs,
     };
   }
 
@@ -127,6 +139,7 @@ export function settlePeekHeaderScrollState(state: PeekHeaderScrollState): PeekH
       accumulatedDelta: 0,
       canReveal: false,
       gestureStartProgress: null,
+      lastNearBottomAtMs: state.lastNearBottomAtMs,
     };
   }
 
@@ -141,6 +154,7 @@ export function settlePeekHeaderScrollState(state: PeekHeaderScrollState): PeekH
     canReveal: false,
     gestureStartCollapsed: null,
     gestureStartProgress: null,
+    lastNearBottomAtMs: state.lastNearBottomAtMs,
   };
 }
 
@@ -196,6 +210,7 @@ function handlePeekHeaderScroll(event: UIEvent<HTMLElement>) {
     scroller.scrollTop,
     readScrollInputDirection(scroller),
     { maxScrollTop: Math.max(0, scroller.scrollHeight - scroller.clientHeight) },
+    nowMs(),
   );
   writeScrollState(scroller, nextState);
   schedulePeekHeaderLayout(scroller, peekHeaderLayoutForState(nextState), false);
@@ -240,6 +255,7 @@ function readScrollState(element: HTMLElement): PeekHeaderScrollState {
     canReveal: element.dataset.qlingPeekHeaderCanReveal === 'true',
     gestureStartCollapsed: readOptionalBoolean(element.dataset.qlingPeekHeaderGestureStartCollapsed),
     gestureStartProgress: readOptionalNumber(element.dataset.qlingPeekHeaderGestureStartProgress),
+    lastNearBottomAtMs: readOptionalNumber(element.dataset.qlingPeekHeaderLastNearBottomAtMs),
   };
 }
 
@@ -257,6 +273,11 @@ function writeScrollState(element: HTMLElement, state: PeekHeaderScrollState) {
     delete element.dataset.qlingPeekHeaderGestureStartProgress;
   } else {
     element.dataset.qlingPeekHeaderGestureStartProgress = String(state.gestureStartProgress);
+  }
+  if (state.lastNearBottomAtMs === null) {
+    delete element.dataset.qlingPeekHeaderLastNearBottomAtMs;
+  } else {
+    element.dataset.qlingPeekHeaderLastNearBottomAtMs = String(state.lastNearBottomAtMs);
   }
 }
 
@@ -351,6 +372,10 @@ function prefersReducedMotion() {
   return typeof window !== 'undefined'
     && typeof window.matchMedia === 'function'
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function nowMs() {
+  return typeof performance === 'undefined' ? Date.now() : performance.now();
 }
 
 function directionFromDelta(delta: number): ScrollInputDirection {

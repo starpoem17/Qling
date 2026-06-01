@@ -126,12 +126,21 @@ test('locks App main scrolling for fixed-canvas routes', () => {
   const source = fs.readFileSync('src/App.tsx', 'utf8');
 
   assert.match(source, /routeBoundary\.mainScrollMode === 'document' && 'overflow-y-auto'/);
-  assert.match(source, /currentRoute === '순위' \|\| currentRoute === 'ranking' \|\| currentRoute === 'privacy_policy' \|\| currentRoute === '마이페이지' \|\| currentRoute === 'my_page' \|\| currentRoute === 'edit_interests'[\s\S]*\? 'overflow-hidden'/);
+  assert.match(source, /currentRoute === 'answer_check' \|\| currentRoute === '순위' \|\| currentRoute === 'ranking' \|\| currentRoute === 'privacy_policy' \|\| currentRoute === '마이페이지' \|\| currentRoute === 'my_page' \|\| currentRoute === 'my_answers' \|\| currentRoute === 'edit_interests'[\s\S]*\? 'overflow-hidden'/);
   assert.match(source, /currentRoute === 'edit_interests' \? 'pb-0' : undefined/);
   assert.ok(
     source.indexOf("routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto'")
-      < source.indexOf("currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page' || currentRoute === 'edit_interests'"),
+      < source.indexOf("currentRoute === 'answer_check' || currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page' || currentRoute === 'my_answers' || currentRoute === 'edit_interests'"),
   );
+});
+
+test('keeps answer check status bar background aligned with the cream route canvas', () => {
+  const source = fs.readFileSync('src/App.tsx', 'utf8');
+
+  assert.match(source, /currentRoute !== 'write_worry' && currentRoute !== 'write_reply' && currentRoute !== 'answer_check'/);
+  assert.match(source, /themeMeta\?\.setAttribute\('content', '#fff1d1'\)/);
+  assert.match(source, /document\.documentElement\.style\.backgroundColor = '#fff1d1'/);
+  assert.match(source, /document\.body\.style\.backgroundColor = '#fff1d1'/);
 });
 
 test('onboarding flow removes App shell padding for responsive canvas routes', () => {

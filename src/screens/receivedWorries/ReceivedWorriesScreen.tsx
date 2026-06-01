@@ -1,7 +1,6 @@
 import type { KeyboardEvent, MouseEvent, TouchEvent, WheelEvent } from 'react';
 import type { CSSProperties } from 'react';
 import {
-  EmptyState,
   ErrorState,
   QlingCard,
 } from '../shared/ui';
@@ -72,9 +71,18 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
             {header}
-            <PeekHeaderScrollArea className={contentClassName} style={contentStyle} resetKey="received-worries-empty">
-              <EmptyState title={props.state.message} />
-            </PeekHeaderScrollArea>
+            <section
+              className="qling-received-worries-font h-[752px] touch-none overscroll-none overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5"
+              aria-label="받은 고민 빈 상태"
+              onWheel={blockLoadingScroll}
+              onTouchMove={blockLoadingScroll}
+            >
+              <QlingCard className="relative flex h-[135px] w-full items-center justify-center overflow-hidden rounded-[18px] border-0 bg-white p-0 text-center shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
+                <p className="w-[325px] break-words text-center text-[16px] font-extrabold leading-6 tracking-[-0.03em] text-[#2a2a2a]">
+                  다른 사람들의 고민을 기다리는 중이에요
+                </p>
+              </QlingCard>
+            </section>
           </div>
         </div>
       </section>

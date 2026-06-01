@@ -9,8 +9,6 @@ const goodIconUrl = new URL('../../../assets/my_concerns/good.svg', import.meta.
 const goodActiveIconUrl = new URL('../../../assets/my_concerns/good_activate.svg', import.meta.url).href;
 const badIconUrl = new URL('../../../assets/my_concerns/bad.svg', import.meta.url).href;
 const badActiveIconUrl = new URL('../../../assets/my_concerns/bad_activate.svg', import.meta.url).href;
-const commentIconUrl = new URL('../../../assets/my_concerns/comment.svg', import.meta.url).href;
-const commentActiveIconUrl = new URL('../../../assets/my_concerns/comment_activate.svg', import.meta.url).href;
 
 export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
   if (props.state.status === 'loading') {
@@ -44,7 +42,7 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
             commentDialog={props.commentDialog?.replyId === reply.replyId ? props.commentDialog : null}
             onLike={props.onLike}
             onDislike={props.onDislike}
-            onOpenComment={props.onOpenComment}
+            onOpenOneLineReply={props.onOpenOneLineReply}
             onCommentChange={props.onCommentChange}
             onCommentSubmit={props.onCommentSubmit}
             onCommentClose={props.onCommentClose}
@@ -121,15 +119,20 @@ function AnswerCheckFrame({ onBack, children }: { readonly onBack: () => void; r
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-full overflow-x-hidden bg-[#fff1d1] pb-[calc(24px+env(safe-area-inset-bottom,0px))] text-[#2a2a2a]">
-      <div className="mx-auto flex w-full max-w-[480px] justify-center overflow-visible">
+    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
+      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
         <div
-          className="relative min-h-[852px] w-[393px] shrink-0 origin-top bg-[#fff1d1] qling-received-worries-font"
+          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-received-worries-font"
           style={{ transform: `scale(${canvasScale})` }}
         >
           <FigmaTopBar title="답변 확인" onBack={onBack} backLabel="나의 고민으로 돌아가기" />
-          <div className="grid gap-[22px] px-4 pt-[127px] pb-[36px]">
-            {children}
+          <div
+            className="absolute left-0 top-[127px] h-[725px] w-full overflow-y-auto overscroll-contain px-4 pb-[108px] [-webkit-overflow-scrolling:touch]"
+            aria-label="답변 확인 내용"
+          >
+            <div className="grid gap-[22px]">
+              {children}
+            </div>
           </div>
         </div>
       </div>
@@ -149,8 +152,8 @@ function WorryCard({
   readonly bodyText: string;
 }) {
   return (
-    <section className="rounded-[18px] bg-white px-[19px] pb-[24px] pt-[11px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
-      <div className="flex items-start gap-[18px]">
+    <section className="overflow-hidden rounded-[18px] bg-white px-[19px] pb-[24px] pt-[11px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
+      <div className="flex min-w-0 items-start gap-[18px]">
         <span className="inline-flex shrink-0 items-start overflow-hidden rounded-[999px] bg-[#ffe4cc] px-3 py-[5px] font-['Qling_Figma_Inter'] text-[11px] font-bold leading-normal text-[#ff8b3d]">
           {categoryLabel}
         </span>
@@ -161,7 +164,7 @@ function WorryCard({
       <p className="mt-[14px] whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
         {summaryText}
       </p>
-      <div className="mt-[10px] h-px rounded-[3px] bg-[#c2c4c8]" />
+      <div className="mt-[10px] h-[0.7px] rounded-[3px] bg-[#c2c4c8]" />
       <p className="mt-[13px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
         {bodyText}
       </p>
@@ -174,7 +177,7 @@ function AnswerCard({
   commentDialog,
   onLike,
   onDislike,
-  onOpenComment,
+  onOpenOneLineReply,
   onCommentChange,
   onCommentSubmit,
   onCommentClose,
@@ -184,7 +187,7 @@ function AnswerCard({
   readonly commentDialog: AnswerCheckScreenProps['commentDialog'];
   readonly onLike: (replyId: string) => void;
   readonly onDislike: (replyId: string) => void;
-  readonly onOpenComment: (replyId: string) => void;
+  readonly onOpenOneLineReply: (replyId: string) => void;
   readonly onCommentChange: (value: string) => void;
   readonly onCommentSubmit: () => void;
   readonly onCommentClose: () => void;
@@ -193,9 +196,14 @@ function AnswerCard({
   const liked = reply.feedbackState === 'liked';
   const disliked = reply.feedbackState === 'disliked';
   const hasComment = typeof reply.publisherComment === 'string' && reply.publisherComment.trim().length > 0;
-  const commentActive = hasComment || Boolean(commentDialog);
+  const showAfterLikeActions = liked && !hasComment && !commentDialog;
+  const showDivider = showAfterLikeActions || hasComment || commentDialog;
+
   return (
-    <section className="rounded-[18px] bg-white px-[19px] pb-[20px] pt-[17px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
+    <section className={cn(
+      'overflow-hidden rounded-[18px] bg-white px-[19px] pt-[17px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
+      showAfterLikeActions ? 'pb-0' : 'pb-[20px]',
+    )}>
       {reply.createdAtLabel && (
         <time className="block text-[12px] font-semibold leading-none tracking-[-0.36px] text-[#b8b8b8]">
           {reply.createdAtLabel}
@@ -204,7 +212,7 @@ function AnswerCard({
       <p className="mt-[15px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
         {reply.bodyText}
       </p>
-      <div className="mt-[5px] flex items-center justify-end gap-[5px]">
+      <div className="mt-[12px] flex items-center justify-end gap-3">
         {reply.canChat && (
           <button
             type="button"
@@ -222,8 +230,8 @@ function AnswerCard({
           selected={liked}
           disabled={!reply.canLike || reply.isFeedbackProcessing}
           onClick={() => onLike(reply.replyId)}
-          className="h-[28px] w-[17px]"
-          iconClassName="h-[17px] w-[17px]"
+          className="h-5 w-5"
+          iconClassName="h-5 w-5"
         />
         <FeedbackAction
           label="싫어요"
@@ -232,23 +240,33 @@ function AnswerCard({
           selected={disliked}
           disabled={!reply.canDislike || reply.isFeedbackProcessing}
           onClick={() => onDislike(reply.replyId)}
-          className="h-[28px] w-[17px]"
-          iconClassName="h-[17px] w-[17px]"
-        />
-        <FeedbackAction
-          label="코멘트"
-          iconUrl={commentIconUrl}
-          activeIconUrl={commentActiveIconUrl}
-          selected={commentActive}
-          disabled={!reply.canComment || reply.isCommentProcessing}
-          onClick={() => onOpenComment(reply.replyId)}
-          className="h-[28px] w-[20px]"
-          iconClassName="h-[15px] w-[15px]"
+          className="h-5 w-5"
+          iconClassName="h-5 w-5 translate-y-px"
         />
       </div>
-      {(hasComment || commentDialog) && <div className="mt-[8px] h-px rounded-[3px] bg-[#c2c4c8]" />}
+      {showDivider && <div className="mt-[10px] h-[0.7px] rounded-[3px] bg-[#c2c4c8]" />}
+      {showAfterLikeActions && (
+        <div className="relative -mx-[19px] mt-0 grid h-[50px] grid-cols-2 overflow-hidden rounded-b-[18px] bg-gradient-to-b from-white via-[#f7e9cb]/20 to-white text-[12px] font-bold leading-6 tracking-[-0.36px] text-black">
+          <button
+            type="button"
+            onClick={() => undefined}
+            className="flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#ff8b3d]"
+          >
+            채팅 시작
+          </button>
+          <div className="absolute left-1/2 top-[3px] h-[45px] w-px -translate-x-1/2 rounded-[3px] bg-[#c2c4c8]" aria-hidden="true" />
+          <button
+            type="button"
+            disabled={!reply.canOneLineReply || reply.isCommentProcessing}
+            onClick={() => onOpenOneLineReply(reply.replyId)}
+            className="flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#ff8b3d] disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            한 줄 답변
+          </button>
+        </div>
+      )}
       {hasComment && (
-        <p className="mt-[13px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
+        <p className="mt-[12px] whitespace-pre-wrap break-words text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
           {reply.publisherComment}
         </p>
       )}
@@ -329,10 +347,10 @@ function InlineCommentEditor({
   readonly onSubmit: () => void;
   readonly onClose: () => void;
 }) {
-  const label = feedbackState === 'liked' ? '좋아요 코멘트 입력' : '싫어요 코멘트 입력';
+  const label = feedbackState === 'liked' ? '한 줄 답변 입력' : '싫어요 코멘트 입력';
 
   return (
-    <div className="mt-[13px]" aria-label={label}>
+    <div className="mt-[12px]" aria-label={label}>
       {moderationMessage && (
         <p className="mb-2 whitespace-pre-wrap text-[12px] font-bold leading-[18px] tracking-[-0.36px] text-[var(--qling-color-danger)]">
           {moderationMessage}
@@ -343,21 +361,16 @@ function InlineCommentEditor({
         onChange={event => onChange(event.target.value)}
         maxLength={maxLength}
         aria-label={label}
-        placeholder="전하고 싶은 말을 남겨주세요."
-        className="min-h-[72px] w-full resize-none rounded-[12px] border border-[#c2c4c8] bg-white px-3 py-2 text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a] outline-none placeholder:text-[#b8b8b8] focus:border-[#ff8b3d] focus:ring-2 focus:ring-[#ff8b3d]/20"
+        placeholder="한 줄 답변을 남겨주세요"
+        className="min-h-[48px] w-full resize-none rounded-[8px] border border-[#c2c4c8] bg-white px-3 py-2 text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a] outline-none placeholder:text-[#b8b8b8] focus:border-[#ff8b3d] focus:ring-2 focus:ring-[#ff8b3d]/20"
       />
-      {validationMessage && (
-        <p className="mt-1 text-[11px] font-bold leading-[16px] tracking-[-0.33px] text-[var(--qling-color-danger)]">
-          {validationMessage}
-        </p>
-      )}
       <div className="mt-2 flex justify-end gap-3 text-[12px] font-extrabold leading-5 tracking-[-0.36px]">
         <button
           type="button"
           onClick={onClose}
           className="rounded-full px-1 text-[#7a7a7a] hover:text-[#2a2a2a] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
         >
-          건너뛰기
+          취소
         </button>
         <button
           type="button"

@@ -104,7 +104,9 @@ test('received-worries loading empty and privacy source stay PRD-scoped', () => 
 
   assert.match(source, /FigmaTabLoading/);
   assert.doesNotMatch(source, /skeleton|placeholder/i);
-  assert.match(source, /<EmptyState title=\{props\.state\.message\}/);
+  assert.match(source, /다른 사람들의 고민을 기다리는 중이에요/);
+  assert.match(source, /aria-label="받은 고민 빈 상태"/);
+  assert.doesNotMatch(source, /<EmptyState/);
   for (const forbidden of ['nickname', 'gender', 'age', 'interests', 'senderUid', 'authorUid', 'publisher']) {
     assert.doesNotMatch(contractSource, new RegExp(`\\b${forbidden}\\b`), `contract includes forbidden privacy field ${forbidden}`);
   }

@@ -269,7 +269,7 @@ export default function App() {
   const currentAnswerCheckRoute = typeof view === 'object' && view.route === 'answer_check' ? view : null;
 
   useEffect(() => {
-    if (currentRoute !== 'write_worry' && currentRoute !== 'write_reply') return;
+    if (currentRoute !== 'write_worry' && currentRoute !== 'write_reply' && currentRoute !== 'answer_check') return;
 
     const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     const root = document.getElementById('root');
@@ -330,7 +330,7 @@ export default function App() {
               ? 'px-0 pt-0 pb-0 overflow-hidden bg-[#ff8b0d]'
               : 'pt-6',
             routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto',
-            currentRoute === '답변하기' || currentRoute === 'received_worries' || currentRoute === '나의 고민' || currentRoute === 'my_worries' || currentRoute === 'my_worry_detail' || currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page' || currentRoute === 'edit_interests'
+            currentRoute === '답변하기' || currentRoute === 'received_worries' || currentRoute === '나의 고민' || currentRoute === 'my_worries' || currentRoute === 'my_worry_detail' || currentRoute === 'answer_check' || currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page' || currentRoute === 'my_answers' || currentRoute === 'edit_interests'
               ? 'overflow-hidden'
               : undefined,
             currentRoute === 'edit_interests' ? 'pb-0' : undefined,
@@ -510,7 +510,7 @@ export default function App() {
 
           {/* 6. Answer Check View */}
           {currentRoute === 'answer_check' && currentAnswerCheckRoute && (
-            <motion.div key="answer_check" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+            <motion.div key="answer_check" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="h-full min-h-0">
               <AnswerCheckContainer
                 user={user}
                 route={currentAnswerCheckRoute}
