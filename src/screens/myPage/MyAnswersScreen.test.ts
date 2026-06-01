@@ -48,6 +48,9 @@ test('my answers screen uses the fixed 393px Figma canvas and ready-only peek sc
   assert.match(html, /aria-label="내가 쓴 답변 목록"/);
   assert.match(html, /data-qling-peek-header-content="true"/);
   assert.match(html, /transform:translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
+  assert.match(html, /<header[^>]*h-\[100px\][\s\S]*<section[^>]*aria-label="내가 쓴 답변 목록"/);
+  assert.match(html, /relative h-\[836px\][^"]*transform-gpu/);
+  assert.doesNotMatch(html, /absolute left-0 top-\[100px\]/);
 });
 
 test('my answers loading empty and error states keep the canvas locked without list scrolling', () => {
@@ -65,8 +68,9 @@ test('my answers loading empty and error states keep the canvas locked without l
   })));
 
   for (const html of [loadingHtml, emptyHtml, errorHtml]) {
-    assert.match(html, /h-\[752px\] w-\[393px\] touch-none overscroll-none overflow-hidden/);
+    assert.match(html, /relative h-\[752px\] touch-none overscroll-none overflow-hidden/);
     assert.doesNotMatch(html, /aria-label="내가 쓴 답변 목록"/);
+    assert.doesNotMatch(html, /absolute left-0 top-\[100px\]/);
   }
   assert.match(loadingHtml, /내가 쓴 답변을 불러오는 중입니다\./);
   assert.match(emptyHtml, /아직 내가 보낸 위로가 없어요\./);

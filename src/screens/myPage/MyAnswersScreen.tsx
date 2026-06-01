@@ -14,7 +14,7 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
   const headerStyle = {
     '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
   } as CSSProperties;
-  const listStyle = {
+  const contentStyle = {
     '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
     transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))',
   } as CSSProperties;
@@ -27,7 +27,7 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
 
           {props.state.status === 'loading' ? (
             <section
-              className="absolute left-0 top-[100px] h-[752px] w-[393px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
+              className="relative h-[752px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
               onWheel={blockLockedScroll}
               onTouchMove={blockLockedScroll}
             >
@@ -35,7 +35,7 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
             </section>
           ) : props.state.status === 'error' ? (
             <section
-              className="absolute left-0 top-[100px] h-[752px] w-[393px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
+              className="relative h-[752px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
               onWheel={blockLockedScroll}
               onTouchMove={blockLockedScroll}
             >
@@ -45,7 +45,7 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
             </section>
           ) : props.state.status === 'empty' ? (
             <section
-              className="absolute left-0 top-[100px] h-[752px] w-[393px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
+              className="relative h-[752px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
               onWheel={blockLockedScroll}
               onTouchMove={blockLockedScroll}
             >
@@ -55,8 +55,8 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
             </section>
           ) : (
             <PeekHeaderScrollArea
-              className="absolute left-0 top-[100px] h-[840px] w-[393px] px-4 pb-[calc(108px+env(safe-area-inset-bottom,0px))] pt-[27px] transform-gpu"
-              style={listStyle}
+              className="relative h-[836px] px-4 pb-[calc(108px+env(safe-area-inset-bottom,0px))] pt-[27px] transform-gpu"
+              style={contentStyle}
               ariaLabel="내가 쓴 답변 목록"
               resetKey="my-answers-ready"
             >
@@ -80,13 +80,13 @@ function MyAnswersHeader({
 }) {
   return (
     <header
-      className="absolute left-0 top-0 z-10 h-[100px] w-[393px] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
+      className="h-[100px] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
       style={style}
       onTouchMove={blockLockedScroll}
       onWheel={blockLockedScroll}
     >
       <div
-        className="relative h-[100px] w-[393px] transform-gpu"
+        className="relative mx-auto h-[100px] w-full max-w-[393px] transform-gpu"
         data-qling-peek-header-content="true"
         style={{ transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))' }}
       >
