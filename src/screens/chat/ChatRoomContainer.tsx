@@ -50,19 +50,12 @@ export function ChatRoomContainer({
 
         const opponentUid = chatData.participants.find((uid: string) => uid !== user.uid);
         if (opponentUid && !opponent) {
-          try {
-            const opponentSnap = await getDoc(doc(db, 'users', opponentUid));
-            if (opponentSnap.exists()) {
-              const opData = opponentSnap.data();
-              setOpponent({
-                nickname: opData.nickname || '익명',
-                profileColor: opData.profileColor || '#FF8B3D',
-              });
-            } else {
-              setOpponent({ nickname: '알 수 없음', profileColor: '#cccccc' });
-            }
-          } catch (e) {
-            console.error('Failed to fetch opponent:', e);
+          if (chatData.participantProfiles && chatData.participantProfiles[opponentUid]) {
+            setOpponent({
+              nickname: chatData.participantProfiles[opponentUid].nickname || '익명',
+              profileColor: chatData.participantProfiles[opponentUid].profileColor || '#FF8B3D',
+            });
+          } else {
             setOpponent({ nickname: '알 수 없음', profileColor: '#cccccc' });
           }
         }

@@ -20,13 +20,12 @@ export function ChatListContainer({
 
     const q = query(
       collection(db, 'chats'),
-      where('participants', 'array-contains', user.uid),
-      orderBy('lastMessageAt', 'desc')
+      where('participants', 'array-contains', user.uid)
     );
 
     const unsubscribe = onSnapshot(
       q,
-      async (snap) => {
+      (snap) => {
         const chatItems: ChatListItem[] = [];
         
         for (const docSnap of snap.docs) {
@@ -37,17 +36,9 @@ export function ChatListContainer({
           let opponentName = '알 수 없음';
           let opponentColor = '#cccccc';
 
-          if (opponentUid) {
-            try {
-              const opSnap = await getDoc(doc(db, 'users', opponentUid));
-              if (opSnap.exists()) {
-                const opData = opSnap.data();
-                opponentName = opData.nickname || '익명';
-                opponentColor = opData.profileColor || '#FF8B3D';
-              }
-            } catch (e) {
-              console.error('Failed to load user:', e);
-            }
+          if (opponentUid && data.participantProfiles && data.participantProfiles[opponentUid]) {
+            opponentName = data.participantProfiles[opponentUid].nickname || '익명';
+            opponentColor = data.participantProfiles[opponentUid].profileColor || '#FF8B3D';
           }
 
           const unreadCount = data.unreadCounts?.[user.uid] || 0;
@@ -69,9 +60,11 @@ export function ChatListContainer({
             lastMessage: data.lastMessageText || '대화가 시작되었습니다.',
             dateLabel,
             unreadCount,
-          });
+            _sortDate: lastDate.getTime(),
+          } as ChatListItem & { _sortDate: number });
         }
         
+        chatItems.sort((a, b) => (b as any)._sortDate - (a as any)._sortDate);
         setChats(chatItems);
         setLoading(false);
       },
