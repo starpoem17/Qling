@@ -129,9 +129,13 @@ test('top ranking avatars and crowns are present in static markup', () => {
   assert.match(source, /left-\[261px\] top-7 h-\[52px\] w-\[108px\] rounded-t-\[16px\] bg-white\/20/);
 });
 
-test('empty second and third podium slots keep crowns ellipses and dash labels without avatars', () => {
+test('podium fills top three entry slots even when shared ranks skip a rank number', () => {
   const rankings = period();
-  const entries = rankings.entries.filter(item => item.rank !== 2 && item.rank !== 3);
+  const entries: RankingDisplayEntry[] = [
+    { ...entry(1), uid: 'co-first-a', nickname: 'Co First A', heartCount: 2 },
+    { ...entry(1), uid: 'co-first-b', nickname: 'Co First B', heartCount: 2 },
+    { ...entry(3), uid: 'shared-third', nickname: 'Shared Third', heartCount: 1 },
+  ];
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps({
     state: {
       status: 'ready',
@@ -145,18 +149,16 @@ test('empty second and third podium slots keep crowns ellipses and dash labels w
   })));
 
   assert.match(html, /data-measure="ranking-profile-first"/);
-  assert.doesNotMatch(html, /data-measure="ranking-profile-second"/);
-  assert.doesNotMatch(html, /data-measure="ranking-profile-third"/);
+  assert.match(html, /data-measure="ranking-profile-second"/);
+  assert.match(html, /data-measure="ranking-profile-third"/);
   assert.match(html, /absolute block max-w-none left-\[55px\] top-\[269px\] h-\[18px\] w-\[42px\]/);
   assert.match(html, /absolute block max-w-none left-\[294px\] top-\[284px\] h-\[18px\] w-\[42px\]/);
   assert.match(html, /crown-second\.svg/);
   assert.match(html, /crown-third\.svg/);
-  assert.match(html, /left-\[16px\] top-\[290px\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">-/);
-  assert.match(html, /left-\[255px\] top-\[305px\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">-/);
-  assert.match(html, /left-\[16px\] top-\[312px\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>-/);
-  assert.match(html, /left-\[255px\] top-\[327px\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>-/);
-  assert.doesNotMatch(html, />User 2</);
-  assert.doesNotMatch(html, />User 3</);
+  assert.match(html, /left-\[16px\] top-\[290px\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">Co First B/);
+  assert.match(html, /left-\[255px\] top-\[305px\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">Shared Third/);
+  assert.match(html, /left-\[16px\] top-\[312px\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>2/);
+  assert.match(html, /left-\[255px\] top-\[327px\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>1/);
 });
 
 test('profile image generation recolors only the shared default profile background', () => {

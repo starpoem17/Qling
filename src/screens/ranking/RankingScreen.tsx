@@ -184,7 +184,7 @@ function SegmentedControl({
 }
 
 function TopRankings({ period }: { readonly period: RankingDisplayPeriod }) {
-  const topEntries = [1, 2, 3].map(rank => period.entries.find(entry => entry.rank === rank) ?? null);
+  const topEntries = period.entries.slice(0, 3);
 
   return (
     <>
