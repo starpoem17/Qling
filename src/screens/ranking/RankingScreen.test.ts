@@ -161,6 +161,84 @@ test('podium fills top three entry slots even when shared ranks skip a rank numb
   assert.match(html, /left-\[255px\] top-\[327px\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>1/);
 });
 
+test('ranking sheet renders entries by slot after the podium even when rank numbers are shared', () => {
+  const rankings = period();
+  const entries: RankingDisplayEntry[] = [
+    { ...entry(1), uid: 'co-first-a', nickname: 'Co First A', heartCount: 9 },
+    { ...entry(1), uid: 'co-first-b', nickname: 'Co First B', heartCount: 9 },
+    { ...entry(1), uid: 'co-first-c', nickname: 'Co First C', heartCount: 9 },
+    { ...entry(1), uid: 'co-first-d', nickname: 'Co First D', heartCount: 9 },
+    { ...entry(5), uid: 'fifth-slot', nickname: 'Fifth Slot', heartCount: 7 },
+  ];
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps({
+    state: {
+      status: 'ready',
+      monthly: { ...rankings, entries },
+      total: { ...rankings, entries },
+      season: {
+        monthLabel: '5월 시즌',
+        daysUntilMonthEnd: 1,
+      },
+    },
+  })));
+
+  assert.match(html, />Co First D</);
+  assert.match(html, />Fifth Slot</);
+  assert.doesNotMatch(html, /아직 순위가 없어요/);
+});
+
+test('ranking sheet renders partial rows and keeps viewer card when the viewer is in the list', () => {
+  const rankings = period();
+  const entries: RankingDisplayEntry[] = [
+    entry(1),
+    entry(2),
+    entry(3),
+    { ...entry(4), uid: 'viewer', nickname: 'Viewer Nickname' },
+    entry(5),
+  ];
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps({
+    state: {
+      status: 'ready',
+      monthly: {
+        entries,
+        viewer: {
+          ...entries[3],
+          percentile: 80,
+        },
+      },
+      total: rankings,
+      season: {
+        monthLabel: '5월 시즌',
+        daysUntilMonthEnd: 1,
+      },
+    },
+  })));
+
+  assert.match(html, />Viewer Nickname</);
+  assert.match(html, />User 5</);
+  assert.match(html, /aria-label="내 순위 4위"/);
+  assert.match(html, />나</);
+  assert.doesNotMatch(html, /아직 순위가 없어요/);
+});
+
+test('ranking sheet is empty when there are fewer than four ranked entries', () => {
+  const rankings = period();
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps({
+    state: {
+      status: 'ready',
+      monthly: { ...rankings, entries: [entry(1), entry(2), entry(3)] },
+      total: rankings,
+      season: {
+        monthLabel: '5월 시즌',
+        daysUntilMonthEnd: 1,
+      },
+    },
+  })));
+
+  assert.match(html, /아직 순위가 없어요/);
+  assert.doesNotMatch(html, />User 4</);
+});
+
 test('profile image generation recolors only the shared default profile background', () => {
   const decoded = decodeURIComponent(profileImageUrlForColor('#6FA8F0'));
 

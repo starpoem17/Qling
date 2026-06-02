@@ -280,7 +280,7 @@ function RankingSheet({
   readonly period?: RankingDisplayPeriod;
   readonly loading?: boolean;
 }) {
-  const rows = period?.entries.filter(entry => entry.rank >= 4).slice(0, 7) ?? [];
+  const rows = period?.entries.slice(3, 10) ?? [];
   return (
     <section
       className={cn(
