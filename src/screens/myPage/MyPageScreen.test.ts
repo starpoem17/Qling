@@ -93,15 +93,21 @@ test('my-page renders colored profile svg at the existing profile image size', (
   assert.doesNotMatch(html, /aria-label="프로필 모티프" role="img"/);
 });
 
-test('my-page root uses a fixed scaled Figma canvas without internal vertical scroll', () => {
+test('my-page root uses a fixed scaled Figma canvas with peek-header body scrolling', () => {
   const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps()));
 
-  assert.doesNotMatch(html, /overflow-y-auto/);
-  assert.match(html, /overflow-hidden/);
   assert.match(html, /data-measure="my-page-responsive-canvas"/);
   assert.match(html, /data-measure="my-page-screen"/);
-  assert.match(html, /h-\[756px\] w-\[393px\]/);
+  assert.match(html, /h-\[852px\] w-\[393px\]/);
+  assert.match(html, /aria-label="마이페이지 본문"/);
+  assert.match(html, /data-qling-peek-header-content="true"/);
+  assert.match(html, /<header[^>]*h-\[100px\][\s\S]*<section[^>]*aria-label="마이페이지 본문"/);
+  assert.match(html, /relative pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\][^"]*transform-gpu/);
+  assert.match(html, /height:min\(836px, max\(520px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 100px\)\)\)/);
+  assert.match(html, /pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
   assert.match(html, /scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.match(html, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
+  assert.doesNotMatch(html, /figma-top-bar/);
   assert.doesNotMatch(html, /home-indicator/);
 });
 
@@ -156,7 +162,7 @@ test('my-page renders at most two answer previews and moves settings to the two-
   assert.match(html, /누구나 그런 시기가 있는 것 같아요/);
   assert.match(html, /자신이 무엇을 좋아하는지 천천히 찾아가는 과정도/);
   assert.doesNotMatch(html, /세 번째 답변은 preview에 표시되지 않아야 해요/);
-  assert.match(html, /style="top:544px"/);
+  assert.match(html, /style="top:444px"/);
 });
 
 test('my-page hides push helper and status copy while keeping the accessible switch state', () => {
@@ -397,7 +403,7 @@ function findOptionalElement(tree: ReactNode, predicate: (element: TestElement) 
   if (!isValidElement(tree)) return null;
   const element = tree as TestElement;
   if (predicate(element)) return element;
-  if (typeof element.type === 'function' && element.type.name !== 'QlingDialog') {
+  if (typeof element.type === 'function' && element.type.name !== 'QlingDialog' && element.type.name !== 'PeekHeaderScrollArea') {
     const rendered = (element.type as (props: Record<string, unknown>) => ReactNode)(element.props);
     const foundInRendered = findOptionalElement(rendered, predicate);
     if (foundInRendered) return foundInRendered;

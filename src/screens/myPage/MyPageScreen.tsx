@@ -3,6 +3,9 @@ import {
   QlingDialog,
   profileImageUrlForColor,
 } from '../shared/ui';
+import type { CSSProperties, TouchEvent, WheelEvent } from 'react';
+import { PeekHeaderScrollArea } from '../shared/PeekHeaderScrollArea';
+import { useScrollPeekHeader } from '../shared/scrollPeekHeader';
 import type {
   ConfirmationProps,
   EditInterestsProps,
@@ -47,82 +50,142 @@ export function MyPageScreen(props: MyPageScreenProps) {
   const isAccountDeletionProcessing = props.accountDeletionConfirmation.isProcessing;
   const previewItems = props.answerPreviewItems.slice(0, 2);
   const hasMultiplePreviewItems = previewItems.length >= 2;
-  const answerSectionBottom = hasMultiplePreviewItems ? 486 : 388;
-  const settingsHeadingTop = hasMultiplePreviewItems ? 511 : 426;
-  const settingsCardTop = hasMultiplePreviewItems ? 544 : 459;
+  const answerSectionBottom = hasMultiplePreviewItems ? 386 : 288;
+  const settingsHeadingTop = hasMultiplePreviewItems ? 411 : 326;
+  const settingsCardTop = hasMultiplePreviewItems ? 444 : 359;
+  const contentBottom = settingsCardTop + 192;
   const myPageCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+  const myPageContentHeight = `min(836px, max(520px, calc((100dvh - var(--qling-space-nav-height)) / (${myPageCanvasScale}) - 100px)))`;
+  const scrollPeekHeader = useScrollPeekHeader();
+  const headerStyle = {
+    '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
+  } as CSSProperties;
+  const contentStyle = {
+    '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
+    height: myPageContentHeight,
+    transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))',
+  } as CSSProperties;
 
   return (
     <section
       aria-label="마이페이지"
-      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-safe-bottom)] -mt-6 h-full min-h-[calc(100dvh-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d] text-[#1a1a1e]"
+      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d] text-[#1a1a1e] qling-figma-font"
     >
       <div
-        className="mx-auto flex w-full max-w-[480px] justify-center"
+        className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"
         data-measure="my-page-responsive-canvas"
-        style={{ minHeight: `calc(min(100vw, var(--qling-mobile-canvas-max-width)) * 756 / 393)` }}
       >
         <div
-          className="relative h-[756px] w-[393px] shrink-0 origin-top bg-[#ff8b3d] font-sans"
+          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]"
           data-measure="my-page-screen"
           style={{ transform: `scale(${myPageCanvasScale})` }}
         >
-          <FigmaTopBar title="마이페이지" onBack={props.onBack} backLabel="이전 화면으로 돌아가기" tone="light" />
+          <MyPageHeader onBack={props.onBack} style={headerStyle} />
 
-          <section className="absolute left-5 top-[132px] h-[93px] w-[353px] overflow-hidden rounded-[24px] bg-white" data-measure="my-page-profile-card">
-            <DefaultProfileImage label={props.profile.profileMotif.label} profileColor={props.profile.profileMotif.profileColor} />
-            <h2 className="absolute left-[100px] top-[23px] max-w-[128px] truncate text-[18px] font-extrabold leading-[22px] tracking-[-0.18px] text-[#1a1a1e]">
-              {props.profile.nickname}
-            </h2>
-            <span className="absolute left-[100px] top-[53px] font-['Qling_Figma_Inter'] text-[14px] font-bold leading-[17px] text-[#ea4335]" aria-hidden="true">♥</span>
-            <span className="absolute left-[116px] top-[54px] max-w-[28px] truncate text-[13px] font-bold leading-4 tracking-[-0.39px] text-[#1a1a1e]">
-              {props.profile.helpedCount}
-            </span>
-            <span className="absolute left-[147px] top-[56px] text-[11px] font-bold leading-[14px] tracking-[-0.33px] text-[#7a7a7e]">
-              {props.profile.helpedCountLabel}
-            </span>
-            <button
-              type="button"
-              onClick={props.onEditInterests}
-              className="absolute left-[256px] top-[26px] whitespace-nowrap text-[12px] font-bold leading-[15px] tracking-[-0.36px] text-[#7a7a7e] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
-              aria-label="관심 분야 수정으로 이동"
-            >
-              관심분야 수정 &gt;
-            </button>
-          </section>
-
-          <h2 className="absolute left-6 top-[270px] text-[16px] font-extrabold leading-5 tracking-[-0.16px] text-white">내가 쓴 답변</h2>
-          <button
-            type="button"
-            onClick={props.onOpenMyAnswers}
-            className="absolute left-[312px] top-[274px] whitespace-nowrap text-[13px] font-bold leading-4 text-white/90 focus:outline-none focus:ring-2 focus:ring-white"
-            aria-label="내가 쓴 답변 전체보기"
+          <PeekHeaderScrollArea
+            className="relative pb-[calc(108px+env(safe-area-inset-bottom,0px))] transform-gpu"
+            style={contentStyle}
+            ariaLabel="마이페이지 본문"
+            resetKey={hasMultiplePreviewItems ? 'my-page-multiple-preview' : 'my-page-short-preview'}
           >
-            전체보기 ›
-          </button>
-          <section className="absolute left-5 w-[353px]" style={{ top: 302, height: answerSectionBottom - 302 }} data-measure="my-page-answer-preview">
-            {previewItems.length === 0 ? (
-              <EmptyAnswerPreviewCard />
-            ) : previewItems.map((item, index) => (
-              <AnswerPreviewCard key={item.replyId} item={item} top={index * 98} />
-            ))}
-          </section>
+            <div className="relative" style={{ height: contentBottom }}>
+              <section className="absolute left-5 top-[32px] h-[93px] w-[353px] overflow-hidden rounded-[24px] bg-white" data-measure="my-page-profile-card">
+                <DefaultProfileImage label={props.profile.profileMotif.label} profileColor={props.profile.profileMotif.profileColor} />
+                <h2 className="absolute left-[100px] top-[23px] max-w-[128px] truncate text-[18px] font-extrabold leading-[22px] tracking-[-0.18px] text-[#1a1a1e]">
+                  {props.profile.nickname}
+                </h2>
+                <span className="absolute left-[100px] top-[53px] font-['Qling_Figma_Inter'] text-[14px] font-bold leading-[17px] text-[#ea4335]" aria-hidden="true">♥</span>
+                <span className="absolute left-[116px] top-[54px] max-w-[28px] truncate text-[13px] font-bold leading-4 tracking-[-0.39px] text-[#1a1a1e]">
+                  {props.profile.helpedCount}
+                </span>
+                <span className="absolute left-[147px] top-[56px] text-[11px] font-bold leading-[14px] tracking-[-0.33px] text-[#7a7a7e]">
+                  {props.profile.helpedCountLabel}
+                </span>
+                <button
+                  type="button"
+                  onClick={props.onEditInterests}
+                  className="absolute left-[256px] top-[26px] whitespace-nowrap text-[12px] font-bold leading-[15px] tracking-[-0.36px] text-[#7a7a7e] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
+                  aria-label="관심 분야 수정으로 이동"
+                >
+                  관심분야 수정 &gt;
+                </button>
+              </section>
 
-          <h2 className="absolute left-5 text-[16px] font-extrabold leading-5 tracking-[-0.16px] text-white" style={{ top: settingsHeadingTop }}>설정</h2>
-          <SettingsCard
-            top={settingsCardTop}
-            settings={props.settings}
-            pushSettings={props.pushSettings}
-            isLogoutProcessing={isLogoutProcessing}
-            isAccountDeletionProcessing={isAccountDeletionProcessing}
-            onSettingSelect={props.onSettingSelect}
-          />
+              <h2 className="absolute left-6 top-[170px] text-[16px] font-extrabold leading-5 tracking-[-0.16px] text-white">내가 쓴 답변</h2>
+              <button
+                type="button"
+                onClick={props.onOpenMyAnswers}
+                className="absolute left-[312px] top-[174px] whitespace-nowrap text-[13px] font-bold leading-4 text-white/90 focus:outline-none focus:ring-2 focus:ring-white"
+                aria-label="내가 쓴 답변 전체보기"
+              >
+                전체보기 ›
+              </button>
+              <section className="absolute left-5 w-[353px]" style={{ top: 202, height: answerSectionBottom - 202 }} data-measure="my-page-answer-preview">
+                {previewItems.length === 0 ? (
+                  <EmptyAnswerPreviewCard />
+                ) : previewItems.map((item, index) => (
+                  <AnswerPreviewCard key={item.replyId} item={item} top={index * 98} />
+                ))}
+              </section>
+
+              <h2 className="absolute left-5 text-[16px] font-extrabold leading-5 tracking-[-0.16px] text-white" style={{ top: settingsHeadingTop }}>설정</h2>
+              <SettingsCard
+                top={settingsCardTop}
+                settings={props.settings}
+                pushSettings={props.pushSettings}
+                isLogoutProcessing={isLogoutProcessing}
+                isAccountDeletionProcessing={isAccountDeletionProcessing}
+                onSettingSelect={props.onSettingSelect}
+              />
+            </div>
+          </PeekHeaderScrollArea>
         </div>
       </div>
       <ConfirmationDialog title="로그아웃할까요?" description="이 기기에서 Qling 계정 연결을 해제합니다." confirmLabel="로그아웃" confirmation={props.logoutConfirmation} />
       <ConfirmationDialog title="계정을 삭제할까요?" description="계정 삭제는 되돌릴 수 없습니다. 작성한 고민과 답변 접근도 함께 중단됩니다." confirmLabel="계정 삭제" confirmation={props.accountDeletionConfirmation} destructive />
     </section>
   );
+}
+
+function MyPageHeader({
+  onBack,
+  style,
+}: {
+  readonly onBack: () => void;
+  readonly style: CSSProperties;
+}) {
+  return (
+    <header
+      className="h-[100px] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
+      style={style}
+      onTouchMove={blockLockedScroll}
+      onWheel={blockLockedScroll}
+    >
+      <div
+        className="relative mx-auto h-[100px] w-full max-w-[393px] transform-gpu"
+        data-qling-peek-header-content="true"
+        style={{ transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))' }}
+      >
+        <button
+          type="button"
+          aria-label="이전 화면으로 돌아가기"
+          onClick={onBack}
+          className="absolute left-[16px] top-[45px] flex h-[45px] w-[24px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          <span aria-hidden="true">‹</span>
+        </button>
+        <h1 className="absolute left-0 top-[60px] w-full text-center text-[17px] font-extrabold leading-none tracking-[-0.02em] text-white">
+          마이페이지
+        </h1>
+      </div>
+    </header>
+  );
+}
+
+function blockLockedScroll(event: TouchEvent<HTMLElement> | WheelEvent<HTMLElement>) {
+  const { preventDefault, stopPropagation } = event;
+  preventDefault.call(event);
+  stopPropagation.call(event);
 }
 
 function DefaultProfileImage({ label, profileColor }: { readonly label: string; readonly profileColor: string }) {
