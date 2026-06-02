@@ -36,8 +36,7 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
   const [localFeedbackByReplyId, setLocalFeedbackByReplyId] = useState(new Map<string, 'helpful' | 'not_helpful'>());
   const [localCommentByReplyId, setLocalCommentByReplyId] = useState(new Map<string, string>());
   const [commentDialog, setCommentDialog] = useState<CommentDialogState | null>(null);
-
-  const [likeActionPopup, setLikeActionPopup] = useState<{ replyId: string } | null>(null);
+  const [likeRequiredPopupOpen, setLikeRequiredPopupOpen] = useState(false);
 
   const worry = useMemo(
     () => myWorries.find(item => item.id === worryId) ?? null,
@@ -118,11 +117,10 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
         validationMessage: validation?.status === 'validation_error' ? validation.message : undefined,
         moderationMessage: commentDialog.moderationMessage,
       } : null}
-      likeActionPopup={likeActionPopup}
+      likeRequiredPopupOpen={likeRequiredPopupOpen}
       onBack={() => props.setView(backRouteForRoute({ route: 'answer_check', worryId: worryId ?? '' }))}
       onLike={async replyId => {
-        const result = await submitFeedback(replyId, 'helpful');
-        if (result?.status === 'saved') setLikeActionPopup({ replyId });
+        await submitFeedback(replyId, 'helpful');
       }}
       onDislike={async replyId => {
         const result = await submitFeedback(replyId, 'not_helpful');
@@ -130,6 +128,7 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
           setHiddenReplyIds(current => new Set(current).add(replyId));
         }
       }}
+      onOpenLikeRequiredPopup={() => setLikeRequiredPopupOpen(true)}
       onOpenOneLineReply={openOneLineReply}
       onCommentChange={value => setCommentDialog(prev => prev ? { ...prev, draft: value, moderationMessage: undefined } : prev)}
       onCommentSubmit={async () => {
@@ -142,9 +141,8 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
         if (result?.status === 'saved') closeComment();
       }}
       onCommentClose={closeComment}
-      onCloseLikeActionPopup={() => setLikeActionPopup(null)}
+      onCloseLikeRequiredPopup={() => setLikeRequiredPopupOpen(false)}
       onStartChat={async (replyId) => {
-        setLikeActionPopup(null);
         props.setFilterAlert('채팅방을 생성하고 있습니다...');
         try {
           const token = await props.user?.getIdToken();

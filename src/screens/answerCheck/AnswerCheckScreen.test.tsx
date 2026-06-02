@@ -23,6 +23,7 @@ function baseProps(overrides: Partial<AnswerCheckScreenProps> = {}): AnswerCheck
         canLike: true,
         canDislike: true,
         canOneLineReply: false,
+        canChat: false,
         isFeedbackProcessing: false,
         isCommentProcessing: false,
       },
@@ -35,18 +36,23 @@ function baseProps(overrides: Partial<AnswerCheckScreenProps> = {}): AnswerCheck
         canLike: true,
         canDislike: false,
         canOneLineReply: false,
+        canChat: true,
         isFeedbackProcessing: false,
         isCommentProcessing: false,
       },
     ],
     commentDialog: null,
+    likeRequiredPopupOpen: false,
     onBack: () => undefined,
     onLike: () => undefined,
     onDislike: () => undefined,
+    onOpenLikeRequiredPopup: () => undefined,
     onOpenOneLineReply: () => undefined,
     onCommentChange: () => undefined,
     onCommentSubmit: () => undefined,
     onCommentClose: () => undefined,
+    onCloseLikeRequiredPopup: () => undefined,
+    onStartChat: () => undefined,
     ...overrides,
   };
 }
@@ -164,6 +170,7 @@ test('liked answer without a comment shows chat and one-line reply actions', () 
       canLike: true,
       canDislike: false,
       canOneLineReply: true,
+      canChat: true,
       isFeedbackProcessing: false,
       isCommentProcessing: false,
     }],
@@ -175,36 +182,49 @@ test('liked answer without a comment shows chat and one-line reply actions', () 
   assert.match(html, /absolute left-1\/2 top-\[3px\] h-\[45px\] w-px -translate-x-1\/2/);
   assert.match(html, /bg-gradient-to-b/);
   assert.match(html, /bg-\[#c2c4c8\]/);
+  assert.match(html, /text-black/);
+  assert.doesNotMatch(html, /text-\[#c4b9a1\]/);
   assert.doesNotMatch(html, /min-h-\[281px\]/);
   assert.doesNotMatch(html, /absolute left-\[15px\] top-\[230px\]/);
 });
 
-test('none and disliked answers do not show chat or one-line reply actions', () => {
+test('unliked answers show disabled-looking chat and one-line reply actions', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
-    replies: [
-      {
-        replyId: 'reply-none',
-        bodyText: '아직 선택 전',
-        createdAtLabel: '1분 전',
-        feedbackState: 'none',
-        canLike: true,
-        canDislike: true,
-        canOneLineReply: false,
-        isFeedbackProcessing: false,
-        isCommentProcessing: false,
-      },
-      {
-        replyId: 'reply-disliked',
-        bodyText: '싫어요 답변 본문',
-        createdAtLabel: '2분 전',
-        feedbackState: 'disliked',
-        canLike: false,
-        canDislike: true,
-        canOneLineReply: false,
-        isFeedbackProcessing: false,
-        isCommentProcessing: false,
-      },
-    ],
+    replies: [{
+      replyId: 'reply-none',
+      bodyText: '아직 선택 전',
+      createdAtLabel: '1분 전',
+      feedbackState: 'none',
+      canLike: true,
+      canDislike: true,
+      canOneLineReply: false,
+      canChat: false,
+      isFeedbackProcessing: false,
+      isCommentProcessing: false,
+    }],
+  })));
+
+  assert.match(html, /채팅 시작/);
+  assert.match(html, /한 줄 답변/);
+  assert.match(html, /text-\[#c4b9a1\]/);
+  assert.equal((html.match(/aria-disabled="true"/g) ?? []).length, 2);
+  assert.doesNotMatch(html, /disabled:cursor-not-allowed disabled:opacity-45/);
+});
+
+test('disliked answers do not show chat or one-line reply actions', () => {
+  const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
+    replies: [{
+      replyId: 'reply-disliked',
+      bodyText: '싫어요 답변 본문',
+      createdAtLabel: '2분 전',
+      feedbackState: 'disliked',
+      canLike: false,
+      canDislike: true,
+      canOneLineReply: false,
+      canChat: false,
+      isFeedbackProcessing: false,
+      isCommentProcessing: false,
+    }],
   })));
 
   assert.equal(html.includes('채팅 시작'), false);
@@ -221,6 +241,7 @@ test('disliked answers use the active bad asset without rotating the icon', () =
       canLike: false,
       canDislike: true,
       canOneLineReply: false,
+      canChat: false,
       isFeedbackProcessing: false,
       isCommentProcessing: false,
     }],
@@ -232,13 +253,45 @@ test('disliked answers use the active bad asset without rotating the icon', () =
 });
 
 test('saved publisher comment appears under the answer card divider', () => {
-  const html = renderToStaticMarkup(AnswerCheckScreen(baseProps()));
+  const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
+    replies: [{
+      replyId: 'reply-commented',
+      bodyText: '두 번째 답변 본문',
+      createdAtLabel: '1분 전',
+      publisherComment: '고마웠어요',
+      feedbackState: 'liked',
+      canLike: true,
+      canDislike: false,
+      canOneLineReply: false,
+      canChat: true,
+      isFeedbackProcessing: false,
+      isCommentProcessing: false,
+    }],
+  })));
 
   assert.match(html, /고마웠어요/);
   assert.match(html, /mt-\[12px\] whitespace-pre-wrap break-words/);
   assert.match(html, /bg-\[#c2c4c8\]/);
   assert.equal(html.includes('채팅 시작'), false);
   assert.equal(html.includes('한 줄 답변'), false);
+});
+
+test('like-required popup matches the Figma warning modal copy and chrome', () => {
+  const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
+    likeRequiredPopupOpen: true,
+  })));
+
+  assert.match(html, /role="dialog"/);
+  assert.match(html, /aria-modal="true"/);
+  assert.match(html, /bg-black\/32/);
+  assert.match(html, /h-\[288px\] w-\[310px\] rounded-\[24px\] bg-white/);
+  assert.match(html, /먼저 좋아요를 눌러주세요!/);
+  assert.match(html, /좋아요를 누른 답변에 한해/);
+  assert.match(html, /채팅과 한 줄 답변을 남길 수 있어요/);
+  assert.match(html, />확인<\/button>/);
+  assert.doesNotMatch(html, /코멘트 남기기/);
+  assert.doesNotMatch(html, /1대1 대화하기/);
+  assert.doesNotMatch(html, /아무것도 안하기/);
 });
 
 test('one-line reply editor supports submit and cancel callbacks', () => {
