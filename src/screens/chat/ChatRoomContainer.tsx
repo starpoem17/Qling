@@ -15,8 +15,9 @@ export function ChatRoomContainer({
   readonly setView: (view: AppRouteViewState) => void;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [opponent, setOpponent] = useState<{ nickname: string; profileColor: string } | null>(null);
+  const [opponent, setOpponent] = useState<{ nickname: string; profileColor: string; uid: string } | null>(null);
   const [worryInfo, setWorryInfo] = useState<{ category: string; title: string; createdAtStr: string } | null>(null);
+  const [opponentUnreadCount, setOpponentUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -55,12 +56,17 @@ export function ChatRoomContainer({
         if (opponentUid && !opponent) {
           if (chatData.participantProfiles && chatData.participantProfiles[opponentUid]) {
             setOpponent({
+              uid: opponentUid,
               nickname: chatData.participantProfiles[opponentUid].nickname || '익명',
               profileColor: chatData.participantProfiles[opponentUid].profileColor || '#FF8B3D',
             });
           } else {
-            setOpponent({ nickname: '알 수 없음', profileColor: '#cccccc' });
+            setOpponent({ uid: opponentUid, nickname: '알 수 없음', profileColor: '#cccccc' });
           }
+        }
+
+        if (opponentUid) {
+           setOpponentUnreadCount(chatData.unreadCounts?.[opponentUid] || 0);
         }
 
         if (chatData.worryId && !worryFetchedRef.current) {
@@ -70,8 +76,8 @@ export function ChatRoomContainer({
               const wd = snap.data();
               const date = wd.createdAt ? wd.createdAt.toDate() : new Date();
               setWorryInfo({
-                category: wd.category || '고민',
-                title: wd.title || '제목 없음',
+                category: (wd.validCategories && wd.validCategories[0]) || '기타',
+                title: wd.summaryText || '게시글 내용을 불러올 수 없습니다',
                 createdAtStr: `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()}`,
               });
             }
@@ -105,7 +111,6 @@ export function ChatRoomContainer({
             content: data.content,
             isMine: data.senderUid === user.uid,
             createdAtStr: `${isAm ? '오전' : '오후'} ${hours}:${minutes}`,
-            readStatus: '읽음',
           };
         });
         setMessages(newMessages);
@@ -174,6 +179,7 @@ export function ChatRoomContainer({
       error={error}
       messages={messages}
       opponent={opponent}
+      opponentUnreadCount={opponentUnreadCount}
       worryInfo={worryInfo}
       onBack={() => setView({ route: 'chat' })}
       onSendMessage={handleSendMessage}

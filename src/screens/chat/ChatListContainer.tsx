@@ -81,8 +81,8 @@ export function ChatListContainer({
               const worrySnap = await getDoc(doc(db, 'worries', item.worryId));
               if (worrySnap.exists()) {
                 const wData = worrySnap.data();
-                item.worryCategory = wData.category || '기타';
-                item.worryTitle = wData.title || '제목 없음';
+                item.worryCategory = (wData.validCategories && wData.validCategories[0]) || '기타';
+                item.worryTitle = wData.summaryText || '게시글 내용을 불러올 수 없습니다';
               }
             } catch (e) {
                console.error('Failed to fetch worry:', e);
