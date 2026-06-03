@@ -56,9 +56,35 @@ export function registerChatRoutes(app: express.Express, deps: {
           return;
         }
 
-        const chatId = replyId;
-        const chatRef = db.collection('chats').doc(chatId);
-        const chatDoc = await chatRef.get();
+        const chatRef = db.collection('chats');
+        
+        // Check if there is an existing active chat for this reply where this user is a participant
+        const existingChatsSnap = await chatRef
+          .where('replyId', '==', replyId)
+          .where('participants', 'array-contains', uid)
+          .get();
+        
+        const activeChat = existingChatsSnap.docs.find(doc => doc.data().status === 'active');
+
+        if (activeChat) {
+          // If the user is already in an active chat for this reply, just return it
+          // Update profiles just in case
+          const authorSnap = await db.collection('users').doc(replyData.authorUid).get();
+          const replierSnap = await db.collection('users').doc(replyData.replierUid).get();
+          const participantProfiles = {
+            [replyData.authorUid]: {
+              nickname: authorSnap.data()?.nickname || '익명',
+              profileColor: authorSnap.data()?.profileColor || '#FF8B3D'
+            },
+            [replyData.replierUid]: {
+              nickname: replierSnap.data()?.nickname || '익명',
+              profileColor: replierSnap.data()?.profileColor || '#FF8B3D'
+            }
+          };
+          await activeChat.ref.update({ participantProfiles });
+          res.status(200).json({ status: 'success', chatId: activeChat.id });
+          return;
+        }
 
         const authorSnap = await db.collection('users').doc(replyData.authorUid).get();
         const replierSnap = await db.collection('users').doc(replyData.replierUid).get();
@@ -74,27 +100,26 @@ export function registerChatRoutes(app: express.Express, deps: {
           }
         };
 
-        if (!chatDoc.exists) {
-          await chatRef.set({
-            replyId: replyId,
-            worryId: replyData.worryId,
-            authorUid: replyData.authorUid,
-            replierUid: replyData.replierUid,
-            participants: [replyData.authorUid, replyData.replierUid],
-            participantProfiles,
-            createdAt: FieldValue.serverTimestamp(),
-            lastMessageAt: null,
-            lastMessageText: '',
-            status: 'active',
-            unreadCounts: {
-              [replyData.authorUid]: 0,
-              [replyData.replierUid]: 0,
-            }
-          });
-        } else {
-          // Update profiles just in case they were missing or updated
-          await chatRef.update({ participantProfiles });
-        }
+        // Create a NEW chat room since there is no active one for this user
+        const newChatRef = chatRef.doc(); // Auto-generated ID
+        const chatId = newChatRef.id;
+
+        await newChatRef.set({
+          replyId: replyId,
+          worryId: replyData.worryId,
+          authorUid: replyData.authorUid,
+          replierUid: replyData.replierUid,
+          participants: [replyData.authorUid, replyData.replierUid],
+          participantProfiles,
+          createdAt: FieldValue.serverTimestamp(),
+          lastMessageAt: null,
+          lastMessageText: '',
+          status: 'active',
+          unreadCounts: {
+            [replyData.authorUid]: 0,
+            [replyData.replierUid]: 0,
+          }
+        });
 
         res.status(200).json({ status: 'success', chatId });
       } catch (error) {
