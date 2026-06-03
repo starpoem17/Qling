@@ -1,11 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '../../lib/utils';
-import { FigmaTopBar, ErrorState } from '../shared/ui';
+import { ChevronLeft, MoreVertical, Plus, Send } from 'lucide-react';
+import { ErrorState } from '../shared/ui';
 
 export interface ChatMessage {
   messageId: string;
   content: string;
   isMine: boolean;
+  createdAtStr: string;
+  readStatus?: string;
+}
+
+export interface WorryInfo {
+  category: string;
+  title: string;
   createdAtStr: string;
 }
 
@@ -14,6 +22,7 @@ export function ChatRoomScreen({
   error,
   messages,
   opponent,
+  worryInfo,
   onBack,
   onSendMessage,
   onLeaveChat,
@@ -22,6 +31,7 @@ export function ChatRoomScreen({
   readonly error: string | null;
   readonly messages: ChatMessage[];
   readonly opponent: { nickname: string; profileColor: string } | null;
+  readonly worryInfo?: WorryInfo | null;
   readonly onBack: () => void;
   readonly onSendMessage: (content: string) => Promise<{ success: boolean; error?: string }>;
   readonly onLeaveChat: () => void;
@@ -50,26 +60,19 @@ export function ChatRoomScreen({
     setIsSending(false);
   };
 
-  if (loading) {
+  if (loading || error) {
     return (
       <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div className="relative h-[852px] w-[393px] shrink-0 origin-top bg-[#fff1d1]" style={{ transform: `scale(${canvasScale})` }}>
-             <FigmaTopBar title="채팅" onBack={onBack} backLabel="뒤로가기" />
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
-        <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-          <div className="relative h-[852px] w-[393px] shrink-0 origin-top bg-[#fff1d1]" style={{ transform: `scale(${canvasScale})` }}>
-            <FigmaTopBar title="채팅" onBack={onBack} backLabel="뒤로가기" />
-            <div className="pt-[127px] px-[24px]">
-              <ErrorState title="오류" message={error} />
+            {/* Simple Top Bar for Loading/Error */}
+            <div className="flex h-[110px] w-full items-end justify-between px-4 pb-4 bg-[#ff8b3d] text-white">
+              <button type="button" onClick={onBack} className="p-2"><ChevronLeft className="w-7 h-7" strokeWidth={3} /></button>
+              <span className="text-[18px] font-bold">채팅</span>
+              <div className="w-11"></div>
+            </div>
+            <div className="pt-[40px] px-[24px]">
+              {error ? <ErrorState title="오류" message={error} /> : <div className="text-center font-bold text-[#b8b8b8]">로딩 중...</div>}
             </div>
           </div>
         </div>
@@ -78,95 +81,159 @@ export function ChatRoomScreen({
   }
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 min-h-full overflow-hidden bg-[#fff1d1] pb-[calc(24px+env(safe-area-inset-bottom,0px))]">
-      <div className="mx-auto flex w-full max-w-[480px] justify-center overflow-visible">
+    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]" onClick={() => setMenuOpen(false)}>
+      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
         <div
-          className="relative min-h-[852px] w-[393px] shrink-0 origin-top bg-[#fff1d1] flex flex-col"
+          className="relative h-[852px] w-[393px] shrink-0 origin-top bg-[#ff8b3d] flex flex-col"
           style={{ transform: `scale(${canvasScale})` }}
         >
-          <FigmaTopBar 
-            title={opponent?.nickname || '대화방'} 
-            onBack={onBack} 
-            backLabel="뒤로가기" 
-            rightComponent={
-              <div className="relative">
-                <button 
-                  type="button" 
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  className="p-2 text-[#2a2a2a] hover:bg-black/5 rounded-full"
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="1"></circle>
-                    <circle cx="12" cy="5" r="1"></circle>
-                    <circle cx="12" cy="19" r="1"></circle>
-                  </svg>
-                </button>
-                {menuOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-[150px] bg-white rounded-[12px] shadow-[0_4px_10px_rgb(0_0_0/0.15)] overflow-hidden z-30">
-                    <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={() => { setMenuOpen(false); alert('알림이 꺼졌습니다.'); }}>알림 끄기</button>
-                    <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={() => { setMenuOpen(false); onLeaveChat(); }}>채팅방 나가기</button>
-                    <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={() => { setMenuOpen(false); alert('신고가 접수되었습니다.'); }}>신고하기</button>
-                  </div>
-                )}
-              </div>
-            }
-          />
-          
-          <div className="flex-1 overflow-y-auto pt-[127px] pb-[80px] px-[24px] scrollbar-hide" onClick={() => setMenuOpen(false)}>
-            {messages.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-[14px] font-bold text-[#b8b8b8]">
-                첫 메시지를 보내보세요!
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {messages.map(msg => (
-                  <div key={msg.messageId} className={cn('flex flex-col', msg.isMine ? 'items-end' : 'items-start')}>
-                    {!msg.isMine && (
-                       <div className="flex items-center gap-2 mb-1">
-                         <div className="w-[30px] h-[30px] rounded-full" style={{ backgroundColor: opponent?.profileColor }} />
-                         <span className="text-[12px] font-bold text-[#2a2a2a]">{opponent?.nickname}</span>
-                       </div>
-                    )}
-                    <div className={cn(
-                      'max-w-[70%] rounded-[18px] px-4 py-[10px] text-[14px] font-bold leading-[21px] tracking-[-0.42px]',
-                      msg.isMine ? 'bg-[#ff8b3d] text-white rounded-tr-sm' : 'bg-white text-[#2a2a2a] rounded-tl-sm shadow-[0_4px_4px_rgb(0_0_0/0.1)]'
-                    )}>
-                      {msg.content}
+          {/* Top Bar Area */}
+          <div className="flex h-[115px] w-full shrink-0 items-end justify-between px-4 pb-4 text-white z-20 bg-[#ff8b3d]">
+            <button type="button" onClick={onBack} className="p-2 focus:outline-none">
+              <ChevronLeft className="w-7 h-7" strokeWidth={3} />
+            </button>
+            <div className="flex flex-col items-center justify-end pb-1">
+               <div className="relative mb-[6px]">
+                 <div className="w-[42px] h-[42px] rounded-full flex items-center justify-center overflow-hidden shadow-sm" style={{ backgroundColor: opponent?.profileColor || '#ffd43b' }}>
+                    <div className="w-[16px] h-[8px] bg-white rounded-full flex items-center justify-center gap-[2px]">
+                        <div className="w-[4px] h-[5px] bg-[#2a2a2a] rounded-full"></div>
+                        <div className="w-[4px] h-[5px] bg-[#2a2a2a] rounded-full"></div>
                     </div>
-                    <span className="mt-1 text-[10px] text-[#b8b8b8]">{msg.createdAtStr}</span>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-            )}
-          </div>
-
-          <div className="absolute bottom-0 left-0 w-full bg-white px-4 py-3 shadow-[0_-4px_10px_rgb(0_0_0/0.05)]">
-            {sendError && (
-              <div className="mb-2 text-center text-[12px] font-bold text-[var(--qling-color-danger)]">
-                {sendError}
-              </div>
-            )}
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={draft}
-                onChange={e => setDraft(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                placeholder="메시지를 입력하세요"
-                className="flex-1 rounded-full border border-[#c2c4c8] bg-[#f8f9fa] px-4 py-2 text-[14px] outline-none focus:border-[#ff8b3d] focus:ring-1 focus:ring-[#ff8b3d]"
-              />
-              <button
-                type="button"
-                onClick={handleSend}
-                disabled={!draft.trim() || isSending}
-                className="flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#ff8b3d] text-white disabled:bg-[#c2c4c8]"
+                 </div>
+                 {/* Online dot */}
+                 <div className="absolute bottom-0 right-0 w-[12px] h-[12px] bg-[#22c55e] border-[2px] border-[#ff8b3d] rounded-full"></div>
+               </div>
+               <span className="text-[17px] font-extrabold tracking-tight leading-none mb-1">{opponent?.nickname || '대화방'}</span>
+               <span className="text-[12px] font-medium text-white/90">답변 채택률 92%</span>
+            </div>
+            <div className="relative pb-5">
+              <button 
+                type="button" 
+                onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
+                className="p-2 focus:outline-none"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13"></line>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
+                <MoreVertical className="w-6 h-6" strokeWidth={2.5} />
               </button>
+              {menuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-[160px] bg-white rounded-[14px] shadow-[0_4px_16px_rgb(0_0_0/0.15)] overflow-hidden z-30">
+                  <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); alert('알림이 꺼졌습니다.'); }}>알림 끄기</button>
+                  <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onLeaveChat(); }}>채팅방 나가기</button>
+                  <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); alert('신고가 접수되었습니다.'); }}>신고하기</button>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Chat Content Area */}
+          <div className="flex-1 w-full bg-[#fff1d1] rounded-t-[24px] overflow-hidden flex flex-col relative z-10 shadow-[0_-4px_16px_rgb(0_0_0/0.05)]">
+            <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-hide">
+              {/* Date Pill */}
+              <div className="w-full flex justify-center mb-6">
+                 <span className="bg-[#ffe8d6] text-[#ff8b3d] px-[14px] py-[6px] rounded-full text-[13px] font-bold tracking-tight">
+                    {worryInfo?.createdAtStr || '날짜 정보 없음'}
+                 </span>
+              </div>
+
+              {/* Worry Card */}
+              <div className="w-full bg-white rounded-[20px] p-5 shadow-[0_4px_12px_rgb(0_0_0/0.04)] mb-8">
+                 <span className="bg-[#ffe8d6] text-[#ff8b3d] px-[10px] py-[4px] rounded-[8px] text-[12px] font-bold inline-block mb-3">
+                    {worryInfo?.category || '고민'}
+                 </span>
+                 <h3 className="text-[16px] font-bold text-[#2a2a2a] leading-[1.4] tracking-tight mb-2">
+                    {worryInfo?.title || '게시글 정보 불러오는 중...'}
+                 </h3>
+                 <p className="text-[13px] font-medium text-[#b8b8b8]">이 고민의 답변에서 시작된 대화예요</p>
+              </div>
+
+              {/* Messages */}
+              <div className="flex flex-col gap-5">
+                {messages.map((msg, index) => {
+                  const showProfile = !msg.isMine && (index === 0 || messages[index - 1].isMine);
+
+                  return (
+                    <div key={msg.messageId} className={cn('flex w-full', msg.isMine ? 'justify-end' : 'justify-start')}>
+                      {!msg.isMine && (
+                         <div className="flex items-start gap-[10px] max-w-[85%]">
+                            {/* Opponent Avatar */}
+                            <div className="relative shrink-0 mt-1">
+                               {showProfile ? (
+                                  <>
+                                    <div className="w-[38px] h-[38px] rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: opponent?.profileColor || '#ffd43b' }}>
+                                       <div className="w-[14px] h-[7px] bg-white rounded-full flex items-center justify-center gap-[1px]">
+                                           <div className="w-[3px] h-[5px] bg-[#2a2a2a] rounded-full"></div>
+                                           <div className="w-[3px] h-[5px] bg-[#2a2a2a] rounded-full"></div>
+                                       </div>
+                                    </div>
+                                    <div className="absolute bottom-0 right-0 w-[10px] h-[10px] bg-[#22c55e] border-[1.5px] border-[#fff1d1] rounded-full"></div>
+                                  </>
+                               ) : (
+                                  <div className="w-[38px] h-[38px]"></div> // Empty space for alignment
+                               )}
+                            </div>
+                            
+                            <div className="flex flex-col items-start gap-1">
+                               <div className="bg-white text-[#2a2a2a] rounded-tr-[18px] rounded-br-[18px] rounded-bl-[18px] px-[18px] py-[12px] shadow-[0_2px_8px_rgb(0_0_0/0.03)] text-[15px] font-medium leading-[1.5] tracking-[-0.3px] break-words">
+                                  {msg.content}
+                               </div>
+                            </div>
+                            
+                            {/* Read Status and Time - Left side for opponent */}
+                            <div className="flex flex-col items-start justify-end shrink-0 pb-1 gap-[2px]">
+                               <span className="text-[11px] font-bold text-[#b8b8b8]">{msg.createdAtStr}</span>
+                            </div>
+                         </div>
+                      )}
+                      
+                      {msg.isMine && (
+                         <div className="flex items-end gap-2 max-w-[85%]">
+                            {/* Read Status and Time - Right side for mine */}
+                            <div className="flex flex-col items-end justify-end shrink-0 pb-1 gap-[2px]">
+                               {msg.readStatus && <span className="text-[11px] font-bold text-[#ff8b3d]">{msg.readStatus}</span>}
+                               <span className="text-[11px] font-bold text-[#b8b8b8]">{msg.createdAtStr}</span>
+                            </div>
+
+                            <div className="bg-[#ff8b3d] text-white rounded-tl-[18px] rounded-bl-[18px] rounded-br-[18px] px-[18px] py-[12px] shadow-[0_2px_8px_rgb(0_0_0/0.08)] text-[15px] font-bold leading-[1.5] tracking-[-0.3px] break-words">
+                               {msg.content}
+                            </div>
+                         </div>
+                      )}
+                    </div>
+                  );
+                })}
+                <div ref={messagesEndRef} className="h-[2px]" />
+              </div>
+            </div>
+
+            {/* Input Area */}
+            <div className="w-full bg-white px-4 py-3 shadow-[0_-4px_16px_rgb(0_0_0/0.03)] z-20 pb-[calc(12px+env(safe-area-inset-bottom,0px))]">
+              {sendError && (
+                <div className="mb-2 text-center text-[12px] font-bold text-red-500">
+                  {sendError}
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <button type="button" className="w-[38px] h-[38px] rounded-full bg-[#fff1d1] text-[#ff8b3d] flex items-center justify-center shrink-0 focus:outline-none">
+                  <Plus className="w-6 h-6" strokeWidth={2.5} />
+                </button>
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    value={draft}
+                    onChange={e => setDraft(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                    placeholder="메시지를 입력해 주세요"
+                    className="w-full rounded-[24px] bg-[#fff1d1] border-none px-[18px] py-[12px] text-[15px] font-medium text-[#2a2a2a] placeholder:text-[#c4a984] focus:outline-none focus:ring-1 focus:ring-[#ff8b3d]"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSend}
+                  disabled={!draft.trim() || isSending}
+                  className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#ff8b3d] text-white shrink-0 shadow-sm focus:outline-none transition-transform active:scale-95 disabled:bg-[#ffe8d6] disabled:text-[#ffb587]"
+                >
+                  <Send className="w-5 h-5 ml-[2px]" strokeWidth={2} />
+                </button>
+              </div>
             </div>
           </div>
         </div>

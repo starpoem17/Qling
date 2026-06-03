@@ -16,9 +16,12 @@ export function ChatRoomContainer({
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [opponent, setOpponent] = useState<{ nickname: string; profileColor: string } | null>(null);
+  const [worryInfo, setWorryInfo] = useState<{ category: string; title: string; createdAtStr: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  const worryFetchedRef = useRef(false);
+
   useEffect(() => {
     if (!user || !chatId) return;
 
@@ -31,7 +34,7 @@ export function ChatRoomContainer({
       }).catch(err => console.error('Failed to mark chat as read:', err));
     }).catch(err => console.error('Failed to get token:', err));
 
-    // Listen to chat doc to get participants
+    // Listen to chat doc to get participants and worryId
     const unsubscribeChat = onSnapshot(
       doc(db, 'chats', chatId),
       async (chatSnap) => {
@@ -59,6 +62,21 @@ export function ChatRoomContainer({
             setOpponent({ nickname: '알 수 없음', profileColor: '#cccccc' });
           }
         }
+
+        if (chatData.worryId && !worryFetchedRef.current) {
+          worryFetchedRef.current = true;
+          getDoc(doc(db, 'worries', chatData.worryId)).then(snap => {
+            if (snap.exists()) {
+              const wd = snap.data();
+              const date = wd.createdAt ? wd.createdAt.toDate() : new Date();
+              setWorryInfo({
+                category: wd.category || '고민',
+                title: wd.title || '제목 없음',
+                createdAtStr: `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()}`,
+              });
+            }
+          });
+        }
       },
       (err) => {
         console.error('Chat sub error:', err);
@@ -75,14 +93,19 @@ export function ChatRoomContainer({
     const unsubscribeMessages = onSnapshot(
       messagesQuery,
       (snap) => {
-        const newMessages: ChatMessage[] = snap.docs.map(doc => {
-          const data = doc.data();
+        const newMessages: ChatMessage[] = snap.docs.map(docSnap => {
+          const data = docSnap.data();
           const createdAt = data.createdAt ? data.createdAt.toDate() : new Date();
+          const isAm = createdAt.getHours() < 12;
+          const hours = createdAt.getHours() % 12 || 12;
+          const minutes = createdAt.getMinutes().toString().padStart(2, '0');
+
           return {
-            messageId: doc.id,
+            messageId: docSnap.id,
             content: data.content,
             isMine: data.senderUid === user.uid,
-            createdAtStr: createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            createdAtStr: `${isAm ? '오전' : '오후'} ${hours}:${minutes}`,
+            readStatus: '읽음',
           };
         });
         setMessages(newMessages);
@@ -151,6 +174,7 @@ export function ChatRoomContainer({
       error={error}
       messages={messages}
       opponent={opponent}
+      worryInfo={worryInfo}
       onBack={() => setView({ route: 'chat' })}
       onSendMessage={handleSendMessage}
       onLeaveChat={handleLeaveChat}

@@ -127,7 +127,7 @@ export function ChatListContainer({
       chats={chats}
       onChatClick={(chatId) => setView({ route: 'chat_room', chatId })}
       onBack={() => setView({ route: 'home' })}
-      onProfileClick={() => setView({ route: 'profile' })}
+      onProfileClick={() => setView({ route: '마이페이지' })}
       onLeaveChat={handleLeaveChat}
     />
   );
