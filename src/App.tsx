@@ -520,8 +520,8 @@ export default function App() {
                 targetUid={view.targetUid}
                 targetNickname={view.targetNickname}
                 chatId={view.chatId}
-                onBack={() => setView({ route: 'chat_room', chatId: view.chatId })}
-                onSuccess={() => setView({ route: 'chat_room', chatId: view.chatId })}
+                onBack={() => setView(view.fromRoute || { route: 'chat_room', chatId: view.chatId })}
+                onSuccess={() => setView(view.fromRoute || { route: 'chat_room', chatId: view.chatId })}
               />
             </motion.div>
           )}

@@ -4,6 +4,7 @@ import { profileImageUrlForColor } from '../shared/ui';
 
 export interface ChatListItem {
   chatId: string;
+  opponentUid: string;
   opponentName: string;
   opponentColor: string;
   lastMessage: string;
@@ -27,6 +28,7 @@ export function ChatScreen({
   readonly onBack?: () => void;
   readonly onProfileClick?: () => void;
   readonly onLeaveChat?: (chatId: string) => void;
+  readonly onReportUser?: (chatId: string, opponentUid: string, opponentNickname: string) => void;
 }) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
@@ -91,7 +93,7 @@ export function ChatScreen({
                         <div className="absolute right-0 top-full mt-1 w-[150px] bg-white rounded-[12px] shadow-[0_4px_10px_rgb(0_0_0/0.15)] overflow-hidden z-30">
                           <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); alert('알림이 꺼졌습니다.'); }}>알림 끄기</button>
                           <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); onLeaveChat && onLeaveChat(chat.chatId); }}>채팅방 나가기</button>
-                          <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); alert('신고가 접수되었습니다.'); }}>신고하기</button>
+                          <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); onReportUser && onReportUser(chat.chatId, chat.opponentUid, chat.opponentName); }}>신고하기</button>
                         </div>
                       )}
                     </div>

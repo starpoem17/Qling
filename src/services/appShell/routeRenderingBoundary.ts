@@ -48,6 +48,7 @@ export const ROUTE_RENDERING_BOUNDARY = {
       '채팅',
       'chat',
       'chat_room',
+      'report_user',
       '순위',
       'ranking',
       '마이페이지',

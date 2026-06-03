@@ -59,9 +59,9 @@ export function ChatListContainer({
           }
 
           // Fetch worry details safely (will populate later if not available immediately)
-          // For now, push with empty worry data, then update
           chatItems.push({
             chatId: docSnap.id,
+            opponentUid: opponentUid || '',
             opponentName,
             opponentColor,
             lastMessage: data.lastMessageText || '대화가 시작되었습니다.',
@@ -126,9 +126,10 @@ export function ChatListContainer({
       loading={loading}
       chats={chats}
       onChatClick={(chatId) => setView({ route: 'chat_room', chatId })}
-      onBack={() => setView({ route: 'home' })}
+      onBack={() => setView({ route: 'home' } as any)}
       onProfileClick={() => setView({ route: '마이페이지' })}
       onLeaveChat={handleLeaveChat}
+      onReportUser={(chatId, targetUid, targetNickname) => setView({ route: 'report_user', targetUid, targetNickname, chatId, fromRoute: 'chat' })}
     />
   );
 }

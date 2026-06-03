@@ -199,7 +199,7 @@ export function ChatRoomContainer({
       onLeaveChat={handleLeaveChat}
       onReportUser={() => {
         if (opponent) {
-          setView({ route: 'report_user', targetUid: opponent.uid, targetNickname: opponent.nickname, chatId });
+          setView({ route: 'report_user', targetUid: opponent.uid, targetNickname: opponent.nickname, chatId, fromRoute: { route: 'chat_room', chatId } });
         }
       }}
     />

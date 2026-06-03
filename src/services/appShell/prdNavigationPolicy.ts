@@ -42,7 +42,7 @@ export type AppRouteState =
   | { route: 'answer_check'; worryId: string }
   | { route: 'my_worry_detail'; worryId: string }
   | { route: 'chat_room'; chatId: string }
-  | { route: 'report_user'; targetUid: string; targetNickname: string; chatId: string };
+  | { route: 'report_user'; targetUid: string; targetNickname: string; chatId: string; fromRoute?: AppRouteViewState };
 
 export type AppRouteViewState = AppRoute | AppRouteState;
 
@@ -86,6 +86,8 @@ export const REQUIRED_PHASE_2_ROUTE_STATES = [
   'received_answer_detail',
   'answer_check',
   'chat',
+  'chat_room',
+  'report_user',
   'ranking',
   'my_page',
   'edit_interests',
@@ -191,8 +193,8 @@ export function routeToChatRoom(params: { chatId: string }): AppRouteState {
   return { route: 'chat_room', chatId: params.chatId };
 }
 
-export function routeToReportUser(params: { targetUid: string; targetNickname: string; chatId: string }): AppRouteState {
-  return { route: 'report_user', targetUid: params.targetUid, targetNickname: params.targetNickname, chatId: params.chatId };
+export function routeToReportUser(params: { targetUid: string; targetNickname: string; chatId: string; fromRoute?: AppRouteViewState }): AppRouteState {
+  return { route: 'report_user', targetUid: params.targetUid, targetNickname: params.targetNickname, chatId: params.chatId, fromRoute: params.fromRoute };
 }
 
 export function backRouteForRoute(route: AppRouteViewState): AppRoute {
