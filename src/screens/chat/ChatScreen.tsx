@@ -65,11 +65,13 @@ export function ChatScreen({
           ) : chats && chats.length > 0 ? (
             <div className="flex flex-col gap-4">
               {chats.map(chat => (
-                <button
+                <div 
                   key={chat.chatId}
-                  type="button"
-                  onClick={() => onChatClick && onChatClick(chat.chatId)}
-                  className="flex w-full flex-col rounded-[20px] bg-white p-[18px] shadow-[0_4px_12px_rgb(0_0_0/0.06)] transition-transform hover:scale-[0.99] focus:outline-none text-left"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onChatClick && onChatClick(chat.chatId)} 
+                  onKeyDown={(e) => { if(e.key === 'Enter' || e.key === ' ') { onChatClick && onChatClick(chat.chatId); } }}
+                  className="flex w-full flex-col rounded-[20px] bg-white p-[18px] shadow-[0_4px_12px_rgb(0_0_0/0.06)] transition-transform hover:scale-[0.99] focus:outline-none text-left cursor-pointer"
                 >
                   {/* Header: Tag + Title + More Icon */}
                   <div className="flex items-center justify-between w-full mb-3 gap-2">
@@ -131,7 +133,7 @@ export function ChatScreen({
                             </div>
                         </div>
                     </div>
-                  </button>
+                  </div>
                 ))}
               </div>
             ) : (

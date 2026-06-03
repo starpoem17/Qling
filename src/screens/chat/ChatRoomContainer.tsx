@@ -198,9 +198,9 @@ export function ChatRoomContainer({
       onSendMessage={handleSendMessage}
       onLeaveChat={handleLeaveChat}
       onReportUser={() => {
-        if (opponent) {
-          setView({ route: 'report_user', targetUid: opponent.uid, targetNickname: opponent.nickname, chatId, fromRoute: { route: 'chat_room', chatId } });
-        }
+        const targetUid = opponent?.uid || 'unknown';
+        const targetNickname = opponent?.nickname || '알 수 없음';
+        setView({ route: 'report_user', targetUid, targetNickname, chatId, fromRoute: { route: 'chat_room', chatId } });
       }}
     />
   );
