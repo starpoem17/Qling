@@ -115,6 +115,19 @@ export function ChatRoomContainer({
         });
         setMessages(newMessages);
         setLoading(false);
+
+        // If the latest message is from the opponent, mark as read so they see '읽음' in real-time
+        if (snap.docs.length > 0) {
+          const lastData = snap.docs[snap.docs.length - 1].data();
+          if (lastData.senderUid !== user.uid) {
+            user.getIdToken().then(token => {
+              fetch(`/api/chats/${chatId}/read`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+              }).catch(e => console.error('Failed to update read status in real-time', e));
+            });
+          }
+        }
       },
       (err) => {
         console.error('Messages sub error:', err);

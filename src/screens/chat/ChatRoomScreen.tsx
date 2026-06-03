@@ -91,12 +91,11 @@ export function ChatRoomScreen({
           </button>
           <div className="flex flex-col items-center justify-end pb-1 overflow-hidden">
              <div className="relative mb-[6px] shrink-0">
-               <div className="w-[42px] h-[42px] rounded-full flex items-center justify-center overflow-hidden shadow-sm" style={{ backgroundColor: opponent?.profileColor || '#ffd43b' }}>
-                  <div className="w-[16px] h-[8px] bg-white rounded-full flex items-center justify-center gap-[2px]">
-                      <div className="w-[4px] h-[5px] bg-[#2a2a2a] rounded-full"></div>
-                      <div className="w-[4px] h-[5px] bg-[#2a2a2a] rounded-full"></div>
-                  </div>
-               </div>
+               <img 
+                 src={profileImageUrlForColor(opponent?.profileColor || '#ffd43b')}
+                 alt="프로필"
+                 className="w-[42px] h-[42px] rounded-full object-cover shadow-sm bg-white"
+               />
                {/* Online dot */}
                <div className="absolute bottom-0 right-0 w-[12px] h-[12px] bg-[#22c55e] border-[2px] border-[#ff8b3d] rounded-full"></div>
              </div>
@@ -162,12 +161,11 @@ export function ChatRoomScreen({
                           <div className="relative shrink-0 mt-1">
                              {showProfile ? (
                                 <>
-                                  <div className="w-[38px] h-[38px] rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: opponent?.profileColor || '#ffd43b' }}>
-                                     <div className="w-[14px] h-[7px] bg-white rounded-full flex items-center justify-center gap-[1px]">
-                                         <div className="w-[3px] h-[5px] bg-[#2a2a2a] rounded-full"></div>
-                                         <div className="w-[3px] h-[5px] bg-[#2a2a2a] rounded-full"></div>
-                                     </div>
-                                  </div>
+                                  <img 
+                                    src={profileImageUrlForColor(opponent?.profileColor || '#ffd43b')}
+                                    alt="프로필"
+                                    className="w-[38px] h-[38px] rounded-full object-cover shadow-sm bg-white"
+                                  />
                                   <div className="absolute bottom-0 right-0 w-[10px] h-[10px] bg-[#22c55e] border-[1.5px] border-[#fff1d1] rounded-full"></div>
                                 </>
                              ) : (
