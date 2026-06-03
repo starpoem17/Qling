@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '../../lib/utils';
 import { ChevronLeft, MoreVertical, Plus, Send } from 'lucide-react';
-import { ErrorState } from '../shared/ui';
+import { ErrorState, profileImageUrlForColor } from '../shared/ui';
 
 export interface ChatMessage {
   messageId: string;
