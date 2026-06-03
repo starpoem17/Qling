@@ -27,6 +27,7 @@ export function ChatRoomScreen({
   onBack,
   onSendMessage,
   onLeaveChat,
+  onReportUser,
 }: {
   readonly loading: boolean;
   readonly error: string | null;

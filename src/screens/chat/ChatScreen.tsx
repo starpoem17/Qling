@@ -21,6 +21,7 @@ export function ChatScreen({
   onBack,
   onProfileClick,
   onLeaveChat,
+  onReportUser,
 }: {
   readonly loading?: boolean;
   readonly chats?: ChatListItem[];
