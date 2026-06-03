@@ -137,7 +137,6 @@ export function ChatScreen({
             )}
           </div>
         </div>
-      </div>
     </section>
   );
 }
