@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ChevronLeft, MoreVertical, Search, UserCircle2 } from 'lucide-react';
 
 export interface ChatListItem {
@@ -16,16 +17,21 @@ export function ChatScreen({
   chats,
   onChatClick,
   onBack,
+  onProfileClick,
+  onLeaveChat,
 }: {
   readonly loading?: boolean;
   readonly chats?: ChatListItem[];
   readonly onChatClick?: (chatId: string) => void;
   readonly onBack?: () => void;
+  readonly onProfileClick?: () => void;
+  readonly onLeaveChat?: (chatId: string) => void;
 }) {
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d] text-[#2a2a2a]">
+    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d] text-[#2a2a2a]" onClick={() => setOpenMenuId(null)}>
       <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
         <div
           className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]"
@@ -37,7 +43,7 @@ export function ChatScreen({
               <ChevronLeft className="w-7 h-7" strokeWidth={3} />
             </button>
             <h1 className="text-[18px] font-bold">채팅</h1>
-            <button type="button" className="focus:outline-none">
+            <button type="button" onClick={() => onProfileClick && onProfileClick()} className="focus:outline-none">
               <UserCircle2 className="w-8 h-8" strokeWidth={1.5} />
             </button>
           </div>
@@ -77,7 +83,22 @@ export function ChatScreen({
                            {chat.worryTitle || '게시글 정보 불러오는 중...'}
                          </span>
                       </div>
-                      <MoreVertical className="w-5 h-5 text-[#b8b8b8] shrink-0" strokeWidth={2} />
+                      <div className="relative">
+                        <button 
+                          type="button" 
+                          onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === chat.chatId ? null : chat.chatId); }} 
+                          className="p-1 hover:bg-gray-50 rounded-full focus:outline-none"
+                        >
+                          <MoreVertical className="w-5 h-5 text-[#b8b8b8] shrink-0" strokeWidth={2} />
+                        </button>
+                        {openMenuId === chat.chatId && (
+                          <div className="absolute right-0 top-full mt-1 w-[150px] bg-white rounded-[12px] shadow-[0_4px_10px_rgb(0_0_0/0.15)] overflow-hidden z-30">
+                            <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); alert('알림이 꺼졌습니다.'); }}>알림 끄기</button>
+                            <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); onLeaveChat && onLeaveChat(chat.chatId); }}>채팅방 나가기</button>
+                            <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); alert('신고가 접수되었습니다.'); }}>신고하기</button>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* Divider */}
