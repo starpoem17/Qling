@@ -25,7 +25,7 @@ export function ChatListContainer({
 
     const unsubscribe = onSnapshot(
       q,
-      (snap) => {
+      async (snap) => {
         const chatItems: ChatListItem[] = [];
         
         for (const docSnap of snap.docs) {
@@ -48,11 +48,18 @@ export function ChatListContainer({
           const now = new Date();
           const isSameDay = lastDate.getDate() === now.getDate() && lastDate.getMonth() === now.getMonth() && lastDate.getFullYear() === now.getFullYear();
           if (isSameDay) {
-            dateLabel = lastDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const isAm = lastDate.getHours() < 12;
+            const hours = lastDate.getHours() % 12 || 12;
+            const minutes = lastDate.getMinutes().toString().padStart(2, '0');
+            dateLabel = `${isAm ? '오전' : '오후'} ${hours}:${minutes}`;
+          } else if (lastDate.getDate() === now.getDate() - 1 && lastDate.getMonth() === now.getMonth() && lastDate.getFullYear() === now.getFullYear()) {
+            dateLabel = '어제';
           } else {
-            dateLabel = `${lastDate.getMonth() + 1}/${lastDate.getDate()}`;
+            dateLabel = `${lastDate.getMonth() + 1}월 ${lastDate.getDate()}일`;
           }
 
+          // Fetch worry details safely (will populate later if not available immediately)
+          // For now, push with empty worry data, then update
           chatItems.push({
             chatId: docSnap.id,
             opponentName,
@@ -60,10 +67,30 @@ export function ChatListContainer({
             lastMessage: data.lastMessageText || '대화가 시작되었습니다.',
             dateLabel,
             unreadCount,
+            worryId: data.worryId,
+            worryCategory: '기타', // default
+            worryTitle: '불러오는 중...', // default
             _sortDate: lastDate.getTime(),
-          } as ChatListItem & { _sortDate: number });
+          } as ChatListItem & { _sortDate: number, worryId: string });
         }
         
+        // Fetch worry data
+        await Promise.all(chatItems.map(async (item: any) => {
+          if (item.worryId) {
+            try {
+              const worrySnap = await getDoc(doc(db, 'worries', item.worryId));
+              if (worrySnap.exists()) {
+                const wData = worrySnap.data();
+                item.worryCategory = wData.category || '기타';
+                item.worryTitle = wData.title || '제목 없음';
+              }
+            } catch (e) {
+               console.error('Failed to fetch worry:', e);
+               item.worryTitle = '게시글을 불러올 수 없습니다';
+            }
+          }
+        }));
+
         chatItems.sort((a, b) => (b as any)._sortDate - (a as any)._sortDate);
         setChats(chatItems);
         setLoading(false);
@@ -82,6 +109,7 @@ export function ChatListContainer({
       loading={loading}
       chats={chats}
       onChatClick={(chatId) => setView({ route: 'chat_room', chatId })}
+      onBack={() => setView({ route: 'home' })}
     />
   );
 }
