@@ -1,19 +1,26 @@
 import { type Express } from 'express';
-import { requireAuth } from './auth';
+import { createRequireActiveFirebaseAuth, type ActiveAuthenticatedRequest } from './auth';
+import type { Auth } from 'firebase-admin/auth';
+import type { Firestore } from 'firebase-admin/firestore';
 
 export function registerReportRoutes(
   app: Express,
   deps: {
-    db: FirebaseFirestore.Firestore | null;
+    db: Firestore | null;
+    auth: Auth;
   }
 ) {
-  app.post('/api/reports', requireAuth, async (req, res) => {
-    if (!deps.db) {
-      return res.status(503).json({ error: { message: 'Firestore is not initialized.' } });
-    }
+  app.post(
+    '/api/reports',
+    createRequireActiveFirebaseAuth({ auth: deps.auth, db: deps.db as Firestore }),
+    async (req, res) => {
+      const authReq = req as ActiveAuthenticatedRequest;
+      if (!deps.db) {
+        return res.status(503).json({ error: { message: 'Firestore is not initialized.' } });
+      }
 
-    try {
-      const reporterUid = req.user!.uid;
+      try {
+        const reporterUid = authReq.auth.uid;
       const { reportedUid, chatId, reason, description } = req.body;
 
       if (!reportedUid || !reason) {

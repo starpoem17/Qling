@@ -166,7 +166,7 @@ async function startServer() {
         return { status: 'rejected' as const, reason: body.reason };
       }),
     });
-    registerReportRoutes(app, { db });
+    registerReportRoutes(app, { db, auth: getAuth() });
   } else {
     app.post('/api/worries/publish', (_req, res) => {
       res.status(500).json({
