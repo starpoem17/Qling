@@ -415,16 +415,16 @@ export function EditInterestsScreen(props: EditInterestsProps) {
           <div className="absolute left-0 top-[196px] h-[656px] w-[393px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" />
           <FigmaTopBar title="관심분야 수정" onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
           <p className="absolute left-[28px] top-[147px] text-[26px] font-extrabold leading-[normal] tracking-[-1.3px] text-white">
-            주요 관심사는 무엇인가요?
+            공감할 수 있는 주제를 골라주세요
           </p>
-          <p className="absolute left-6 top-[258px] text-[13px] font-bold leading-[normal] tracking-[-0.13px] text-[#8e9095]">
+          <p className="absolute left-6 top-[243px] text-[13px] font-bold leading-[normal] tracking-[-0.13px] text-[#8e9095]">
             변경사항은 저장하기를 눌러야 반영돼요.
           </p>
-          <p className="absolute left-6 top-[277px] text-[13px] font-bold leading-[normal] tracking-[-0.13px] text-[#8e9095]">
+          <p className="absolute left-6 top-[262px] text-[13px] font-bold leading-[normal] tracking-[-0.13px] text-[#8e9095]">
             최소 1개 선택, 복수 선택 가능
           </p>
           <div
-            className="absolute left-[34px] top-[322px] grid w-[324px] max-w-[323px] grid-cols-3 justify-center gap-x-[7px] gap-y-[13px]"
+            className="absolute left-[35px] top-[303px] grid w-[323px] grid-cols-2 justify-center gap-x-[13px] gap-y-[9px]"
             aria-label="관심 분야 선택"
           >
             {orderedCategoryOptions.map(interest => {
@@ -436,7 +436,7 @@ export function EditInterestsScreen(props: EditInterestsProps) {
                   disabled={props.isProcessing}
                   aria-pressed={selected}
                   onClick={() => props.onInterestToggle(interest)}
-                  className={`box-border h-[44px] w-[103px] max-w-[103px] rounded-[22px] border-2 px-1 py-0 text-[14px] font-bold leading-none tracking-[-0.14px] disabled:cursor-not-allowed disabled:opacity-55 ${selected ? 'border-[#ff8b0d] bg-transparent text-[#2a2a2a]' : 'border-[#d4be91] bg-[#fff1d1] text-[#25272b]'}`}
+                  className={`box-border h-[43px] w-[155px] rounded-[19px] border-2 px-1 py-0 text-[14px] font-bold leading-none tracking-normal disabled:cursor-not-allowed disabled:opacity-55 ${selected ? 'border-[#ff8b0d] bg-transparent text-[#2a2a2a]' : 'border-[#d4be91] bg-[#fff1d1] text-[#25272b]'}`}
                 >
                   {interest}
                 </button>

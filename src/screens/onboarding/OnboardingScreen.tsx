@@ -275,14 +275,14 @@ function InterestsStep({
     <>
       <ProgressHeader
         question="QUESTION 2"
-        title="주요 관심사는 무엇인가요?"
-        subtitle="고민매칭에 필요해요! 언제든 나중에 수정할 수 있어요."
-        secondSubtitle="최소 1개 선택, 복수 선택 가능"
+        title="공감할 수 있는 주제를 골라주세요"
+        subtitle="선택한 주제에 맞는 고민들을 전달받을 수 있어요"
+        secondSubtitle="언제든 수정할 수 있어요. 최소 1개 선택, 복수 선택 가능"
         progressWidthClassName="w-[230px]"
       />
 
       <div
-        className="absolute left-[34px] top-[322px] grid w-[324px] grid-cols-3 justify-center gap-x-[7px] gap-y-[13px] max-w-[323px]"
+        className="absolute left-[35px] top-[318px] grid w-[323px] grid-cols-2 justify-center gap-x-[13px] gap-y-[9px]"
         aria-label="관심 분야 선택"
         data-columns={ONBOARDING_INTEREST_GRID.columns}
         data-rows={ONBOARDING_INTEREST_GRID.rows}
@@ -297,7 +297,7 @@ function InterestsStep({
               aria-pressed={selected}
               onClick={() => props.onInterestToggle(category)}
               className={cn(
-                'box-border h-[44px] w-[103px] max-w-[103px] rounded-[22px] border-2 px-1 py-0 text-[14px] font-bold leading-none tracking-normal disabled:cursor-not-allowed disabled:opacity-55',
+                'box-border h-[43px] w-[155px] rounded-[19px] border-2 px-1 py-0 text-[14px] font-bold leading-none tracking-normal disabled:cursor-not-allowed disabled:opacity-55',
                 selected
                   ? 'border-[#ff8b0d] bg-transparent text-[#2a2a2a]'
                   : 'border-[#d4be91] bg-[#fff1d1] text-[#25272b]',

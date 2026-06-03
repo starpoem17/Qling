@@ -316,7 +316,7 @@ function baseEditInterestsProps(overrides: Partial<EditInterestsProps> = {}): Ed
   };
 }
 
-test('edit interests screen renders fixed three-column chip grid and exact zero-selection validation', () => {
+test('edit interests screen renders fixed two-column chip grid and exact zero-selection validation', () => {
   const html = renderToStaticMarkup(EditInterestsScreen(baseEditInterestsProps({
     selectedInterests: [],
     validationMessages: { interests: '1개 이상의 관심 분야를 선택해주세요.' },
@@ -327,16 +327,18 @@ test('edit interests screen renders fixed three-column chip grid and exact zero-
   assert.match(html, /w-\[393px\]/);
   assert.match(html, /origin-top/);
   assert.match(html, /min\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\), calc\(100dvh \/ 852px\)\)/);
-  assert.match(html, /grid-cols-3/);
-  assert.match(html, /w-\[103px\]/);
-  assert.match(html, /h-\[44px\]/);
-  assert.match(html, /tracking-\[-0\.14px\]/);
+  assert.match(html, /공감할 수 있는 주제를 골라주세요/);
+  assert.match(html, /grid-cols-2/);
+  assert.match(html, /w-\[155px\]/);
+  assert.match(html, /h-\[43px\]/);
+  assert.match(html, /tracking-normal/);
   assert.match(html, /top-\[730px\]/);
   assert.match(html, /font-extrabold/);
   assert.match(html, /최소 1개의 관심분야를 선택해주세요/);
   assert.match(html, /저장하기/);
   assert.match(html, />직장</);
   assert.doesNotMatch(html, /워라밸|워라벨/);
+  assert.doesNotMatch(html, /aria-pressed="true"/);
 });
 
 test('edit interests screen forwards chip toggle and submit interactions', () => {

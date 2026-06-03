@@ -22,14 +22,14 @@ export const ONBOARDING_INTEREST_CATEGORY_ORDER = [
 ] as const satisfies readonly WorryCategory[];
 
 export const ONBOARDING_INTEREST_GRID = {
-  columns: 3,
-  rows: 7,
-  chipWidthPx: 103,
-  chipHeightPx: 44,
-  chipRadiusPx: 22,
+  columns: 2,
+  rows: 8,
+  chipWidthPx: 155,
+  chipHeightPx: 43,
+  chipRadiusPx: 19,
   chipBorderWidthPx: 2,
-  columnGapPx: 7,
-  rowGapPx: 13,
+  columnGapPx: 13,
+  rowGapPx: 9,
   selectedBorderColor: '#ff8b0d',
   unselectedBackgroundColor: '#fff1d1',
   unselectedBorderColor: '#d4be91',
