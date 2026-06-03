@@ -68,7 +68,7 @@ const profile = {
   normalizedNickname: 'qling',
   gender: 'female' as const,
   age: 20,
-  interests: ['워라밸'] as const,
+  interests: ['직장'] as const,
   profileColor: '#FF8B3D' as const,
 };
 
@@ -261,7 +261,7 @@ test('real repository completeOnboarding writes server-owned profile fields afte
   assert.equal(written?.normalizedNickname, 'qling');
   assert.equal(written?.age, 20);
   assert.equal(written?.gender, 'female');
-  assert.deepEqual(written?.interests, ['워라밸']);
+  assert.deepEqual(written?.interests, ['직장']);
   assert.equal(written?.profileColor, '#FF8B3D');
   assert.ok(Object.hasOwn(written ?? {}, 'createdAt'));
   assert.ok(Object.hasOwn(written ?? {}, 'updatedAt'));

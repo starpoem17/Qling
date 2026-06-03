@@ -1,3 +1,5 @@
+import { normalizeWorryCategories } from '@midnight-radio/domain';
+
 export const ACTIVE_DELIVERY_LIMIT = 10;
 
 export interface HumanCandidate {
@@ -48,7 +50,7 @@ export function normalizeHumanCandidate(candidate: HumanCandidate) {
     ...candidate,
     gender: typeof candidate.gender === 'string' ? candidate.gender : '',
     interests: Array.isArray(candidate.interests)
-      ? candidate.interests.filter((interest): interest is string => typeof interest === 'string')
+      ? normalizeWorryCategories(candidate.interests)
       : [],
     helpedCount: typeof candidate.helpedCount === 'number' ? candidate.helpedCount : 0,
     activeDeliveryCount: typeof candidate.activeDeliveryCount === 'number' ? candidate.activeDeliveryCount : 0,
@@ -56,8 +58,8 @@ export function normalizeHumanCandidate(candidate: HumanCandidate) {
 }
 
 export function overlapCount(interests: string[], matchingCategories: string[]): number {
-  const interestsSet = new Set(interests);
-  return matchingCategories.filter(category => interestsSet.has(category)).length;
+  const interestsSet = new Set(normalizeWorryCategories(interests));
+  return normalizeWorryCategories(matchingCategories, { fallback: false }).filter(category => interestsSet.has(category)).length;
 }
 
 export function rankMatchedHumanCandidates(params: {

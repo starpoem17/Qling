@@ -1,4 +1,4 @@
-import { WORRY_CATEGORIES } from '@midnight-radio/domain';
+import { DEFAULT_WORRY_CATEGORY, WORRY_CATEGORIES } from '@midnight-radio/domain';
 
 export const MODERATION_PROVIDER = 'openai';
 export const MODERATION_MODEL = 'gpt-5.4-mini';
@@ -95,7 +95,7 @@ Decision policy:
 
 3. For approved text, return the best category labels from the fixed vocabulary above.
 
-4. If category inference is uncertain, choose exactly ["잡담"].
+4. If category inference is uncertain, choose exactly ["${DEFAULT_WORRY_CATEGORY}"].
 
 5. Never include explanations, markdown, or extra text.
 6. Return JSON only.

@@ -156,7 +156,14 @@ async function startServer() {
 2. Return JSON exactly like this:
    - If bad: { "status": "rejected", "reason": "부적절한 표현이 감지되었습니다." }
    - If good: { "status": "approved" }`, content)
-      ).then(result => result.body),
+      ).then(result => {
+        const body = result.body;
+        if (!('status' in body) || body.status === 'invalid') {
+          return { status: 'rejected' as const, reason: '부적절한 표현이 감지되었습니다.' };
+        }
+        if (body.status === 'approved') return { status: 'approved' as const };
+        return { status: 'rejected' as const, reason: body.reason };
+      }),
     });
   } else {
     app.post('/api/worries/publish', (_req, res) => {

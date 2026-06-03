@@ -6,6 +6,7 @@ import type {
   ReplyDetailVariant,
   ReplyDetailWorryProps,
 } from './contract';
+import { DEFAULT_WORRY_CATEGORY } from '@midnight-radio/domain';
 import type { ReplyReadModelItem } from '../../services/myWorries';
 import { routeName, type AppRouteViewState } from '../../services/appShell/prdNavigationPolicy';
 
@@ -41,7 +42,7 @@ export function mapReplyToDetailProps(params: {
 
   const originalWorry: ReplyDetailWorryProps = {
     worryId: params.reply.worryId ?? '',
-    category: '잡담',
+    category: DEFAULT_WORRY_CATEGORY,
     summaryText: params.reply.summaryText ?? params.reply.replyToContent ?? params.originalWorryFallback ?? params.reply.originalContent,
     bodyText: params.reply.replyToContent ?? params.originalWorryFallback ?? params.reply.originalContent,
     date: { label: dateLabel(params.reply.createdAt) },

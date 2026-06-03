@@ -8,7 +8,7 @@ test('normalizes approved worry moderation with valid categories', () => {
       status: 'approved',
       categories: ['취업', ' 취업 ', 'unknown', '', '잡담'],
     }),
-    { status: 'approved', categories: ['취업', '잡담'] }
+    { status: 'approved', categories: ['취업', '일상'] }
   );
 });
 

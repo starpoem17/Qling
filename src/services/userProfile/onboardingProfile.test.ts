@@ -32,7 +32,7 @@ test('valid onboarding produces profile persistence contract', async () => {
       nickname: ' QLING ',
       gender: 'female',
       age: '14',
-      interests: ['워라밸', '취업'],
+      interests: ['직장', '취업'],
       profileColor: '#B49BE8',
     },
     repository: repo,
@@ -45,7 +45,7 @@ test('valid onboarding produces profile persistence contract', async () => {
     normalizedNickname: 'qling',
     gender: 'female',
     age: 14,
-    interests: ['워라밸', '취업'],
+    interests: ['직장', '취업'],
     profileColor: '#B49BE8',
   });
 });
@@ -55,7 +55,7 @@ test('invalid required fields, duplicate nickname, and network states cannot sub
     nickname: '라미',
     gender: 'female',
     age: '20',
-    interests: ['워라밸'],
+    interests: ['직장'],
     profileColor: '#FF8B3D',
   };
   assert.equal(canSubmitOnboarding({ draft: validDraft, duplicateState: 'idle' }), false);
@@ -95,7 +95,7 @@ test('invalid draft does not persist profile', async () => {
       nickname: '라미',
       gender: 'female',
       age: '13',
-      interests: ['워라밸'],
+      interests: ['직장'],
       profileColor: '#FF8B3D',
     },
     repository: repo,
@@ -109,7 +109,7 @@ test('invalid draft does not persist profile', async () => {
   assert.deepEqual(repo.writes, []);
 });
 
-test('validation uses domain category values and keeps 워라밸 selected', () => {
+test('validation maps legacy category values to current categories', () => {
   const validation = validateOnboardingDraft({
     nickname: '라미',
     gender: 'female',
@@ -119,7 +119,7 @@ test('validation uses domain category values and keeps 워라밸 selected', () =
   });
 
   assert.equal(validation.valid, true);
-  assert.deepEqual(validation.interests, { valid: true, interests: ['워라밸'] });
+  assert.deepEqual(validation.interests, { valid: true, interests: ['직장'] });
 });
 
 test('invalid profile color blocks onboarding persistence', async () => {
@@ -130,7 +130,7 @@ test('invalid profile color blocks onboarding persistence', async () => {
       nickname: '라미',
       gender: 'female',
       age: '20',
-      interests: ['워라밸'],
+      interests: ['직장'],
       profileColor: '#ff8b3d',
     },
     repository: repo,

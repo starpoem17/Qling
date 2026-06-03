@@ -1,13 +1,9 @@
+import { normalizeWorryCategories } from '@midnight-radio/domain';
 import type { ExampleWorrySeed } from './types';
 
 function cleanCategories(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
-  return Array.from(new Set(
-    value
-      .filter((item): item is string => typeof item === 'string')
-      .map(item => item.trim())
-      .filter(Boolean)
-  ));
+  return normalizeWorryCategories(value);
 }
 
 export function adaptExampleWorrySeed(

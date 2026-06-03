@@ -89,9 +89,11 @@ test('age validation requires numeric 14 through 99 inclusive', () => {
   });
 });
 
-test('interests normalize through domain categories and preserve 워라밸', () => {
-  assert.ok(WORRY_CATEGORIES.includes('워라밸'));
-  assert.deepEqual(normalizeInterests(['워라밸', '없는값', '워라밸', '취업']), ['워라밸', '취업']);
+test('interests normalize through current and legacy domain categories', () => {
+  assert.ok(WORRY_CATEGORIES.includes('직장'));
+  assert.deepEqual(normalizeInterests(['워라밸', '없는값', '워라밸', '취업']), ['직장', '취업']);
+  assert.deepEqual(normalizeInterests(['없는값']), ['일상']);
+  assert.deepEqual(normalizeInterests([]), []);
 });
 
 test('profile color validation allows only PRD uppercase color options', () => {

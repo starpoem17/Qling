@@ -69,7 +69,7 @@ test('push mapping lets current-device opt-out override registered status', () =
   assert.equal(status.enabled, false);
 });
 
-test('my-page mapping preserves canonical 워라밸 category value', () => {
+test('my-page mapping normalizes legacy 워라밸 category value', () => {
   const answerItem = mapMyGivenReplyToListItem({
     id: 'reply-워라밸',
     deliveryId: 'delivery-1',
@@ -87,8 +87,8 @@ test('my-page mapping preserves canonical 워라밸 category value', () => {
     categories: ['워라밸'],
   } as never);
 
-  assert.equal(WORRY_CATEGORIES.includes('워라밸'), true);
-  assert.equal(answerItem.categoryLabel, '워라밸');
+  assert.equal((WORRY_CATEGORIES as readonly string[]).includes('워라밸'), false);
+  assert.equal(answerItem.categoryLabel, '직장');
   assert.equal(answerItem.accessibilityLabel.includes('워라벨'), false);
 });
 
@@ -131,11 +131,11 @@ test('reply and worry read models map to list props without example labels', () 
   assert.equal(answerItem.feedbackLabel, '받은 하트');
   assert.equal(answerItem.feedbackComment, '고마워요');
   assert.equal(answerItem.hasReceivedHeart, true);
-  assert.equal(answerItem.categoryLabel, '자존감');
+  assert.equal(answerItem.categoryLabel, '건강');
   assert.match(answerItem.accessibilityLabel, /내가 쓴 답변/);
   assert.match(answerItem.accessibilityLabel, /피드백 받은 하트/);
   assert.equal(worryItem.summaryText, '내 고민 요약');
-  assert.match(worryItem.accessibilityLabel, /카테고리 진로/);
+  assert.match(worryItem.accessibilityLabel, /카테고리 취업/);
   assert.equal(worryItem.categoryLabel, WORRY_CATEGORIES[1]);
   assert.equal(worryItem.replyCountLabel, '2명이 답변했어요');
   assert.match(worryItem.accessibilityLabel, /2명이 답변했어요/);
@@ -157,7 +157,7 @@ test('my answer feedback visibility follows PRD for like dislike and comments', 
     refinedContent: 'my answer',
     isRead: true,
     hasUnread: false,
-    categories: ['잡담'],
+    categories: ['일상'],
   } as const;
 
   const likeOnly = mapMyGivenReplyToListItem({ ...baseReply, id: 'like-only', feedback: 'helpful' } as never);
@@ -221,14 +221,14 @@ test('my worry mapping uses shared display date, first valid category, fallback 
 
   const item = mapMyWorryToListItem({ worry, options: { now } });
 
-  assert.equal(item.categoryLabel, '외로움');
+  assert.equal(item.categoryLabel, '인간관계');
   assert.equal(item.createdAtLabel, '5분 전');
   assert.equal(item.summaryText, '저장된 요약');
   assert.equal(item.replyCountLabel, '아직 답변이 없어요.');
   assert.match(item.accessibilityLabel, /작성일 5분 전/);
 });
 
-test('my worry mapping falls back to 잡담 and keeps answer writer private data out of output', () => {
+test('my worry mapping falls back to 일상 and keeps answer writer private data out of output', () => {
   const item = mapMyWorryToListItem({
     worry: {
       id: 'worry-privacy',
@@ -248,7 +248,7 @@ test('my worry mapping falls back to 잡담 and keeps answer writer private data
     } as never,
   });
 
-  assert.equal(item.categoryLabel, '잡담');
+  assert.equal(item.categoryLabel, '일상');
   assert.equal(item.replyCountLabel, '1명이 답변했어요');
   const serialized = JSON.stringify(item);
   for (const forbidden of ['답변자닉', '여성', '30', 'replier-1', '답변 본문 preview', 'profileMetadata']) {

@@ -15,7 +15,7 @@ const validDraft: OnboardingDraft = {
   nickname: '라미',
   gender: 'female',
   age: '20',
-  interests: ['워라밸'],
+  interests: ['직장'],
   profileColor: '#FF8B3D',
 };
 
@@ -48,11 +48,11 @@ test('required age and interests behavior is enforced by service state', () => {
   assert.equal(validateOnboardingDraft({ ...validDraft, age: '스무살' }).age.valid, false);
   assert.equal(validateOnboardingDraft({ ...validDraft, age: '14' }).age.valid, true);
   assert.equal(validateOnboardingDraft({ ...validDraft, interests: [] }).interests.valid, false);
-  assert.deepEqual(validateOnboardingDraft({ ...validDraft, interests: [WORRY_CATEGORIES[14]] }).interests, {
+  assert.deepEqual(validateOnboardingDraft({ ...validDraft, interests: [WORRY_CATEGORIES[2]] }).interests, {
     valid: true,
-    interests: ['워라밸'],
+    interests: ['직장'],
   });
-  assert.equal(canSubmit({ ...validDraft, age: '14', interests: ['워라밸'] }, 'available'), true);
+  assert.equal(canSubmit({ ...validDraft, age: '14', interests: ['직장'] }, 'available'), true);
 });
 
 test('onboarding side effects complete profile then examples then route completion', async () => {
@@ -60,11 +60,11 @@ test('onboarding side effects complete profile then examples then route completi
   const result = await submitAvailableOnboarding({
     user: { uid: 'user-1' } as never,
     disabled: false,
-    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['워라밸'], profileColor: '#FF8B3D' },
+    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['직장'], profileColor: '#FF8B3D' },
     deps: {
       async completeOnboarding() {
         calls.push('completeOnboarding');
-        return { status: 'completed', profile: { uid: 'user-1', nickname: '라미', normalizedNickname: '라미', gender: 'female', age: 20, interests: ['워라밸'], profileColor: '#FF8B3D' } };
+        return { status: 'completed', profile: { uid: 'user-1', nickname: '라미', normalizedNickname: '라미', gender: 'female', age: 20, interests: ['직장'], profileColor: '#FF8B3D' } };
       },
       async createExamples() {
         calls.push('createExamples');
@@ -87,7 +87,7 @@ test('profile completion failure does not create examples or route transition', 
   const result = await submitAvailableOnboarding({
     user: { uid: 'user-1' } as never,
     disabled: false,
-    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['워라밸'], profileColor: '#FF8B3D' },
+    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['직장'], profileColor: '#FF8B3D' },
     deps: {
       async completeOnboarding() {
         calls.push('completeOnboarding');
@@ -114,11 +114,11 @@ test('example creation failure blocks route transition under current implementat
   const result = await submitAvailableOnboarding({
     user: { uid: 'user-1' } as never,
     disabled: false,
-    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['워라밸'], profileColor: '#FF8B3D' },
+    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['직장'], profileColor: '#FF8B3D' },
     deps: {
       async completeOnboarding() {
         calls.push('completeOnboarding');
-        return { status: 'completed', profile: { uid: 'user-1', nickname: '라미', normalizedNickname: '라미', gender: 'female', age: 20, interests: ['워라밸'], profileColor: '#FF8B3D' } };
+        return { status: 'completed', profile: { uid: 'user-1', nickname: '라미', normalizedNickname: '라미', gender: 'female', age: 20, interests: ['직장'], profileColor: '#FF8B3D' } };
       },
       async createExamples() {
         calls.push('createExamples');
@@ -142,7 +142,7 @@ test('disabled submission is blocked before API side effects', async () => {
   const result = await submitAvailableOnboarding({
     user: { uid: 'user-1' } as never,
     disabled: true,
-    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['워라밸'], profileColor: '#FF8B3D' },
+    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['직장'], profileColor: '#FF8B3D' },
     deps: {
       async completeOnboarding() {
         calls.push('completeOnboarding');

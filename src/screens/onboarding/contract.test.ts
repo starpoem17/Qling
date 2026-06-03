@@ -59,24 +59,20 @@ test('duplicate-check state union covers expected UI states only', () => {
   ]);
 });
 
-test('onboarding interests use the design-aligned 7 by 3 category order and preserve 워라밸', () => {
-  assert.equal(ONBOARDING_INTEREST_CATEGORY_ORDER.length, 21);
+test('onboarding interests use the Figma 16 category order', () => {
+  assert.equal(ONBOARDING_INTEREST_CATEGORY_ORDER.length, 16);
   assert.equal(ONBOARDING_INTEREST_GRID.rows, 7);
   assert.equal(ONBOARDING_INTEREST_GRID.columns, 3);
   assert.deepEqual(
     Array.from(ONBOARDING_INTEREST_CATEGORY_ORDER),
     [
-      '진로', '취업', '시험',
-      '학업', '소득', '연애',
-      '결혼', '부모', '자녀',
-      '우울', '불안', '외로움',
-      '직장', '워라밸', '외모',
-      '자존감', '건강', '노후',
-      '미래', '잡담', '주거',
+      '진로', '취업', '직장', '학업',
+      '시험', '경제', '연애', '결혼',
+      '가족', '인간관계', '육아', '건강',
+      '외모', '군대', '미래', '일상',
     ],
   );
-  assert.equal(ONBOARDING_INTEREST_CATEGORY_ORDER.includes('워라밸'), true);
-  assert.equal(ONBOARDING_INTEREST_CATEGORY_ORDER.includes('워라벨' as never), false);
+  assert.equal((ONBOARDING_INTEREST_CATEGORY_ORDER as readonly string[]).includes('워라밸'), false);
   assert.deepEqual(orderOnboardingInterestCategories(WORRY_CATEGORIES), Array.from(ONBOARDING_INTEREST_CATEGORY_ORDER));
 });
 

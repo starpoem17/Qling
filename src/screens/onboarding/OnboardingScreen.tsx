@@ -289,7 +289,6 @@ function InterestsStep({
       >
         {orderedCategoryOptions.map(category => {
           const selected = props.values.selectedInterests.includes(category);
-          const displayLabel = category === '워라밸' ? '워라벨' : category;
           return (
             <button
               key={category}
@@ -304,7 +303,7 @@ function InterestsStep({
                   : 'border-[#d4be91] bg-[#fff1d1] text-[#25272b]',
               )}
             >
-              {displayLabel}
+              {category}
             </button>
           );
         })}

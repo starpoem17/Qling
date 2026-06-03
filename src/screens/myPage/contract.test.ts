@@ -201,7 +201,7 @@ test('policy screen contract carries title, body or unavailable state', () => {
 test('edit-interests contract exposes only interest fields and callbacks', () => {
   const props = {
     categoryOptions: WORRY_CATEGORIES,
-    selectedInterests: ['워라밸'],
+    selectedInterests: ['직장'],
     validationMessages: {},
     isProcessing: false,
     onBack: () => undefined,
@@ -209,7 +209,7 @@ test('edit-interests contract exposes only interest fields and callbacks', () =>
     onSubmit: () => undefined,
   } satisfies EditInterestsProps;
 
-  assert.equal(props.selectedInterests.includes('워라밸'), true);
+  assert.equal(props.selectedInterests.includes('직장'), true);
   for (const forbidden of ['nickname', 'gender', 'age', 'onNicknameChange', 'onGenderChange', 'onAgeChange']) {
     assert.equal(Object.hasOwn(props, forbidden), false);
   }

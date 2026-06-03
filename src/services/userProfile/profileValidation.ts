@@ -1,4 +1,4 @@
-import { WORRY_CATEGORY_SET, type WorryCategory } from '@midnight-radio/domain';
+import { normalizeWorryCategories, type WorryCategory } from '@midnight-radio/domain';
 export {
   DEFAULT_PROFILE_COLOR,
   PROFILE_COLOR_OPTIONS,
@@ -107,14 +107,5 @@ export function isValidGender(value: string): value is GenderValue {
 }
 
 export function normalizeInterests(values: readonly string[]): WorryCategory[] {
-  const seen = new Set<string>();
-  const normalized: WorryCategory[] = [];
-
-  for (const value of values) {
-    if (!WORRY_CATEGORY_SET.has(value) || seen.has(value)) continue;
-    seen.add(value);
-    normalized.push(value as WorryCategory);
-  }
-
-  return normalized;
+  return normalizeWorryCategories(values);
 }

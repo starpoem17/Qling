@@ -335,8 +335,8 @@ test('edit interests screen renders fixed three-column chip grid and exact zero-
   assert.match(html, /font-extrabold/);
   assert.match(html, /최소 1개의 관심분야를 선택해주세요/);
   assert.match(html, /저장하기/);
-  assert.match(html, /워라벨/);
-  assert.doesNotMatch(html, />워라밸</);
+  assert.match(html, />직장</);
+  assert.doesNotMatch(html, /워라밸|워라벨/);
 });
 
 test('edit interests screen forwards chip toggle and submit interactions', () => {
@@ -347,10 +347,10 @@ test('edit interests screen forwards chip toggle and submit interactions', () =>
   }));
 
   click(findElement(tree, element => element.type === 'button' && element.props.children === '진로'));
-  click(findElement(tree, element => element.type === 'button' && element.props.children === '워라벨'));
+  click(findElement(tree, element => element.type === 'button' && element.props.children === '직장'));
   click(findElement(tree, element => element.type === 'button' && element.props['aria-label'] === '관심 분야 저장'));
 
-  assert.deepEqual(events, ['toggle:진로', 'toggle:워라밸', 'submit']);
+  assert.deepEqual(events, ['toggle:진로', 'toggle:직장', 'submit']);
 });
 
 test('privacy policy screen uses exact PRD empty copy', () => {

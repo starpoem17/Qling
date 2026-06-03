@@ -4,6 +4,7 @@ import {
   type Firestore,
   type Transaction,
 } from 'firebase-admin/firestore';
+import { normalizeWorryCategories } from '@midnight-radio/domain';
 import { isEligibleHumanCandidate } from '../matching/server/recipientPolicy';
 import type {
   CommittedRematchBatch,
@@ -43,7 +44,7 @@ function userDocToCandidate(uid: string, data: FirebaseFirestore.DocumentData | 
   return {
     uid,
     gender: typeof data?.gender === 'string' ? data.gender : undefined,
-    interests: Array.isArray(data?.interests) ? data.interests : undefined,
+    interests: Array.isArray(data?.interests) ? normalizeWorryCategories(data.interests) : undefined,
     helpedCount: typeof data?.helpedCount === 'number' ? data.helpedCount : undefined,
     activeDeliveryCount: typeof data?.activeDeliveryCount === 'number' ? data.activeDeliveryCount : undefined,
     deleted: data?.deleted,
@@ -231,9 +232,9 @@ export function createRematchRepository(params: { db: Firestore }): RematchRepos
           author: {
             uid: worry.authorUid,
             gender: typeof authorDoc?.data()?.gender === 'string' ? authorDoc.data()?.gender : '',
-            interests: stringArray(authorDoc?.data()?.interests),
+            interests: normalizeWorryCategories(stringArray(authorDoc?.data()?.interests)),
           },
-          matchingCategories: stringArray(worry.matchingCategories),
+          matchingCategories: normalizeWorryCategories(stringArray(worry.matchingCategories)),
           humanDeliveryCount: typeof worry.humanDeliveryCount === 'number'
             ? worry.humanDeliveryCount
             : countHumanDeliveries(allDeliveries),

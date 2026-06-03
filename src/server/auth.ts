@@ -2,6 +2,7 @@ import type express from 'express';
 import type { Request } from 'express';
 import type { Auth } from 'firebase-admin/auth';
 import type { Firestore } from 'firebase-admin/firestore';
+import { normalizeWorryCategories } from '@midnight-radio/domain';
 
 export interface AuthenticatedRequest extends Request {
   auth: { uid: string };
@@ -80,9 +81,7 @@ export function createRequireFirebaseAuth(deps: {
     authReq.authorProfile = {
       uid,
       gender: data.gender.trim(),
-      interests: data.interests
-        .filter((interest: unknown): interest is string => typeof interest === 'string' && interest.trim().length > 0)
-        .map((interest: string) => interest.trim()),
+      interests: normalizeWorryCategories(data.interests),
       deleted: data.deleted,
     };
 

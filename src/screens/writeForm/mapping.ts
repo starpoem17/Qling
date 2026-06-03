@@ -1,4 +1,4 @@
-import { WORRY_CATEGORIES, type WorryCategory } from '@midnight-radio/domain';
+import { DEFAULT_WORRY_CATEGORY, normalizeWorryCategories, type WorryCategory } from '@midnight-radio/domain';
 import type { ContentValidationResult } from '../../services/validation/content';
 import type { HomeWorryFeedTimestamp } from '../../services/homeWorryFeed/types';
 import type { SelectedReceivedWorry } from '../receivedWorries/ReceivedWorriesContainer';
@@ -72,13 +72,8 @@ function resolveSubmitDisabledReason(params: {
 }
 
 function firstValidCategory(categories: readonly string[] | undefined, fallbackCategory: string | undefined): WorryCategory {
-  const validCategory = categories?.find(isWorryCategory);
-  if (validCategory) return validCategory;
-  if (fallbackCategory === '잡담') return '잡담';
-  if (isWorryCategory(fallbackCategory)) return fallbackCategory;
-  return WORRY_CATEGORIES[0];
-}
-
-function isWorryCategory(category: string | undefined): category is WorryCategory {
-  return WORRY_CATEGORIES.includes(category as WorryCategory);
+  return normalizeWorryCategories([
+    ...(categories ?? []),
+    fallbackCategory,
+  ])[0] ?? DEFAULT_WORRY_CATEGORY;
 }

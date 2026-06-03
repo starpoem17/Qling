@@ -58,7 +58,7 @@ test('pass replacement delivery appears through joined worry without content sna
       {
         id: 'worry1',
         content: 'joined worry content',
-        matchingCategories: ['진로', '관계'],
+        matchingCategories: ['진로', '인간관계'],
         createdAt: { toMillis: () => 1 },
       },
     ]]),
@@ -67,7 +67,7 @@ test('pass replacement delivery appears through joined worry without content sna
   assert.equal(items.length, 1);
   assert.equal(items[0].deliveryId, 'worry1_replacementRecipient');
   assert.equal(items[0].originalContent, 'joined worry content');
-  assert.deepEqual(items[0].categories, ['진로', '관계']);
+  assert.deepEqual(items[0].categories, ['진로', '인간관계']);
 });
 
 test('replacement display categories fall back to joined worry validCategories', () => {
@@ -227,7 +227,7 @@ test('worry deletedAt is excluded from answer feed', () => {
   assert.deepEqual(items, []);
 });
 
-test('domain category 워라밸 is preserved in answer feed categories', () => {
+test('legacy domain category 워라밸 maps to current answer feed category', () => {
   const items = selectActivePrdAnswerFeedItems({
     profileUid: 'recipient',
     deliveries: [
@@ -243,7 +243,7 @@ test('domain category 워라밸 is preserved in answer feed categories', () => {
     ]]),
   });
 
-  assert.deepEqual(items.map(item => item.categories), [['워라밸']]);
+  assert.deepEqual(items.map(item => item.categories), [['직장']]);
 });
 
 test('status answered delivery is excluded even without answeredAt', () => {
@@ -323,7 +323,7 @@ test('adapter preserves PRD identity fields for reply form compatibility', () =>
     originalContent: 'content',
     refinedContent: 'content',
     summaryText: 'summary',
-    categories: ['잡담'],
+    categories: ['일상'],
     createdAt: null,
     status: 'active',
     source: 'prd_delivery',

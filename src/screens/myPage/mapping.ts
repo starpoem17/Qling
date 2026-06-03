@@ -1,4 +1,4 @@
-import { WORRY_CATEGORIES, type WorryCategory } from '@midnight-radio/domain';
+import { DEFAULT_WORRY_CATEGORY, normalizeWorryCategories, type WorryCategory } from '@midnight-radio/domain';
 import type {
   MyAnswerListItemProps,
   MyPageProfileSummaryProps,
@@ -114,8 +114,7 @@ export function replyCountLabelForCount(replyCount: number): string {
 }
 
 function firstUserFacingCategory(categories: readonly string[]): WorryCategory {
-  const firstValid = categories.find((category): category is WorryCategory => WORRY_CATEGORIES.includes(category as WorryCategory));
-  return firstValid ?? '잡담';
+  return normalizeWorryCategories(categories)[0] ?? DEFAULT_WORRY_CATEGORY;
 }
 
 function fallbackSummary(content: string): string {

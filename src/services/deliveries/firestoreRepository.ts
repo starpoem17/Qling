@@ -3,6 +3,7 @@ import {
   type Firestore,
   type Transaction,
 } from 'firebase-admin/firestore';
+import { normalizeWorryCategories } from '@midnight-radio/domain';
 import type {
   DeliveryPassInternalResult,
   DeliveryPassRepository,
@@ -31,7 +32,7 @@ function userDocToCandidate(uid: string, data: FirebaseFirestore.DocumentData | 
   return {
     uid,
     gender: typeof data?.gender === 'string' ? data.gender : undefined,
-    interests: Array.isArray(data?.interests) ? data.interests : undefined,
+    interests: Array.isArray(data?.interests) ? normalizeWorryCategories(data.interests) : undefined,
     helpedCount: typeof data?.helpedCount === 'number' ? data.helpedCount : undefined,
     activeDeliveryCount: typeof data?.activeDeliveryCount === 'number' ? data.activeDeliveryCount : undefined,
     deleted: data?.deleted,

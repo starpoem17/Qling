@@ -146,7 +146,7 @@ test('onboarding profile route persists required age, gender, interests, and nic
         normalizedNickname: '라미',
         gender: 'female',
         age: 99,
-        interests: ['워라밸'],
+        interests: ['직장'],
         profileColor: '#4FB8C9',
       });
       return { status: 'completed', profile: params };
@@ -229,7 +229,7 @@ test('interests update route accepts only valid interests and verified uid', asy
     async updateInterests(params) {
       assert.deepEqual(params, {
         uid: 'verified-user',
-        interests: ['워라밸'],
+        interests: ['직장'],
       });
       return { status: 'updated', interests: params.interests };
     },
@@ -243,7 +243,7 @@ test('interests update route accepts only valid interests and verified uid', asy
   });
 
   assert.equal(res.statusCode, 200);
-  assert.deepEqual(res.body, { status: 'updated', interests: ['워라밸'] });
+  assert.deepEqual(res.body, { status: 'updated', interests: ['직장'] });
 });
 
 test('interests update route rejects empty interests before persistence', async () => {

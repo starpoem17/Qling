@@ -1,4 +1,4 @@
-import { WORRY_CATEGORY_SET } from '@midnight-radio/domain';
+import { normalizeWorryCategories as normalizeDomainWorryCategories } from '@midnight-radio/domain';
 
 export type NormalizedWorryModeration =
   | { status: 'approved'; categories: string[] }
@@ -23,21 +23,7 @@ function normalizeWorryCategories(rawCategories: unknown): string[] {
     : typeof rawCategories === 'string'
       ? rawCategories.split(',')
       : [];
-
-  const normalized: string[] = [];
-  const seen = new Set<string>();
-
-  for (const value of values) {
-    const trimmed = nonEmptyString(value);
-    if (!trimmed || seen.has(trimmed) || !WORRY_CATEGORY_SET.has(trimmed)) {
-      continue;
-    }
-
-    seen.add(trimmed);
-    normalized.push(trimmed);
-  }
-
-  return normalized;
+  return normalizeDomainWorryCategories(values, { fallback: false });
 }
 
 export function normalizeWorryModeration(raw: unknown): NormalizedWorryModeration {

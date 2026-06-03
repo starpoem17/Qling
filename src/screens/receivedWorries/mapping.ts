@@ -1,19 +1,14 @@
-import { WORRY_CATEGORIES, type WorryCategory } from '@midnight-radio/domain';
+import { DEFAULT_WORRY_CATEGORY, normalizeWorryCategories, type WorryCategory } from '@midnight-radio/domain';
 import type { HomeWorryFeedLetter } from '../../services/homeWorryFeed';
 import type { DisplayDate } from '../shared/contract';
 import { formatDisplayDate, type DisplayDateOptions } from '../shared/displayDate';
 import type { ReceivedWorryFeedItem } from './contract';
 
-function isWorryCategory(value: string | undefined): value is WorryCategory {
-  return typeof value === 'string' && (WORRY_CATEGORIES as readonly string[]).includes(value);
-}
-
 function categoryForFeedItem(worry: HomeWorryFeedLetter): WorryCategory {
-  const firstValidCategory = worry.categories?.find(isWorryCategory);
-  if (firstValidCategory) return firstValidCategory;
-  if (worry.category === '잡담') return '잡담';
-  if (isWorryCategory(worry.category)) return worry.category;
-  return WORRY_CATEGORIES[0];
+  return normalizeWorryCategories([
+    ...(worry.categories ?? []),
+    worry.category,
+  ])[0] ?? DEFAULT_WORRY_CATEGORY;
 }
 
 function displayDateFromTimestamp(createdAt: HomeWorryFeedLetter['createdAt'], options?: DisplayDateOptions): DisplayDate {

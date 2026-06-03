@@ -8,18 +8,18 @@ import {
 test('approved moderation preserves raw, valid, invalid, and matching categories', () => {
   const result = normalizeWorryModerationForPublication({
     status: 'approved',
-    categories: ['취업', '없는분류', ' 취업 ', '잡담'],
+    categories: ['취업', '없는분류', ' 취업 ', '일상'],
   });
 
   assert.equal(result.status, 'approved');
   if (result.status !== 'approved') return;
-  assert.deepEqual(result.rawCategories, ['취업', '없는분류', '잡담']);
-  assert.deepEqual(result.validCategories, ['취업', '잡담']);
+  assert.deepEqual(result.rawCategories, ['취업', '없는분류', '일상']);
+  assert.deepEqual(result.validCategories, ['취업', '일상']);
   assert.deepEqual(result.invalidCategories, ['없는분류']);
-  assert.deepEqual(result.matchingCategories, ['취업', '잡담']);
+  assert.deepEqual(result.matchingCategories, ['취업', '일상']);
 });
 
-test('approved moderation with no valid categories falls back to 잡담 matching', () => {
+test('approved moderation with no valid categories falls back to 일상 matching', () => {
   const result = normalizeWorryModerationForPublication({
     status: 'approved',
     categories: ['없는분류'],
@@ -30,7 +30,7 @@ test('approved moderation with no valid categories falls back to 잡담 matching
   assert.deepEqual(result.rawCategories, ['없는분류']);
   assert.deepEqual(result.validCategories, []);
   assert.deepEqual(result.invalidCategories, ['없는분류']);
-  assert.deepEqual(result.matchingCategories, ['잡담']);
+  assert.deepEqual(result.matchingCategories, ['일상']);
 });
 
 test('rejected moderation maps reason code and message', () => {
@@ -52,7 +52,7 @@ test('invalid provider output retries once', async () => {
     provider: async (_content, strictRetry) => {
       calls.push(strictRetry);
       return strictRetry
-        ? { status: 'approved', categories: ['잡담'] }
+        ? { status: 'approved', categories: ['일상'] }
         : { nope: true };
     },
   });

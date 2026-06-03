@@ -24,25 +24,20 @@ const settingLabels: Record<MyPageSettingItem, string> = {
 const editInterestsFigmaOrder = [
   '진로',
   '취업',
-  '시험',
+  '직장',
   '학업',
-  '소득',
+  '시험',
+  '경제',
   '연애',
   '결혼',
-  '부모',
-  '자녀',
-  '우울',
-  '불안',
-  '외로움',
-  '직장',
-  '워라밸',
-  '외모',
-  '자존감',
+  '가족',
+  '인간관계',
+  '육아',
   '건강',
-  '노후',
+  '외모',
+  '군대',
   '미래',
-  '잡담',
-  '주거',
+  '일상',
 ] as const;
 
 export function MyPageScreen(props: MyPageScreenProps) {
@@ -434,7 +429,6 @@ export function EditInterestsScreen(props: EditInterestsProps) {
           >
             {orderedCategoryOptions.map(interest => {
               const selected = props.selectedInterests.includes(interest);
-              const displayLabel = interest === '워라밸' ? '워라벨' : interest;
               return (
                 <button
                   key={interest}
@@ -444,7 +438,7 @@ export function EditInterestsScreen(props: EditInterestsProps) {
                   onClick={() => props.onInterestToggle(interest)}
                   className={`box-border h-[44px] w-[103px] max-w-[103px] rounded-[22px] border-2 px-1 py-0 text-[14px] font-bold leading-none tracking-[-0.14px] disabled:cursor-not-allowed disabled:opacity-55 ${selected ? 'border-[#ff8b0d] bg-transparent text-[#2a2a2a]' : 'border-[#d4be91] bg-[#fff1d1] text-[#25272b]'}`}
                 >
-                  {displayLabel}
+                  {interest}
                 </button>
               );
             })}

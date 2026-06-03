@@ -3,6 +3,7 @@ import {
   Timestamp,
   type Firestore,
 } from 'firebase-admin/firestore';
+import { normalizeWorryCategories } from '@midnight-radio/domain';
 import { createExampleFeedbackRunAfter } from './policy';
 import { adaptActiveExampleWorrySeed } from './seedAdapter';
 import type {
@@ -144,7 +145,7 @@ export function createExampleWorriesFirestoreRepository(params: {
       const data = doc.data() ?? {};
       return {
         uid,
-        interests: stringArray(data.interests),
+        interests: normalizeWorryCategories(stringArray(data.interests)),
         gender: typeof data.gender === 'string' ? data.gender : null,
         helpedCount: typeof data.helpedCount === 'number' ? data.helpedCount : undefined,
         exampleWorriesCreatedAt: data.exampleWorriesCreatedAt,

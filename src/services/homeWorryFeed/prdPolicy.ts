@@ -3,6 +3,7 @@ import type {
   HomeWorryFeedTimestamp,
   PrdAnswerFeedItem,
 } from './types';
+import { normalizeWorryCategories } from '@midnight-radio/domain';
 
 export interface PrdDeliveryDoc {
   id: string;
@@ -75,8 +76,8 @@ export function selectVisibleAnswerFeedItems(params: {
     if (!worry || typeof worry.content !== 'string') return [];
     if (isHiddenWorry(worry)) return [];
 
-    const matchingCategories = stringArray(worry.matchingCategories);
-    const validCategories = stringArray(worry.validCategories);
+    const matchingCategories = normalizeWorryCategories(stringArray(worry.matchingCategories), { fallback: false });
+    const validCategories = normalizeWorryCategories(stringArray(worry.validCategories), { fallback: false });
 
     return [{
       id: delivery.id,

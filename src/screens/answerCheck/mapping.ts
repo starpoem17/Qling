@@ -1,4 +1,4 @@
-import { WORRY_CATEGORIES } from '@midnight-radio/domain';
+import { DEFAULT_WORRY_CATEGORY, normalizeWorryCategories } from '@midnight-radio/domain';
 import { formatDisplayDate } from '../shared/displayDate';
 import type { MyWorryListItem, ReplyReadModelItem } from '../../services/myWorries';
 import type { AnswerCheckReplyProps, AnswerCheckWorryProps } from './contract';
@@ -60,9 +60,7 @@ export function mapRepliesToAnswerCheckProps(params: {
 }
 
 function firstUserFacingCategory(categories: readonly string[]): string {
-  return categories.find((category): category is (typeof WORRY_CATEGORIES)[number] => (
-    (WORRY_CATEGORIES as readonly string[]).includes(category)
-  )) ?? '잡담';
+  return normalizeWorryCategories(categories)[0] ?? DEFAULT_WORRY_CATEGORY;
 }
 
 function fallbackSummary(content: string): string {

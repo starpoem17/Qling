@@ -79,7 +79,7 @@ test('falls back to a valid category and stable date label for incomplete feed d
     hasUnread: false,
   });
 
-  assert.equal(item?.category, WORRY_CATEGORIES[0]);
+  assert.equal(item?.category, '일상');
   assert.deepEqual(item?.receivedAt, { label: '수신됨' });
   assert.equal(item?.isUnread, false);
 });
@@ -124,7 +124,7 @@ test('uses chat fallback before generic valid single category fallback', () => {
     worryId: 'worry-single',
   });
 
-  assert.equal(chatFallback?.category, '잡담');
+  assert.equal(chatFallback?.category, '일상');
   assert.equal(validSingleCategory?.category, WORRY_CATEGORIES[3]);
 });
 

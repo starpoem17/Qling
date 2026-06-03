@@ -7,7 +7,7 @@ import type { MyWorryListItem } from '../../services/myWorries';
 const screenItem: MyWorryListItemProps = {
   worryId: 'worry-1',
   summaryText: '요약...',
-  categoryLabel: '잡담',
+  categoryLabel: '일상',
   createdAtLabel: '방금 전',
   replyCountLabel: '아직 답변이 없어요.',
   accessibilityLabel: '답변 확인으로 이동',
@@ -17,7 +17,7 @@ const worry: MyWorryListItem = {
   id: 'worry-1',
   authorUid: 'me',
   content: '원문',
-  categories: ['잡담'],
+  categories: ['일상'],
   createdAt: null,
   humanReplyCount: 0,
   source: 'prd_worries',

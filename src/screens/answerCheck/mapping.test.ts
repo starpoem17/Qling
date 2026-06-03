@@ -125,7 +125,7 @@ function worryItem(overrides: Partial<MyWorryListItem>): MyWorryListItem {
     id: 'worry',
     authorUid: 'author',
     content: 'worry content',
-    categories: ['잡담'],
+    categories: ['일상'],
     createdAt: ts(1),
     source: 'prd_worries',
     ...overrides,

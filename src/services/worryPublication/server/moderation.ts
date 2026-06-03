@@ -1,4 +1,4 @@
-import { WORRY_CATEGORY_SET } from '@midnight-radio/domain';
+import { DEFAULT_WORRY_CATEGORY, WORRY_CATEGORY_SET } from '@midnight-radio/domain';
 import {
   getModerationRejectionCopy,
   type ModerationReasonCode,
@@ -87,7 +87,7 @@ export function normalizeWorryModerationForPublication(raw: unknown): Normalized
       rawCategories,
       validCategories,
       invalidCategories,
-      matchingCategories: validCategories.length > 0 ? validCategories : ['잡담'],
+      matchingCategories: validCategories.length > 0 ? validCategories : [DEFAULT_WORRY_CATEGORY],
     };
   }
 
