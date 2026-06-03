@@ -53,6 +53,9 @@ import {
   MobileAppShell,
 } from './screens/shared/ui';
 import { LoadingShellScreen } from './screens/loadingShell/LoadingShellScreen';
+import { PrivacyPolicyScreen } from './screens/privacy/PrivacyPolicyScreen';
+import { ReportUserContainer } from './screens/report/ReportUserContainer';
+import { BackHandler } from './services/appShell/BackHandler';
 import { LoginScreen } from './screens/loadingShell/LoginScreen';
 import { ChatScreen } from './screens/chat/ChatScreen';
 import { ChatListContainer } from './screens/chat/ChatListContainer';
@@ -506,6 +509,19 @@ export default function App() {
                 user={user}
                 chatId={view.chatId}
                 setView={setView}
+              />
+            </motion.div>
+          )}
+
+          {currentRoute === 'report_user' && typeof view === 'object' && view.route === 'report_user' && (
+            <motion.div key="report_user" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="h-full">
+              <ReportUserContainer
+                user={user}
+                targetUid={view.targetUid}
+                targetNickname={view.targetNickname}
+                chatId={view.chatId}
+                onBack={() => setView({ route: 'chat_room', chatId: view.chatId })}
+                onSuccess={() => setView({ route: 'chat_room', chatId: view.chatId })}
               />
             </motion.div>
           )}

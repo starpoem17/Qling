@@ -30,17 +30,19 @@ export type AppRoute =
   | 'edit_interests'
   | 'my_answers'
   | 'privacy_policy'
+  | 'report_user'
   | 'logout_confirmation'
   | 'account_deletion_confirmation';
 
 export type AppRouteState =
-  | { route: Exclude<AppRoute, 'write_reply' | 'write_reply_success' | 'received_answer_detail' | 'read_received_reply' | 'my_worry_detail' | 'answer_check' | 'chat_room'> }
+  | { route: Exclude<AppRoute, 'write_reply' | 'write_reply_success' | 'received_answer_detail' | 'read_received_reply' | 'my_worry_detail' | 'answer_check' | 'chat_room' | 'report_user'> }
   | { route: 'write_reply'; deliveryId: string; worryId: string }
   | { route: 'write_reply_success'; deliveryId: string; worryId: string }
   | { route: 'received_answer_detail' | 'read_received_reply'; worryId: string; replyId: string }
   | { route: 'answer_check'; worryId: string }
   | { route: 'my_worry_detail'; worryId: string }
-  | { route: 'chat_room'; chatId: string };
+  | { route: 'chat_room'; chatId: string }
+  | { route: 'report_user'; targetUid: string; targetNickname: string; chatId: string };
 
 export type AppRouteViewState = AppRoute | AppRouteState;
 
@@ -189,6 +191,10 @@ export function routeToChatRoom(params: { chatId: string }): AppRouteState {
   return { route: 'chat_room', chatId: params.chatId };
 }
 
+export function routeToReportUser(params: { targetUid: string; targetNickname: string; chatId: string }): AppRouteState {
+  return { route: 'report_user', targetUid: params.targetUid, targetNickname: params.targetNickname, chatId: params.chatId };
+}
+
 export function backRouteForRoute(route: AppRouteViewState): AppRoute {
   const currentRoute = routeName(route);
   if (currentRoute === 'write_worry' || currentRoute === 'write_worry_success' || currentRoute === 'my_worry_detail') return '나의 고민';
@@ -197,6 +203,7 @@ export function backRouteForRoute(route: AppRouteViewState): AppRoute {
   if (currentRoute === 'received_answer_detail' || currentRoute === 'read_received_reply') return '나의 고민';
   if (currentRoute === 'my_worries') return '나의 고민';
   if (currentRoute === 'chat_room') return 'chat';
+  if (currentRoute === 'report_user') return 'chat'; // Though in practice we return to chat_room, backRouteForRoute returns an AppRoute (string). The container will handle navigating to chat_room directly.
   if (MY_PAGE_SUBROUTES.includes(currentRoute as (typeof MY_PAGE_SUBROUTES)[number])) return '마이페이지';
   return DEFAULT_AUTHENTICATED_TAB;
 }

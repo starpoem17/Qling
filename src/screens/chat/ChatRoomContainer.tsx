@@ -197,6 +197,11 @@ export function ChatRoomContainer({
       onBack={() => setView({ route: 'chat' })}
       onSendMessage={handleSendMessage}
       onLeaveChat={handleLeaveChat}
+      onReportUser={() => {
+        if (opponent) {
+          setView({ route: 'report_user', targetUid: opponent.uid, targetNickname: opponent.nickname, chatId });
+        }
+      }}
     />
   );
 }

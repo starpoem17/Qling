@@ -37,6 +37,7 @@ export function ChatRoomScreen({
   readonly onBack: () => void;
   readonly onSendMessage: (content: string) => Promise<{ success: boolean; error?: string }>;
   readonly onLeaveChat: () => void;
+  readonly onReportUser: () => void;
 }) {
   const [draft, setDraft] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -114,7 +115,7 @@ export function ChatRoomScreen({
               <div className="absolute right-0 top-full mt-2 w-[160px] bg-white rounded-[14px] shadow-[0_4px_16px_rgb(0_0_0/0.15)] overflow-hidden z-30">
                 <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); alert('알림이 꺼졌습니다.'); }}>알림 끄기</button>
                 <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onLeaveChat(); }}>채팅방 나가기</button>
-                <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); alert('신고가 접수되었습니다.'); }}>신고하기</button>
+                <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onReportUser(); }}>신고하기</button>
               </div>
             )}
           </div>

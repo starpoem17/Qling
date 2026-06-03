@@ -29,6 +29,7 @@ import { registerPolicyRoutes } from "./src/server/policyRoutes";
 import { registerVersionRoutes } from "./src/server/versionRoutes";
 import { registerRankingRoutes } from "./src/server/rankingRoutes";
 import { registerChatRoutes } from "./src/server/chatRoutes";
+import { registerReportRoutes } from "./src/server/reportRoutes";
 
 // Read client config to get database ID
 const clientConfigPath = path.join(process.cwd(), 'firebase-applet-config.json');
@@ -165,6 +166,7 @@ async function startServer() {
         return { status: 'rejected' as const, reason: body.reason };
       }),
     });
+    registerReportRoutes(app, { db });
   } else {
     app.post('/api/worries/publish', (_req, res) => {
       res.status(500).json({
