@@ -138,7 +138,30 @@ export function ChatScreen({
                 ))}
               </div>
             ) : (
-              <div className="flex justify-center py-10 text-[#b8b8b8] text-[14px] font-bold">참여 중인 대화방이 없습니다.</div>
+              <div className="flex flex-col items-center pt-20 pb-10 px-4 text-center h-full">
+                <div className="relative mb-6">
+                  <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="55" cy="55" r="42" fill="#ff8b3d" />
+                    <ellipse cx="41" cy="55" rx="7.5" ry="14" fill="white" />
+                    <ellipse cx="61" cy="55" rx="7.5" ry="14" fill="white" />
+                    <ellipse cx="39.5" cy="56.5" rx="3.5" ry="7" fill="#1a1a1a" />
+                    <ellipse cx="59.5" cy="56.5" rx="3.5" ry="7" fill="#1a1a1a" />
+                    <text x="68" y="94" fontFamily="Arial, sans-serif" fontWeight="900" fontSize="76" fill="#c3b29c" transform="rotate(18 68 94)">?</text>
+                    <text x="65" y="91" fontFamily="Arial, sans-serif" fontWeight="900" fontSize="76" fill="#fbbf24" transform="rotate(18 65 91)">?</text>
+                  </svg>
+                </div>
+                <h2 className="text-[20px] font-extrabold text-[#2a2a2a] mb-[12px] tracking-tight">아직 시작된 채팅이 없어요</h2>
+                <p className="text-[14.5px] text-[#7a7a7a] font-medium leading-[1.5] tracking-tight mb-8">
+                  답변에 코멘트를 받으면,<br />
+                  답변자가 먼저 채팅을 시작할 수 있어요.
+                </p>
+                <div className="w-full bg-white rounded-[16px] px-[20px] py-[18px] text-left shadow-[0_2px_8px_rgb(0_0_0/0.02)] border border-[#fdf9f5]">
+                  <p className="text-[13.5px] text-[#7a7a7a] font-medium leading-[1.55] tracking-tight">
+                    좋은 답변을 남기면 채팅으로 이어질 확률이<br />
+                    높아져요. 받은 고민에 답변을 달아보세요!
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         </div>
