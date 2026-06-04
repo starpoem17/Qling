@@ -9,6 +9,7 @@ const roomNotificationOffIconUrl = new URL('../../../assets/chat/room_notificati
 const roomBlockIconUrl = new URL('../../../assets/chat/room_block.svg', import.meta.url).href;
 const roomReportIconUrl = new URL('../../../assets/chat/room_report.svg', import.meta.url).href;
 const dimThemeColor = '#8b7b62';
+const chatRoomDocumentBackground = '#ffffff';
 const chatInputYOffset = 10;
 
 type ChatRoomCanvasStyle = CSSProperties & {
@@ -94,22 +95,17 @@ export function ChatRoomScreen({
   }, []);
 
   useEffect(() => {
-    if (!menuOpen) return;
-
-    const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     const root = document.getElementById('root');
-    const previousThemeColor = themeMeta?.getAttribute('content') ?? null;
     const previousHtmlBackground = document.documentElement.style.backgroundColor;
     const previousBodyBackground = document.body.style.backgroundColor;
     const previousRootBackground = root?.style.backgroundColor ?? null;
+    const backgroundColor = menuOpen ? dimThemeColor : chatRoomDocumentBackground;
 
-    themeMeta?.setAttribute('content', dimThemeColor);
-    document.documentElement.style.backgroundColor = dimThemeColor;
-    document.body.style.backgroundColor = dimThemeColor;
-    if (root) root.style.backgroundColor = dimThemeColor;
+    document.documentElement.style.backgroundColor = backgroundColor;
+    document.body.style.backgroundColor = backgroundColor;
+    if (root) root.style.backgroundColor = backgroundColor;
 
     return () => {
-      if (themeMeta && previousThemeColor !== null) themeMeta.setAttribute('content', previousThemeColor);
       document.documentElement.style.backgroundColor = previousHtmlBackground;
       document.body.style.backgroundColor = previousBodyBackground;
       if (root && previousRootBackground !== null) root.style.backgroundColor = previousRootBackground;

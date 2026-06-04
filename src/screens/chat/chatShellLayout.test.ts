@@ -71,15 +71,18 @@ test('chat room more menu is fixed to the visible viewport bottom', () => {
   assert.match(chatRoomScreenSource, /roomReportIconUrl/);
 });
 
-test('chat room accounts for iPhone visual viewport and dimmed status bar color', () => {
+test('chat room accounts for iPhone visual viewport and document background', () => {
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('resize', updateViewportMetrics\)/);
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('scroll', updateViewportMetrics\)/);
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('resize', updateViewportMetrics\)/);
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('scroll', updateViewportMetrics\)/);
-  assert.match(chatRoomScreenSource, /document\.querySelector<HTMLMetaElement>\('meta\[name="theme-color"\]'\)/);
-  assert.match(chatRoomScreenSource, /document\.documentElement\.style\.backgroundColor = dimThemeColor/);
-  assert.match(chatRoomScreenSource, /document\.body\.style\.backgroundColor = dimThemeColor/);
-  assert.match(chatRoomScreenSource, /root\.style\.backgroundColor = dimThemeColor/);
+  assert.match(chatRoomScreenSource, /const chatRoomDocumentBackground = '#ffffff'/);
+  assert.match(chatRoomScreenSource, /const backgroundColor = menuOpen \? dimThemeColor : chatRoomDocumentBackground/);
+  assert.match(chatRoomScreenSource, /document\.documentElement\.style\.backgroundColor = backgroundColor/);
+  assert.match(chatRoomScreenSource, /document\.body\.style\.backgroundColor = backgroundColor/);
+  assert.match(chatRoomScreenSource, /root\.style\.backgroundColor = backgroundColor/);
+  assert.doesNotMatch(chatRoomScreenSource, /meta\[name="theme-color"\]/);
+  assert.doesNotMatch(chatRoomScreenSource, /setAttribute\('content', '#ffffff'\)/);
 });
 
 test('chat list header matches the Figma vertical positions', () => {
