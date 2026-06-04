@@ -70,7 +70,7 @@ export function ChatRoomScreen({
     return (
       <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
         <div className="mx-auto flex h-full w-full max-w-[480px] flex-col">
-          <div className="relative h-[115px] shrink-0 w-full z-20 bg-[#ff8b3d]">
+          <div className="relative h-[127px] shrink-0 w-full z-20 bg-[#ff8b3d]">
             <button
               type="button"
               onClick={onBack}
@@ -97,7 +97,7 @@ export function ChatRoomScreen({
     <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]" onClick={() => setMenuOpen(false)}>
       <div className="mx-auto flex h-full w-full max-w-[480px] flex-col bg-[#ff8b3d]">
         {/* Top Bar Area */}
-        <div className="relative h-[115px] shrink-0 w-full z-20 bg-[#ff8b3d]">
+        <div className="relative h-[127px] shrink-0 w-full z-20 bg-[#ff8b3d]">
           <button
             type="button"
             onClick={onBack}
@@ -109,7 +109,7 @@ export function ChatRoomScreen({
             </span>
           </button>
           
-          <div className="absolute left-0 bottom-[10px] w-full flex flex-col items-center justify-end pointer-events-none">
+          <div className="absolute left-0 top-[51px] w-full flex flex-col items-center justify-start pointer-events-none">
              <div className="relative mb-[4px] shrink-0 pointer-events-auto">
                <img 
                  src={profileImageUrlForColor(opponent?.profileColor || '#ffd43b')}

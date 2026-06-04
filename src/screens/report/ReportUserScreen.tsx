@@ -37,7 +37,7 @@ export function ReportUserScreen({
     <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]">
       <div className="mx-auto flex h-full w-full max-w-[480px] flex-col bg-[#ff8b3d]">
         {/* Top Bar Area */}
-        <div className="relative h-[115px] shrink-0 w-full z-20 bg-[#ff8b3d]">
+        <div className="relative h-[127px] shrink-0 w-full z-20 bg-[#ff8b3d]">
           <button
             type="button"
             onClick={onBack}
