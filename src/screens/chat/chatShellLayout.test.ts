@@ -16,9 +16,15 @@ test('chat room autoscroll stays inside the message scroller', () => {
 });
 
 test('chat room top bar is fixed outside the keyboard-offset canvas', () => {
+  assert.match(chatRoomScreenSource, /const \[headerLayerTarget, setHeaderLayerTarget\] = useState<HTMLElement \| null>\(null\)/);
+  assert.match(chatRoomScreenSource, /setHeaderLayerTarget\(document\.body\)/);
+  assert.match(chatRoomScreenSource, /const headerLayer = headerLayerTarget \? createPortal\(/);
   assert.match(chatRoomScreenSource, /const topBarStyle: ChatRoomTopBarStyle = \{\s*transform: `translateX\(-50%\) scale\(\$\{viewportMetrics\.scale\}\)`,\s*\}/);
   assert.match(chatRoomScreenSource, /<ChatRoomTopBar[\s\S]*style=\{topBarStyle\}[\s\S]*\/>/);
-  assert.match(chatRoomScreenSource, /<header className="fixed left-1\/2 top-0 z-20 h-\[74px\] w-\[393px\] origin-top bg-\[#ff8b3d\] qling-figma-font" style=\{style\}>/);
+  assert.match(chatRoomScreenSource, /<header className="fixed left-0 right-0 top-0 z-20 mx-auto h-\[74px\] w-\[min\(480px,100vw\)\] overflow-hidden bg-\[#ff8b3d\] qling-figma-font">/);
+  assert.match(chatRoomScreenSource, /<div className="absolute left-1\/2 top-0 h-\[74px\] w-\[393px\] origin-top" style=\{style\}>/);
+  assert.match(chatRoomScreenSource, /\{headerLayer\}/);
+  assert.doesNotMatch(chatRoomScreenSource, /<header[^>]*style=\{style\}/);
   assert.doesNotMatch(chatRoomScreenSource, /<div className="relative w-\[393px\][^>]*>\s*<ChatRoomTopBar/);
 });
 

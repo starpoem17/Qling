@@ -70,6 +70,7 @@ export function ChatRoomScreen({
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerLayerTarget, setHeaderLayerTarget] = useState<HTMLElement | null>(null);
   const [inputLayerTarget, setInputLayerTarget] = useState<HTMLElement | null>(null);
   const [viewportMetrics, setViewportMetrics] = useState({ canvasHeight: 852, keyboardOffset: 0, scale: 1 });
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
@@ -110,6 +111,7 @@ export function ChatRoomScreen({
   }, []);
 
   useEffect(() => {
+    setHeaderLayerTarget(document.body);
     setInputLayerTarget(document.body);
   }, []);
 
@@ -175,6 +177,15 @@ export function ChatRoomScreen({
 
   const mineMessageIds = messages.filter(m => m.isMine).map(m => m.messageId);
   const unreadThresholdIndex = mineMessageIds.length - (opponentUnreadCount || 0);
+  const headerLayer = headerLayerTarget ? createPortal(
+    <ChatRoomTopBar
+      opponent={opponent}
+      onBack={onBack}
+      onOpenMenu={() => setMenuOpen(true)}
+      style={topBarStyle}
+    />,
+    headerLayerTarget,
+  ) : null;
   const inputLayer = inputLayerTarget ? createPortal(
     <ChatRoomInputBar
       draft={draft}
@@ -191,33 +202,24 @@ export function ChatRoomScreen({
 
   if (loading || error) {
     return (
-      <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
-        <ChatRoomTopBar
-          opponent={opponent}
-          onBack={onBack}
-          onOpenMenu={() => setMenuOpen(true)}
-          style={topBarStyle}
-        />
-        <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-          <div className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
-            <div className="absolute bottom-0 left-0 top-[74px] flex w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
-              {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
+      <>
+        <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
+          <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+            <div className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+              <div className="absolute bottom-0 left-0 top-[74px] flex w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
+                {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+        {headerLayer}
+      </>
     );
   }
 
   return (
     <>
       <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
-        <ChatRoomTopBar
-          opponent={opponent}
-          onBack={onBack}
-          onOpenMenu={() => setMenuOpen(true)}
-          style={topBarStyle}
-        />
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
             <div
@@ -321,6 +323,7 @@ export function ChatRoomScreen({
           />
         )}
       </section>
+      {headerLayer}
       {inputLayer}
     </>
   );
@@ -417,42 +420,44 @@ function ChatRoomTopBar({
   readonly style: ChatRoomTopBarStyle;
 }) {
   return (
-    <header className="fixed left-1/2 top-0 z-20 h-[74px] w-[393px] origin-top bg-[#ff8b3d] qling-figma-font" style={style}>
-      <button
-        type="button"
-        onClick={onBack}
-        aria-label="뒤로가기"
-        className="absolute left-[11px] top-[18px] flex h-12 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
-      >
-        <span aria-hidden="true" className="font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-none">
-          ‹
-        </span>
-      </button>
-      <div className="absolute left-[126px] top-[28px] h-[30px] w-[30px]">
-        <img
-          src={profileImageUrlForColor(opponent?.profileColor || '#FF8B3D')}
-          alt="프로필"
-          className="h-[30px] w-[30px] rounded-full object-cover"
-          draggable={false}
-        />
-        <span className="absolute left-[21px] top-5 h-[11px] w-[11px] rounded-full border-[1.6px] border-[#fff4e8] bg-[#3fc36b]" aria-hidden="true" />
+    <header className="fixed left-0 right-0 top-0 z-20 mx-auto h-[74px] w-[min(480px,100vw)] overflow-hidden bg-[#ff8b3d] qling-figma-font">
+      <div className="absolute left-1/2 top-0 h-[74px] w-[393px] origin-top" style={style}>
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="뒤로가기"
+          className="absolute left-[11px] top-[18px] flex h-12 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          <span aria-hidden="true" className="font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-none">
+            ‹
+          </span>
+        </button>
+        <div className="absolute left-[126px] top-[28px] h-[30px] w-[30px]">
+          <img
+            src={profileImageUrlForColor(opponent?.profileColor || '#FF8B3D')}
+            alt="프로필"
+            className="h-[30px] w-[30px] rounded-full object-cover"
+            draggable={false}
+          />
+          <span className="absolute left-[21px] top-5 h-[11px] w-[11px] rounded-full border-[1.6px] border-[#fff4e8] bg-[#3fc36b]" aria-hidden="true" />
+        </div>
+        <div className="absolute left-[170px] top-[25px] flex w-[83px] flex-col items-start">
+          <span className="max-w-[130px] truncate text-[16px] font-extrabold leading-5 tracking-[-0.4px] text-white">
+            {opponent?.nickname || '대화방'}
+          </span>
+          <span className="whitespace-nowrap text-[11.5px] font-medium leading-[17.25px] text-white/80">
+            답변 채택률 92%
+          </span>
+        </div>
+        <button
+          type="button"
+          aria-label="채팅방 메뉴 열기"
+          onClick={onOpenMenu}
+          className="absolute left-[339px] top-[27px] flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          <img src={roomMoreIconUrl} alt="" aria-hidden="true" className="h-[22px] w-[22px]" draggable={false} />
+        </button>
       </div>
-      <div className="absolute left-[170px] top-[25px] flex w-[83px] flex-col items-start">
-        <span className="max-w-[130px] truncate text-[16px] font-extrabold leading-5 tracking-[-0.4px] text-white">
-          {opponent?.nickname || '대화방'}
-        </span>
-        <span className="whitespace-nowrap text-[11.5px] font-medium leading-[17.25px] text-white/80">
-          답변 채택률 92%
-        </span>
-      </div>
-      <button
-        type="button"
-        aria-label="채팅방 메뉴 열기"
-        onClick={onOpenMenu}
-        className="absolute left-[339px] top-[27px] flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
-      >
-        <img src={roomMoreIconUrl} alt="" aria-hidden="true" className="h-[22px] w-[22px]" draggable={false} />
-      </button>
     </header>
   );
 }
