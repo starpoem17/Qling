@@ -1,5 +1,4 @@
-import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent, type FormEvent, type RefObject } from 'react';
-import { createPortal } from 'react-dom';
+import { useState, useRef, useEffect, type CSSProperties, type ChangeEvent, type KeyboardEvent, type RefObject } from 'react';
 import { cn } from '../../lib/utils';
 import { ErrorState, profileImageUrlForColor } from '../shared/ui';
 
@@ -12,31 +11,14 @@ const roomReportIconUrl = new URL('../../../assets/chat/room_report.svg', import
 const dimThemeColor = '#8b7b62';
 const chatRoomDocumentBackground = '#ffffff';
 const chatInputYOffset = 10;
+const chatInputBaseHeight = 67;
+const chatTextareaMinHeight = 40;
+const chatTextareaMaxHeight = 60;
 
 type ChatRoomCanvasStyle = CSSProperties & {
   readonly '--chat-keyboard-offset': string;
   readonly '--chat-input-y-offset': string;
-};
-
-type ChatRoomTopBarStyle = CSSProperties & {
-  readonly transform: string;
-};
-
-type ChatRoomInputBarStyle = CSSProperties & {
-  readonly left: string;
-  readonly bottom: string;
-  readonly width: string;
-  readonly height: string;
-};
-
-type ChatRoomSafeInputStyle = CSSProperties & {
-  readonly position: 'fixed';
-  readonly left: string;
-  readonly top: string;
-  readonly width: string;
-  readonly height: string;
-  readonly opacity: number;
-  readonly pointerEvents: 'none';
+  readonly '--chat-input-height': string;
 };
 
 type ChatRoomViewportMetrics = {
@@ -44,33 +26,6 @@ type ChatRoomViewportMetrics = {
   readonly keyboardOffset: number;
   readonly scale: number;
 };
-
-function logChatRoomKeyboardViewport(label: string, metrics: ChatRoomViewportMetrics) {
-  const header = document.querySelector('[data-chat-room-top-bar]');
-  const inputBar = document.querySelector('[data-chat-room-input-bar]');
-  const canvas = document.querySelector('[data-chat-room-canvas]');
-  const root = document.getElementById('root');
-  const canvasStyle = canvas instanceof HTMLElement ? getComputedStyle(canvas) : null;
-
-  console.log(`[chat-room-keyboard] ${label}`, {
-    scrollY: window.scrollY,
-    innerHeight: window.innerHeight,
-    docClientHeight: document.documentElement.clientHeight,
-    vvHeight: window.visualViewport?.height,
-    vvOffsetTop: window.visualViewport?.offsetTop,
-    bodyTop: document.body.getBoundingClientRect().top,
-    rootTop: root?.getBoundingClientRect().top,
-    headerTop: header?.getBoundingClientRect().top,
-    inputBarBottom: inputBar?.getBoundingClientRect().bottom,
-    inputBarTop: inputBar?.getBoundingClientRect().top,
-    canvasTop: canvas?.getBoundingClientRect().top,
-    keyboardOffset: metrics.keyboardOffset,
-    keyboardOffsetCss: canvasStyle?.getPropertyValue('--chat-keyboard-offset').trim(),
-    inputBarBottomStyle: inputBar instanceof HTMLElement ? inputBar.style.bottom : undefined,
-    canvasHeight: metrics.canvasHeight,
-    scale: metrics.scale,
-  });
-}
 
 export interface ChatMessage {
   messageId: string;
@@ -113,21 +68,11 @@ export function ChatRoomScreen({
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [headerLayerTarget, setHeaderLayerTarget] = useState<HTMLElement | null>(null);
-  const [inputLayerTarget, setInputLayerTarget] = useState<HTMLElement | null>(null);
-  const [viewportMetrics, setViewportMetrics] = useState({ canvasHeight: 852, keyboardOffset: 0, scale: 1 });
-  const viewportMetricsRef = useRef<ChatRoomViewportMetrics>(viewportMetrics);
-  const keyboardActiveRef = useRef(false);
-  const lockedDocumentScrollYRef = useRef(0);
-  const messageInputFocusedRef = useRef(false);
+  const [textareaHeight, setTextareaHeight] = useState(chatTextareaMinHeight);
+  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, keyboardOffset: 0, scale: 1 });
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
-  const safeInputRef = useRef<HTMLDivElement>(null);
-
-  const restoreKeyboardDocumentScroll = () => {
-    if (!keyboardActiveRef.current) return;
-    const lockedScrollY = lockedDocumentScrollYRef.current;
-    if (window.scrollY !== lockedScrollY) window.scrollTo(window.scrollX, lockedScrollY);
-  };
+  const messageInputRef = useRef<HTMLTextAreaElement>(null);
+  const shouldStickToBottomRef = useRef(true);
 
   useEffect(() => {
     const updateViewportMetrics = () => {
@@ -136,32 +81,13 @@ export function ChatRoomScreen({
       const scale = Math.max(Math.min(visualWidth, 480) / 393, 0.1);
       const layoutHeight = document.documentElement.clientHeight || window.innerHeight || visualViewport?.height || 852;
       const keyboardOffset = Math.max(0, layoutHeight - (visualViewport?.height ?? layoutHeight) - (visualViewport?.offsetTop ?? 0));
-      const nextKeyboardOffset = keyboardOffset / scale;
-      const isKeyboardActive = nextKeyboardOffset > 0;
-
-      if (isKeyboardActive) {
-        keyboardActiveRef.current = true;
-        requestAnimationFrame(restoreKeyboardDocumentScroll);
-      } else {
-        keyboardActiveRef.current = false;
-        if (!messageInputFocusedRef.current) lockedDocumentScrollYRef.current = window.scrollY;
-      }
-
-      if (document.activeElement instanceof HTMLElement && document.activeElement.matches('[data-chat-room-message-input]')) {
-        logChatRoomKeyboardViewport('viewport metrics update', {
-          canvasHeight: viewportMetricsRef.current.canvasHeight,
-          keyboardOffset: nextKeyboardOffset,
-          scale,
-        });
-      }
+      const nextMetrics = {
+        canvasHeight: layoutHeight / scale,
+        keyboardOffset: keyboardOffset / scale,
+        scale,
+      };
 
       setViewportMetrics(previousMetrics => {
-        const nextMetrics = {
-          canvasHeight: keyboardOffset > 0 ? previousMetrics.canvasHeight : layoutHeight / scale,
-          keyboardOffset: nextKeyboardOffset,
-          scale,
-        };
-
         return previousMetrics.canvasHeight === nextMetrics.canvasHeight
           && previousMetrics.keyboardOffset === nextMetrics.keyboardOffset
           && previousMetrics.scale === nextMetrics.scale
@@ -174,59 +100,14 @@ export function ChatRoomScreen({
     window.addEventListener('resize', updateViewportMetrics);
     window.addEventListener('orientationchange', updateViewportMetrics);
     window.visualViewport?.addEventListener('resize', updateViewportMetrics);
+    window.visualViewport?.addEventListener('scroll', updateViewportMetrics);
 
     return () => {
       window.removeEventListener('resize', updateViewportMetrics);
       window.removeEventListener('orientationchange', updateViewportMetrics);
       window.visualViewport?.removeEventListener('resize', updateViewportMetrics);
+      window.visualViewport?.removeEventListener('scroll', updateViewportMetrics);
     };
-  }, []);
-
-  useEffect(() => {
-    lockedDocumentScrollYRef.current = window.scrollY;
-
-    const restoreAfterViewportChange = () => {
-      requestAnimationFrame(restoreKeyboardDocumentScroll);
-    };
-    const handleDocumentScroll = () => {
-      if (!keyboardActiveRef.current) {
-        if (!messageInputFocusedRef.current) lockedDocumentScrollYRef.current = window.scrollY;
-        return;
-      }
-      restoreKeyboardDocumentScroll();
-    };
-    const handleNonMessageScroll = (event: TouchEvent | WheelEvent) => {
-      if (!keyboardActiveRef.current) return;
-      const scroller = messagesScrollerRef.current;
-      if (scroller && event.target instanceof Node && scroller.contains(event.target)) return;
-      event.preventDefault();
-      event.stopPropagation();
-      restoreKeyboardDocumentScroll();
-    };
-    const blockingListenerOptions = { passive: false, capture: true };
-
-    window.addEventListener('scroll', handleDocumentScroll, { passive: true });
-    window.visualViewport?.addEventListener('resize', restoreAfterViewportChange);
-    window.visualViewport?.addEventListener('scroll', restoreAfterViewportChange);
-    document.addEventListener('touchmove', handleNonMessageScroll, blockingListenerOptions);
-    document.addEventListener('wheel', handleNonMessageScroll, blockingListenerOptions);
-
-    return () => {
-      window.removeEventListener('scroll', handleDocumentScroll);
-      window.visualViewport?.removeEventListener('resize', restoreAfterViewportChange);
-      window.visualViewport?.removeEventListener('scroll', restoreAfterViewportChange);
-      document.removeEventListener('touchmove', handleNonMessageScroll, blockingListenerOptions);
-      document.removeEventListener('wheel', handleNonMessageScroll, blockingListenerOptions);
-    };
-  }, []);
-
-  useEffect(() => {
-    viewportMetricsRef.current = viewportMetrics;
-  }, [viewportMetrics]);
-
-  useEffect(() => {
-    setHeaderLayerTarget(document.body);
-    setInputLayerTarget(document.body);
   }, []);
 
   useEffect(() => {
@@ -250,42 +131,42 @@ export function ChatRoomScreen({
   const canvasStyle: ChatRoomCanvasStyle = {
     '--chat-keyboard-offset': `${viewportMetrics.keyboardOffset}px`,
     '--chat-input-y-offset': `${chatInputYOffset}px`,
+    '--chat-input-height': `${chatInputBaseHeight + Math.max(0, textareaHeight - chatTextareaMinHeight)}px`,
     height: `${viewportMetrics.canvasHeight}px`,
     transform: `scale(${viewportMetrics.scale})`,
   };
-  const topBarStyle: ChatRoomTopBarStyle = {
-    transform: `translateX(-50%) scale(${viewportMetrics.scale})`,
-  };
-  const inputBarBottom = Math.max(0, viewportMetrics.keyboardOffset - chatInputYOffset) * viewportMetrics.scale;
-  const inputBarStyle: ChatRoomInputBarStyle = {
-    left: `calc(50% - ${(393 * viewportMetrics.scale) / 2}px)`,
-    bottom: `${inputBarBottom}px`,
-    width: `${393 * viewportMetrics.scale}px`,
-    height: `${67 * viewportMetrics.scale}px`,
-  };
-  const safeInputStyle: ChatRoomSafeInputStyle = {
-    position: 'fixed',
-    left: `calc(50% - ${160 * viewportMetrics.scale}px)`,
-    top: `${120 * viewportMetrics.scale}px`,
-    width: `${320 * viewportMetrics.scale}px`,
-    height: `${40 * viewportMetrics.scale}px`,
-    opacity: 0.01,
-    pointerEvents: 'none',
-  };
 
   useEffect(() => {
+    const textarea = messageInputRef.current;
+    if (!textarea) return;
+    textarea.style.height = `${chatTextareaMinHeight}px`;
+    const nextHeight = Math.min(chatTextareaMaxHeight, Math.max(chatTextareaMinHeight, textarea.scrollHeight));
+    textarea.style.height = `${nextHeight}px`;
+    setTextareaHeight(nextHeight);
+  }, [draft]);
+
+  useEffect(() => {
+    if (!shouldStickToBottomRef.current) return;
     const scroller = messagesScrollerRef.current;
     if (!scroller) return;
     scroller.scrollTop = scroller.scrollHeight;
-  }, [messages]);
+  }, [messages, textareaHeight, viewportMetrics.keyboardOffset]);
+
+  const handleMessagesScroll = () => {
+    const scroller = messagesScrollerRef.current;
+    if (!scroller) return;
+    const distanceFromBottom = scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
+    shouldStickToBottomRef.current = distanceFromBottom <= 72;
+  };
 
   const handleSend = async () => {
-    if (!draft.trim() || isSending) return;
+    const content = draft.trim();
+    if (!content || isSending) return;
     setIsSending(true);
     setSendError(null);
-    const { success, error } = await onSendMessage(draft);
+    const { success, error } = await onSendMessage(content);
     if (success) {
-      if (safeInputRef.current) safeInputRef.current.textContent = '';
+      shouldStickToBottomRef.current = true;
       setDraft('');
     } else {
       setSendError(error || '전송 실패');
@@ -293,97 +174,57 @@ export function ChatRoomScreen({
     setIsSending(false);
   };
 
-  const handleMessageKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  const handleMessageKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return;
     event.preventDefault();
     void handleSend();
   };
 
-  const handleDraftInput = (event: FormEvent<HTMLDivElement>) => {
-    setDraft(event.currentTarget.textContent ?? '');
+  const handleDraftChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setDraft(event.currentTarget.value);
+    setSendError(null);
   };
 
-  const focusSafeMessageInput = () => {
-    lockedDocumentScrollYRef.current = window.scrollY;
-    messageInputFocusedRef.current = true;
-    safeInputRef.current?.focus();
-  };
-
-  const handleMessageFocus = () => {
-    lockedDocumentScrollYRef.current = window.scrollY;
-    messageInputFocusedRef.current = true;
-    logChatRoomKeyboardViewport('input focus', viewportMetricsRef.current);
-    requestAnimationFrame(() => logChatRoomKeyboardViewport('input focus raf', viewportMetricsRef.current));
-    requestAnimationFrame(restoreKeyboardDocumentScroll);
-    window.setTimeout(() => logChatRoomKeyboardViewport('input focus 150ms', viewportMetricsRef.current), 150);
-    window.setTimeout(restoreKeyboardDocumentScroll, 150);
-    window.setTimeout(() => logChatRoomKeyboardViewport('input focus 450ms', viewportMetricsRef.current), 450);
-    window.setTimeout(restoreKeyboardDocumentScroll, 450);
-    window.setTimeout(() => logChatRoomKeyboardViewport('input focus 900ms', viewportMetricsRef.current), 900);
-    window.setTimeout(restoreKeyboardDocumentScroll, 900);
-  };
-
-  const handleMessageBlur = () => {
-    messageInputFocusedRef.current = false;
-    keyboardActiveRef.current = false;
-    lockedDocumentScrollYRef.current = window.scrollY;
+  const handleOpenMenu = () => {
+    messageInputRef.current?.blur();
+    setMenuOpen(true);
   };
 
   const mineMessageIds = messages.filter(m => m.isMine).map(m => m.messageId);
   const unreadThresholdIndex = mineMessageIds.length - (opponentUnreadCount || 0);
-  const headerLayer = headerLayerTarget ? createPortal(
-    <ChatRoomTopBar
-      opponent={opponent}
-      onBack={onBack}
-      onOpenMenu={() => setMenuOpen(true)}
-      style={topBarStyle}
-    />,
-    headerLayerTarget,
-  ) : null;
-  const inputLayer = inputLayerTarget ? createPortal(
-    <ChatRoomInputBar
-      draft={draft}
-      sendError={sendError}
-      isSending={isSending}
-      scale={viewportMetrics.scale}
-      style={inputBarStyle}
-      safeInputRef={safeInputRef}
-      safeInputStyle={safeInputStyle}
-      onDraftInput={handleDraftInput}
-      onMessageKeyDown={handleMessageKeyDown}
-      onMessageFocus={handleMessageFocus}
-      onMessageBlur={handleMessageBlur}
-      onFocusProxy={focusSafeMessageInput}
-      onSend={handleSend}
-    />,
-    inputLayerTarget,
-  ) : null;
-
   if (loading || error) {
     return (
-      <>
-        <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
-          <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-            <div data-chat-room-canvas className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
-              <div className="absolute bottom-0 left-0 top-[74px] flex w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
-                {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
-              </div>
+      <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
+        <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+          <div data-chat-room-canvas className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+            <ChatRoomTopBar
+              opponent={opponent}
+              onBack={onBack}
+              onOpenMenu={handleOpenMenu}
+            />
+            <div className="absolute bottom-0 left-0 top-[74px] flex w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
+              {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
             </div>
           </div>
-        </section>
-        {headerLayer}
-      </>
+        </div>
+      </section>
     );
   }
 
   return (
-    <>
-      <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
-        <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-          <div data-chat-room-canvas className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+    <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
+      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+        <div data-chat-room-canvas className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+          <ChatRoomTopBar
+            opponent={opponent}
+            onBack={onBack}
+            onOpenMenu={handleOpenMenu}
+          />
             <div
               ref={messagesScrollerRef}
-              className="absolute bottom-[calc(67px+max(0px,calc(var(--chat-keyboard-offset)-var(--chat-input-y-offset))))] left-0 top-[74px] w-[393px] overflow-y-auto overscroll-contain bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
+              data-chat-room-message-scroller
+              className="absolute bottom-[calc(var(--chat-input-height)+max(0px,calc(var(--chat-keyboard-offset)-var(--chat-input-y-offset))))] left-0 top-[74px] w-[393px] overflow-y-auto overscroll-contain bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
+              onScroll={handleMessagesScroll}
             >
             <div className="mb-[14px] flex w-full justify-center">
               <span className="rounded-full bg-[#ffe7d2] px-3 py-[4px] text-[11px] font-semibold leading-[16.5px] text-[#f26c0f]">
@@ -461,11 +302,20 @@ export function ChatRoomScreen({
               })}
             </div>
             </div>
+            <ChatRoomInputBar
+              draft={draft}
+              sendError={sendError}
+              isSending={isSending}
+              textareaHeight={textareaHeight}
+              inputRef={messageInputRef}
+              onDraftChange={handleDraftChange}
+              onMessageKeyDown={handleMessageKeyDown}
+              onSend={handleSend}
+            />
           </div>
         </div>
         {menuOpen && (
           <ChatRoomActionSheet
-            keyboardOffset={viewportMetrics.keyboardOffset * viewportMetrics.scale}
             onClose={() => setMenuOpen(false)}
             onNotificationOff={() => {
               setMenuOpen(false);
@@ -482,9 +332,6 @@ export function ChatRoomScreen({
           />
         )}
       </section>
-      {headerLayer}
-      {inputLayer}
-    </>
   );
 }
 
@@ -492,116 +339,62 @@ function ChatRoomInputBar({
   draft,
   sendError,
   isSending,
-  scale,
-  style,
-  safeInputRef,
-  safeInputStyle,
-  onDraftInput,
+  textareaHeight,
+  inputRef,
+  onDraftChange,
   onMessageKeyDown,
-  onMessageFocus,
-  onMessageBlur,
-  onFocusProxy,
   onSend,
 }: {
   readonly draft: string;
   readonly sendError: string | null;
   readonly isSending: boolean;
-  readonly scale: number;
-  readonly style: ChatRoomInputBarStyle;
-  readonly safeInputRef: RefObject<HTMLDivElement>;
-  readonly safeInputStyle: ChatRoomSafeInputStyle;
-  readonly onDraftInput: (event: FormEvent<HTMLDivElement>) => void;
-  readonly onMessageKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
-  readonly onMessageFocus: () => void;
-  readonly onMessageBlur: () => void;
-  readonly onFocusProxy: () => void;
+  readonly textareaHeight: number;
+  readonly inputRef: RefObject<HTMLTextAreaElement | null>;
+  readonly onDraftChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  readonly onMessageKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
   readonly onSend: () => void;
 }) {
-  const px = (value: number) => `${value * scale}px`;
-
   return (
-    <>
-      <div
-        ref={safeInputRef}
-        data-chat-room-message-input
-        role="textbox"
-        contentEditable
-        suppressContentEditableWarning
-        tabIndex={-1}
-        onInput={onDraftInput}
-        onKeyDown={onMessageKeyDown}
-        onFocus={onMessageFocus}
-        onBlur={onMessageBlur}
-        aria-label="메시지 입력"
-        inputMode="text"
-        enterKeyHint="send"
-        autoCorrect="off"
-        autoCapitalize="sentences"
-        spellCheck={false}
-        data-lpignore="true"
-        data-1p-ignore="true"
-        className="bg-transparent text-transparent outline-none caret-transparent"
-        style={safeInputStyle}
-      />
-      <div data-chat-room-input-bar className="fixed z-10 border-t border-[#ede3d6] bg-white qling-figma-font" style={style}>
+      <div data-chat-room-input-bar className="absolute bottom-[max(0px,calc(var(--chat-keyboard-offset)-var(--chat-input-y-offset)))] left-0 h-[var(--chat-input-height)] w-[393px] border-t border-[#ede3d6] bg-white qling-figma-font">
         {sendError && (
-          <div
-            className="absolute rounded-[12px] bg-white text-center font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]"
-            style={{
-              bottom: px(67),
-              left: px(16),
-              right: px(16),
-              padding: `${px(8)} ${px(12)}`,
-              fontSize: px(12),
-            }}
-          >
+          <div className="absolute bottom-[67px] left-4 right-4 rounded-[12px] bg-white px-3 py-2 text-center text-[12px] font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]">
             {sendError}
           </div>
         )}
-        <div
-          className="absolute flex items-center justify-center rounded-full bg-[#fff0e2]"
-          style={{ left: px(14), top: px(12.2), width: px(38), height: px(38) }}
-        >
+        <div className="absolute left-[14px] top-[12.2px] flex h-[38px] w-[38px] items-center justify-center rounded-full bg-[#fff0e2]">
           <button type="button" aria-label="첨부 추가" className="flex h-full w-full items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]">
-            <img src={roomPlusIconUrl} alt="" aria-hidden="true" style={{ width: px(18), height: px(18) }} draggable={false} />
+            <img src={roomPlusIconUrl} alt="" aria-hidden="true" className="h-[18px] w-[18px]" draggable={false} />
           </button>
         </div>
-        <button
-          type="button"
-          className="absolute flex items-center rounded-[21px] border border-[#ede3d6] bg-[#fff4e8]"
-          onPointerDown={(event) => {
-            event.preventDefault();
-            onFocusProxy();
-          }}
-          onClick={onFocusProxy}
+        <textarea
+          ref={inputRef}
+          data-chat-room-message-input
+          value={draft}
+          onChange={onDraftChange}
+          onKeyDown={onMessageKeyDown}
           aria-label="메시지 입력"
-          style={{
-            left: px(60),
-            top: px(10.2),
-            minHeight: px(40),
-            width: px(269),
-            padding: `${px(0.8)} ${px(16.8)}`,
-          }}
-        >
-          <span
-            className={cn('block w-full truncate text-left font-normal', draft ? 'text-[#2b2620]' : 'text-[#a39e96]')}
-            style={{ fontSize: px(14), lineHeight: px(20) }}
-          >
-            {draft || '메시지를 입력해 주세요'}
-          </span>
-        </button>
+          rows={1}
+          inputMode="text"
+          enterKeyHint="send"
+          autoCorrect="off"
+          autoCapitalize="sentences"
+          spellCheck={false}
+          data-lpignore="true"
+          data-1p-ignore="true"
+          placeholder="메시지를 입력해 주세요"
+          className="absolute left-[60px] top-[10.2px] w-[269px] resize-none rounded-[21px] border border-[#ede3d6] bg-[#fff4e8] px-[16.8px] py-[9px] text-[14px] font-normal leading-5 text-[#2b2620] outline-none placeholder:text-[#a39e96] focus:ring-2 focus:ring-[#ff8b3d]"
+          style={{ height: textareaHeight, overflow: 'hidden' }}
+        />
         <button
           type="button"
           onClick={() => void onSend()}
           disabled={!draft.trim() || isSending}
           aria-label="메시지 보내기"
-          className="absolute flex items-center justify-center rounded-full bg-[#ff8b3d] shadow-[0_4px_6px_rgb(255_122_26/0.4)] transition-transform active:scale-95 disabled:opacity-45 focus:outline-none focus:ring-2 focus:ring-[#f26c0f]"
-          style={{ left: px(337), top: px(8.2), width: px(42), height: px(42) }}
+          className="absolute left-[337px] top-[8.2px] flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#ff8b3d] shadow-[0_4px_6px_rgb(255_122_26/0.4)] transition-transform active:scale-95 disabled:opacity-45 focus:outline-none focus:ring-2 focus:ring-[#f26c0f]"
         >
-          <img src={roomSendIconUrl} alt="" aria-hidden="true" style={{ width: px(20), height: px(20) }} draggable={false} />
+          <img src={roomSendIconUrl} alt="" aria-hidden="true" className="h-5 w-5" draggable={false} />
         </button>
       </div>
-    </>
   );
 }
 
@@ -609,16 +402,13 @@ function ChatRoomTopBar({
   opponent,
   onBack,
   onOpenMenu,
-  style,
 }: {
   readonly opponent: { nickname: string; profileColor: string } | null;
   readonly onBack: () => void;
   readonly onOpenMenu: () => void;
-  readonly style: ChatRoomTopBarStyle;
 }) {
   return (
-    <header data-chat-room-top-bar className="fixed left-0 right-0 top-0 z-20 mx-auto h-[74px] w-[min(480px,100vw)] overflow-hidden bg-[#ff8b3d] qling-figma-font">
-      <div className="absolute left-1/2 top-0 h-[74px] w-[393px] origin-top" style={style}>
+    <header data-chat-room-top-bar className="absolute left-0 top-0 z-20 h-[74px] w-[393px] overflow-hidden bg-[#ff8b3d] qling-figma-font">
         <button
           type="button"
           onClick={onBack}
@@ -654,36 +444,28 @@ function ChatRoomTopBar({
         >
           <img src={roomMoreIconUrl} alt="" aria-hidden="true" className="h-[22px] w-[22px]" draggable={false} />
         </button>
-      </div>
     </header>
   );
 }
 
 function ChatRoomActionSheet({
-  keyboardOffset,
   onClose,
   onNotificationOff,
   onBlock,
   onReport,
 }: {
-  readonly keyboardOffset: number;
   readonly onClose: () => void;
   readonly onNotificationOff: () => void;
   readonly onBlock: () => void;
   readonly onReport: () => void;
 }) {
-  const sheetStyle = {
-    '--chat-keyboard-offset': `${keyboardOffset}px`,
-  } as CSSProperties;
-
   return (
     <div className="fixed inset-0 z-30 bg-[rgba(40,30,20,0.42)]" role="presentation" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label="채팅방 메뉴"
-        className="absolute bottom-[var(--chat-keyboard-offset)] left-1/2 flex h-[284px] w-[min(393px,100vw)] -translate-x-1/2 flex-col items-start overflow-hidden rounded-tl-[22px] rounded-tr-[22px] bg-white pb-[26px] pt-[10px]"
-        style={sheetStyle}
+        className="absolute bottom-0 left-1/2 flex h-[284px] w-[min(393px,100vw)] -translate-x-1/2 flex-col items-start overflow-hidden rounded-tl-[22px] rounded-tr-[22px] bg-white pb-[26px] pt-[10px]"
         onClick={event => event.stopPropagation()}
       >
         <div className="flex w-full justify-center overflow-hidden pb-2">
