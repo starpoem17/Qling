@@ -202,6 +202,14 @@ test('onboarding interests use a responsive two-column chip grid contract', () =
   assert.doesNotMatch(screen, /flex flex-wrap gap-2/);
 });
 
+test('onboarding interests step disables next without rendering a validation alert', () => {
+  const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
+
+  assert.match(screen, /props\.values\.selectedInterests\.length > 0/);
+  assert.match(screen, /disabled=\{!canContinue \|\| props\.isProcessing\}/);
+  assert.doesNotMatch(screen, /props\.validationMessages\.interests && \(\s*<p/);
+});
+
 test('onboarding screen uses ranking-style responsive Figma canvas scaling', () => {
   const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
 

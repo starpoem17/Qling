@@ -308,12 +308,6 @@ function InterestsStep({
           );
         })}
       </div>
-      {props.validationMessages.interests && (
-        <p className="absolute left-[34px] top-[716px] text-[13px] font-bold text-[#ea4335]" role="alert">
-          {props.validationMessages.interests}
-        </p>
-      )}
-
       <button
         type="button"
         onClick={onPrevious}
