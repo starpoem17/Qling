@@ -16,15 +16,24 @@ test('chat room autoscroll stays inside the message scroller', () => {
 });
 
 test('chat shell routes fill the app shell without extending under bottom navigation', () => {
-  for (const source of [chatScreenSource, chatRoomScreenSource, reportUserScreenSource]) {
+  for (const source of [chatRoomScreenSource, reportUserScreenSource]) {
     assert.match(source, /-mx-\[var\(--qling-space-shell-x\)\] -mt-6 h-\[calc\(100%\+1\.5rem\)\] overflow-hidden/);
     assert.doesNotMatch(source, /-mb-\[var\(--qling-space-scroll-bottom\)\]/);
     assert.doesNotMatch(source, /h-dvh/);
   }
 });
 
+test('chat list uses the 393px fixed canvas scale layout', () => {
+  assert.match(chatScreenSource, /const canvasScale = 'calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)'/);
+  assert.match(chatScreenSource, /-mx-\[var\(--qling-space-shell-x\)\] -mb-\[var\(--qling-space-scroll-bottom\)\] -mt-6 h-dvh overflow-hidden/);
+  assert.match(chatScreenSource, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden/);
+  assert.match(chatScreenSource, /style=\{\{ transform: `scale\(\$\{canvasScale\}\)` \}\}/);
+});
+
 test('chat shell routes keep scrolling in route-owned content areas', () => {
-  assert.match(chatScreenSource, /min-h-0 w-full flex-1 overflow-y-auto/);
+  assert.match(chatScreenSource, /absolute left-0 top-\[162px\] h-\[690px\] w-full overflow-y-auto/);
+  assert.match(chatScreenSource, /CreamContentBackground/);
+  assert.match(chatScreenSource, /touch-none overscroll-none overflow-hidden rounded-t-\[30px\]/);
   assert.match(chatRoomScreenSource, /min-h-0 flex-1 overflow-y-auto/);
   assert.match(reportUserScreenSource, /min-h-0 flex-1 overflow-y-auto/);
 

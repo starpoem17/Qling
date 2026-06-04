@@ -1,6 +1,13 @@
-import { useState } from 'react';
-import { MoreVertical, Search, CircleUserRound } from 'lucide-react';
+import { useState, type TouchEvent, type WheelEvent } from 'react';
 import { profileImageUrlForColor } from '../shared/ui';
+import { FigmaTabLoading } from '../shared/FigmaTabLoading';
+
+const searchIconUrl = new URL('../../../assets/chat/search_icon.svg', import.meta.url).href;
+const myPageIconUrl = new URL('../../../assets/chat/my_page_icon.svg', import.meta.url).href;
+const moreVerticalUrl = new URL('../../../assets/chat/more_vertical.svg', import.meta.url).href;
+const emptyAvatarUrl = new URL('../../../assets/chat/empty_avatar.svg', import.meta.url).href;
+const emptyEyesUrl = new URL('../../../assets/chat/empty_eyes.svg', import.meta.url).href;
+const emptyQuestionUrl = new URL('../../../assets/chat/empty_question.svg', import.meta.url).href;
 
 export interface ChatListItem {
   chatId: string;
@@ -18,7 +25,6 @@ export function ChatScreen({
   loading,
   chats,
   onChatClick,
-  onBack,
   onProfileClick,
   onLeaveChat,
   onReportUser,
@@ -26,161 +32,227 @@ export function ChatScreen({
   readonly loading?: boolean;
   readonly chats?: ChatListItem[];
   readonly onChatClick?: (chatId: string) => void;
-  readonly onBack?: () => void;
   readonly onProfileClick?: () => void;
   readonly onLeaveChat?: (chatId: string) => void;
   readonly onReportUser?: (chatId: string, opponentUid: string, opponentNickname: string) => void;
 }) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+  const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
+  const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font';
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[calc(100%+1.5rem)] overflow-hidden bg-[#ff8b3d] text-[#2a2a2a]" onClick={() => setOpenMenuId(null)}>
-      <div className="mx-auto flex h-full min-h-0 w-full max-w-[480px] flex-col overflow-hidden bg-[#ff8b3d]">
-        {/* Top Bar Area */}
-        <div className="flex flex-col w-full z-20 bg-[#ff8b3d] shrink-0 pt-[calc(env(safe-area-inset-top,20px)+20px)] pb-4 relative">
-          <div className="flex items-start justify-between px-2">
-            <button
-              type="button"
-              onClick={() => onBack && onBack()}
-              aria-label="뒤로가기"
-              className="flex h-[44px] w-[36px] items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white shrink-0"
-            >
-              <span aria-hidden="true" className="font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-none text-white pr-1">
-                ‹
-              </span>
-            </button>
-            <h1 className="flex-1 text-center text-[17px] font-extrabold leading-[44px] tracking-[-0.34px] font-sans text-white pointer-events-none">
-              채팅
-            </h1>
-            <button
-              type="button"
-              aria-label="마이페이지 열기"
-              onClick={() => onProfileClick && onProfileClick()}
-              className="flex h-[44px] w-[36px] items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white shrink-0"
-            >
-              <CircleUserRound className="h-[26px] w-[26px]" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
+    <section className={screenClassName} onClick={() => setOpenMenuId(null)}>
+      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+        <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
+          <ChatStaticHeader onOpenMyPage={onProfileClick} />
+          <CreamContentBackground />
 
-        {/* Search Bar */}
-        <div className="px-6 relative z-20 shrink-0">
-          <div className="flex items-center bg-white/30 rounded-[12px] px-4 py-3">
-            <Search className="w-5 h-5 text-white mr-2 shrink-0" strokeWidth={2} />
-            <input 
-              type="text" 
-              placeholder="닉네임으로 검색" 
-              className="bg-transparent border-none text-white placeholder:text-white/90 focus:outline-none w-full text-[15px] font-medium" 
-            />
-          </div>
-        </div>
-
-        {/* Bottom Sheet Area */}
-        <div className="z-10 mt-6 min-h-0 w-full flex-1 overflow-y-auto rounded-t-[30px] bg-[#fff1d1] px-[18px] pb-[calc(108px+env(safe-area-inset-bottom,0px))] pt-6 scrollbar-hide">
           {loading ? (
-             <div className="flex justify-center py-10 text-[#b8b8b8] text-[14px] font-bold">목록을 불러오는 중입니다...</div>
+            <section
+              className="absolute left-0 top-[162px] h-[690px] w-full touch-none overscroll-none overflow-hidden rounded-t-[30px]"
+              aria-label="채팅 목록 로딩 상태"
+              onWheel={blockStaticScroll}
+              onTouchMove={blockStaticScroll}
+            >
+              <FigmaTabLoading label="채팅 목록을 불러오는 중입니다" className="top-[244px]" />
+            </section>
           ) : chats && chats.length > 0 ? (
-            <div className="flex flex-col gap-4">
-              {chats.map(chat => (
-                <div 
-                  key={chat.chatId}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => onChatClick && onChatClick(chat.chatId)} 
-                  onKeyDown={(e) => { if(e.key === 'Enter' || e.key === ' ') { onChatClick && onChatClick(chat.chatId); } }}
-                  className="flex w-full flex-col rounded-[20px] bg-white p-[18px] shadow-[0_4px_12px_rgb(0_0_0/0.06)] transition-transform hover:scale-[0.99] focus:outline-none text-left cursor-pointer"
-                >
-                  {/* Header: Tag + Title + More Icon */}
-                  <div className="flex items-center justify-between w-full mb-3 gap-2">
-                    <div className="flex items-center gap-[10px] w-full overflow-hidden">
-                       <span className="bg-[#ffe8d6] text-[#ff8b3d] px-[12px] py-[4px] rounded-full text-[12px] font-bold shrink-0">
-                         {chat.worryCategory || '기타'}
-                       </span>
-                       <span className="text-[14px] font-medium text-[#4a4a4a] truncate w-full tracking-[-0.28px]">
-                         {chat.worryTitle || '게시글 정보 불러오는 중...'}
-                       </span>
-                    </div>
-                    <div className="relative">
-                      <button 
-                        type="button" 
-                        onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === chat.chatId ? null : chat.chatId); }} 
-                        className="p-1 hover:bg-gray-50 rounded-full focus:outline-none"
-                      >
-                        <MoreVertical className="w-5 h-5 text-[#b8b8b8] shrink-0" strokeWidth={2} />
-                      </button>
-                      {openMenuId === chat.chatId && (
-                        <div className="absolute right-0 top-full mt-1 w-[150px] bg-white rounded-[12px] shadow-[0_4px_10px_rgb(0_0_0/0.15)] overflow-hidden z-30">
-                          <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); alert('알림이 꺼졌습니다.'); }}>알림 끄기</button>
-                          <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); onLeaveChat && onLeaveChat(chat.chatId); }}>채팅방 나가기</button>
-                          <button type="button" className="w-full text-left px-4 py-3 text-[14px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); onReportUser && onReportUser(chat.chatId, chat.opponentUid, chat.opponentName); }}>신고하기</button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="w-full h-[1px] bg-[#f0f0f0] mb-4"></div>
-
-                  {/* Content: Avatar + Text */}
-                  <div className="flex items-start w-full gap-4">
-                      {/* Avatar */}
-                      <div className="relative shrink-0">
-                          <img 
-                            src={profileImageUrlForColor(chat.opponentColor || '#ff8b3d')} 
-                            alt="프로필" 
-                            className="w-[52px] h-[52px] rounded-full object-cover shadow-sm bg-white" 
-                          />
-                          {/* Online dot */}
-                          <div className="absolute bottom-0 right-0 w-[14px] h-[14px] bg-[#22c55e] border-[2px] border-white rounded-full"></div>
-                      </div>
-
-                        {/* Text info */}
-                        <div className="flex flex-col flex-1 pt-1 overflow-hidden">
-                            <div className="flex justify-between items-center w-full mb-[2px]">
-                               <span className="font-bold text-[16px] text-[#2a2a2a] truncate">{chat.opponentName}</span>
-                               <span className="text-[12px] font-medium text-[#b8b8b8] shrink-0">{chat.dateLabel}</span>
-                            </div>
-                            <div className="flex justify-between items-start w-full gap-2">
-                               <span className="text-[13.5px] font-medium text-[#7a7a7a] line-clamp-1 break-all leading-[1.3] mt-[2px]">{chat.lastMessage}</span>
-                               {chat.unreadCount > 0 && (
-                                  <span className="flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-[#ff8b3d] px-[6px] text-[12px] font-bold text-white shrink-0">
-                                     {chat.unreadCount > 99 ? '99+' : chat.unreadCount}
-                                  </span>
-                               )}
-                            </div>
-                        </div>
-                    </div>
-                  </div>
+            <section
+              className="absolute left-0 top-[162px] h-[690px] w-full overflow-y-auto rounded-t-[30px] px-4 pb-[108px] pt-4 [-webkit-overflow-scrolling:touch]"
+              aria-label="채팅 목록"
+            >
+              <div className="flex flex-col gap-3">
+                {chats.map(chat => (
+                  <ChatListCard
+                    key={chat.chatId}
+                    chat={chat}
+                    menuOpen={openMenuId === chat.chatId}
+                    onChatClick={onChatClick}
+                    onToggleMenu={() => setOpenMenuId(openMenuId === chat.chatId ? null : chat.chatId)}
+                    onCloseMenu={() => setOpenMenuId(null)}
+                    onLeaveChat={onLeaveChat}
+                    onReportUser={onReportUser}
+                  />
                 ))}
               </div>
-            ) : (
-              <div className="flex flex-col items-center pt-20 pb-10 px-4 text-center h-full">
-                <div className="relative mb-6">
-                  <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="55" cy="55" r="42" fill="#ff8b3d" />
-                    <ellipse cx="41" cy="55" rx="7.5" ry="14" fill="white" />
-                    <ellipse cx="61" cy="55" rx="7.5" ry="14" fill="white" />
-                    <ellipse cx="39.5" cy="56.5" rx="3.5" ry="7" fill="#1a1a1a" />
-                    <ellipse cx="59.5" cy="56.5" rx="3.5" ry="7" fill="#1a1a1a" />
-                    <text x="68" y="94" fontFamily="Arial, sans-serif" fontWeight="900" fontSize="76" fill="#c3b29c" transform="rotate(18 68 94)">?</text>
-                    <text x="65" y="91" fontFamily="Arial, sans-serif" fontWeight="900" fontSize="76" fill="#fbbf24" transform="rotate(18 65 91)">?</text>
-                  </svg>
-                </div>
-                <h2 className="text-[20px] font-extrabold text-[#2a2a2a] mb-[12px] tracking-tight">아직 시작된 채팅이 없어요</h2>
-                <p className="text-[14.5px] text-[#7a7a7a] font-medium leading-[1.5] tracking-tight mb-8">
-                  답변에 코멘트를 받으면,<br />
-                  답변자가 먼저 채팅을 시작할 수 있어요.
-                </p>
-                <div className="w-full bg-white rounded-[16px] px-[20px] py-[18px] text-left shadow-[0_2px_8px_rgb(0_0_0/0.02)] border border-[#fdf9f5]">
-                  <p className="text-[13.5px] text-[#7a7a7a] font-medium leading-[1.55] tracking-tight">
-                    좋은 답변을 남기면 채팅으로 이어질 확률이<br />
-                    높아져요. 받은 고민에 답변을 달아보세요!
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
+            </section>
+          ) : (
+            <section
+              className="absolute left-0 top-[162px] flex h-[608px] w-full touch-none overscroll-none items-center justify-center overflow-hidden rounded-t-[30px]"
+              aria-label="채팅 목록 빈 상태"
+              onWheel={blockStaticScroll}
+              onTouchMove={blockStaticScroll}
+            >
+              <ChatEmptyState />
+            </section>
+          )}
         </div>
+      </div>
     </section>
   );
+}
+
+function ChatStaticHeader({ onOpenMyPage }: { readonly onOpenMyPage?: () => void }) {
+  return (
+    <header
+      className="absolute left-0 top-0 h-[202px] w-full touch-none overscroll-none bg-[#ff8b3d]"
+      onTouchMove={blockStaticScroll}
+      onWheel={blockStaticScroll}
+    >
+      <h1 className="absolute left-0 top-[60px] w-full text-center text-[17px] font-extrabold leading-normal tracking-[-0.34px] text-white">
+        채팅
+      </h1>
+      <button
+        type="button"
+        aria-label="마이페이지 열기"
+        onClick={onOpenMyPage}
+        className="absolute left-[327px] top-[47px] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+      >
+        <img src={myPageIconUrl} alt="" aria-hidden="true" className="absolute left-3 top-3 h-[25px] w-[25px]" draggable={false} />
+      </button>
+      <div className="absolute left-4 top-[101px] flex h-10 w-[361px] items-center gap-2 rounded-[14px] bg-white/[0.22] px-3">
+        <img src={searchIconUrl} alt="" aria-hidden="true" className="h-4 w-4 shrink-0" draggable={false} />
+        <span className="whitespace-nowrap text-[14px] font-normal leading-5 text-white/85">
+          닉네임으로 검색
+        </span>
+      </div>
+    </header>
+  );
+}
+
+function CreamContentBackground() {
+  return (
+    <div
+      aria-hidden="true"
+      className="absolute left-0 top-[162px] h-[690px] w-full overflow-hidden rounded-t-[30px] bg-[#fff1d1]"
+    />
+  );
+}
+
+function ChatListCard({
+  chat,
+  menuOpen,
+  onChatClick,
+  onToggleMenu,
+  onCloseMenu,
+  onLeaveChat,
+  onReportUser,
+}: {
+  readonly chat: ChatListItem;
+  readonly menuOpen: boolean;
+  readonly onChatClick?: (chatId: string) => void;
+  readonly onToggleMenu: () => void;
+  readonly onCloseMenu: () => void;
+  readonly onLeaveChat?: (chatId: string) => void;
+  readonly onReportUser?: (chatId: string, opponentUid: string, opponentNickname: string) => void;
+}) {
+  return (
+    <article
+      role="button"
+      tabIndex={0}
+      onClick={() => onChatClick?.(chat.chatId)}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        onChatClick?.(chat.chatId);
+      }}
+      className="relative flex w-full cursor-pointer flex-col items-start gap-[10px] overflow-visible rounded-[16px] border border-[#f1e7da] bg-white p-[14px] text-left shadow-[0_4px_4px_rgb(0_0_0/0.25)] transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
+    >
+      <div className="flex w-full items-center gap-2 overflow-hidden">
+        <span className="shrink-0 overflow-hidden rounded-full bg-[#ffe7d2] px-[9px] py-[3px] text-[10.5px] font-black leading-[15px] text-[#f26c0f]">
+          {chat.worryCategory || '기타'}
+        </span>
+        <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[12.5px] font-normal leading-[18px] text-[#6e6a63]">
+          {chat.worryTitle || '게시글 정보 불러오는 중...'}
+        </span>
+        <div className="relative h-[22px] w-[22px] shrink-0">
+          <button
+            type="button"
+            aria-label="채팅방 메뉴 열기"
+            onClick={(event) => {
+              event.stopPropagation();
+              onToggleMenu();
+            }}
+            className="absolute inset-0 rounded-full transition-colors hover:bg-[#f4efe7] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
+          >
+            <img src={moreVerticalUrl} alt="" aria-hidden="true" className="h-full w-full" draggable={false} />
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-full z-30 mt-1 w-[150px] overflow-hidden rounded-[12px] bg-white shadow-[0_4px_10px_rgb(0_0_0/0.15)]">
+              <button type="button" className="w-full border-b border-gray-100 px-4 py-3 text-left text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50" onClick={(event) => { event.stopPropagation(); onCloseMenu(); alert('알림이 꺼졌습니다.'); }}>알림 끄기</button>
+              <button type="button" className="w-full border-b border-gray-100 px-4 py-3 text-left text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50" onClick={(event) => { event.stopPropagation(); onCloseMenu(); onLeaveChat?.(chat.chatId); }}>채팅방 나가기</button>
+              <button type="button" className="w-full px-4 py-3 text-left text-[14px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={(event) => { event.stopPropagation(); onCloseMenu(); onReportUser?.(chat.chatId, chat.opponentUid, chat.opponentName); }}>신고하기</button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="h-px w-full shrink-0 bg-[#f4efe7]" />
+
+      <div className="relative flex w-full items-center gap-[10px] overflow-hidden">
+        <div className="relative h-[38px] w-[38px] shrink-0">
+          <img
+            src={profileImageUrlForColor(chat.opponentColor || '#ff8b3d')}
+            alt="프로필"
+            className="h-[38px] w-[38px] rounded-full object-cover"
+            draggable={false}
+          />
+          <span className="absolute left-[27px] top-[28px] h-[13px] w-[13px] rounded-full border-[1.6px] border-[#fff4e8] bg-[#3fc36b]" aria-hidden="true" />
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-[3px] overflow-hidden whitespace-nowrap">
+          <p className="max-w-full overflow-hidden text-ellipsis text-[14.5px] font-bold leading-5 text-[#2b2620]">
+            {chat.opponentName}
+          </p>
+          <p className="min-w-full overflow-hidden text-ellipsis text-[13px] font-normal leading-[18px] text-[#6e6a63]">
+            {chat.lastMessage}
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-[6px] overflow-hidden">
+          <time className="whitespace-nowrap text-[11px] font-normal leading-[15px] text-[#a39e96]">
+            {chat.dateLabel}
+          </time>
+          {chat.unreadCount > 0 && (
+            <span className="flex min-w-[20px] items-start justify-center rounded-full bg-[#ff7a1a] px-[6px] py-[2px] text-[11px] font-bold leading-[15px] text-white">
+              {chat.unreadCount > 99 ? '99+' : chat.unreadCount}
+            </span>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function ChatEmptyState() {
+  return (
+    <div className="flex h-[305px] w-[301px] flex-col items-center justify-center overflow-hidden text-center">
+      <div className="relative h-[76.58px] w-[80.76px] shrink-0" aria-hidden="true">
+        <img src={emptyAvatarUrl} alt="" className="absolute left-0 top-[3.58px] h-[73px] w-[74px]" draggable={false} />
+        <img src={emptyEyesUrl} alt="" className="absolute left-[21.43px] top-[28.9px] h-[23.84px] w-[31.43px]" draggable={false} />
+        <img src={emptyQuestionUrl} alt="" className="absolute left-[45.96px] top-0 h-[65.303px] w-[34.802px]" draggable={false} />
+      </div>
+      <div className="h-[21px] shrink-0" />
+      <h2 className="whitespace-nowrap text-[18px] font-black leading-[26px] text-[#2b2620]">
+        아직 시작된 채팅이 없어요
+      </h2>
+      <div className="h-[10px] shrink-0" />
+      <p className="text-center text-[13.5px] font-normal leading-5 text-[#6e6a63]">
+        답변에 코멘트를 받으면,<br />
+        답변자가 먼저 채팅을 시작할 수 있어요.
+      </p>
+      <div className="h-[22px] shrink-0" />
+      <div className="w-full rounded-[14px] border border-[#f1e7da] bg-white px-[15px] py-[13px]">
+        <p className="whitespace-pre-wrap text-center text-[12.5px] font-normal leading-[18px] text-[#6e6a63]">
+          좋은 답변을 남기면 채팅으로 이어질 확률이<br />
+          높아져요. 받은 고민에 답변을 달아보세요!
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function blockStaticScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLElement>) {
+  const { preventDefault, stopPropagation } = event;
+  preventDefault.call(event);
+  stopPropagation.call(event);
 }

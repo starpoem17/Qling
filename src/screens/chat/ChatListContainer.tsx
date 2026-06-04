@@ -126,7 +126,6 @@ export function ChatListContainer({
       loading={loading}
       chats={chats}
       onChatClick={(chatId) => setView({ route: 'chat_room', chatId })}
-      onBack={() => setView('답변하기')}
       onProfileClick={() => setView('마이페이지')}
       onLeaveChat={handleLeaveChat}
       onReportUser={(chatId, targetUid, targetNickname) => setView({ route: 'report_user', targetUid, targetNickname, chatId, fromRoute: 'chat' })}
