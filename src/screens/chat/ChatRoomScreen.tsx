@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent, type ChangeEvent, type RefObject } from 'react';
+import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent, type FormEvent, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../../lib/utils';
 import { ErrorState, profileImageUrlForColor } from '../shared/ui';
@@ -118,7 +118,7 @@ export function ChatRoomScreen({
   const [viewportMetrics, setViewportMetrics] = useState({ canvasHeight: 852, keyboardOffset: 0, scale: 1 });
   const viewportMetricsRef = useRef<ChatRoomViewportMetrics>(viewportMetrics);
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
-  const safeInputRef = useRef<HTMLInputElement>(null);
+  const safeInputRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const updateViewportMetrics = () => {
@@ -229,6 +229,7 @@ export function ChatRoomScreen({
     setSendError(null);
     const { success, error } = await onSendMessage(draft);
     if (success) {
+      if (safeInputRef.current) safeInputRef.current.textContent = '';
       setDraft('');
     } else {
       setSendError(error || '전송 실패');
@@ -236,14 +237,14 @@ export function ChatRoomScreen({
     setIsSending(false);
   };
 
-  const handleMessageKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== 'Enter' || event.shiftKey) return;
+  const handleMessageKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return;
     event.preventDefault();
     void handleSend();
   };
 
-  const handleDraftChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setDraft(event.target.value);
+  const handleDraftInput = (event: FormEvent<HTMLDivElement>) => {
+    setDraft(event.currentTarget.textContent ?? '');
   };
 
   const focusSafeMessageInput = () => {
@@ -278,7 +279,7 @@ export function ChatRoomScreen({
       style={inputBarStyle}
       safeInputRef={safeInputRef}
       safeInputStyle={safeInputStyle}
-      onDraftChange={handleDraftChange}
+      onDraftInput={handleDraftInput}
       onMessageKeyDown={handleMessageKeyDown}
       onMessageFocus={handleMessageFocus}
       onFocusProxy={focusSafeMessageInput}
@@ -424,7 +425,7 @@ function ChatRoomInputBar({
   style,
   safeInputRef,
   safeInputStyle,
-  onDraftChange,
+  onDraftInput,
   onMessageKeyDown,
   onMessageFocus,
   onFocusProxy,
@@ -435,10 +436,10 @@ function ChatRoomInputBar({
   readonly isSending: boolean;
   readonly scale: number;
   readonly style: ChatRoomInputBarStyle;
-  readonly safeInputRef: RefObject<HTMLInputElement>;
+  readonly safeInputRef: RefObject<HTMLDivElement>;
   readonly safeInputStyle: ChatRoomSafeInputStyle;
-  readonly onDraftChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  readonly onMessageKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
+  readonly onDraftInput: (event: FormEvent<HTMLDivElement>) => void;
+  readonly onMessageKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
   readonly onMessageFocus: () => void;
   readonly onFocusProxy: () => void;
   readonly onSend: () => void;
@@ -447,18 +448,19 @@ function ChatRoomInputBar({
 
   return (
     <>
-      <input
+      <div
         ref={safeInputRef}
         data-chat-room-message-input
-        type="search"
-        value={draft}
-        onChange={onDraftChange}
+        role="textbox"
+        contentEditable
+        suppressContentEditableWarning
+        tabIndex={-1}
+        onInput={onDraftInput}
         onKeyDown={onMessageKeyDown}
         onFocus={onMessageFocus}
         aria-label="메시지 입력"
         inputMode="text"
         enterKeyHint="send"
-        autoComplete="new-password"
         autoCorrect="off"
         autoCapitalize="sentences"
         spellCheck={false}
