@@ -37,28 +37,30 @@ export function ChatScreen({
     <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d] text-[#2a2a2a]" onClick={() => setOpenMenuId(null)}>
       <div className="mx-auto flex h-full w-full max-w-[480px] flex-col overflow-hidden bg-[#ff8b3d]">
         {/* Top Bar Area */}
-        <div className="relative h-[127px] shrink-0 w-full z-20 bg-[#ff8b3d]">
-          <button
-            type="button"
-            onClick={() => onBack && onBack()}
-            aria-label="뒤로가기"
-            className="absolute left-[14px] top-[49px] h-[44px] w-[28px] rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white"
-          >
-            <span aria-hidden="true" className="absolute left-[8px] top-0 font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-[38px] text-white">
-              ‹
-            </span>
-          </button>
-          <h1 className="absolute left-0 top-[60px] w-full text-center text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] font-sans text-white pointer-events-none">
-            채팅
-          </h1>
-          <button
-            type="button"
-            aria-label="마이페이지 열기"
-            onClick={() => onProfileClick && onProfileClick()}
-            className="absolute right-[14px] top-[53.5px] flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
-          >
-            <CircleUserRound className="h-[25px] w-[25px]" aria-hidden="true" />
-          </button>
+        <div className="flex flex-col w-full z-20 bg-[#ff8b3d] shrink-0 pt-[calc(env(safe-area-inset-top,20px)+20px)] pb-4 relative">
+          <div className="flex items-start justify-between px-2">
+            <button
+              type="button"
+              onClick={() => onBack && onBack()}
+              aria-label="뒤로가기"
+              className="flex h-[44px] w-[36px] items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white shrink-0"
+            >
+              <span aria-hidden="true" className="font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-none text-white pr-1">
+                ‹
+              </span>
+            </button>
+            <h1 className="flex-1 text-center text-[17px] font-extrabold leading-[44px] tracking-[-0.34px] font-sans text-white pointer-events-none">
+              채팅
+            </h1>
+            <button
+              type="button"
+              aria-label="마이페이지 열기"
+              onClick={() => onProfileClick && onProfileClick()}
+              className="flex h-[44px] w-[36px] items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white shrink-0"
+            >
+              <CircleUserRound className="h-[26px] w-[26px]" aria-hidden="true" />
+            </button>
+          </div>
         </div>
 
         {/* Search Bar */}

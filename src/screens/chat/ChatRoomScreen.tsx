@@ -70,20 +70,22 @@ export function ChatRoomScreen({
     return (
       <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
         <div className="mx-auto flex h-full w-full max-w-[480px] flex-col">
-          <div className="relative h-[127px] shrink-0 w-full z-20 bg-[#ff8b3d]">
-            <button
-              type="button"
-              onClick={onBack}
-              aria-label="뒤로가기"
-              className="absolute left-[14px] top-[49px] h-[44px] w-[28px] rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white z-10"
-            >
-              <span aria-hidden="true" className="absolute left-[8px] top-0 font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-[38px] text-white">
-                ‹
-              </span>
-            </button>
-            <h1 className="absolute left-0 top-[60px] w-full text-center text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] font-sans text-white pointer-events-none">
-              채팅
-            </h1>
+          <div className="flex flex-col w-full z-20 bg-[#ff8b3d] shrink-0 pt-[calc(env(safe-area-inset-top,20px)+20px)] pb-4 relative">
+            <div className="flex items-start justify-between px-2">
+              <button
+                type="button"
+                onClick={onBack}
+                aria-label="뒤로가기"
+                className="flex h-[44px] w-[36px] items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white shrink-0"
+              >
+                <span aria-hidden="true" className="font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-none text-white pr-1">
+                  ‹
+                </span>
+              </button>
+              <h1 className="flex-1 text-center text-[17px] font-extrabold leading-[44px] tracking-[-0.34px] font-sans text-white pointer-events-none pr-8">
+                채팅
+              </h1>
+            </div>
           </div>
           <div className="pt-[40px] px-[24px] flex-1">
             {error ? <ErrorState title="오류" message={error} /> : <div className="text-center font-bold text-[#b8b8b8]">로딩 중...</div>}
@@ -97,46 +99,48 @@ export function ChatRoomScreen({
     <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]" onClick={() => setMenuOpen(false)}>
       <div className="mx-auto flex h-full w-full max-w-[480px] flex-col bg-[#ff8b3d]">
         {/* Top Bar Area */}
-        <div className="relative h-[127px] shrink-0 w-full z-20 bg-[#ff8b3d]">
-          <button
-            type="button"
-            onClick={onBack}
-            aria-label="뒤로가기"
-            className="absolute left-[14px] top-[49px] h-[44px] w-[28px] rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white z-10"
-          >
-            <span aria-hidden="true" className="absolute left-[8px] top-0 font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-[38px] text-white">
-              ‹
-            </span>
-          </button>
-          
-          <div className="absolute left-0 top-[51px] w-full flex flex-col items-center justify-start pointer-events-none">
-             <div className="relative mb-[4px] shrink-0 pointer-events-auto">
-               <img 
-                 src={profileImageUrlForColor(opponent?.profileColor || '#ffd43b')}
-                 alt="프로필"
-                 className="w-[40px] h-[40px] rounded-full object-cover shadow-sm bg-white"
-               />
-               <div className="absolute bottom-0 right-0 w-[12px] h-[12px] bg-[#22c55e] border-[2px] border-[#ff8b3d] rounded-full"></div>
-             </div>
-             <span className="text-[16px] font-extrabold tracking-tight leading-none mb-1 truncate px-2 text-white">{opponent?.nickname || '대화방'}</span>
-             <span className="text-[11px] font-medium text-white/90 shrink-0">답변 채택률 92%</span>
-          </div>
-
-          <div className="absolute right-[14px] top-[53.5px] z-10">
-            <button 
-              type="button" 
-              onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+        <div className="flex flex-col w-full z-20 bg-[#ff8b3d] shrink-0 pt-[calc(env(safe-area-inset-top,20px)+20px)] pb-4 relative">
+          <div className="flex items-start justify-between px-2">
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label="뒤로가기"
+              className="flex h-[44px] w-[36px] items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white shrink-0"
             >
-              <MoreVertical className="h-[25px] w-[25px]" strokeWidth={2.5} />
+              <span aria-hidden="true" className="font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-none text-white pr-1">
+                ‹
+              </span>
             </button>
-            {menuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-[160px] bg-white rounded-[14px] shadow-[0_4px_16px_rgb(0_0_0/0.15)] overflow-hidden z-30 pointer-events-auto">
-                <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); alert('알림이 꺼졌습니다.'); }}>알림 끄기</button>
-                <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onLeaveChat(); }}>채팅방 나가기</button>
-                <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onReportUser(); }}>신고하기</button>
-              </div>
-            )}
+            
+            <div className="flex flex-col items-center justify-start flex-1 px-2 pointer-events-none">
+               <div className="relative mb-[6px] shrink-0 pointer-events-auto">
+                 <img 
+                   src={profileImageUrlForColor(opponent?.profileColor || '#ffd43b')}
+                   alt="프로필"
+                   className="w-[42px] h-[42px] rounded-full object-cover shadow-sm bg-white"
+                 />
+                 <div className="absolute bottom-0 right-0 w-[12px] h-[12px] bg-[#22c55e] border-[2px] border-[#ff8b3d] rounded-full"></div>
+               </div>
+               <span className="text-[17px] font-extrabold tracking-tight leading-none mb-1 truncate w-full text-center text-white">{opponent?.nickname || '대화방'}</span>
+               <span className="text-[12px] font-medium text-white/90 shrink-0">답변 채택률 92%</span>
+            </div>
+
+            <div className="relative shrink-0 flex items-start justify-center h-[44px] w-[36px]">
+              <button 
+                type="button" 
+                onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
+                className="flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+              >
+                <MoreVertical className="h-[26px] w-[26px]" strokeWidth={2.5} />
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 top-[100%] mt-1 w-[160px] bg-white rounded-[14px] shadow-[0_4px_16px_rgb(0_0_0/0.15)] overflow-hidden z-30 pointer-events-auto">
+                  <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); alert('알림이 꺼졌습니다.'); }}>알림 끄기</button>
+                  <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onLeaveChat(); }}>채팅방 나가기</button>
+                  <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onReportUser(); }}>신고하기</button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         
