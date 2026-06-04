@@ -29,6 +29,39 @@ type ChatRoomInputBarStyle = CSSProperties & {
   readonly height: string;
 };
 
+type ChatRoomViewportMetrics = {
+  readonly canvasHeight: number;
+  readonly keyboardOffset: number;
+  readonly scale: number;
+};
+
+function logChatRoomKeyboardViewport(label: string, metrics: ChatRoomViewportMetrics) {
+  const header = document.querySelector('[data-chat-room-top-bar]');
+  const inputBar = document.querySelector('[data-chat-room-input-bar]');
+  const canvas = document.querySelector('[data-chat-room-canvas]');
+  const root = document.getElementById('root');
+  const canvasStyle = canvas instanceof HTMLElement ? getComputedStyle(canvas) : null;
+
+  console.log(`[chat-room-keyboard] ${label}`, {
+    scrollY: window.scrollY,
+    innerHeight: window.innerHeight,
+    docClientHeight: document.documentElement.clientHeight,
+    vvHeight: window.visualViewport?.height,
+    vvOffsetTop: window.visualViewport?.offsetTop,
+    bodyTop: document.body.getBoundingClientRect().top,
+    rootTop: root?.getBoundingClientRect().top,
+    headerTop: header?.getBoundingClientRect().top,
+    inputBarBottom: inputBar?.getBoundingClientRect().bottom,
+    inputBarTop: inputBar?.getBoundingClientRect().top,
+    canvasTop: canvas?.getBoundingClientRect().top,
+    keyboardOffset: metrics.keyboardOffset,
+    keyboardOffsetCss: canvasStyle?.getPropertyValue('--chat-keyboard-offset').trim(),
+    inputBarBottomStyle: inputBar instanceof HTMLElement ? inputBar.style.bottom : undefined,
+    canvasHeight: metrics.canvasHeight,
+    scale: metrics.scale,
+  });
+}
+
 export interface ChatMessage {
   messageId: string;
   content: string;
@@ -73,6 +106,7 @@ export function ChatRoomScreen({
   const [headerLayerTarget, setHeaderLayerTarget] = useState<HTMLElement | null>(null);
   const [inputLayerTarget, setInputLayerTarget] = useState<HTMLElement | null>(null);
   const [viewportMetrics, setViewportMetrics] = useState({ canvasHeight: 852, keyboardOffset: 0, scale: 1 });
+  const viewportMetricsRef = useRef<ChatRoomViewportMetrics>(viewportMetrics);
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -82,11 +116,20 @@ export function ChatRoomScreen({
       const scale = Math.max(Math.min(visualWidth, 480) / 393, 0.1);
       const layoutHeight = document.documentElement.clientHeight || window.innerHeight || visualViewport?.height || 852;
       const keyboardOffset = Math.max(0, layoutHeight - (visualViewport?.height ?? layoutHeight) - (visualViewport?.offsetTop ?? 0));
+      const nextKeyboardOffset = keyboardOffset / scale;
+
+      if (document.activeElement instanceof HTMLElement && document.activeElement.matches('[data-chat-room-message-input]')) {
+        logChatRoomKeyboardViewport('viewport metrics update', {
+          canvasHeight: viewportMetricsRef.current.canvasHeight,
+          keyboardOffset: nextKeyboardOffset,
+          scale,
+        });
+      }
 
       setViewportMetrics(previousMetrics => {
         const nextMetrics = {
           canvasHeight: keyboardOffset > 0 ? previousMetrics.canvasHeight : layoutHeight / scale,
-          keyboardOffset: keyboardOffset / scale,
+          keyboardOffset: nextKeyboardOffset,
           scale,
         };
 
@@ -109,6 +152,10 @@ export function ChatRoomScreen({
       window.visualViewport?.removeEventListener('resize', updateViewportMetrics);
     };
   }, []);
+
+  useEffect(() => {
+    viewportMetricsRef.current = viewportMetrics;
+  }, [viewportMetrics]);
 
   useEffect(() => {
     setHeaderLayerTarget(document.body);
@@ -175,6 +222,14 @@ export function ChatRoomScreen({
     void handleSend();
   };
 
+  const handleMessageFocus = () => {
+    logChatRoomKeyboardViewport('input focus', viewportMetricsRef.current);
+    requestAnimationFrame(() => logChatRoomKeyboardViewport('input focus raf', viewportMetricsRef.current));
+    window.setTimeout(() => logChatRoomKeyboardViewport('input focus 150ms', viewportMetricsRef.current), 150);
+    window.setTimeout(() => logChatRoomKeyboardViewport('input focus 450ms', viewportMetricsRef.current), 450);
+    window.setTimeout(() => logChatRoomKeyboardViewport('input focus 900ms', viewportMetricsRef.current), 900);
+  };
+
   const mineMessageIds = messages.filter(m => m.isMine).map(m => m.messageId);
   const unreadThresholdIndex = mineMessageIds.length - (opponentUnreadCount || 0);
   const headerLayer = headerLayerTarget ? createPortal(
@@ -195,6 +250,7 @@ export function ChatRoomScreen({
       style={inputBarStyle}
       onDraftChange={setDraft}
       onMessageKeyDown={handleMessageKeyDown}
+      onMessageFocus={handleMessageFocus}
       onSend={handleSend}
     />,
     inputLayerTarget,
@@ -205,7 +261,7 @@ export function ChatRoomScreen({
       <>
         <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
           <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-            <div className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+            <div data-chat-room-canvas className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
               <div className="absolute bottom-0 left-0 top-[74px] flex w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
                 {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
               </div>
@@ -221,7 +277,7 @@ export function ChatRoomScreen({
     <>
       <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-          <div className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+          <div data-chat-room-canvas className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
             <div
               ref={messagesScrollerRef}
               className="absolute bottom-[calc(67px+max(0px,calc(var(--chat-keyboard-offset)-var(--chat-input-y-offset))))] left-0 top-[74px] w-[393px] overflow-y-auto bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
@@ -337,6 +393,7 @@ function ChatRoomInputBar({
   style,
   onDraftChange,
   onMessageKeyDown,
+  onMessageFocus,
   onSend,
 }: {
   readonly draft: string;
@@ -346,12 +403,13 @@ function ChatRoomInputBar({
   readonly style: ChatRoomInputBarStyle;
   readonly onDraftChange: (draft: string) => void;
   readonly onMessageKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
+  readonly onMessageFocus: () => void;
   readonly onSend: () => void;
 }) {
   const px = (value: number) => `${value * scale}px`;
 
   return (
-    <div className="fixed z-10 border-t border-[#ede3d6] bg-white qling-figma-font" style={style}>
+    <div data-chat-room-input-bar className="fixed z-10 border-t border-[#ede3d6] bg-white qling-figma-font" style={style}>
       {sendError && (
         <div
           className="absolute rounded-[12px] bg-white text-center font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]"
@@ -385,10 +443,12 @@ function ChatRoomInputBar({
         }}
       >
         <input
+          data-chat-room-message-input
           type="text"
           value={draft}
           onChange={event => onDraftChange(event.target.value)}
           onKeyDown={onMessageKeyDown}
+          onFocus={onMessageFocus}
           placeholder="메시지를 입력해 주세요"
           className="w-full bg-transparent font-normal text-[#2b2620] outline-none placeholder:text-[#a39e96]"
           style={{ fontSize: px(14), lineHeight: px(20) }}
@@ -420,7 +480,7 @@ function ChatRoomTopBar({
   readonly style: ChatRoomTopBarStyle;
 }) {
   return (
-    <header className="fixed left-0 right-0 top-0 z-20 mx-auto h-[74px] w-[min(480px,100vw)] overflow-hidden bg-[#ff8b3d] qling-figma-font">
+    <header data-chat-room-top-bar className="fixed left-0 right-0 top-0 z-20 mx-auto h-[74px] w-[min(480px,100vw)] overflow-hidden bg-[#ff8b3d] qling-figma-font">
       <div className="absolute left-1/2 top-0 h-[74px] w-[393px] origin-top" style={style}>
         <button
           type="button"

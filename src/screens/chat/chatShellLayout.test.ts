@@ -21,7 +21,7 @@ test('chat room top bar is fixed outside the keyboard-offset canvas', () => {
   assert.match(chatRoomScreenSource, /const headerLayer = headerLayerTarget \? createPortal\(/);
   assert.match(chatRoomScreenSource, /const topBarStyle: ChatRoomTopBarStyle = \{\s*transform: `translateX\(-50%\) scale\(\$\{viewportMetrics\.scale\}\)`,\s*\}/);
   assert.match(chatRoomScreenSource, /<ChatRoomTopBar[\s\S]*style=\{topBarStyle\}[\s\S]*\/>/);
-  assert.match(chatRoomScreenSource, /<header className="fixed left-0 right-0 top-0 z-20 mx-auto h-\[74px\] w-\[min\(480px,100vw\)\] overflow-hidden bg-\[#ff8b3d\] qling-figma-font">/);
+  assert.match(chatRoomScreenSource, /<header data-chat-room-top-bar className="fixed left-0 right-0 top-0 z-20 mx-auto h-\[74px\] w-\[min\(480px,100vw\)\] overflow-hidden bg-\[#ff8b3d\] qling-figma-font">/);
   assert.match(chatRoomScreenSource, /<div className="absolute left-1\/2 top-0 h-\[74px\] w-\[393px\] origin-top" style=\{style\}>/);
   assert.match(chatRoomScreenSource, /\{headerLayer\}/);
   assert.doesNotMatch(chatRoomScreenSource, /<header[^>]*style=\{style\}/);
@@ -64,7 +64,9 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(chatRoomScreenSource, /const inputLayer = inputLayerTarget \? createPortal\(/);
   assert.match(chatRoomScreenSource, /<ChatRoomInputBar[\s\S]*style=\{inputBarStyle\}/);
   assert.match(chatRoomScreenSource, /function ChatRoomInputBar/);
-  assert.match(chatRoomScreenSource, /<div className="fixed z-10 border-t border-\[#ede3d6\] bg-white qling-figma-font" style=\{style\}>/);
+  assert.match(chatRoomScreenSource, /<div data-chat-room-input-bar className="fixed z-10 border-t border-\[#ede3d6\] bg-white qling-figma-font" style=\{style\}>/);
+  assert.match(chatRoomScreenSource, /data-chat-room-message-input/);
+  assert.match(chatRoomScreenSource, /onFocus=\{onMessageFocus\}/);
   assert.match(chatRoomScreenSource, /left: `calc\(50% - \$\{\(393 \* viewportMetrics\.scale\) \/ 2\}px\)`/);
   assert.match(chatRoomScreenSource, /bottom: `\$\{inputBarBottom\}px`/);
   assert.doesNotMatch(chatRoomScreenSource, /absolute bottom-\[max\(0px,calc\(var\(--chat-keyboard-offset\)-var\(--chat-input-y-offset\)\)\)\] left-0 h-\[67px\] w-\[393px\]/);
@@ -88,6 +90,15 @@ test('chat room more menu is fixed to the visible viewport bottom', () => {
 });
 
 test('chat room accounts for iPhone visual viewport and document background', () => {
+  assert.match(chatRoomScreenSource, /function logChatRoomKeyboardViewport\(label: string, metrics: ChatRoomViewportMetrics\)/);
+  assert.match(chatRoomScreenSource, /\[chat-room-keyboard\] \$\{label\}/);
+  assert.match(chatRoomScreenSource, /headerTop: header\?\.getBoundingClientRect\(\)\.top/);
+  assert.match(chatRoomScreenSource, /bodyTop: document\.body\.getBoundingClientRect\(\)\.top/);
+  assert.match(chatRoomScreenSource, /vvOffsetTop: window\.visualViewport\?\.offsetTop/);
+  assert.match(chatRoomScreenSource, /keyboardOffset: metrics\.keyboardOffset/);
+  assert.match(chatRoomScreenSource, /const viewportMetricsRef = useRef<ChatRoomViewportMetrics>\(viewportMetrics\)/);
+  assert.match(chatRoomScreenSource, /logChatRoomKeyboardViewport\('input focus 900ms', viewportMetricsRef\.current\)/);
+  assert.match(chatRoomScreenSource, /logChatRoomKeyboardViewport\('viewport metrics update'/);
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('resize', updateViewportMetrics\)/);
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('resize', updateViewportMetrics\)/);
   assert.doesNotMatch(chatRoomScreenSource, /visualViewport\?\.addEventListener\('scroll'/);
