@@ -102,8 +102,11 @@ test('my worries write button uses the transformed Figma canvas coordinates', ()
   assert.match(html, /고민 작성 화면으로 이동/);
   assert.match(html, /absolute left-\[258px\] z-40 flex items-center gap-\[7px\]/);
   assert.match(html, /style="top:min\(710px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 62px\)\)"/);
+  assert.match(html, /my_concerns\/write_plus\.svg/);
+  assert.match(html, /h-\[15\.563px\] w-\[15\.563px\] shrink-0/);
   assert.match(html, /고민 쓰기/);
   assert.doesNotMatch(html, /my_concerns\/send\.svg/);
+  assert.doesNotMatch(html, /rounded-sm bg-white/);
   assert.doesNotMatch(html, /fixed bottom-\[calc\(var\(--qling-space-nav-height\)\+29\.5px\)\]/);
 });
 

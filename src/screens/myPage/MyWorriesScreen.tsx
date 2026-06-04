@@ -10,6 +10,7 @@ const headerEyeUrl = new URL('../../../assets/my_concerns/header_eye.svg', impor
 const myPageIconUrl = new URL('../../../assets/my_concerns/my_page_icon.svg', import.meta.url).href;
 const titleHeartUrl = new URL('../../../assets/my_concerns/title_heart.svg', import.meta.url).href;
 const replyHeartUrl = new URL('../../../assets/my_concerns/reply_heart.svg', import.meta.url).href;
+const writePlusUrl = new URL('../../../assets/my_concerns/write_plus.svg', import.meta.url).href;
 
 export function MyWorriesScreen(props: MyWorriesScreenProps) {
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
@@ -27,10 +28,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
       className="absolute left-[258px] z-40 flex items-center gap-[7px] overflow-hidden rounded-full bg-[#ff8b3d] py-[14px] pl-[18px] pr-5 text-white shadow-[0_5px_14px_rgb(255_139_61/0.45)] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-white"
       style={writeButtonStyle}
     >
-      <span className="relative h-4 w-4 shrink-0" aria-hidden="true">
-        <span className="absolute left-0.5 top-[6.7px] h-[2.6px] w-[15px] rounded-sm bg-white" />
-        <span className="absolute left-[6.7px] top-0.5 h-[15px] w-[2.6px] rounded-sm bg-white" />
-      </span>
+      <img src={writePlusUrl} alt="" className="h-[15.563px] w-[15.563px] shrink-0" aria-hidden="true" draggable={false} />
       <span className="whitespace-nowrap text-[15px] font-bold leading-normal tracking-[-0.3px]">
         고민 쓰기
       </span>
