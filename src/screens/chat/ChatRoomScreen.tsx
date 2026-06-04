@@ -254,6 +254,8 @@ export function ChatRoomScreen({
             </div>
           </div>
 
+          <div className="absolute bottom-0 left-0 h-[calc(var(--chat-keyboard-offset)+var(--qling-space-safe-bottom))] w-[393px] bg-white" aria-hidden="true" />
+
           <div className="absolute bottom-[calc(var(--chat-keyboard-offset)+var(--qling-space-safe-bottom))] left-0 h-[67px] w-[393px] border-t-[0.8px] border-[#ede3d6] bg-white">
             {sendError && (
               <div className="absolute bottom-[67px] left-4 right-4 rounded-[12px] bg-white px-3 py-2 text-center text-[12px] font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]">

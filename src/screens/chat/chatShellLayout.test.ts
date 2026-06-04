@@ -44,6 +44,7 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(reportUserScreenSource, /min-h-0 flex-1 overflow-y-auto/);
 
   assert.match(chatRoomScreenSource, /absolute bottom-\[calc\(var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)\)\] left-0 h-\[67px\] w-\[393px\]/);
+  assert.match(chatRoomScreenSource, /absolute bottom-0 left-0 h-\[calc\(var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)\)\] w-\[393px\] bg-white" aria-hidden="true"/);
   assert.doesNotMatch(chatRoomScreenSource, /top-\[790px\]/);
   assert.match(chatRoomScreenSource, /ChatRoomTopBar/);
   assert.match(reportUserScreenSource, /flex h-full min-h-0 flex-col/);
