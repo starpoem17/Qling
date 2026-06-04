@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent, type ChangeEvent, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../../lib/utils';
 import { ErrorState, profileImageUrlForColor } from '../shared/ui';
@@ -27,6 +27,16 @@ type ChatRoomInputBarStyle = CSSProperties & {
   readonly bottom: string;
   readonly width: string;
   readonly height: string;
+};
+
+type ChatRoomSafeInputStyle = CSSProperties & {
+  readonly position: 'fixed';
+  readonly left: string;
+  readonly top: string;
+  readonly width: string;
+  readonly height: string;
+  readonly opacity: number;
+  readonly pointerEvents: 'none';
 };
 
 type ChatRoomViewportMetrics = {
@@ -108,6 +118,7 @@ export function ChatRoomScreen({
   const [viewportMetrics, setViewportMetrics] = useState({ canvasHeight: 852, keyboardOffset: 0, scale: 1 });
   const viewportMetricsRef = useRef<ChatRoomViewportMetrics>(viewportMetrics);
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
+  const safeInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const updateViewportMetrics = () => {
@@ -196,6 +207,15 @@ export function ChatRoomScreen({
     width: `${393 * viewportMetrics.scale}px`,
     height: `${67 * viewportMetrics.scale}px`,
   };
+  const safeInputStyle: ChatRoomSafeInputStyle = {
+    position: 'fixed',
+    left: `calc(50% - ${160 * viewportMetrics.scale}px)`,
+    top: `${120 * viewportMetrics.scale}px`,
+    width: `${320 * viewportMetrics.scale}px`,
+    height: `${40 * viewportMetrics.scale}px`,
+    opacity: 0.01,
+    pointerEvents: 'none',
+  };
 
   useEffect(() => {
     const scroller = messagesScrollerRef.current;
@@ -220,6 +240,14 @@ export function ChatRoomScreen({
     if (event.key !== 'Enter' || event.shiftKey) return;
     event.preventDefault();
     void handleSend();
+  };
+
+  const handleDraftChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setDraft(event.target.value);
+  };
+
+  const focusSafeMessageInput = () => {
+    safeInputRef.current?.focus();
   };
 
   const handleMessageFocus = () => {
@@ -248,9 +276,12 @@ export function ChatRoomScreen({
       isSending={isSending}
       scale={viewportMetrics.scale}
       style={inputBarStyle}
-      onDraftChange={setDraft}
+      safeInputRef={safeInputRef}
+      safeInputStyle={safeInputStyle}
+      onDraftChange={handleDraftChange}
       onMessageKeyDown={handleMessageKeyDown}
       onMessageFocus={handleMessageFocus}
+      onFocusProxy={focusSafeMessageInput}
       onSend={handleSend}
     />,
     inputLayerTarget,
@@ -391,9 +422,12 @@ function ChatRoomInputBar({
   isSending,
   scale,
   style,
+  safeInputRef,
+  safeInputStyle,
   onDraftChange,
   onMessageKeyDown,
   onMessageFocus,
+  onFocusProxy,
   onSend,
 }: {
   readonly draft: string;
@@ -401,70 +435,90 @@ function ChatRoomInputBar({
   readonly isSending: boolean;
   readonly scale: number;
   readonly style: ChatRoomInputBarStyle;
-  readonly onDraftChange: (draft: string) => void;
+  readonly safeInputRef: RefObject<HTMLInputElement>;
+  readonly safeInputStyle: ChatRoomSafeInputStyle;
+  readonly onDraftChange: (event: ChangeEvent<HTMLInputElement>) => void;
   readonly onMessageKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
   readonly onMessageFocus: () => void;
+  readonly onFocusProxy: () => void;
   readonly onSend: () => void;
 }) {
   const px = (value: number) => `${value * scale}px`;
 
   return (
-    <div data-chat-room-input-bar className="fixed z-10 border-t border-[#ede3d6] bg-white qling-figma-font" style={style}>
-      {sendError && (
+    <>
+      <input
+        ref={safeInputRef}
+        data-chat-room-message-input
+        type="text"
+        value={draft}
+        onChange={onDraftChange}
+        onKeyDown={onMessageKeyDown}
+        onFocus={onMessageFocus}
+        aria-label="메시지 입력"
+        autoComplete="off"
+        className="bg-transparent text-transparent outline-none caret-transparent"
+        style={safeInputStyle}
+      />
+      <div data-chat-room-input-bar className="fixed z-10 border-t border-[#ede3d6] bg-white qling-figma-font" style={style}>
+        {sendError && (
+          <div
+            className="absolute rounded-[12px] bg-white text-center font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]"
+            style={{
+              bottom: px(67),
+              left: px(16),
+              right: px(16),
+              padding: `${px(8)} ${px(12)}`,
+              fontSize: px(12),
+            }}
+          >
+            {sendError}
+          </div>
+        )}
         <div
-          className="absolute rounded-[12px] bg-white text-center font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]"
+          className="absolute flex items-center justify-center rounded-full bg-[#fff0e2]"
+          style={{ left: px(14), top: px(12.2), width: px(38), height: px(38) }}
+        >
+          <button type="button" aria-label="첨부 추가" className="flex h-full w-full items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]">
+            <img src={roomPlusIconUrl} alt="" aria-hidden="true" style={{ width: px(18), height: px(18) }} draggable={false} />
+          </button>
+        </div>
+        <button
+          type="button"
+          className="absolute flex items-center rounded-[21px] border border-[#ede3d6] bg-[#fff4e8]"
+          onPointerDown={(event) => {
+            event.preventDefault();
+            onFocusProxy();
+          }}
+          onClick={onFocusProxy}
+          aria-label="메시지 입력"
           style={{
-            bottom: px(67),
-            left: px(16),
-            right: px(16),
-            padding: `${px(8)} ${px(12)}`,
-            fontSize: px(12),
+            left: px(60),
+            top: px(10.2),
+            minHeight: px(40),
+            width: px(269),
+            padding: `${px(0.8)} ${px(16.8)}`,
           }}
         >
-          {sendError}
-        </div>
-      )}
-      <div
-        className="absolute flex items-center justify-center rounded-full bg-[#fff0e2]"
-        style={{ left: px(14), top: px(12.2), width: px(38), height: px(38) }}
-      >
-        <button type="button" aria-label="첨부 추가" className="flex h-full w-full items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]">
-          <img src={roomPlusIconUrl} alt="" aria-hidden="true" style={{ width: px(18), height: px(18) }} draggable={false} />
+          <span
+            className={cn('block w-full truncate text-left font-normal', draft ? 'text-[#2b2620]' : 'text-[#a39e96]')}
+            style={{ fontSize: px(14), lineHeight: px(20) }}
+          >
+            {draft || '메시지를 입력해 주세요'}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => void onSend()}
+          disabled={!draft.trim() || isSending}
+          aria-label="메시지 보내기"
+          className="absolute flex items-center justify-center rounded-full bg-[#ff8b3d] shadow-[0_4px_6px_rgb(255_122_26/0.4)] transition-transform active:scale-95 disabled:opacity-45 focus:outline-none focus:ring-2 focus:ring-[#f26c0f]"
+          style={{ left: px(337), top: px(8.2), width: px(42), height: px(42) }}
+        >
+          <img src={roomSendIconUrl} alt="" aria-hidden="true" style={{ width: px(20), height: px(20) }} draggable={false} />
         </button>
       </div>
-      <div
-        className="absolute flex items-center rounded-[21px] border border-[#ede3d6] bg-[#fff4e8]"
-        style={{
-          left: px(60),
-          top: px(10.2),
-          minHeight: px(40),
-          width: px(269),
-          padding: `${px(0.8)} ${px(16.8)}`,
-        }}
-      >
-        <input
-          data-chat-room-message-input
-          type="text"
-          value={draft}
-          onChange={event => onDraftChange(event.target.value)}
-          onKeyDown={onMessageKeyDown}
-          onFocus={onMessageFocus}
-          placeholder="메시지를 입력해 주세요"
-          className="w-full bg-transparent font-normal text-[#2b2620] outline-none placeholder:text-[#a39e96]"
-          style={{ fontSize: px(14), lineHeight: px(20) }}
-        />
-      </div>
-      <button
-        type="button"
-        onClick={() => void onSend()}
-        disabled={!draft.trim() || isSending}
-        aria-label="메시지 보내기"
-        className="absolute flex items-center justify-center rounded-full bg-[#ff8b3d] shadow-[0_4px_6px_rgb(255_122_26/0.4)] transition-transform active:scale-95 disabled:opacity-45 focus:outline-none focus:ring-2 focus:ring-[#f26c0f]"
-        style={{ left: px(337), top: px(8.2), width: px(42), height: px(42) }}
-      >
-        <img src={roomSendIconUrl} alt="" aria-hidden="true" style={{ width: px(20), height: px(20) }} draggable={false} />
-      </button>
-    </div>
+    </>
   );
 }
 
