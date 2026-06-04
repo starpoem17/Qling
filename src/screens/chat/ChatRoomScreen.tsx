@@ -16,6 +16,10 @@ type ChatRoomCanvasStyle = CSSProperties & {
   readonly '--chat-input-y-offset': string;
 };
 
+type ChatRoomTopBarStyle = CSSProperties & {
+  readonly transform: string;
+};
+
 export interface ChatMessage {
   messageId: string;
   content: string;
@@ -118,6 +122,9 @@ export function ChatRoomScreen({
     height: `${viewportMetrics.canvasHeight}px`,
     transform: `scale(${viewportMetrics.scale})`,
   };
+  const topBarStyle: ChatRoomTopBarStyle = {
+    transform: `translateX(-50%) scale(${viewportMetrics.scale})`,
+  };
 
   useEffect(() => {
     const scroller = messagesScrollerRef.current;
@@ -150,13 +157,14 @@ export function ChatRoomScreen({
   if (loading || error) {
     return (
       <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
+        <ChatRoomTopBar
+          opponent={opponent}
+          onBack={onBack}
+          onOpenMenu={() => setMenuOpen(true)}
+          style={topBarStyle}
+        />
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
-            <ChatRoomTopBar
-              opponent={opponent}
-              onBack={onBack}
-              onOpenMenu={() => setMenuOpen(true)}
-            />
             <div className="absolute bottom-0 left-0 top-[74px] flex w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
               {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
             </div>
@@ -168,14 +176,14 @@ export function ChatRoomScreen({
 
   return (
     <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
+      <ChatRoomTopBar
+        opponent={opponent}
+        onBack={onBack}
+        onOpenMenu={() => setMenuOpen(true)}
+        style={topBarStyle}
+      />
       <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
         <div className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
-          <ChatRoomTopBar
-            opponent={opponent}
-            onBack={onBack}
-            onOpenMenu={() => setMenuOpen(true)}
-          />
-
           <div
             ref={messagesScrollerRef}
             className="absolute bottom-[calc(67px+max(0px,calc(var(--chat-keyboard-offset)-var(--chat-input-y-offset))))] left-0 top-[74px] w-[393px] overflow-y-auto bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
@@ -316,13 +324,15 @@ function ChatRoomTopBar({
   opponent,
   onBack,
   onOpenMenu,
+  style,
 }: {
   readonly opponent: { nickname: string; profileColor: string } | null;
   readonly onBack: () => void;
   readonly onOpenMenu: () => void;
+  readonly style: ChatRoomTopBarStyle;
 }) {
   return (
-    <header className="absolute left-0 top-0 z-20 h-[74px] w-[393px] bg-[#ff8b3d]">
+    <header className="fixed left-1/2 top-0 z-20 h-[74px] w-[393px] origin-top bg-[#ff8b3d] qling-figma-font" style={style}>
       <button
         type="button"
         onClick={onBack}

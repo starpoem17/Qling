@@ -15,6 +15,13 @@ test('chat room autoscroll stays inside the message scroller', () => {
   assert.match(chatRoomScreenSource, /ref=\{messagesScrollerRef\}[\s\S]*className="absolute bottom-\[calc\(67px\+max\(0px,calc\(var\(--chat-keyboard-offset\)-var\(--chat-input-y-offset\)\)\)\)\] left-0 top-\[74px\] w-\[393px\] overflow-y-auto/);
 });
 
+test('chat room top bar is fixed outside the keyboard-offset canvas', () => {
+  assert.match(chatRoomScreenSource, /const topBarStyle: ChatRoomTopBarStyle = \{\s*transform: `translateX\(-50%\) scale\(\$\{viewportMetrics\.scale\}\)`,\s*\}/);
+  assert.match(chatRoomScreenSource, /<ChatRoomTopBar[\s\S]*style=\{topBarStyle\}[\s\S]*\/>/);
+  assert.match(chatRoomScreenSource, /<header className="fixed left-1\/2 top-0 z-20 h-\[74px\] w-\[393px\] origin-top bg-\[#ff8b3d\] qling-figma-font" style=\{style\}>/);
+  assert.doesNotMatch(chatRoomScreenSource, /<div className="relative w-\[393px\][^>]*>\s*<ChatRoomTopBar/);
+});
+
 test('chat shell routes fill the app shell without extending under bottom navigation', () => {
   assert.match(chatRoomScreenSource, /-mx-\[var\(--qling-space-shell-x\)\] -mb-12 -mt-6 h-dvh overflow-hidden/);
   assert.doesNotMatch(chatRoomScreenSource, /-mb-\[var\(--qling-space-scroll-bottom\)\]/);
@@ -48,7 +55,6 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(chatRoomScreenSource, /absolute bottom-\[max\(0px,calc\(var\(--chat-keyboard-offset\)-var\(--chat-input-y-offset\)\)\)\] left-0 h-\[67px\] w-\[393px\]/);
   assert.doesNotMatch(chatRoomScreenSource, /bottom-0 left-0 h-\[max\(0px,calc\(var\(--chat-keyboard-offset\)/);
   assert.doesNotMatch(chatRoomScreenSource, /top-\[790px\]/);
-  assert.match(chatRoomScreenSource, /ChatRoomTopBar/);
   assert.match(reportUserScreenSource, /flex h-full min-h-0 flex-col/);
 });
 
