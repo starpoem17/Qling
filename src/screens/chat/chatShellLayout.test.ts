@@ -12,7 +12,7 @@ test('chat room autoscroll stays inside the message scroller', () => {
   assert.doesNotMatch(chatRoomScreenSource, /behavior:\s*'smooth'/);
   assert.match(chatRoomScreenSource, /const messagesScrollerRef = useRef<HTMLDivElement>\(null\)/);
   assert.match(chatRoomScreenSource, /scroller\.scrollTop = scroller\.scrollHeight/);
-  assert.match(chatRoomScreenSource, /ref=\{messagesScrollerRef\}[\s\S]*className="absolute bottom-\[calc\(67px\+var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)-var\(--chat-input-y-offset\)\)\] left-0 top-\[74px\] w-\[393px\] overflow-y-auto/);
+  assert.match(chatRoomScreenSource, /ref=\{messagesScrollerRef\}[\s\S]*className="absolute bottom-\[calc\(67px\+max\(0px,calc\(var\(--chat-keyboard-offset\)-var\(--chat-input-y-offset\)\)\)\)\] left-0 top-\[74px\] w-\[393px\] overflow-y-auto/);
 });
 
 test('chat shell routes fill the app shell without extending under bottom navigation', () => {
@@ -42,11 +42,11 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(chatScreenSource, /absolute left-0 top-\[136px\] h-\[716px\] w-full overflow-y-auto/);
   assert.match(chatScreenSource, /CreamContentBackground/);
   assert.match(chatScreenSource, /touch-none overscroll-none overflow-hidden rounded-t-\[30px\]/);
-  assert.match(chatRoomScreenSource, /absolute bottom-\[calc\(67px\+var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)-var\(--chat-input-y-offset\)\)\] left-0 top-\[74px\] w-\[393px\] overflow-y-auto/);
+  assert.match(chatRoomScreenSource, /absolute bottom-\[calc\(67px\+max\(0px,calc\(var\(--chat-keyboard-offset\)-var\(--chat-input-y-offset\)\)\)\)\] left-0 top-\[74px\] w-\[393px\] overflow-y-auto/);
   assert.match(reportUserScreenSource, /min-h-0 flex-1 overflow-y-auto/);
 
-  assert.match(chatRoomScreenSource, /absolute bottom-\[calc\(var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)-var\(--chat-input-y-offset\)\)\] left-0 h-\[67px\] w-\[393px\]/);
-  assert.match(chatRoomScreenSource, /absolute bottom-0 left-0 h-\[max\(0px,calc\(var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)-var\(--chat-input-y-offset\)\)\)\] w-\[393px\] bg-white" aria-hidden="true"/);
+  assert.match(chatRoomScreenSource, /absolute bottom-\[max\(0px,calc\(var\(--chat-keyboard-offset\)-var\(--chat-input-y-offset\)\)\)\] left-0 h-\[67px\] w-\[393px\]/);
+  assert.doesNotMatch(chatRoomScreenSource, /bottom-0 left-0 h-\[max\(0px,calc\(var\(--chat-keyboard-offset\)/);
   assert.doesNotMatch(chatRoomScreenSource, /top-\[790px\]/);
   assert.match(chatRoomScreenSource, /ChatRoomTopBar/);
   assert.match(reportUserScreenSource, /flex h-full min-h-0 flex-col/);
@@ -55,7 +55,7 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
 test('chat room more menu is fixed to the visible viewport bottom', () => {
   assert.match(chatRoomScreenSource, /bg-\[rgba\(40,30,20,0\.42\)\]/);
   assert.match(chatRoomScreenSource, /className="fixed inset-0 z-30 bg-\[rgba\(40,30,20,0\.42\)\]"/);
-  assert.match(chatRoomScreenSource, /bottom-\[calc\(var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)\)\][\s\S]*h-\[284px\][\s\S]*rounded-tl-\[22px\] rounded-tr-\[22px\]/);
+  assert.match(chatRoomScreenSource, /bottom-\[var\(--chat-keyboard-offset\)\][\s\S]*h-\[284px\][\s\S]*rounded-tl-\[22px\] rounded-tr-\[22px\]/);
   assert.doesNotMatch(chatRoomScreenSource, /top-\[597px\]/);
   assert.match(chatRoomScreenSource, /label="알림 끄기"/);
   assert.match(chatRoomScreenSource, /label="차단하기" danger onClick=\{onBlock\}/);
