@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { User } from 'firebase/auth';
 import { CONTENT_MAX_LENGTH, validateDraftContent } from '../../services/validation/content';
 import { submitReplyFeedbackWithProductionAdapters } from '../../services/replyFeedback/production';
+import { markRepliesForWorryReadWithServer } from '../../services/readState/apiClient';
 import {
   backRouteForRoute,
   type AppRouteState,
@@ -10,6 +11,7 @@ import {
 import { useMyWorries, useRepliesForWorry } from '../../services/myWorries';
 import { AnswerCheckScreen } from './AnswerCheckScreen';
 import type { AnswerCheckCommentDialogProps } from './contract';
+import { shouldMarkRepliesForWorryRead } from './containerPolicy';
 import { mapRepliesToAnswerCheckProps, mapWorryToAnswerCheckProps } from './mapping';
 
 export type AnswerCheckContainerProps = {
@@ -37,6 +39,20 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
   const [localCommentByReplyId, setLocalCommentByReplyId] = useState(new Map<string, string>());
   const [commentDialog, setCommentDialog] = useState<CommentDialogState | null>(null);
   const [likeRequiredPopupOpen, setLikeRequiredPopupOpen] = useState(false);
+
+  useEffect(() => {
+    if (!shouldMarkRepliesForWorryRead({ hasUser: Boolean(props.user), worryId })) return;
+    if (!props.user || !worryId) return;
+
+    void markRepliesForWorryReadWithServer({
+      user: props.user,
+      worryId,
+    }).then(result => {
+      if (result.status === 'failed') {
+        console.error('Failed to mark replies read:', result.reason);
+      }
+    });
+  }, [props.user, worryId]);
 
   const worry = useMemo(
     () => myWorries.find(item => item.id === worryId) ?? null,

@@ -1,5 +1,6 @@
 import type { KeyboardEvent, MouseEvent, TouchEvent, WheelEvent } from 'react';
 import type { CSSProperties } from 'react';
+import { CircleAlert, MessageCircle } from 'lucide-react';
 import {
   ErrorState,
   QlingCard,
@@ -101,6 +102,25 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
             resetKey="received-worries-ready"
           >
             <div className="grid gap-[14px]">
+              <div className="flex items-center gap-2 pt-0.5">
+                <div className="min-w-0 flex-1">
+                  <h1 className="pl-2 text-[22px] font-extrabold leading-normal tracking-[-0.02em] text-[#f26c0f]">
+                    답변하기
+                  </h1>
+                  <p className="pl-2 text-[13px] font-medium leading-normal tracking-[-0.01em] text-[#8a8a8a]">
+                    다른 친구의 고민에 마음을 나눠주세요
+                  </p>
+                </div>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ffe4cc] text-[#ff8b3d]" aria-hidden="true">
+                  <MessageCircle className="h-[22px] w-[22px] fill-[#ff8b3d] text-[#ff8b3d]" />
+                </div>
+              </div>
+              <div className="flex items-center gap-[9px] overflow-hidden rounded-[14px] bg-[#ffe4cc] px-[14px] py-3 text-[13.5px] font-bold leading-normal tracking-[-0.01em] text-[#7a4b22]">
+                <CircleAlert className="h-[17px] w-[17px] shrink-0 text-[#e8631a]" aria-hidden="true" />
+                <p className="min-w-0 flex-1">
+                  지금 <strong className="text-[#e8631a]">{props.waitingCount}명</strong>이 답변을 기다리고 있어요
+                </p>
+              </div>
               {props.items.map(item => {
                 const isPassing = passingDeliveryIds.has(item.deliveryId);
                 const content = item.bodyText ?? item.previewText;

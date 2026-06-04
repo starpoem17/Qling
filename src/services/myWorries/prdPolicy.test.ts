@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   composeReplyReadModel,
+  selectUnreadReplyCountForMyWorries,
   selectMyGivenReplies,
   selectMyWorries,
   selectRepliesForWorry,
+  summarizeMyWorryActivity,
 } from './prdPolicy';
 import type {
   PrdReplyDoc,
@@ -77,6 +79,41 @@ test('my worries selection does not expose unread reply state', () => {
   assert.equal(Object.hasOwn(w2, 'unreadReplyCount'), false);
   assert.equal(Object.hasOwn(w2, 'hasUnreadReplies'), false);
   assert.equal(replies.length, 3);
+});
+
+test('my worry activity summary adds visible worry count and human reply counts', () => {
+  const summary = summarizeMyWorryActivity({
+    worries: [
+      { id: 'w1', authorUid: 'me', content: 'one', categories: [], createdAt: null, humanReplyCount: 5, source: 'prd_worries' },
+      { id: 'w2', authorUid: 'me', content: 'two', categories: [], createdAt: null, humanReplyCount: 7, source: 'prd_worries' },
+      { id: 'w3', authorUid: 'me', content: 'three', categories: [], createdAt: null, source: 'prd_worries' },
+    ],
+    unreadReplyCount: 3,
+  });
+
+  assert.deepEqual(summary, {
+    worryCount: 3,
+    replyCount: 12,
+    unreadReplyCount: 3,
+  });
+});
+
+test('my worry activity summary counts only unread visible replies', () => {
+  const replies: PrdReplyDoc[] = [
+    prdReply({ id: 'unread', worryId: 'visible', authorUid: 'me', replierUid: 'r1', publisherVisible: true, status: 'active' }),
+    prdReply({ id: 'read', worryId: 'visible', authorUid: 'me', replierUid: 'r2', publisherVisible: true, status: 'active' }),
+    prdReply({ id: 'other-worry', worryId: 'hidden', authorUid: 'me', replierUid: 'r3', publisherVisible: true, status: 'active' }),
+    prdReply({ id: 'other-author', worryId: 'visible', authorUid: 'other', replierUid: 'r4', publisherVisible: true, status: 'active' }),
+    prdReply({ id: 'not-visible', worryId: 'visible', authorUid: 'me', replierUid: 'r5', publisherVisible: false, status: 'active' }),
+    prdReply({ id: 'hidden-reply', worryId: 'visible', authorUid: 'me', replierUid: 'r6', publisherVisible: true, status: 'active', hiddenAt: {} }),
+  ];
+
+  assert.equal(selectUnreadReplyCountForMyWorries({
+    replies,
+    userUid: 'me',
+    visibleWorryIds: new Set(['visible']),
+    readStatesByReplyId: new Map([['read', { replyId: 'read', readByAuthorAt: {} }]]),
+  }), 1);
 });
 
 test('my worries excludes hidden worries', () => {

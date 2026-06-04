@@ -88,6 +88,29 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
                 resetKey="my-worries-ready"
               >
                 <div className="grid gap-[14px]">
+                <div className="flex items-center gap-[13px] pt-0.5">
+                  <div className="min-w-0 flex-1">
+                    <h1 className="pl-2 text-[22px] font-extrabold leading-normal tracking-[-0.02em] text-[#f26c0f]">
+                      나의 고민
+                    </h1>
+                    <p className="pl-2 text-[13px] font-medium leading-normal tracking-[-0.01em] text-[#8a8a8a]">
+                      내가 남긴 고민과 받은 답변이에요
+                    </p>
+                  </div>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ffe4cc] text-[#ff8b3d]" aria-hidden="true">
+                    <Heart className="h-[22px] w-[22px] fill-[#ff8b3d]" />
+                  </div>
+                </div>
+                <section
+                  aria-label="내 활동 요약"
+                  className="grid grid-cols-[1fr_1px_1fr_1px_1fr] items-center overflow-hidden rounded-[16px] bg-white px-2 py-[15px] text-center shadow-[0_3px_10px_rgb(0_0_0/0.08)]"
+                >
+                  <ActivitySummaryMetric value={props.activitySummary.worryCount} label="남긴 고민" />
+                  <div className="h-[26px] bg-[#eee]" aria-hidden="true" />
+                  <ActivitySummaryMetric value={props.activitySummary.replyCount} label="받은 답변" />
+                  <div className="h-[26px] bg-[#eee]" aria-hidden="true" />
+                  <ActivitySummaryMetric value={props.activitySummary.unreadReplyCount} label="새 답변" accent />
+                </section>
                 {props.items.map(worry => (
                   <button
                     key={worry.worryId}
@@ -125,6 +148,23 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
         </div>
       </section>
     </>
+  );
+}
+
+function ActivitySummaryMetric(props: {
+  readonly value: number;
+  readonly label: string;
+  readonly accent?: boolean;
+}) {
+  return (
+    <div className="min-w-0">
+      <p className={`text-[20px] font-black leading-normal tracking-[-0.01em] ${props.accent ? 'text-[#ff8b3d]' : 'text-[#2a2a2a]'}`}>
+        {props.value}
+      </p>
+      <p className="text-[11px] font-medium leading-normal text-[#8a8a8a]">
+        {props.label}
+      </p>
+    </div>
   );
 }
 
