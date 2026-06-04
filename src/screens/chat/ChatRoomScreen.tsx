@@ -73,10 +73,18 @@ export function ChatRoomScreen({
       const layoutHeight = document.documentElement.clientHeight || window.innerHeight || visualViewport?.height || 852;
       const keyboardOffset = Math.max(0, layoutHeight - (visualViewport?.height ?? layoutHeight) - (visualViewport?.offsetTop ?? 0));
 
-      setViewportMetrics({
-        canvasHeight: layoutHeight / scale,
-        keyboardOffset: keyboardOffset / scale,
-        scale,
+      setViewportMetrics(previousMetrics => {
+        const nextMetrics = {
+          canvasHeight: keyboardOffset > 0 ? previousMetrics.canvasHeight : layoutHeight / scale,
+          keyboardOffset: keyboardOffset / scale,
+          scale,
+        };
+
+        return previousMetrics.canvasHeight === nextMetrics.canvasHeight
+          && previousMetrics.keyboardOffset === nextMetrics.keyboardOffset
+          && previousMetrics.scale === nextMetrics.scale
+          ? previousMetrics
+          : nextMetrics;
       });
     };
 
@@ -84,13 +92,11 @@ export function ChatRoomScreen({
     window.addEventListener('resize', updateViewportMetrics);
     window.addEventListener('orientationchange', updateViewportMetrics);
     window.visualViewport?.addEventListener('resize', updateViewportMetrics);
-    window.visualViewport?.addEventListener('scroll', updateViewportMetrics);
 
     return () => {
       window.removeEventListener('resize', updateViewportMetrics);
       window.removeEventListener('orientationchange', updateViewportMetrics);
       window.visualViewport?.removeEventListener('resize', updateViewportMetrics);
-      window.visualViewport?.removeEventListener('scroll', updateViewportMetrics);
     };
   }, []);
 

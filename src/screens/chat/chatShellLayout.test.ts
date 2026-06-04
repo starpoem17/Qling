@@ -38,7 +38,7 @@ test('chat screens keep 393px canvas width while chat room uses viewport height'
   assert.match(chatRoomScreenSource, /const \[viewportMetrics, setViewportMetrics\] = useState\(\{ canvasHeight: 852, keyboardOffset: 0, scale: 1 \}\)/);
   assert.match(chatRoomScreenSource, /const chatInputYOffset = 10/);
   assert.match(chatRoomScreenSource, /'--chat-input-y-offset': `\$\{chatInputYOffset\}px`/);
-  assert.match(chatRoomScreenSource, /canvasHeight: layoutHeight \/ scale/);
+  assert.match(chatRoomScreenSource, /canvasHeight: keyboardOffset > 0 \? previousMetrics\.canvasHeight : layoutHeight \/ scale/);
   assert.match(chatRoomScreenSource, /transform: `scale\(\$\{viewportMetrics\.scale\}\)`/);
   assert.match(chatRoomScreenSource, /relative w-\[393px\] shrink-0 origin-top overflow-hidden/);
   assert.doesNotMatch(chatRoomScreenSource, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden/);
@@ -73,9 +73,10 @@ test('chat room more menu is fixed to the visible viewport bottom', () => {
 
 test('chat room accounts for iPhone visual viewport and document background', () => {
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('resize', updateViewportMetrics\)/);
-  assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('scroll', updateViewportMetrics\)/);
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('resize', updateViewportMetrics\)/);
-  assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('scroll', updateViewportMetrics\)/);
+  assert.doesNotMatch(chatRoomScreenSource, /visualViewport\?\.addEventListener\('scroll'/);
+  assert.doesNotMatch(chatRoomScreenSource, /visualViewport\?\.removeEventListener\('scroll'/);
+  assert.match(chatRoomScreenSource, /setViewportMetrics\(previousMetrics =>/);
   assert.match(chatRoomScreenSource, /const chatRoomDocumentBackground = '#ffffff'/);
   assert.match(chatRoomScreenSource, /const backgroundColor = menuOpen \? dimThemeColor : chatRoomDocumentBackground/);
   assert.match(chatRoomScreenSource, /document\.documentElement\.style\.backgroundColor = backgroundColor/);
