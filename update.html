@@ -303,44 +303,151 @@
     <li><code>INTERNAL_JOB_SECRET</code>은 internal job route 보호에 사용한다.</li>
   </ul>
 
-  <h2>15. 테스트 결과</h2>
+  <h2>15. 자동 테스트 및 정적 검증 결과</h2>
   <table>
     <thead>
       <tr>
         <th>검증 항목</th>
+        <th>실행 내용</th>
         <th>결과</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td><code>npm run lint</code></td>
+        <td>TypeScript 타입 체크 전체 실행</td>
         <td>통과</td>
       </tr>
       <tr>
-        <td>핵심 서버/매칭 테스트</td>
-        <td><code>164/164</code> 통과</td>
+        <td><code>npm run test</code></td>
+        <td>전체 TypeScript 테스트 실행. Firestore rules 전용 테스트는 emulator 명령에서 실행하도록 skip 처리됨.</td>
+        <td><code>850 pass / 1 skip / 0 fail</code></td>
       </tr>
       <tr>
-        <td>Firestore rules 테스트</td>
-        <td><code>82/82</code> 통과</td>
+        <td><code>npm run test:rules</code></td>
+        <td>Firebase Firestore emulator 기반 rules 테스트 실행</td>
+        <td><code>82 pass / 0 fail</code></td>
+      </tr>
+      <tr>
+        <td>Internal job runner 테스트</td>
+        <td><code>fetch</code> provider mock 주입으로 실제 API 호출 없이 route, header, body, error logging 검증</td>
+        <td>통과</td>
+      </tr>
+      <tr>
+        <td>Secret scan</td>
+        <td>커밋 전 staged diff와 작업트리에서 OpenAI key, Firebase service account, internal secret 패턴 검색</td>
+        <td>실제 secret 노출 없음</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="note">
+    전체 테스트는 원격 <code>main</code>에 먼저 반영된 채팅/신고 기능 커밋을 rebase로 통합한 뒤 다시 실행했다.
+    충돌 파일은 <code>server.ts</code>, 온보딩 테스트, moderation provider, recipient policy, rematch repository였고,
+    원격 기능을 보존하면서 매칭 변경을 합쳤다.
+  </div>
+
+  <h2>16. GitHub 및 Render 배포 결과</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>항목</th>
+        <th>결과</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GitHub push</td>
+        <td><code>origin/main</code>에 반영 완료</td>
+      </tr>
+      <tr>
+        <td>최종 커밋</td>
+        <td><code>99743f2 Implement experience-based matching</code></td>
+      </tr>
+      <tr>
+        <td>Render auto deploy</td>
+        <td>사용자가 Render 대시보드에서 auto deploy와 최신 배포 버전 확인 완료</td>
+      </tr>
+      <tr>
+        <td>운영 서버 release sha</td>
+        <td><code>99743f2161f479f1a6f174cf5caab21121a1af24</code> 응답 header로 확인</td>
+      </tr>
+      <tr>
+        <td>운영 서버 URL</td>
+        <td><code>https://qling-hangyeol-hyu.onrender.com</code></td>
       </tr>
     </tbody>
   </table>
 
-  <h2>16. 남은 운영 작업</h2>
-  <div class="note">
-    코드에는 Render Cron Job에서 바로 실행할 수 있는 npm 명령을 추가했다. Render 대시보드에서 아래 cron job 2개를 등록해야 자동 처리된다.
-  </div>
+  <h2>17. Firebase Rules 배포 결과</h2>
   <ul>
-    <li>환경변수: <code>QLING_INTERNAL_BASE_URL=https://qling-hangyeol-hyu.onrender.com</code></li>
-    <li>환경변수: <code>INTERNAL_JOB_SECRET</code>는 web service와 cron job에 같은 값으로 설정한다.</li>
-    <li>Decay cron command: <code>npm run internal:decay</code></li>
-    <li>Profile summary cron command: <code>npm run internal:profile-summary</code></li>
-    <li>권장 schedule: summary는 10분마다 <code>*/10 * * * *</code>, decay는 하루 1회 <code>0 18 * * *</code> UTC 기준으로 등록한다.</li>
-    <li>온보딩 UI의 새 matching tag 입력 화면은 다른 개발 파트에서 반영 예정이며, 반영 후 저장값 연동만 확인하면 된다.</li>
+    <li>Firebase CLI 로그인 후 프로젝트 <code>qling-hyu</code>에 <code>firestore.rules</code>를 배포했다.</li>
+    <li>배포 명령: <code>npx firebase deploy --only firestore:rules --project qling-hyu</code></li>
+    <li>배포 결과: <code>Deploy complete</code></li>
+    <li>rules file은 컴파일 성공 후 <code>cloud.firestore</code>에 release 완료되었다.</li>
+    <li>배포 전 rules 테스트는 <code>82 pass / 0 fail</code>이었다.</li>
   </ul>
+  <div class="note">
+    Firebase deploy 과정에서 unused function 등 warning은 표시되었지만, 컴파일과 배포는 성공했다.
+    해당 warning은 배포 차단 요인이 아니며 기존 rules 구조의 정리 대상이다.
+  </div>
 
-  <h2>17. Cron 실행 검증 보강</h2>
+  <h2>18. Render Cron Job 구성 및 검증</h2>
+  <p>
+    Profile summary 재생성과 90일 decay는 사용자의 요청과 무관하게 주기적으로 실행되어야 하므로
+    Render Cron Job으로 등록했다. 두 job 모두 web service와 동일한 <code>INTERNAL_JOB_SECRET</code>을 사용해
+    internal route를 호출한다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Cron Job</th>
+        <th>Command</th>
+        <th>Schedule</th>
+        <th>목적</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Profile Summary</td>
+        <td><code>npm run internal:profile-summary</code></td>
+        <td><code>*/10 * * * *</code></td>
+        <td>대기 중인 <code>experienceProfileSummaryJobs</code>를 처리해 <code>experienceProfile.profileSummary</code>를 갱신한다.</td>
+      </tr>
+      <tr>
+        <td>Experience Decay</td>
+        <td><code>npm run internal:decay</code></td>
+        <td><code>0 18 * * *</code></td>
+        <td><code>experienceProfileDecayPending</code> 유저를 최근 90일 signal 기준으로 재계산한다.</td>
+      </tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>Render Cron Job 2개는 사용자가 Render 대시보드에서 등록 완료했다.</li>
+    <li>필수 환경변수 <code>QLING_INTERNAL_BASE_URL</code>과 <code>INTERNAL_JOB_SECRET</code>를 Cron Job과 web service에 설정했다.</li>
+    <li>인증 없이 internal route를 호출하면 <code>401 auth_missing</code>으로 차단되는 것을 운영 서버에서 확인했다.</li>
+    <li>로컬 <code>.env</code>의 secret을 사용해 운영 internal route를 직접 호출했고, 두 job 모두 <code>200 OK</code>를 반환했다.</li>
+  </ul>
+  <p>운영 호출 검증 결과:</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Endpoint</th>
+        <th>결과</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>/api/internal/recalculate-experience-profiles</code></td>
+        <td><code>statusCode: 200</code>, <code>status: completed</code>, <code>failedCount: 0</code></td>
+      </tr>
+      <tr>
+        <td><code>/api/internal/experience-profile-summaries/run</code></td>
+        <td><code>statusCode: 200</code>, <code>status: completed</code>, <code>failedCount: 0</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>19. Cron 실행 검증 보강</h2>
   <ul>
     <li><code>scripts/runInternalJob.ts</code>의 실행 로직을 <code>src/server/internalJobRunner.ts</code>로 분리했다.</li>
     <li>Render Cron Job 명령은 기존처럼 <code>npm run internal:decay</code>, <code>npm run internal:profile-summary</code>를 사용한다.</li>
@@ -348,12 +455,118 @@
     <li>성공/실패 로그에 <code>INTERNAL_JOB_SECRET</code> 값이 노출되지 않는 조건을 테스트로 고정했다.</li>
   </ul>
 
-  <h2>18. 주의 사항</h2>
+  <h2>20. 운영 Smoke Test 결과</h2>
+  <p>
+    실제 사용자에게 테스트 고민이 전달되는 것을 피하기 위해, 자동 smoke test는 일반 고민 delivery 생성 경로가 아니라
+    테스트 계정 온보딩과 high-risk 차단 경로를 검증했다. high-risk 경로는 매칭과 delivery 생성을 중단하므로
+    운영 사용자에게 테스트 고민이 전달되지 않는다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>검증 항목</th>
+        <th>확인 결과</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>테스트 계정 생성/인증</td>
+        <td>Firebase custom token으로 테스트 UID를 만들고 운영 API 인증에 사용했다.</td>
+      </tr>
+      <tr>
+        <td>닉네임 예약</td>
+        <td><code>/api/users/me/nickname-reservation</code> 성공</td>
+      </tr>
+      <tr>
+        <td>온보딩 저장</td>
+        <td><code>/api/users/me/onboarding-profile</code> 성공</td>
+      </tr>
+      <tr>
+        <td>Experience Profile 생성</td>
+        <td><code>profileStatus: cold_start</code>, <code>topTopics: ["직장", "취업"]</code> 확인</td>
+      </tr>
+      <tr>
+        <td>High-risk 차단</td>
+        <td><code>status: risk_blocked</code> 반환 확인</td>
+      </tr>
+      <tr>
+        <td>Delivery 생성 여부</td>
+        <td><code>deliveriesCreated: 0</code> 확인</td>
+      </tr>
+      <tr>
+        <td>Moderation log</td>
+        <td><code>reasonCode: high_risk</code> 저장 확인</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>Smoke test 산출 요약:</p>
+  <ul>
+    <li>테스트 UID: <code>smoke_55296600</code></li>
+    <li>테스트 닉네임: <code>스모크6600</code></li>
+    <li>High-risk moderation log id: <code>mzAwI1TJdZdCVIlY2unz</code></li>
+    <li>운영 smoke test에 사용한 임시 스크립트는 실행 후 삭제했고, 작업트리는 깨끗한 상태로 확인했다.</li>
+  </ul>
+
+  <h2>21. 일반 고민 작성 QA가 자동 실행되지 않은 이유</h2>
+  <div class="note">
+    일반 고민 작성은 실제 운영 매칭을 타며, 현재 서버는 운영 <code>users</code> 전체를 후보로 스캔한다.
+    따라서 자동 API 테스트로 일반 고민을 발행하면 실제 사용자에게 테스트 고민 delivery가 전달될 수 있다.
+  </div>
+  <ul>
+    <li>이 때문에 자동 smoke test에서는 실제 delivery를 만들지 않는 high-risk 경로만 검증했다.</li>
+    <li>일반 고민 작성 QA는 앱 화면에서 의도적으로 수행하는 것이 안전하다.</li>
+    <li>가능하면 테스트 계정 2~3개를 준비하고 운영 사용자가 적은 시간대에 짧은 테스트 고민으로 확인한다.</li>
+    <li>QA 후 Firestore에서 <code>worries.llmAnalysis</code>, <code>deliveries.llmMatch</code>, <code>experienceSignals</code>, 답변자 <code>experienceProfile</code>을 확인하면 된다.</li>
+  </ul>
+
+  <h2>22. 앞으로 남은 과정</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>우선순위</th>
+        <th>남은 작업</th>
+        <th>확인할 데이터</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>앱에서 일반 고민 작성 수동 QA</td>
+        <td><code>worries.llmAnalysis</code>, <code>deliveries.llmMatch</code>, delivery 생성 수</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>답변 작성 및 좋아요 플로우 QA</td>
+        <td><code>experienceSignals</code>, 답변자 <code>experienceProfile</code>, <code>helpedCount</code></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Profile Summary job 실제 대상 발생 확인</td>
+        <td><code>experienceProfileSummaryJobs</code>, <code>profileSummary</code>, job 상태</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>온보딩 UI 최종 연동 확인</td>
+        <td>새 matching tag UI 저장값이 서버에서 <code>experienceProfile</code>로 정상 매핑되는지 확인</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>운영 모니터링</td>
+        <td>Render Cron logs, OpenAI API 오류율, Firestore 오류, underfill 빈도</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>23. 운영 시 주의 사항</h2>
   <ul>
     <li>API key는 절대 커밋하면 안 된다.</li>
     <li>LLM 관련 테스트는 provider DI/mock 구조로 되어 있어 실제 API 호출 없이 검증한다.</li>
     <li><code>docs/PRD.md</code>는 수정하지 않았다.</li>
-    <li>실제 배포 전 Firestore rules 배포와 Render 환경변수 확인이 필요하다.</li>
+    <li><code>.env</code>는 로컬 실행용이며 커밋 대상이 아니다.</li>
+    <li><code>INTERNAL_JOB_SECRET</code>은 web service와 Render Cron Job에 동일한 값으로 유지해야 한다.</li>
+    <li><code>OPENAI_API_KEY</code>는 Render 환경변수 주입을 사용하며 코드에 하드코딩하지 않는다.</li>
+    <li>일반 고민 발행 smoke test는 실제 사용자에게 delivery가 갈 수 있으므로 운영에서 자동 실행하지 않는다.</li>
+    <li>Render Cron Job의 <code>Run now</code> 또는 로그에서 주기 실행 성공 여부를 초기 며칠간 확인한다.</li>
   </ul>
 </body>
 </html>

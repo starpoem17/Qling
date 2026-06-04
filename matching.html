@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qling Experience-based Matching 알고리즘 문서</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+      color: #1f2937;
+      max-width: 1080px;
+      margin: 40px auto;
+      padding: 0 24px 56px;
+      background: #ffffff;
+    }
+    h1, h2, h3 {
+      color: #111827;
+      line-height: 1.28;
+    }
+    h1 {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+    h2 {
+      margin-top: 40px;
+      padding-top: 22px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 22px;
+    }
+    h3 {
+      margin-top: 24px;
+      font-size: 17px;
+    }
+    .meta {
+      color: #6b7280;
+      margin-bottom: 28px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #ecfdf5;
+      color: #047857;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .note {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+    .flow {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    code {
+      background: #f3f4f6;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.92em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 20px;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 10px 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: #f9fafb;
+      font-weight: 700;
+    }
+    ul {
+      padding-left: 22px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Qling Experience-based Matching 알고리즘 문서</h1>
+  <p class="meta">작성일: 2026-06-04 / 기준: <code>matching.md</code>, <code>docs/PRD.md</code>, 실제 구현 코드</p>
+  <p><span class="badge">운영 반영 완료</span></p>
+
+  <h2>1. 알고리즘 목적</h2>
+  <p>
+    Qling의 매칭 목표는 단순히 관심사가 비슷한 사람을 연결하는 것이 아니라,
+    <strong>비슷한 경험을 했거나 해당 고민에 답변할 근거가 있는 사용자</strong>에게 고민을 전달하는 것이다.
+    MVP에서는 별도 추천 모델을 학습하지 않고, Firestore에 저장된 사용자 경험 프로필과 LLM 분석 결과를 조합해 매칭한다.
+  </p>
+  <div class="flow">Firestore 사용자 데이터
++ LLM Concern Analyzer
++ Experience Profile
++ Tier-based Retrieval
++ LLM Matching Judge
++ Post-processing Rule
+= 최종 Delivery Recipient</div>
+
+  <h2>2. 전체 처리 흐름</h2>
+  <div class="flow">1. 사용자가 온보딩에서 답변 가능한 주제 선택
+2. 서버가 users.profileStatus, users.experienceProfile 초기화
+3. 사용자가 고민 작성
+4. 기존 moderation + category inference 실행
+5. Concern Analyzer가 고민을 experience ontology로 분석
+6. high risk면 delivery 없이 차단
+7. 전체 후보 users를 eligibility policy로 필터링
+8. experience profile과 concern tag overlap으로 retrieval score 계산
+9. score와 profileStatus 기준으로 Tier A/B/C/Exploration 분류
+10. 후보 최대 20명을 LLM Judge에 전달
+11. LLM Judge 순위 결과를 검증/정규화
+12. tier quota 기반 post-processing으로 최대 5명 선정
+13. 부족하면 legacy category ranking으로 underfill 보충
+14. worries, deliveryBatches, deliveries, moderationLogs를 transaction으로 저장
+15. 답변/좋아요/moderation 이벤트로 experience profile과 signal 원장을 업데이트
+16. Cron Job이 profile summary 재생성과 90일 decay를 주기적으로 수행</div>
+
+  <h2>3. Ontology v1</h2>
+  <p>
+    매칭 알고리즘은 고정된 ontology v1을 사용한다. LLM이 임의로 만든 태그는 직접 매칭 점수에는 사용하지 않고,
+    <code>suggestedNewTags</code>에만 보관한다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>분류</th>
+        <th>태그</th>
+        <th>제약</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Topic</td>
+        <td>진로, 취업, 직장, 학업, 시험, 경제, 연애, 결혼, 가족, 인간관계, 육아, 건강, 외모, 군대, 미래, 일상</td>
+        <td>Concern Analyzer 결과에서 최대 3개</td>
+      </tr>
+      <tr>
+        <td>Emotion</td>
+        <td>불안, 우울감, 외로움, 자존감저하, 무기력, 좌절, 슬픔, 분노, 죄책감, 후회, 혼란, 부담감</td>
+        <td>최대 2개. 현재 retrieval score에는 직접 반영하지 않고 분석/기록에 사용</td>
+      </tr>
+      <tr>
+        <td>Desired Response</td>
+        <td>공감, 경험공유, 현실조언, 정보제공, 격려, 관점정리</td>
+        <td>최대 2개. answerStyle overlap에 사용</td>
+      </tr>
+      <tr>
+        <td>Situation</td>
+        <td>장기취준, 서류탈락, 면접실패, 이직고민, 직장적응, 상사갈등, 번아웃, 성적부진, 시험불안, 진로혼란, 휴학고민, 전공불만, 이별, 짝사랑, 연애갈등, 부모갈등, 친구갈등, 대인관계어려움, 경제부담, 미래불확실성, 건강염려, 외모고민, 군생활적응, 일상무기력</td>
+        <td>최대 3개. retrieval score에서 가장 높은 가중치</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>구현 파일: <code>src/services/matching/server/ontology.ts</code></p>
+
+  <h2>4. Experience Profile</h2>
+  <p>
+    <code>experienceProfile</code>은 사용자가 어떤 주제와 상황에서 답변 경험을 쌓았는지 나타내는 서버 소유 프로필이다.
+    클라이언트가 직접 수정할 수 없고, 온보딩/답변/좋아요/moderation/decay job에 의해 갱신된다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>필드</th>
+        <th>설명</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>profileStatus</code></td>
+        <td><code>cold_start</code>, <code>light</code>, <code>validated</code>, <code>trusted</code>. 현재 기본값은 <code>cold_start</code>이며 활동이 생기면 <code>light</code>로 승격된다.</td>
+      </tr>
+      <tr>
+        <td><code>topicScores</code></td>
+        <td>Topic tag별 경험 점수. 온보딩 선택 주제는 초기값 1로 생성된다.</td>
+      </tr>
+      <tr>
+        <td><code>situationScores</code></td>
+        <td>Situation tag별 경험 점수. 답변/좋아요 signal에서 쌓인다.</td>
+      </tr>
+      <tr>
+        <td><code>answerStyleScores</code></td>
+        <td>Desired response tag별 답변 스타일 점수. 예: 공감, 현실조언, 정보제공.</td>
+      </tr>
+      <tr>
+        <td><code>topTopics</code>, <code>topSituations</code>, <code>topAnswerStyles</code></td>
+        <td>각 score map에서 상위 태그를 정규화해 저장한다. LLM Judge와 summary generation에 사용된다.</td>
+      </tr>
+      <tr>
+        <td><code>profileSummary</code></td>
+        <td>LLM이 생성한 짧은 경험 요약. Matching Judge가 후보 맥락을 판단할 때 참고한다.</td>
+      </tr>
+      <tr>
+        <td><code>recentPositiveSignals</code></td>
+        <td>최근 긍정 signal source 목록. 현재 <code>reply_created</code>, <code>like_received</code>가 반영된다.</td>
+      </tr>
+      <tr>
+        <td><code>safetyPenalty</code></td>
+        <td>moderation fail 등 안전 리스크 신호 누적값. trusted 판단 및 매칭 품질에 영향을 준다.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>구현 파일: <code>src/services/matching/server/experienceProfile.ts</code></p>
+
+  <h2>5. 온보딩 초기화</h2>
+  <p>
+    사용자가 온보딩에서 선택한 관심사는 서버에서 experience topic으로 매핑된다.
+    최신 도메인 카테고리는 이미 새 ontology와 맞춰져 있으며, legacy 값은 도메인 정규화 단계에서 현재 카테고리로 변환된다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>입력 예시</th>
+        <th>저장 결과</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>["직장", "취업"]</code></td>
+        <td><code>topicScores: { "직장": 1, "취업": 1 }</code>, <code>topTopics: ["직장", "취업"]</code>, <code>profileStatus: cold_start</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p>구현 파일: <code>src/services/matching/server/interestTopicMapping.ts</code>, <code>src/services/userProfile/onboardingProfile.ts</code></p>
+
+  <h2>6. Concern Analyzer</h2>
+  <p>
+    고민 작성 시 LLM Concern Analyzer가 원문을 experience ontology로 분석한다.
+    분석 결과는 <code>worries.llmAnalysis</code>에 저장되고, high risk 판단과 후보 검색에 사용된다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>출력 필드</th>
+        <th>용도</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>topicTags</code></td>
+        <td>후보의 <code>topicScores</code>와 overlap 계산</td>
+      </tr>
+      <tr>
+        <td><code>emotionTags</code></td>
+        <td>고민의 정서 맥락 기록. 현재 retrieval score에는 직접 반영하지 않음</td>
+      </tr>
+      <tr>
+        <td><code>situationTags</code></td>
+        <td>후보의 <code>situationScores</code>와 overlap 계산. 가장 높은 가중치</td>
+      </tr>
+      <tr>
+        <td><code>desiredResponse</code></td>
+        <td>후보의 <code>answerStyleScores</code>와 overlap 계산</td>
+      </tr>
+      <tr>
+        <td><code>riskLevel</code></td>
+        <td><code>high</code>이면 matching/delivery 중단</td>
+      </tr>
+      <tr>
+        <td><code>matchingBrief</code></td>
+        <td>30~60자, 한 문장. LLM Judge에 전달할 고민 요약 맥락</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="note">
+    Analyzer 결과가 invalid이면 retry하고, 그래도 실패하면 fallback analysis를 사용한다.
+    따라서 LLM 분석 실패가 곧바로 고민 발행 전체 실패로 이어지지 않는다.
+  </div>
+  <p>구현 파일: <code>src/services/matching/server/concernAnalysis.ts</code>, <code>src/services/worryPublication/server/concernAnalysis.ts</code></p>
+
+  <h2>7. High Risk Policy</h2>
+  <p>
+    Concern Analyzer가 <code>riskLevel: high</code>를 반환하면 매칭을 중단한다.
+    이 경로에서는 <code>worries</code>, <code>deliveryBatches</code>, <code>deliveries</code>를 생성하지 않는다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>riskLevel</th>
+        <th>처리</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>low</code></td>
+        <td>일반 매칭 진행</td>
+      </tr>
+      <tr>
+        <td><code>medium</code></td>
+        <td>현재 구현에서는 일반 매칭 진행. 추후 추가 moderation 정책을 붙일 수 있음</td>
+      </tr>
+      <tr>
+        <td><code>high</code></td>
+        <td><code>risk_blocked</code> 반환, delivery 생성 0개, <code>moderationLogs.reasonCode = high_risk</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p>사용자 안내에는 119/112, 자살예방상담전화 109, 정신건강위기상담 1577-0199가 포함된다.</p>
+  <p>구현 파일: <code>src/services/worryPublication/server/riskPolicy.ts</code></p>
+
+  <h2>8. 후보 Eligibility Policy</h2>
+  <p>
+    후보 검색 전 전체 사용자 pool에서 매칭 불가 사용자를 제외한다.
+    현재 repository는 운영 <code>users</code> 컬렉션을 넓게 스캔한 뒤 서버 정책으로 필터링한다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>제외 조건</th>
+        <th>설명</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>작성자 본인</td>
+        <td><code>candidate.uid === authorUid</code>이면 제외</td>
+      </tr>
+      <tr>
+        <td>삭제/비활성/차단 계정</td>
+        <td><code>deleted</code>, <code>status: deleted</code>, <code>inactive</code>, <code>disabled</code>이면 제외</td>
+      </tr>
+      <tr>
+        <td>봇 계정</td>
+        <td><code>uid</code>가 <code>bot_</code>으로 시작하거나 <code>isBot</code>, <code>type: bot</code>이면 제외</td>
+      </tr>
+      <tr>
+        <td>수신 한도 초과</td>
+        <td><code>activeDeliveryCount >= 10</code>이면 제외</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>구현 파일: <code>src/services/matching/server/recipientPolicy.ts</code>, <code>src/services/matching/server/candidateRetrieval.ts</code></p>
+
+  <h2>9. Retrieval Score</h2>
+  <p>
+    후보의 experience profile과 고민 분석 결과를 비교해 retrieval score를 계산한다.
+    이 점수는 LLM Judge에 넘길 후보의 1차 우선순위와 Tier 분류에 사용된다.
+  </p>
+  <div class="flow">retrievalScore =
+  2 * topicOverlap
++ 3 * situationOverlap
++ 1 * answerStyleOverlap</div>
+  <table>
+    <thead>
+      <tr>
+        <th>항목</th>
+        <th>계산 방식</th>
+        <th>가중치 이유</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>topicOverlap</code></td>
+        <td>후보 <code>topicScores</code> key와 고민 <code>topicTags</code>의 교집합 수</td>
+        <td>큰 주제 일치. 기본 적합도</td>
+      </tr>
+      <tr>
+        <td><code>situationOverlap</code></td>
+        <td>후보 <code>situationScores</code> key와 고민 <code>situationTags</code>의 교집합 수</td>
+        <td>구체적 경험 일치. 가장 중요하므로 3점</td>
+      </tr>
+      <tr>
+        <td><code>answerStyleOverlap</code></td>
+        <td>후보 <code>answerStyleScores</code> key와 고민 <code>desiredResponse</code>의 교집합 수</td>
+        <td>답변 스타일 일치. 보조 신호</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>구현 파일: <code>src/services/matching/server/candidateRetrieval.ts</code></p>
+
+  <h2>10. Tier 분류</h2>
+  <p>
+    retrieval score와 profile status를 함께 사용해 후보를 Tier로 나눈다.
+    Tier는 최종 post-processing quota에 직접 반영된다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Tier</th>
+        <th>조건</th>
+        <th>의미</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A</td>
+        <td><code>retrievalScore >= 7</code>이고 <code>profileStatus</code>가 <code>validated</code> 또는 <code>trusted</code></td>
+        <td>강한 경험 일치 + 검증된 프로필</td>
+      </tr>
+      <tr>
+        <td>B</td>
+        <td><code>retrievalScore >= 4</code></td>
+        <td>충분한 주제/상황/스타일 일치</td>
+      </tr>
+      <tr>
+        <td>C</td>
+        <td><code>retrievalScore >= 1</code></td>
+        <td>약한 일치가 있는 후보</td>
+      </tr>
+      <tr>
+        <td>Exploration</td>
+        <td><code>profileStatus === cold_start</code></td>
+        <td>경험 데이터가 부족한 신규 사용자. 제한적으로 노출</td>
+      </tr>
+      <tr>
+        <td>제외</td>
+        <td>cold start가 아니고 <code>retrievalScore === 0</code></td>
+        <td>경험 일치가 없어 후보에서 제거</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>11. LLM Matching Judge</h2>
+  <p>
+    retrieval을 통과한 후보는 최대 20명까지 LLM Judge에 전달된다.
+    Judge는 후보를 고민에 맞는 순서로 정렬하고, 각 후보에 대한 짧은 reason을 반환한다.
+  </p>
+  <h3>Judge 입력</h3>
+  <ul>
+    <li>고민 분석 결과: topic, situation, desired response, matching brief</li>
+    <li>후보 context: uid, tier, retrieval score, profile status, top topics/situations/answer styles, profile summary, helpedCount, safetyPenalty</li>
+  </ul>
+  <h3>Judge 제한</h3>
+  <ul>
+    <li>입력 후보에 존재하는 candidateId만 반환해야 한다.</li>
+    <li>candidateId는 중복될 수 없다.</li>
+    <li>private, sensitive, demographic, identity trait를 추론하거나 사용하지 말아야 한다.</li>
+    <li>reason은 한국어 짧은 한 문장이어야 하며 내부 점수를 직접 언급하지 않는다.</li>
+    <li>invalid output이면 한 번 retry한다.</li>
+  </ul>
+  <p>구현 파일: <code>src/services/matching/server/llmJudge.ts</code>, <code>src/server/moderationProvider.ts</code></p>
+
+  <h2>12. Post-processing Quota</h2>
+  <p>
+    LLM Judge가 순위를 주더라도 최종 선택은 tier quota를 적용한다.
+    이렇게 하면 특정 tier에 과도하게 치우치지 않고, cold start 사용자에게도 제한적인 탐색 기회를 줄 수 있다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>선택 순서</th>
+        <th>Tier</th>
+        <th>최대 수</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>A</td>
+        <td>최대 2명</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>B</td>
+        <td>1명</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>B</td>
+        <td>추가 1명</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>C</td>
+        <td>1명</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>A</td>
+        <td>남는 슬롯이 있으면 추가 1명</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>Exploration</td>
+        <td>남는 슬롯이 있으면 1명</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    최종 delivery target은 <code>5명</code>이다. 후보가 부족하면 선택 가능한 만큼만 반환하고,
+    발행/패스/rematch 단계에서 legacy fallback이 부족분을 보충한다.
+  </p>
+  <p>구현 파일: <code>src/services/matching/server/postProcessing.ts</code></p>
+
+  <h2>13. Delivery 저장 구조</h2>
+  <p>
+    최종 선택된 recipient는 <code>deliveries</code>에 저장된다.
+    experience matching으로 선정된 경우 <code>llmMatch</code> snapshot이 같이 저장된다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>필드</th>
+        <th>설명</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>selectionType</code></td>
+        <td><code>matched</code> 또는 legacy fallback의 <code>random</code></td>
+      </tr>
+      <tr>
+        <td><code>matchOverlapCount</code></td>
+        <td>experience recipient는 topic overlap 값, legacy recipient는 기존 category overlap 값</td>
+      </tr>
+      <tr>
+        <td><code>matchCategoriesSnapshot</code></td>
+        <td>moderation category inference에서 나온 matching category snapshot</td>
+      </tr>
+      <tr>
+        <td><code>recipientInterestsSnapshot</code></td>
+        <td>전달 시점 수신자의 관심사 snapshot</td>
+      </tr>
+      <tr>
+        <td><code>llmMatch</code></td>
+        <td>tier, LLM rank, reason, retrievalScore, topic/situation/answerStyle overlap 저장</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>14. Underfill Fallback</h2>
+  <p>
+    Experience matching 결과가 목표 수 5명을 채우지 못하면 기존 카테고리 기반 랭킹으로 부족한 슬롯을 채운다.
+    이 fallback은 초기 운영처럼 <code>cold_start</code> 유저가 많고 검증된 experience profile이 적은 상태에서 delivery 부족을 줄이기 위한 장치다.
+  </p>
+  <ul>
+    <li>experience matching으로 먼저 recipient를 선택한다.</li>
+    <li>이미 선택된 uid는 fallback 후보에서 제외한다.</li>
+    <li>legacy rankMatchedHumanCandidates로 부족한 수만큼 보충한다.</li>
+    <li>최종 recipient는 중복 없이 저장된다.</li>
+  </ul>
+  <p>구현 파일: <code>src/services/worryPublication/server/recipientSelection.ts</code></p>
+
+  <h2>15. Pass 및 Rematch에서의 매칭</h2>
+  <p>
+    최초 발행뿐 아니라 pass replacement와 rematch due delivery에도 같은 experience matching 구조를 적용했다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>흐름</th>
+        <th>적용 방식</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Pass replacement</td>
+        <td>사용자가 고민을 pass하면 대체 recipient를 experience matching으로 찾고, 부족하면 legacy fallback으로 보충한다.</td>
+      </tr>
+      <tr>
+        <td>Rematch</td>
+        <td>기존 delivery batch의 답변/패스 상태를 고려해 다음 round recipient를 experience matching으로 찾는다.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    Rematch는 기존 PRD의 5-slot 정책과 round 제한을 유지한다. 이미 답변했거나 pass한 사용자,
+    기존 round에서 받은 사용자는 중복 delivery 대상에서 제외된다.
+  </p>
+  <p>구현 파일: <code>src/services/deliveries/passDelivery.ts</code>, <code>src/services/rematch/rematchDueDeliveries.ts</code>, <code>src/services/rematch/policy.ts</code></p>
+
+  <h2>16. Experience Profile 학습 규칙</h2>
+  <p>
+    사용자 활동은 즉시 experience profile에 반영되고, 동시에 <code>experienceSignals</code> 원장에 저장된다.
+    즉시 반영은 매칭 품질을 빠르게 개선하기 위한 것이고, signal 원장은 90일 decay 재계산을 위한 기준 데이터다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>이벤트</th>
+        <th>signal source</th>
+        <th>가중치</th>
+        <th>반영 내용</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>답변 작성 성공</td>
+        <td><code>reply_created</code></td>
+        <td><code>0.5</code></td>
+        <td>원 고민의 topic/situation/desired response를 답변자 profile에 반영</td>
+      </tr>
+      <tr>
+        <td>답변 좋아요 수신</td>
+        <td><code>like_received</code></td>
+        <td><code>2</code></td>
+        <td>긍정 신호로 강하게 반영하고 <code>helpedCount</code> 증가</td>
+      </tr>
+      <tr>
+        <td>답변 moderation fail</td>
+        <td>moderation 관련 signal</td>
+        <td>score 가중치 없음</td>
+        <td><code>safetyPenalty</code> 증가, profile summary 재검토 대상</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    활동 신호가 들어오면 <code>experienceProfileDecayPending</code>이 true가 되고,
+    Cron Job이 이후 90일 기준 재계산을 수행한다.
+  </p>
+
+  <h2>17. Profile Summary 재생성</h2>
+  <p>
+    <code>profileSummary</code>는 LLM Judge가 후보의 경험 맥락을 빠르게 이해하도록 돕는 요약문이다.
+    매 activity마다 즉시 LLM을 호출하지 않고, 조건을 만족하면 job queue에 넣고 Cron Job이 처리한다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>재생성 조건</th>
+        <th>reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>이전 summary snapshot 대비 <code>helpedCount +3</code> 이상</td>
+        <td><code>helped_count_delta</code></td>
+      </tr>
+      <tr>
+        <td><code>topTopics</code>가 이전 summary snapshot과 달라짐</td>
+        <td><code>top_topics_changed</code></td>
+      </tr>
+      <tr>
+        <td>마지막 summary update가 없거나 7일 이상 지남</td>
+        <td><code>stale_7d</code></td>
+      </tr>
+      <tr>
+        <td>중요 moderation 이벤트 발생</td>
+        <td><code>moderation_event</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    Internal route는 <code>POST /api/internal/experience-profile-summaries/run</code>이고,
+    Render Cron Job은 <code>npm run internal:profile-summary</code>로 10분마다 실행된다.
+  </p>
+
+  <h2>18. 90일 Experience Decay</h2>
+  <p>
+    사용자의 오래된 경험이 영구적으로 매칭에 남지 않도록 최근 90일 signal만 재합산한다.
+    이 방식은 단순히 점수를 일정 비율로 깎는 것이 아니라, signal 원장에서 최근 90일 데이터만 다시 읽어 profile을 재구성한다.
+  </p>
+  <ul>
+    <li>대상: <code>users.experienceProfileDecayPending === true</code></li>
+    <li>기본 batch limit: 50, route validation maximum: 100</li>
+    <li>사용 signal: <code>experienceSignals.uid === user uid</code>이고 <code>signalDate</code>가 최근 90일 이내</li>
+    <li>재계산 후 <code>experienceProfileDecayPending</code>을 false로 변경</li>
+    <li>필요하면 profile summary job을 함께 enqueue</li>
+  </ul>
+  <p>
+    Internal route는 <code>POST /api/internal/recalculate-experience-profiles</code>이고,
+    Render Cron Job은 <code>npm run internal:decay</code>로 하루 1회 실행된다.
+  </p>
+
+  <h2>19. 보안 및 운영 경계</h2>
+  <ul>
+    <li>서버 소유 필드인 <code>experienceProfile</code>, <code>profileStatus</code>, decay 관련 필드는 클라이언트 직접 write가 금지된다.</li>
+    <li><code>experienceSignals</code>와 <code>experienceProfileSummaryJobs</code>는 클라이언트 read/write 모두 금지된다.</li>
+    <li>Internal route는 <code>Authorization: Bearer INTERNAL_JOB_SECRET</code>이 없으면 <code>401</code>로 차단된다.</li>
+    <li>LLM API key는 코드에 저장하지 않고 Render 환경변수 <code>OPENAI_API_KEY</code>로 주입한다.</li>
+    <li>테스트는 provider dependency injection과 mock을 사용해 실제 LLM 호출 없이 검증한다.</li>
+  </ul>
+
+  <h2>20. 실제 구현 파일 맵</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>영역</th>
+        <th>주요 파일</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Ontology / Concern</td>
+        <td><code>ontology.ts</code>, <code>concernAnalysis.ts</code>, <code>worryPublication/server/concernAnalysis.ts</code></td>
+      </tr>
+      <tr>
+        <td>Experience Profile</td>
+        <td><code>experienceProfile.ts</code>, <code>interestTopicMapping.ts</code>, <code>profileSignals.ts</code></td>
+      </tr>
+      <tr>
+        <td>Candidate Retrieval</td>
+        <td><code>candidateRetrieval.ts</code>, <code>recipientPolicy.ts</code></td>
+      </tr>
+      <tr>
+        <td>LLM Judge / Post-processing</td>
+        <td><code>llmJudge.ts</code>, <code>postProcessing.ts</code>, <code>experienceRecipientSelection.ts</code></td>
+      </tr>
+      <tr>
+        <td>Worry Publication</td>
+        <td><code>publishWorry.ts</code>, <code>recipientSelection.ts</code>, <code>riskPolicy.ts</code></td>
+      </tr>
+      <tr>
+        <td>Pass / Rematch</td>
+        <td><code>passDelivery.ts</code>, <code>deliveries/recipientSelection.ts</code>, <code>rematch/policy.ts</code>, <code>rematchDueDeliveries.ts</code></td>
+      </tr>
+      <tr>
+        <td>Summary / Decay Jobs</td>
+        <td><code>profileSummary.ts</code>, <code>profileSummaryPolicy.ts</code>, <code>profileSummaryJobs.ts</code>, <code>experienceSignals.ts</code>, <code>experienceDecay.ts</code></td>
+      </tr>
+      <tr>
+        <td>Server Routes</td>
+        <td><code>server.ts</code>, <code>worryRoutes.ts</code>, <code>passRoutes.ts</code>, <code>rematchRoutes.ts</code>, <code>experienceProfileSummaryRoutes.ts</code>, <code>experienceDecayRoutes.ts</code></td>
+      </tr>
+      <tr>
+        <td>운영 스크립트</td>
+        <td><code>scripts/backfillExperienceProfiles.ts</code>, <code>scripts/runInternalJob.ts</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>21. 현재 확인된 운영 상태</h2>
+  <ul>
+    <li>GitHub <code>origin/main</code>에 commit <code>99743f2</code> 반영 완료</li>
+    <li>Render 운영 서버가 release sha <code>99743f2161f479f1a6f174cf5caab21121a1af24</code>로 응답하는 것 확인</li>
+    <li>Firestore rules 운영 배포 완료</li>
+    <li>Render Cron Job 2개 등록 및 internal route <code>200 OK</code> 확인</li>
+    <li>운영 smoke test에서 온보딩 experience profile 생성과 high-risk 차단 확인</li>
+  </ul>
+
+  <h2>22. 남은 QA 포인트</h2>
+  <p>
+    알고리즘과 운영 자동화는 반영되었지만, 일반 고민 작성은 실제 사용자에게 delivery가 갈 수 있으므로
+    자동 smoke test로 실행하지 않았다. 아래 항목은 앱 화면에서 수동 QA로 확인하는 것이 안전하다.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>QA 항목</th>
+        <th>확인할 데이터</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>일반 고민 작성</td>
+        <td><code>worries.llmAnalysis</code>, <code>deliveryBatches</code>, <code>deliveries.llmMatch</code></td>
+      </tr>
+      <tr>
+        <td>답변 작성</td>
+        <td><code>experienceSignals</code>의 <code>reply_created</code>, 답변자 profile score 증가</td>
+      </tr>
+      <tr>
+        <td>좋아요 수신</td>
+        <td><code>experienceSignals</code>의 <code>like_received</code>, <code>helpedCount</code>, profile score 증가</td>
+      </tr>
+      <tr>
+        <td>Profile Summary Job</td>
+        <td><code>experienceProfileSummaryJobs</code> enqueue 및 Cron 처리 결과</td>
+      </tr>
+      <tr>
+        <td>온보딩 UI 최종 연동</td>
+        <td>다른 팀원이 수정한 새 matching tag UI 저장값이 서버 profile 초기화와 일치하는지 확인</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>
