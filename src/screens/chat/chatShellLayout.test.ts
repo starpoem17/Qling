@@ -31,7 +31,7 @@ test('chat list uses the 393px fixed canvas scale layout', () => {
 });
 
 test('chat shell routes keep scrolling in route-owned content areas', () => {
-  assert.match(chatScreenSource, /absolute left-0 top-\[162px\] h-\[690px\] w-full overflow-y-auto/);
+  assert.match(chatScreenSource, /absolute left-0 top-\[136px\] h-\[716px\] w-full overflow-y-auto/);
   assert.match(chatScreenSource, /CreamContentBackground/);
   assert.match(chatScreenSource, /touch-none overscroll-none overflow-hidden rounded-t-\[30px\]/);
   assert.match(chatRoomScreenSource, /min-h-0 flex-1 overflow-y-auto/);
@@ -40,6 +40,13 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(chatRoomScreenSource, /shrink-0 bg-white/);
   assert.match(chatRoomScreenSource, /flex min-h-0 w-full flex-1 flex-col overflow-hidden/);
   assert.match(reportUserScreenSource, /flex h-full min-h-0 flex-col/);
+});
+
+test('chat list header matches the Figma vertical positions', () => {
+  assert.match(chatScreenSource, /top-\[34px\] w-full text-center text-\[17px\]/);
+  assert.match(chatScreenSource, /left-\[327px\] top-\[20px\] h-\[49px\] w-\[49px\]/);
+  assert.match(chatScreenSource, /absolute left-4 top-\[75px\] flex h-10 w-\[361px\]/);
+  assert.match(chatScreenSource, /absolute left-0 top-\[136px\] h-\[716px\] w-full overflow-hidden rounded-t-\[30px\] bg-\[#fff1d1\]/);
 });
 
 function readSource(relativePath: string) {

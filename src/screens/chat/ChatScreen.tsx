@@ -1,6 +1,7 @@
 import { useState, type TouchEvent, type WheelEvent } from 'react';
 import { profileImageUrlForColor } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
+import { filterChatsByOpponentName } from './chatListSearch';
 
 const searchIconUrl = new URL('../../../assets/chat/search_icon.svg', import.meta.url).href;
 const myPageIconUrl = new URL('../../../assets/chat/my_page_icon.svg', import.meta.url).href;
@@ -37,33 +38,39 @@ export function ChatScreen({
   readonly onReportUser?: (chatId: string, opponentUid: string, opponentNickname: string) => void;
 }) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font';
+  const visibleChats = filterChatsByOpponentName(chats ?? [], searchQuery);
 
   return (
     <section className={screenClassName} onClick={() => setOpenMenuId(null)}>
       <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
         <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
-          <ChatStaticHeader onOpenMyPage={onProfileClick} />
+          <ChatStaticHeader
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onOpenMyPage={onProfileClick}
+          />
           <CreamContentBackground />
 
           {loading ? (
             <section
-              className="absolute left-0 top-[162px] h-[690px] w-full touch-none overscroll-none overflow-hidden rounded-t-[30px]"
+              className="absolute left-0 top-[136px] h-[716px] w-full touch-none overscroll-none overflow-hidden rounded-t-[30px]"
               aria-label="채팅 목록 로딩 상태"
               onWheel={blockStaticScroll}
               onTouchMove={blockStaticScroll}
             >
-              <FigmaTabLoading label="채팅 목록을 불러오는 중입니다" className="top-[244px]" />
+              <FigmaTabLoading label="채팅 목록을 불러오는 중입니다" className="top-[270px]" />
             </section>
           ) : chats && chats.length > 0 ? (
             <section
-              className="absolute left-0 top-[162px] h-[690px] w-full overflow-y-auto rounded-t-[30px] px-4 pb-[108px] pt-4 [-webkit-overflow-scrolling:touch]"
+              className="absolute left-0 top-[136px] h-[716px] w-full overflow-y-auto rounded-t-[30px] px-4 pb-[108px] pt-4 [-webkit-overflow-scrolling:touch]"
               aria-label="채팅 목록"
             >
               <div className="flex flex-col gap-3">
-                {chats.map(chat => (
+                {visibleChats.map(chat => (
                   <ChatListCard
                     key={chat.chatId}
                     chat={chat}
@@ -79,7 +86,7 @@ export function ChatScreen({
             </section>
           ) : (
             <section
-              className="absolute left-0 top-[162px] flex h-[608px] w-full touch-none overscroll-none items-center justify-center overflow-hidden rounded-t-[30px]"
+              className="absolute left-0 top-[136px] flex h-[716px] w-full touch-none overscroll-none items-center justify-center overflow-hidden rounded-t-[30px]"
               aria-label="채팅 목록 빈 상태"
               onWheel={blockStaticScroll}
               onTouchMove={blockStaticScroll}
@@ -93,30 +100,43 @@ export function ChatScreen({
   );
 }
 
-function ChatStaticHeader({ onOpenMyPage }: { readonly onOpenMyPage?: () => void }) {
+function ChatStaticHeader({
+  searchQuery,
+  onSearchChange,
+  onOpenMyPage,
+}: {
+  readonly searchQuery: string;
+  readonly onSearchChange: (value: string) => void;
+  readonly onOpenMyPage?: () => void;
+}) {
   return (
     <header
-      className="absolute left-0 top-0 h-[202px] w-full touch-none overscroll-none bg-[#ff8b3d]"
+      className="absolute left-0 top-0 h-[202px] w-full overscroll-none bg-[#ff8b3d]"
       onTouchMove={blockStaticScroll}
       onWheel={blockStaticScroll}
     >
-      <h1 className="absolute left-0 top-[60px] w-full text-center text-[17px] font-extrabold leading-normal tracking-[-0.34px] text-white">
+      <h1 className="absolute left-0 top-[34px] w-full text-center text-[17px] font-extrabold leading-normal tracking-[-0.34px] text-white">
         채팅
       </h1>
       <button
         type="button"
         aria-label="마이페이지 열기"
         onClick={onOpenMyPage}
-        className="absolute left-[327px] top-[47px] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+        className="absolute left-[327px] top-[20px] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
       >
-        <img src={myPageIconUrl} alt="" aria-hidden="true" className="absolute left-3 top-3 h-[25px] w-[25px]" draggable={false} />
+        <img src={myPageIconUrl} alt="" aria-hidden="true" className="absolute left-3 top-[13px] h-[25px] w-[25px]" draggable={false} />
       </button>
-      <div className="absolute left-4 top-[101px] flex h-10 w-[361px] items-center gap-2 rounded-[14px] bg-white/[0.22] px-3">
+      <label className="absolute left-4 top-[75px] flex h-10 w-[361px] items-center gap-2 rounded-[14px] bg-white/[0.22] px-3">
+        <span className="sr-only">닉네임으로 검색</span>
         <img src={searchIconUrl} alt="" aria-hidden="true" className="h-4 w-4 shrink-0" draggable={false} />
-        <span className="whitespace-nowrap text-[14px] font-normal leading-5 text-white/85">
-          닉네임으로 검색
-        </span>
-      </div>
+        <input
+          value={searchQuery}
+          onChange={event => onSearchChange(event.target.value)}
+          onClick={event => event.stopPropagation()}
+          placeholder="닉네임으로 검색"
+          className="min-w-0 flex-1 bg-transparent text-[14px] font-normal leading-5 text-white outline-none placeholder:text-white/85"
+        />
+      </label>
     </header>
   );
 }
@@ -125,7 +145,7 @@ function CreamContentBackground() {
   return (
     <div
       aria-hidden="true"
-      className="absolute left-0 top-[162px] h-[690px] w-full overflow-hidden rounded-t-[30px] bg-[#fff1d1]"
+      className="absolute left-0 top-[136px] h-[716px] w-full overflow-hidden rounded-t-[30px] bg-[#fff1d1]"
     />
   );
 }
