@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent } from 'react';
 import { cn } from '../../lib/utils';
 import { ErrorState, profileImageUrlForColor } from '../shared/ui';
 
@@ -8,6 +8,11 @@ const roomMoreIconUrl = new URL('../../../assets/chat/room_more.svg', import.met
 const roomNotificationOffIconUrl = new URL('../../../assets/chat/room_notification_off.svg', import.meta.url).href;
 const roomBlockIconUrl = new URL('../../../assets/chat/room_block.svg', import.meta.url).href;
 const roomReportIconUrl = new URL('../../../assets/chat/room_report.svg', import.meta.url).href;
+const dimThemeColor = '#8b7b62';
+
+type ChatRoomCanvasStyle = CSSProperties & {
+  readonly '--chat-keyboard-offset': string;
+};
 
 export interface ChatMessage {
   messageId: string;
@@ -50,8 +55,66 @@ export function ChatRoomScreen({
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [viewportMetrics, setViewportMetrics] = useState({ canvasHeight: 852, keyboardOffset: 0, scale: 1 });
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
-  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+
+  useEffect(() => {
+    const updateViewportMetrics = () => {
+      const visualViewport = window.visualViewport;
+      const visualWidth = visualViewport?.width ?? window.innerWidth;
+      const scale = Math.max(Math.min(visualWidth, 480) / 393, 0.1);
+      const layoutHeight = document.documentElement.clientHeight || window.innerHeight || visualViewport?.height || 852;
+      const keyboardOffset = Math.max(0, layoutHeight - (visualViewport?.height ?? layoutHeight) - (visualViewport?.offsetTop ?? 0));
+
+      setViewportMetrics({
+        canvasHeight: layoutHeight / scale,
+        keyboardOffset: keyboardOffset / scale,
+        scale,
+      });
+    };
+
+    updateViewportMetrics();
+    window.addEventListener('resize', updateViewportMetrics);
+    window.addEventListener('orientationchange', updateViewportMetrics);
+    window.visualViewport?.addEventListener('resize', updateViewportMetrics);
+    window.visualViewport?.addEventListener('scroll', updateViewportMetrics);
+
+    return () => {
+      window.removeEventListener('resize', updateViewportMetrics);
+      window.removeEventListener('orientationchange', updateViewportMetrics);
+      window.visualViewport?.removeEventListener('resize', updateViewportMetrics);
+      window.visualViewport?.removeEventListener('scroll', updateViewportMetrics);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const root = document.getElementById('root');
+    const previousThemeColor = themeMeta?.getAttribute('content') ?? null;
+    const previousHtmlBackground = document.documentElement.style.backgroundColor;
+    const previousBodyBackground = document.body.style.backgroundColor;
+    const previousRootBackground = root?.style.backgroundColor ?? null;
+
+    themeMeta?.setAttribute('content', dimThemeColor);
+    document.documentElement.style.backgroundColor = dimThemeColor;
+    document.body.style.backgroundColor = dimThemeColor;
+    if (root) root.style.backgroundColor = dimThemeColor;
+
+    return () => {
+      if (themeMeta && previousThemeColor !== null) themeMeta.setAttribute('content', previousThemeColor);
+      document.documentElement.style.backgroundColor = previousHtmlBackground;
+      document.body.style.backgroundColor = previousBodyBackground;
+      if (root && previousRootBackground !== null) root.style.backgroundColor = previousRootBackground;
+    };
+  }, [menuOpen]);
+
+  const canvasStyle: ChatRoomCanvasStyle = {
+    '--chat-keyboard-offset': `${viewportMetrics.keyboardOffset}px`,
+    height: `${viewportMetrics.canvasHeight}px`,
+    transform: `scale(${viewportMetrics.scale})`,
+  };
 
   useEffect(() => {
     const scroller = messagesScrollerRef.current;
@@ -85,13 +148,13 @@ export function ChatRoomScreen({
     return (
       <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-          <div className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={{ transform: `scale(${canvasScale})` }}>
+          <div className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
             <ChatRoomTopBar
               opponent={opponent}
               onBack={onBack}
               onOpenMenu={() => setMenuOpen(true)}
             />
-            <div className="absolute left-0 top-[74px] flex h-[778px] w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
+            <div className="absolute bottom-0 left-0 top-[74px] flex w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
               {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
             </div>
           </div>
@@ -103,7 +166,7 @@ export function ChatRoomScreen({
   return (
     <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
       <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-        <div className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={{ transform: `scale(${canvasScale})` }}>
+        <div className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
           <ChatRoomTopBar
             opponent={opponent}
             onBack={onBack}
@@ -112,7 +175,7 @@ export function ChatRoomScreen({
 
           <div
             ref={messagesScrollerRef}
-            className="absolute left-0 top-[74px] h-[716px] w-[393px] overflow-y-auto bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
+            className="absolute bottom-[calc(67px+var(--chat-keyboard-offset)+var(--qling-space-safe-bottom))] left-0 top-[74px] w-[393px] overflow-y-auto bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
           >
             <div className="mb-[14px] flex w-full justify-center">
               <span className="rounded-full bg-[#ffe7d2] px-3 py-[4px] text-[11px] font-semibold leading-[16.5px] text-[#f26c0f]">
@@ -121,7 +184,7 @@ export function ChatRoomScreen({
             </div>
 
             <div className="mb-[14px] h-[99.425px] w-full rounded-[14px] border-[0.8px] border-[#f1e7da] bg-white px-[14.8px] py-[12.8px] shadow-[0_2px_8px_rgb(120_90_60/0.07)]">
-              <div className="mb-[8px] flex h-[30.2px] items-center">
+              <div className="flex h-[30.2px] items-center">
                 <span className="rounded-full bg-[#ffe7d2] px-[7.2px] py-[2px] font-['Qling_Noto_Sans_KR_Black'] text-[10px] font-black leading-[15px] text-[#f26c0f]">
                   {worryInfo?.category || '고민'}
                 </span>
@@ -191,7 +254,7 @@ export function ChatRoomScreen({
             </div>
           </div>
 
-          <div className="absolute left-0 top-[790px] h-[67px] w-[393px] border-t-[0.8px] border-[#ede3d6] bg-white">
+          <div className="absolute bottom-[calc(var(--chat-keyboard-offset)+var(--qling-space-safe-bottom))] left-0 h-[67px] w-[393px] border-t-[0.8px] border-[#ede3d6] bg-white">
             {sendError && (
               <div className="absolute bottom-[67px] left-4 right-4 rounded-[12px] bg-white px-3 py-2 text-center text-[12px] font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]">
                 {sendError}
@@ -222,26 +285,26 @@ export function ChatRoomScreen({
               <img src={roomSendIconUrl} alt="" aria-hidden="true" className="h-5 w-5" draggable={false} />
               </button>
           </div>
-
-          {menuOpen && (
-            <ChatRoomActionSheet
-              onClose={() => setMenuOpen(false)}
-              onNotificationOff={() => {
-                setMenuOpen(false);
-                alert('알림이 꺼졌습니다.');
-              }}
-              onBlock={() => {
-                setMenuOpen(false);
-                onLeaveChat();
-              }}
-              onReport={() => {
-                setMenuOpen(false);
-                onReportUser();
-              }}
-            />
-          )}
         </div>
       </div>
+      {menuOpen && (
+        <ChatRoomActionSheet
+          keyboardOffset={viewportMetrics.keyboardOffset * viewportMetrics.scale}
+          onClose={() => setMenuOpen(false)}
+          onNotificationOff={() => {
+            setMenuOpen(false);
+            alert('알림이 꺼졌습니다.');
+          }}
+          onBlock={() => {
+            setMenuOpen(false);
+            onLeaveChat();
+          }}
+          onReport={() => {
+            setMenuOpen(false);
+            onReportUser();
+          }}
+        />
+      )}
     </section>
   );
 }
@@ -297,23 +360,30 @@ function ChatRoomTopBar({
 }
 
 function ChatRoomActionSheet({
+  keyboardOffset,
   onClose,
   onNotificationOff,
   onBlock,
   onReport,
 }: {
+  readonly keyboardOffset: number;
   readonly onClose: () => void;
   readonly onNotificationOff: () => void;
   readonly onBlock: () => void;
   readonly onReport: () => void;
 }) {
+  const sheetStyle = {
+    '--chat-keyboard-offset': `${keyboardOffset}px`,
+  } as CSSProperties;
+
   return (
-    <div className="absolute inset-0 z-30 bg-[rgba(40,30,20,0.42)]" role="presentation" onClick={onClose}>
+    <div className="fixed inset-0 z-30 bg-[rgba(40,30,20,0.42)]" role="presentation" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label="채팅방 메뉴"
-        className="absolute left-[-3px] top-[597px] flex h-[284px] w-[393px] flex-col items-start overflow-hidden rounded-tl-[22px] rounded-tr-[22px] bg-white pb-[26px] pt-[10px]"
+        className="absolute bottom-[calc(var(--chat-keyboard-offset)+var(--qling-space-safe-bottom))] left-1/2 flex h-[284px] w-[min(393px,100vw)] -translate-x-1/2 flex-col items-start overflow-hidden rounded-tl-[22px] rounded-tr-[22px] bg-white pb-[26px] pt-[10px]"
+        style={sheetStyle}
         onClick={event => event.stopPropagation()}
       >
         <div className="flex w-full justify-center overflow-hidden pb-2">
