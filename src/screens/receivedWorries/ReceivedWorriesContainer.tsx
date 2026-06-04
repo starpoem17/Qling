@@ -129,6 +129,7 @@ export function ReceivedWorriesContainer(props: ReceivedWorriesContainerProps) {
     <ReceivedWorriesScreen
       state={state}
       items={items}
+      waitingCount={items.length}
       passingDeliveryIds={[...passingDeliveryIds]}
       onPass={passWorry}
       onOpen={openWorryForReply}

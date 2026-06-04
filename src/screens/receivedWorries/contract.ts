@@ -14,6 +14,7 @@ export type ReceivedWorryFeedItem = {
 export type ReceivedWorriesScreenProps = {
   readonly state: ScreenAsyncState;
   readonly items: readonly ReceivedWorryFeedItem[];
+  readonly waitingCount: number;
   readonly passingDeliveryIds: readonly string[];
   readonly onPass: (deliveryId: string) => void;
   readonly onOpen: (item: { readonly deliveryId: string; readonly worryId: string }) => void;

@@ -112,9 +112,16 @@ export type MyWorryListItemProps = {
   readonly accessibilityLabel: string;
 };
 
+export type MyWorryActivitySummaryProps = {
+  readonly worryCount: number;
+  readonly replyCount: number;
+  readonly unreadReplyCount: number;
+};
+
 export type MyWorriesScreenProps = {
   readonly state: ScreenAsyncState;
   readonly items: readonly MyWorryListItemProps[];
+  readonly activitySummary: MyWorryActivitySummaryProps;
   readonly onWriteWorry: () => void;
   readonly onOpenMyPage: () => void;
   readonly onSelectWorryForAnswers: (item: MyWorryListItemProps) => void;

@@ -135,6 +135,11 @@ test('my answers and my worries contracts expose list states and route callbacks
       accessibilityLabel: '답변 확인으로 이동, 카테고리 취업, 작성일 방금 전, 1명이 답변했어요',
     },
     ],
+    activitySummary: {
+      worryCount: 1,
+      replyCount: 1,
+      unreadReplyCount: 0,
+    },
     onWriteWorry: () => undefined,
     onOpenMyPage: () => undefined,
     onSelectWorryForAnswers: () => undefined,

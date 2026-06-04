@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { User } from 'firebase/auth';
 import {
   useMyWorries,
+  useMyWorryActivitySummary,
   type MyWorryListItem,
   type ReplyReadModelItem,
 } from '../../services/myWorries';
@@ -25,6 +26,7 @@ export type SelectedMyReply = ReplyReadModelItem;
 
 export function MyWorriesContainer(props: MyWorriesContainerProps) {
   const { myWorries, isLoadingMyWorries, myWorriesError } = useMyWorries({ user: props.user });
+  const activitySummary = useMyWorryActivitySummary({ user: props.user, worries: myWorries });
 
   const selectWorry = (item: MyWorryListItemProps) => {
     const selection = routeForMyWorryAnswerCheck({ item, worries: myWorries });
@@ -42,6 +44,7 @@ export function MyWorriesContainer(props: MyWorriesContainerProps) {
         itemCount: myWorries.length,
       })}
       items={myWorries.map(worry => mapMyWorryToListItem({ worry }))}
+      activitySummary={activitySummary}
       onWriteWorry={() => props.setView(routeToWriteWorry())}
       onOpenMyPage={() => props.setView('마이페이지')}
       onSelectWorryForAnswers={selectWorry}

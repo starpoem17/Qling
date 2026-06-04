@@ -19,6 +19,7 @@ function baseProps(overrides: Partial<ReceivedWorriesScreenProps> = {}): Receive
       receivedAt: { label: 'Today', isoValue: '2026-05-16T00:00:00.000Z' },
       isUnread: true,
     }],
+    waitingCount: 1,
     passingDeliveryIds: [],
     onPass: () => undefined,
     onOpen: () => undefined,
@@ -39,6 +40,7 @@ test('received-worries feed item includes ids needed for pass and open events', 
       receivedAt: { label: 'Today', isoValue: '2026-05-16T00:00:00.000Z' },
       isUnread: true,
     }],
+    waitingCount: 1,
     passingDeliveryIds: ['delivery-1'],
     onPass: () => undefined,
     onOpen: () => undefined,
@@ -48,7 +50,26 @@ test('received-worries feed item includes ids needed for pass and open events', 
   assert.equal(props.items[0].deliveryId, 'delivery-1');
   assert.equal(props.items[0].worryId, 'worry-1');
   assert.equal(props.items[0].isUnread, true);
+  assert.equal(props.waitingCount, 1);
   assert.deepEqual(props.passingDeliveryIds, ['delivery-1']);
+});
+
+test('received-worries ready state renders waiting count from feed items', () => {
+  const html = renderToStaticMarkup(ReceivedWorriesScreen(baseProps({
+    waitingCount: 2,
+    items: [
+      baseProps().items[0],
+      {
+        ...baseProps().items[0],
+        deliveryId: 'delivery-2',
+        worryId: 'worry-2',
+      },
+    ],
+  })));
+
+  assert.match(html, /답변하기/);
+  assert.match(html, /다른 친구의 고민에 마음을 나눠주세요/);
+  assert.match(html, /지금 <strong class="text-\[#e8631a\]">2명<\/strong>이 답변을 기다리고 있어요/);
 });
 
 test('received-worries contract represents loading, error, and empty states', () => {

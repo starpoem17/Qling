@@ -21,6 +21,11 @@ function baseProps(overrides: Partial<MyWorriesScreenProps> = {}): MyWorriesScre
   return {
     state: { status: 'ready' },
     items: [item],
+    activitySummary: {
+      worryCount: 2,
+      replyCount: 12,
+      unreadReplyCount: 3,
+    },
     onWriteWorry: () => undefined,
     onOpenMyPage: () => undefined,
     onSelectWorryForAnswers: () => undefined,
@@ -39,12 +44,16 @@ test('my worries screen is a list-only screen without inline received-reply pane
   assert.doesNotMatch(html, /받은 답장 상세로 이동/);
 });
 
-test('my worries screen does not render new-reply emphasis', () => {
+test('my worries screen renders activity summary for my worries and unread replies', () => {
   const html = renderToStaticMarkup(MyWorriesScreen(baseProps()));
 
+  assert.match(html, /나의 고민/);
+  assert.match(html, /내가 남긴 고민과 받은 답변이에요/);
+  assert.match(html, /내 활동 요약/);
+  assert.match(html, />2<\/p><p class="text-\[11px\] font-medium leading-normal text-\[#8a8a8a\]">남긴 고민<\/p>/);
+  assert.match(html, />12<\/p><p class="text-\[11px\] font-medium leading-normal text-\[#8a8a8a\]">받은 답변<\/p>/);
+  assert.match(html, /text-\[#ff8b3d\]">3<\/p><p class="text-\[11px\] font-medium leading-normal text-\[#8a8a8a\]">새 답변<\/p>/);
   assert.doesNotMatch(html, /새 답장/);
-  assert.doesNotMatch(html, /<span[^>]*>새 답장<\/span>/);
-  assert.doesNotMatch(html, /읽지 않은 답장/);
 });
 
 test('my worries card click invokes answer-check intent with the selected worry item', () => {

@@ -190,3 +190,34 @@ export function composeReplyReadModel(params: {
   void params.mode;
   return sortNewestFirst(params.prdReplies);
 }
+
+export function selectUnreadReplyCountForMyWorries(params: {
+  replies: readonly PrdReplyDoc[];
+  userUid: string;
+  visibleWorryIds: ReadonlySet<string>;
+  readStatesByReplyId?: ReadonlyMap<string, ReplyReadStateDoc>;
+}): number {
+  return params.replies.filter(reply => {
+    if (!reply.id || params.readStatesByReplyId?.has(reply.id)) return false;
+    if (reply.authorUid !== params.userUid) return false;
+    if (!reply.worryId || !params.visibleWorryIds.has(reply.worryId)) return false;
+    if (reply.publisherVisible !== true) return false;
+    if (isHiddenReply(reply) || reply.status !== 'active') return false;
+    return true;
+  }).length;
+}
+
+export function summarizeMyWorryActivity(params: {
+  worries: readonly MyWorryListItem[];
+  unreadReplyCount: number;
+}): {
+  readonly worryCount: number;
+  readonly replyCount: number;
+  readonly unreadReplyCount: number;
+} {
+  return {
+    worryCount: params.worries.length,
+    replyCount: params.worries.reduce((sum, worry) => sum + Math.max(0, worry.humanReplyCount ?? 0), 0),
+    unreadReplyCount: Math.max(0, params.unreadReplyCount),
+  };
+}
