@@ -1,4 +1,5 @@
 node_modules/
+.conda-qling/
 build/
 dist/
 coverage/

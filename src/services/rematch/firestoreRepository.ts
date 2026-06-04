@@ -6,6 +6,7 @@ import {
 } from 'firebase-admin/firestore';
 import { normalizeWorryCategories } from '@midnight-radio/domain';
 import { isEligibleHumanCandidate } from '../matching/server/recipientPolicy';
+import { normalizeExperienceProfileStatus } from '../matching/server/experienceProfile';
 import type {
   CommittedRematchBatch,
   RematchBatchWriteModel,
@@ -46,6 +47,10 @@ function userDocToCandidate(uid: string, data: FirebaseFirestore.DocumentData | 
     gender: typeof data?.gender === 'string' ? data.gender : undefined,
     interests: Array.isArray(data?.interests) ? normalizeWorryCategories(data.interests) : undefined,
     helpedCount: typeof data?.helpedCount === 'number' ? data.helpedCount : undefined,
+    profileStatus: normalizeExperienceProfileStatus(data?.profileStatus),
+    experienceProfile: data?.experienceProfile && typeof data.experienceProfile === 'object'
+      ? data.experienceProfile
+      : undefined,
     activeDeliveryCount: typeof data?.activeDeliveryCount === 'number' ? data.activeDeliveryCount : undefined,
     deleted: data?.deleted,
     status: typeof data?.status === 'string' ? data.status : undefined,
@@ -144,7 +149,7 @@ function buildDelivery(params: {
   rematchEligibleAfter: Date | null;
   matchingCategories: string[];
 }): RematchDeliveryWriteModel {
-  return {
+  const delivery: RematchDeliveryWriteModel = {
     id: `${params.worryId}_${params.recipient.uid}`,
     worryId: params.worryId,
     recipientUid: params.recipient.uid,
@@ -169,6 +174,10 @@ function buildDelivery(params: {
     createdAt: params.now,
     updatedAt: params.now,
   };
+  if (params.recipient.llmMatch) {
+    delivery.llmMatch = params.recipient.llmMatch;
+  }
+  return delivery;
 }
 
 async function queryIsEmpty(
@@ -235,6 +244,7 @@ export function createRematchRepository(params: { db: Firestore }): RematchRepos
             interests: normalizeWorryCategories(stringArray(authorDoc?.data()?.interests)),
           },
           matchingCategories: normalizeWorryCategories(stringArray(worry.matchingCategories)),
+          llmAnalysis: worry.llmAnalysis,
           humanDeliveryCount: typeof worry.humanDeliveryCount === 'number'
             ? worry.humanDeliveryCount
             : countHumanDeliveries(allDeliveries),

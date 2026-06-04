@@ -8,9 +8,10 @@ import {
   validatePassBody,
   type ServerPassDeliveryResult,
 } from '../services/deliveries';
+import type { MatchingJudgeProvider } from '../services/matching/server/llmJudge';
 
 type PassDeliveryService = {
-  passDelivery(params: { uid: string; deliveryId: string }): Promise<ServerPassDeliveryResult>;
+  passDelivery(params: { uid: string; deliveryId: string; matchingJudgeProvider?: MatchingJudgeProvider }): Promise<ServerPassDeliveryResult>;
 };
 
 function publicPassResult(result: Extract<ServerPassDeliveryResult, { status: 'passed' }>) {
@@ -55,6 +56,7 @@ export function registerPassRoutes(app: express.Express, deps: {
   db: Firestore | null;
   messaging: Messaging | null;
   auth: Auth;
+  matchingJudgeProvider?: MatchingJudgeProvider;
   service?: PassDeliveryService;
 }): void {
   if (!deps.db) {
@@ -75,6 +77,7 @@ export function registerPassRoutes(app: express.Express, deps: {
       messaging: deps.messaging,
       uid,
       deliveryId,
+      matchingJudgeProvider: deps.matchingJudgeProvider,
     }),
   };
 
@@ -94,10 +97,12 @@ export function registerPassRoutes(app: express.Express, deps: {
         }
 
         const authReq = req as ActiveAuthenticatedRequest;
-        const result = await service.passDelivery({
+        const serviceParams = {
           uid: authReq.auth.uid,
           deliveryId: req.params.deliveryId,
-        });
+          ...(deps.matchingJudgeProvider ? { matchingJudgeProvider: deps.matchingJudgeProvider } : {}),
+        };
+        const result = await service.passDelivery(serviceParams);
 
         sendPassResult(res, result);
       } catch (error) {

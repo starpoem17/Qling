@@ -1,4 +1,6 @@
 import type { WorryCategory } from '@midnight-radio/domain';
+import { createInitialExperienceProfile } from '../matching/server/experienceProfile';
+import { mapInterestsToExperienceTopics } from '../matching/server/interestTopicMapping';
 import {
   isValidGender,
   isValidProfileColor,
@@ -114,5 +116,9 @@ export async function completeOnboarding(params: {
     age: validation.age.age,
     interests: validation.interests.interests as WorryCategory[],
     profileColor: validation.profileColor.profileColor,
+    profileStatus: 'cold_start',
+    experienceProfile: createInitialExperienceProfile(
+      mapInterestsToExperienceTopics(validation.interests.interests as WorryCategory[]),
+    ),
   });
 }

@@ -1,4 +1,8 @@
 import { DEFAULT_WORRY_CATEGORY, WORRY_CATEGORIES } from '@midnight-radio/domain';
+import type {
+  MatchingJudgeProvider,
+  MatchingJudgeResult,
+} from '../services/matching/server/llmJudge';
 
 export const MODERATION_PROVIDER = 'openai';
 export const MODERATION_MODEL = 'gpt-5.4-mini';
@@ -122,4 +126,128 @@ ${strictRetry ? 'This is a retry because the previous summary was invalid or lon
   } catch {
     return trimmed;
   }
+}
+
+export async function analyzeConcernForExperienceMatching(content: string, strictRetry = false): Promise<unknown> {
+  const systemInstruction = `You analyze Korean anonymous worry posts for experience-based matching.
+Return JSON only with this exact shape:
+{
+  "topicTags": [],
+  "emotionTags": [],
+  "situationTags": [],
+  "desiredResponse": [],
+  "suggestedNewTags": [],
+  "riskLevel": "low",
+  "riskReason": "",
+  "matchingBrief": ""
+}
+
+Use ONLY these topicTags:
+진로, 취업, 직장, 학업, 시험, 경제, 연애, 결혼, 가족, 인간관계, 육아, 건강, 외모, 군대, 미래, 일상
+
+Use ONLY these emotionTags:
+불안, 우울감, 외로움, 자존감저하, 무기력, 좌절, 슬픔, 분노, 죄책감, 후회, 혼란, 부담감
+
+Use ONLY these desiredResponse tags:
+공감, 경험공유, 현실조언, 정보제공, 격려, 관점정리
+
+Use ONLY these situationTags:
+장기취준, 서류탈락, 면접실패, 이직고민, 직장적응, 상사갈등, 번아웃, 성적부진, 시험불안, 진로혼란, 휴학고민, 전공불만, 이별, 짝사랑, 연애갈등, 부모갈등, 친구갈등, 대인관계어려움, 경제부담, 미래불확실성, 건강염려, 외모고민, 군생활적응, 일상무기력
+
+Constraints:
+- topicTags: at most 3
+- emotionTags: at most 2
+- situationTags: at most 3
+- desiredResponse: at most 2
+- riskLevel: one of low, medium, high
+- matchingBrief: Korean, 30 to 60 characters, exactly one sentence
+- suggestedNewTags may contain short Korean tags only when the fixed ontology is insufficient
+- Do not include scores, markdown, explanations, or extra keys.
+${strictRetry ? 'This is a retry because the previous response was invalid. Return valid JSON only and satisfy every constraint.' : ''}`;
+
+  return fetchFromOpenAI(systemInstruction, content);
+}
+
+const MATCHING_JUDGE_CANDIDATE_LIMIT = 20;
+
+export const EXPERIENCE_MATCHING_JUDGE_PROVIDER = MODERATION_PROVIDER;
+export const EXPERIENCE_MATCHING_JUDGE_MODEL = MODERATION_MODEL;
+
+export const judgeExperienceMatchingCandidates: MatchingJudgeProvider = async params => {
+  const candidates = params.candidates.slice(0, MATCHING_JUDGE_CANDIDATE_LIMIT);
+  if (candidates.length === 0) {
+    return { rankedCandidates: [] };
+  }
+
+  const payload = JSON.stringify({
+    concern: params.concern,
+    candidates,
+  });
+  const allowedCandidateIds = new Set(candidates.map(candidate => candidate.candidateId));
+
+  const first = normalizeJudgeProviderOutput(
+    await fetchFromOpenAI(buildMatchingJudgeInstruction(false), payload),
+    allowedCandidateIds,
+  );
+  if (first.status === 'valid') return first.result;
+
+  const second = normalizeJudgeProviderOutput(
+    await fetchFromOpenAI(buildMatchingJudgeInstruction(true), payload),
+    allowedCandidateIds,
+  );
+  if (second.status === 'valid') return second.result;
+
+  throw new Error('OpenAI matching judge returned invalid output');
+};
+
+function buildMatchingJudgeInstruction(strictRetry: boolean): string {
+  return `You rank recipient candidates for a Korean anonymous worry-sharing app.
+Return JSON only with this exact shape:
+{
+  "rankedCandidates": [
+    { "candidateId": "candidate-id-from-input", "reason": "짧은 한국어 한 문장" }
+  ]
+}
+
+Rules:
+- Use ONLY candidateId values from the input candidates.
+- Include each candidateId at most once.
+- Rank candidates by fit for the concern using only topic, situation, answer style, profile summary, recent positive signals, helpedCount, safetyPenalty, tier, and profileStatus.
+- Prefer candidates who can share relevant experience or give the desired response style.
+- Do not infer or use private, sensitive, demographic, or identity traits.
+- reason must be Korean, one short sentence, and must not mention internal scores.
+- Return up to ${MATCHING_JUDGE_CANDIDATE_LIMIT} ranked candidates.
+- Do not include markdown, explanations, comments, or extra keys.
+${strictRetry ? 'This is a retry because the previous response was invalid. Return valid JSON only and satisfy every constraint.' : ''}`;
+}
+
+function normalizeJudgeProviderOutput(
+  value: unknown,
+  allowedCandidateIds: ReadonlySet<string>,
+): { status: 'valid'; result: MatchingJudgeResult } | { status: 'invalid' } {
+  if (!isRecord(value) || !Array.isArray(value.rankedCandidates)) {
+    return { status: 'invalid' };
+  }
+
+  const seen = new Set<string>();
+  const rankedCandidates = value.rankedCandidates
+    .map(item => {
+      if (!isRecord(item)) return null;
+      const candidateId = typeof item.candidateId === 'string' ? item.candidateId : '';
+      const reason = typeof item.reason === 'string' ? item.reason.trim() : '';
+      if (!allowedCandidateIds.has(candidateId) || seen.has(candidateId) || reason.length === 0) return null;
+      seen.add(candidateId);
+      return { candidateId, reason };
+    })
+    .filter((item): item is MatchingJudgeResult['rankedCandidates'][number] => Boolean(item));
+
+  if (rankedCandidates.length === 0 && allowedCandidateIds.size > 0) {
+    return { status: 'invalid' };
+  }
+
+  return { status: 'valid', result: { rankedCandidates } };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
 }

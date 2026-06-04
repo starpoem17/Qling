@@ -1,6 +1,18 @@
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 import type { ReplyFeedbackRepository } from './serverFeedback';
 import type { ReplyFeedbackDoc, ReplyFeedbackType } from './types';
+import type { ConcernAnalysis } from '../matching/server/concernAnalysis';
+import {
+  buildConcernExperienceSignal,
+  createExperienceSignalId,
+  enqueueExperienceSignal,
+} from '../matching/server/experienceSignals';
+import {
+  applyConcernExperienceSignal,
+  promoteExperienceProfileStatus,
+} from '../matching/server/profileSignals';
+import { enqueueExperienceProfileSummaryJob } from '../matching/server/profileSummaryJobs';
+import { resolveProfileSummaryJobReason } from '../matching/server/profileSummaryPolicy';
 
 function withoutUndefined<T extends Record<string, unknown>>(value: T): T {
   return Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined)) as T;
@@ -57,6 +69,8 @@ export function createReplyFeedbackRepository(params: { db: Firestore }): ReplyF
         if (input.publisherUid === replierUid) throw buildError('publisher_reply_forbidden');
 
         const feedbackDoc = await transaction.get(feedbackRef);
+        const userRef = db.collection('users').doc(replierUid);
+        const userDoc = await transaction.get(userRef);
         let existingFeedback: ReplyFeedbackDoc | null = null;
         if (feedbackDoc.exists) {
           existingFeedback = feedbackDoc.data() as ReplyFeedbackDoc;
@@ -126,9 +140,56 @@ export function createReplyFeedbackRepository(params: { db: Firestore }): ReplyF
         }
 
         if (helpedCountApplied) {
-          transaction.set(db.collection('users').doc(replierUid), {
+          const user = userDoc.data();
+          const currentHelpedCount = typeof user?.helpedCount === 'number' ? user.helpedCount : 0;
+          const nextHelpedCount = currentHelpedCount + 1;
+          const nextProfile = applyConcernExperienceSignal({
+            currentProfile: user?.experienceProfile,
+            concern: worry.llmAnalysis as Partial<ConcernAnalysis> | undefined,
+            weight: 2,
+            positiveSignal: 'like_received',
+          });
+          const summaryReason = resolveProfileSummaryJobReason({
+            profile: nextProfile,
+            helpedCount: nextHelpedCount,
+            now: new Date(),
+          });
+          transaction.set(userRef, {
             helpedCount: FieldValue.increment(1),
+            profileStatus: promoteExperienceProfileStatus(user?.profileStatus),
+            experienceProfile: summaryReason ? { ...nextProfile, profileSummaryPendingReason: summaryReason } : nextProfile,
+            experienceProfileDecayPending: true,
+            experienceProfileLastSignalAt: timestamp,
           }, { merge: true });
+          enqueueExperienceSignal({
+            db,
+            transaction,
+            signal: buildConcernExperienceSignal({
+              id: createExperienceSignalId({
+                uid: replierUid,
+                source: 'like_received',
+                dedupeKey: input.replyId,
+              }),
+              uid: replierUid,
+              source: 'like_received',
+              concern: worry.llmAnalysis as Partial<ConcernAnalysis> | undefined,
+              weight: 2,
+              replyId: input.replyId,
+              worryId,
+              deliveryId,
+              feedbackId: input.replyId,
+              now: timestamp,
+            }),
+          });
+          if (summaryReason) {
+            enqueueExperienceProfileSummaryJob({
+              db,
+              transaction,
+              uid: replierUid,
+              reason: summaryReason,
+              now: timestamp,
+            });
+          }
         }
 
         return {

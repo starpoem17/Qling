@@ -1,10 +1,11 @@
 import type { Firestore } from 'firebase-admin/firestore';
 import type { Messaging } from 'firebase-admin/messaging';
 import { createDeliveryPassRepository } from './firestoreRepository';
-import { selectPassReplacementCandidates } from './recipientSelection';
+import { selectExperiencePassReplacementCandidates } from './recipientSelection';
 import { sendReplacementPushAfterCommit } from './pushLogs';
 import type {
   DeliveryPassRepository,
+  PassMatchingJudgeProvider,
   ServerPassDeliveryResult,
 } from './types';
 
@@ -67,17 +68,19 @@ export async function passDelivery(params: {
   deliveryId: string;
   repository?: DeliveryPassRepository;
   random?: () => number;
+  matchingJudgeProvider?: PassMatchingJudgeProvider;
 }): Promise<ServerPassDeliveryResult> {
   const repository = params.repository ?? createDeliveryPassRepository({ db: params.db });
 
   try {
     const scan = await repository.fetchReplacementScan({ deliveryId: params.deliveryId });
-    const candidates = selectPassReplacementCandidates({
+    const candidates = await selectExperiencePassReplacementCandidates({
       author: scan.author,
       candidates: scan.candidates,
       matchingCategories: scan.matchingCategories,
+      llmAnalysis: scan.llmAnalysis,
       excludedUids: scan.excludedUids,
-      random: params.random ?? Math.random,
+      matchingJudgeProvider: params.matchingJudgeProvider,
     });
 
     for (const selectedRecipient of candidates) {

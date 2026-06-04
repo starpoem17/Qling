@@ -145,6 +145,93 @@ test('passDelivery tries ranked candidates until one commits or writes shortfall
   assert.deepEqual(attempted, ['first', 'second']);
 });
 
+test('passDelivery uses experience matching judge and passes llmMatch to commit', async () => {
+  let committedLlmMatch: unknown = null;
+  const repository: DeliveryPassRepository = {
+    fetchReplacementScan: async () => ({
+      candidates: ['a', 'b'].map(uid => ({
+        uid,
+        gender: 'female',
+        interests: ['취업'],
+        helpedCount: 1,
+        activeDeliveryCount: 0,
+        profileStatus: 'validated',
+        experienceProfile: {
+          topicScores: { '취업': 1, '진로': 1 },
+          situationScores: { '장기취준': 1 },
+          answerStyleScores: { '공감': 1 },
+          topTopics: ['취업', '진로'],
+          topSituations: ['장기취준'],
+          topAnswerStyles: ['공감'],
+          profileSummary: '',
+          recentPositiveSignals: [],
+          safetyPenalty: 0,
+        },
+      })),
+      excludedUids: new Set(['author', 'passer']),
+      existingHumanDeliveryCount: 1,
+      replierUids: new Set(),
+      author: { uid: 'author', gender: 'female' },
+      matchingCategories: ['취업'],
+      llmAnalysis: {
+        topicTags: ['취업', '진로'],
+        emotionTags: ['불안'],
+        situationTags: ['장기취준'],
+        desiredResponse: ['공감'],
+        suggestedNewTags: [],
+        riskLevel: 'low',
+        riskReason: '',
+        matchingBrief: '취업 준비가 길어지며 불안과 좌절을 함께 느끼는 고민입니다.',
+      },
+    }),
+    commitPassDelivery: async ({ selectedRecipient }) => {
+      committedLlmMatch = selectedRecipient?.llmMatch;
+      return {
+        status: 'passed',
+        deliveryId: 'delivery1',
+        replacementDeliveryId: `worry1_${selectedRecipient?.uid}`,
+        replacementStatus: 'created',
+        attemptId: 'delivery1',
+        warnings: [],
+      };
+    },
+    markReplacementPushResult: async () => undefined,
+  };
+
+  const result = await passDelivery({
+    db: {
+      collection: (name: string) => ({
+        doc: () => ({
+          get: async () => ({ exists: true, data: () => ({}) }),
+          collection: () => ({ get: async () => ({ empty: true, docs: [] }) }),
+        }),
+        add: async () => ({ id: `${name}-log` }),
+      }),
+    } as never,
+    messaging: null,
+    uid: 'passer',
+    deliveryId: 'delivery1',
+    repository,
+    matchingJudgeProvider: async () => ({
+      rankedCandidates: [
+        { candidateId: 'b', reason: '더 잘 맞는 후보입니다. 추가 문장은 제거됩니다.' },
+        { candidateId: 'a', reason: '다음 후보입니다.' },
+      ],
+    }),
+  });
+
+  assert.equal(result.status, 'passed');
+  assert.deepEqual(committedLlmMatch, {
+    tier: 'A',
+    rank: 1,
+    reason: '더 잘 맞는 후보입니다.',
+    retrievalScore: 8,
+    topicOverlap: 2,
+    situationOverlap: 1,
+    answerStyleOverlap: 1,
+  });
+});
+
 test('validatePassBody accepts absent or empty object and rejects non-empty non-object values', () => {
   assert.deepEqual(validatePassBody(undefined), { status: 'ok' });
   assert.deepEqual(validatePassBody({}), { status: 'ok' });

@@ -77,6 +77,11 @@ service cloud.firestore {
         'deletedAt',
         'nickname',
         'normalizedNickname',
+        'profileStatus',
+        'experienceProfile',
+        'experienceProfileDecayPending',
+        'experienceProfileLastSignalAt',
+        'experienceProfileRecalculatedAt',
         'onboardingCompletedAt',
         'exampleWorriesCreatedAt',
         'exampleWorrySeedIds',
@@ -260,6 +265,14 @@ service cloud.firestore {
     }
 
     match /exampleFeedbackJobs/{jobId} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /experienceProfileSummaryJobs/{jobId} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /experienceSignals/{signalId} {
       allow read, create, update, delete: if false;
     }
 

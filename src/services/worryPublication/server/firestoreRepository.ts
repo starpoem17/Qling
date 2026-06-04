@@ -17,6 +17,7 @@ import type {
 import {
   isEligiblePhase1HumanCandidate,
 } from './recipientSelection';
+import { normalizeExperienceProfileStatus } from '../../matching/server/experienceProfile';
 
 function withoutId<T extends { id: string }>(model: T): Omit<T, 'id'> {
   const { id: _id, ...rest } = model;
@@ -29,6 +30,10 @@ function userDocToCandidate(uid: string, data: FirebaseFirestore.DocumentData | 
     gender: typeof data?.gender === 'string' ? data.gender : undefined,
     interests: Array.isArray(data?.interests) ? normalizeWorryCategories(data.interests) : undefined,
     helpedCount: typeof data?.helpedCount === 'number' ? data.helpedCount : undefined,
+    profileStatus: normalizeExperienceProfileStatus(data?.profileStatus),
+    experienceProfile: data?.experienceProfile && typeof data.experienceProfile === 'object'
+      ? data.experienceProfile
+      : undefined,
     activeDeliveryCount: typeof data?.activeDeliveryCount === 'number' ? data.activeDeliveryCount : undefined,
     deleted: data?.deleted,
     status: typeof data?.status === 'string' ? data.status : undefined,

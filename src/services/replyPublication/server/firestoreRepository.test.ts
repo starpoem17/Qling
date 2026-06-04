@@ -95,9 +95,26 @@ test('repository creates replies by deterministic delivery id and answers delive
       authorUid: 'author',
       humanReplyCount: 0,
       hasHumanReply: false,
+      llmAnalysis: {
+        topicTags: ['취업'],
+        situationTags: ['장기취준'],
+        desiredResponse: ['공감'],
+      },
     },
     'users/recipient': {
       activeDeliveryCount: 2,
+      profileStatus: 'cold_start',
+      experienceProfile: {
+        topicScores: {},
+        situationScores: {},
+        answerStyleScores: {},
+        topTopics: [],
+        topSituations: [],
+        topAnswerStyles: [],
+        profileSummary: '',
+        recentPositiveSignals: [],
+        safetyPenalty: 0,
+      },
     },
   });
   const repo = createReplyPublicationRepository({ db: db as never });
@@ -121,6 +138,22 @@ test('repository creates replies by deterministic delivery id and answers delive
   assert.equal(db.store.get('deliveries/delivery1')?.status, 'answered');
   assert.equal(db.store.get('worries/worry1')?.hasHumanReply, true);
   assert.equal(db.store.get('users/recipient')?.activeDeliveryCount, 1);
+  assert.equal(db.store.get('users/recipient')?.profileStatus, 'light');
+  const profile = db.store.get('users/recipient')?.experienceProfile as Record<string, Record<string, number>>;
+  assert.equal(profile.topicScores['취업'], 0.5);
+  assert.equal(profile.situationScores['장기취준'], 0.5);
+  assert.equal(profile.answerStyleScores['공감'], 0.5);
+  const jobs = [...db.store.entries()].filter(([path]) => path.startsWith('experienceProfileSummaryJobs/'));
+  assert.equal(jobs.length, 1);
+  assert.equal(jobs[0][1].uid, 'recipient');
+  assert.equal(jobs[0][1].reason, 'stale_7d');
+  const signals = [...db.store.entries()].filter(([path]) => path.startsWith('experienceSignals/'));
+  assert.equal(signals.length, 1);
+  assert.equal(signals[0][1].uid, 'recipient');
+  assert.equal(signals[0][1].source, 'reply_created');
+  assert.equal(signals[0][1].weight, 0.5);
+  assert.deepEqual(signals[0][1].topicTags, ['취업']);
+  assert.equal(db.store.get('users/recipient')?.experienceProfileDecayPending, true);
 });
 
 test('repository reads user counter before any transaction write', async () => {
@@ -342,4 +375,37 @@ test('rejected example reply creates moderation log only and no reply or job', a
   assert.equal(db.store.get('moderationLogs/mod1')?.targetType, 'example_reply');
   assert.equal(db.store.has('replies/delivery1'), false);
   assert.equal(db.store.has('exampleFeedbackJobs/delivery1'), false);
+  assert.equal([...db.store.keys()].some(path => path.startsWith('experienceProfileSummaryJobs/')), false);
+  assert.equal([...db.store.keys()].some(path => path.startsWith('experienceSignals/')), false);
+});
+
+test('rejected normal reply increments experience safety penalty', async () => {
+  const db = createFakeFirestore({
+    'deliveries/delivery1': {
+      worryId: 'worry1',
+      recipientUid: 'recipient',
+    },
+    'users/recipient': {
+      profileStatus: 'cold_start',
+      experienceProfile: {
+        safetyPenalty: 1,
+      },
+    },
+  });
+  const repo = createReplyPublicationRepository({ db: db as never });
+
+  await repo.commitRejectedReplyModeration({ moderationLog: { ...moderationLog, status: 'rejected' } });
+
+  assert.equal(db.store.get('users/recipient')?.profileStatus, 'light');
+  const profile = db.store.get('users/recipient')?.experienceProfile as Record<string, number>;
+  assert.equal(profile.safetyPenalty, 2);
+  const jobs = [...db.store.entries()].filter(([path]) => path.startsWith('experienceProfileSummaryJobs/'));
+  assert.equal(jobs.length, 1);
+  assert.equal(jobs[0][1].uid, 'recipient');
+  assert.equal(jobs[0][1].reason, 'moderation_event');
+  const signals = [...db.store.entries()].filter(([path]) => path.startsWith('experienceSignals/'));
+  assert.equal(signals.length, 1);
+  assert.equal(signals[0][1].source, 'moderation_fail');
+  assert.equal(signals[0][1].safetyPenaltyDelta, 1);
+  assert.equal(db.store.get('users/recipient')?.experienceProfileDecayPending, true);
 });

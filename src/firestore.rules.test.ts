@@ -204,6 +204,19 @@ describe('profile and token transition', () => {
     }));
   });
 
+  test('own profile create fails when experience matching fields are included', async () => {
+    await assertFails(dbFor('author').doc('users/author').set({
+      ...safeProfile('author'),
+      profileStatus: 'cold_start',
+    }));
+    await assertFails(dbFor('author').doc('users/author').set({
+      ...safeProfile('author'),
+      experienceProfile: {
+        topicScores: { '취업': 1 },
+      },
+    }));
+  });
+
   test('own profile create fails when deleted or example state is included', async () => {
     await assertFails(dbFor('author').doc('users/author').set({
       ...safeProfile('author'),
@@ -293,6 +306,8 @@ describe('profile and token transition', () => {
     await assertFails(dbFor('author').doc('users/author').update({ activeDeliveryCount: 1 }));
     await assertFails(dbFor('author').doc('users/author').update({ deleted: true }));
     await assertFails(dbFor('author').doc('users/author').update({ deletedAt: new Date() }));
+    await assertFails(dbFor('author').doc('users/author').update({ profileStatus: 'validated' }));
+    await assertFails(dbFor('author').doc('users/author').update({ experienceProfile: { topicScores: { '취업': 1 } } }));
     await assertFails(dbFor('author').doc('users/author').update({ onboardingCompletedAt: new Date() }));
     await assertFails(dbFor('author').doc('users/author').update({ exampleWorriesCreatedAt: new Date() }));
     await assertFails(dbFor('author').doc('users/author').update({ exampleWorrySeedIds: ['seed1'] }));
@@ -309,14 +324,26 @@ describe('profile and token transition', () => {
       ...safeProfile('author'),
       helpedCount: 1,
     }));
+    await assertFails(dbFor('author').doc('users/author').set({
+      ...safeProfile('author'),
+      profileStatus: 'cold_start',
+    }));
+    await assertFails(dbFor('author').doc('users/author').set({
+      ...safeProfile('author'),
+      experienceProfile: { topicScores: { '취업': 1 } },
+    }));
 
     await seed('users/author', {
       ...safeProfile('author'),
       activeDeliveryCount: 1,
       helpedCount: 2,
+      profileStatus: 'cold_start',
+      experienceProfile: { topicScores: { '취업': 1 } },
     });
     await assertFails(dbFor('author').doc('users/author').update({ activeDeliveryCount: 2 }));
     await assertFails(dbFor('author').doc('users/author').update({ helpedCount: 3 }));
+    await assertFails(dbFor('author').doc('users/author').update({ profileStatus: 'trusted' }));
+    await assertFails(dbFor('author').doc('users/author').update({ experienceProfile: { topicScores: { '취업': 2 } } }));
     await assertFails(dbFor('author').doc('users/author').set({ activeDeliveryCount: 2 }, { merge: true }));
     await assertFails(dbFor('author').doc('users/author').set({ helpedCount: 3 }, { merge: true }));
     await assertFails(dbFor('author').doc('users/author').set({ deleted: true }, { merge: true }));
@@ -1269,6 +1296,52 @@ describe('example operational collections', () => {
     }));
     await assertFails(dbFor('author').doc('exampleFeedbackJobs/reply1').update({ status: 'completed' }));
     await assertFails(dbFor('author').doc('exampleFeedbackJobs/reply1').delete());
+  });
+
+  test('clients cannot read create update or delete experienceProfileSummaryJobs', async () => {
+    await seedBaseUsers();
+    await seed('experienceProfileSummaryJobs/job1', {
+      uid: 'recipient',
+      status: 'queued',
+      reason: 'stale_7d',
+      attempts: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await assertFails(dbFor('author').doc('experienceProfileSummaryJobs/job1').get());
+    await assertFails(dbFor('author').doc('experienceProfileSummaryJobs/job2').set({
+      uid: 'recipient',
+      status: 'queued',
+      reason: 'stale_7d',
+      attempts: 0,
+    }));
+    await assertFails(dbFor('author').doc('experienceProfileSummaryJobs/job1').update({ status: 'completed' }));
+    await assertFails(dbFor('author').doc('experienceProfileSummaryJobs/job1').delete());
+  });
+
+  test('clients cannot read create update or delete experienceSignals', async () => {
+    await seedBaseUsers();
+    await seed('experienceSignals/signal1', {
+      uid: 'recipient',
+      source: 'like_received',
+      weight: 2,
+      topicTags: ['취업'],
+      situationTags: ['장기취준'],
+      answerStyleTags: ['공감'],
+      safetyPenaltyDelta: 0,
+      signalDate: new Date(),
+      createdAt: new Date(),
+    });
+
+    await assertFails(dbFor('author').doc('experienceSignals/signal1').get());
+    await assertFails(dbFor('author').doc('experienceSignals/signal2').set({
+      uid: 'recipient',
+      source: 'reply_created',
+      weight: 0.5,
+    }));
+    await assertFails(dbFor('author').doc('experienceSignals/signal1').update({ weight: 3 }));
+    await assertFails(dbFor('author').doc('experienceSignals/signal1').delete());
   });
 });
 }

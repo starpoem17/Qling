@@ -1,4 +1,5 @@
 import type { WorryCategory } from '@midnight-radio/domain';
+import type { ExperienceProfile, ExperienceProfileStatus } from '../matching/server/experienceProfile';
 import type { GenderValue, ProfileColor } from './profileValidation';
 
 export type NicknameReservationStatus =
@@ -32,6 +33,8 @@ export type CompleteOnboardingInput = {
 export type UserProfileWriteModel = CompleteOnboardingInput & {
   readonly uid: string;
   readonly normalizedNickname: string;
+  readonly profileStatus: ExperienceProfileStatus;
+  readonly experienceProfile: ExperienceProfile;
 };
 
 export type CompleteOnboardingResult =

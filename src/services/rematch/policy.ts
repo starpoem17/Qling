@@ -4,6 +4,12 @@ import {
   normalizeHumanCandidate,
   type HumanCandidate,
 } from '../matching/server/recipientPolicy';
+import { resolveExperienceConcernAnalysis } from '../matching/server/concernFallback';
+import {
+  selectExperienceRecipients,
+  type ExperienceDeliveryLlmMatchSnapshot,
+} from '../matching/server/experienceRecipientSelection';
+import type { MatchingJudgeProvider } from '../matching/server/llmJudge';
 import type {
   DeliverySelectionType,
   RematchScan,
@@ -179,6 +185,60 @@ export function selectRematchRecipients(params: {
   })));
 
   return recipients.slice(0, params.targetCount).map((recipient, index) => ({
+    ...recipient,
+    slotIndex: index,
+  }));
+}
+
+export async function selectExperienceRematchRecipients(params: {
+  scan: RematchScan;
+  targetCount: number;
+  matchingJudgeProvider?: MatchingJudgeProvider;
+}): Promise<SelectedRematchRecipient[]> {
+  if (params.targetCount <= 0) return [];
+
+  const excludedUids = buildExcludedUids(params.scan);
+  const recipients = await selectExperienceRecipients({
+    author: params.scan.author,
+    candidates: params.scan.candidates,
+    concern: resolveExperienceConcernAnalysis({
+      llmAnalysis: params.scan.llmAnalysis,
+      matchingCategories: params.scan.matchingCategories,
+    }),
+    targetCount: params.targetCount,
+    excludedUids,
+    matchingJudgeProvider: params.matchingJudgeProvider,
+  });
+
+  for (const recipient of recipients) {
+    excludedUids.add(recipient.uid);
+  }
+
+  const selected = recipients.map((recipient, index): SelectedRematchRecipient => ({
+    ...recipient,
+    randomTieBreaker: 0,
+    selectionType: 'matched',
+    slotIndex: index,
+    llmMatch: recipient.llmMatch as ExperienceDeliveryLlmMatchSnapshot,
+  }));
+
+  if (selected.length < params.targetCount) {
+    const fallback = rankMatchedHumanCandidates({
+      author: params.scan.author,
+      candidates: params.scan.candidates.filter(hasValidRematchProfile),
+      matchingCategories: params.scan.matchingCategories,
+      excludedUids,
+      random: () => 0,
+    }).slice(0, params.targetCount - selected.length);
+
+    selected.push(...fallback.map((recipient, index): SelectedRematchRecipient => ({
+      ...recipient,
+      selectionType: 'matched',
+      slotIndex: selected.length + index,
+    })));
+  }
+
+  return selected.slice(0, params.targetCount).map((recipient, index) => ({
     ...recipient,
     slotIndex: index,
   }));

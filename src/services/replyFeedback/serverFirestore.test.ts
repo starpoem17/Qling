@@ -37,7 +37,14 @@ function createDb(initial: Store = {}) {
 }
 
 const baseStore: Store = {
-  'worries/worry1': { authorUid: 'publisher' },
+  'worries/worry1': {
+    authorUid: 'publisher',
+    llmAnalysis: {
+      topicTags: ['취업'],
+      situationTags: ['장기취준'],
+      desiredResponse: ['공감'],
+    },
+  },
   'replies/reply1': {
     deliveryId: 'delivery1',
     worryId: 'worry1',
@@ -47,7 +54,21 @@ const baseStore: Store = {
     isAiGenerated: false,
     isExampleReply: false,
   },
-  'users/replier': { helpedCount: 0 },
+  'users/replier': {
+    helpedCount: 0,
+    profileStatus: 'cold_start',
+    experienceProfile: {
+      topicScores: {},
+      situationScores: {},
+      answerStyleScores: {},
+      topTopics: [],
+      topSituations: [],
+      topAnswerStyles: [],
+      profileSummary: '',
+      recentPositiveSignals: [],
+      safetyPenalty: 0,
+    },
+  },
 };
 
 async function save(store: Store, input: {
@@ -92,6 +113,22 @@ test('initial like without comment stores exact feedback document shape', async 
   assert.equal(store['feedbacks/reply1'].isForAiReply, false);
   assert.equal(store['feedbacks/reply1'].isForExampleReply, false);
   assert.ok('helpedCount' in store['users/replier']);
+  assert.equal(store['users/replier'].profileStatus, 'light');
+  const profile = store['users/replier'].experienceProfile as Record<string, Record<string, number>>;
+  assert.equal(profile.topicScores['취업'], 2);
+  assert.equal(profile.situationScores['장기취준'], 2);
+  assert.equal(profile.answerStyleScores['공감'], 2);
+  const jobs = Object.entries(store).filter(([path]) => path.startsWith('experienceProfileSummaryJobs/'));
+  assert.equal(jobs.length, 1);
+  assert.equal(jobs[0][1].uid, 'replier');
+  assert.equal(jobs[0][1].reason, 'stale_7d');
+  const signals = Object.entries(store).filter(([path]) => path.startsWith('experienceSignals/'));
+  assert.equal(signals.length, 1);
+  assert.equal(signals[0][1].uid, 'replier');
+  assert.equal(signals[0][1].source, 'like_received');
+  assert.equal(signals[0][1].weight, 2);
+  assert.deepEqual(signals[0][1].topicTags, ['취업']);
+  assert.equal(store['users/replier'].experienceProfileDecayPending, true);
   assert.equal(store['replies/reply1'].feedbackType, 'like');
   assert.ok(!('publisherVisible' in store['replies/reply1']));
   assert.ok('likedAt' in store['replies/reply1']);
@@ -132,7 +169,8 @@ test('initial dislike without comment stores admin-only state only in feedbacks'
   assert.equal(store['feedbacks/reply1'].comment, null);
   assert.equal(store['feedbacks/reply1'].commentVisibility, 'none');
   assert.equal(store['feedbacks/reply1'].commentModerationLogId, null);
-  assert.deepEqual(store['users/replier'], { helpedCount: 0 });
+  assert.equal(store['users/replier'].helpedCount, 0);
+  assert.equal(store['users/replier'].profileStatus, 'cold_start');
   assert.ok(!('feedbackType' in store['replies/reply1']));
   assert.ok(!('dislikedAt' in store['replies/reply1']));
   assert.ok(!('publisherHiddenBecauseDisliked' in store['replies/reply1']));

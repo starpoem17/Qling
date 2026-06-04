@@ -1,5 +1,7 @@
 import type { Firestore } from 'firebase-admin/firestore';
 import type { Messaging } from 'firebase-admin/messaging';
+import type { ConcernAnalysis } from '../matching/server/concernAnalysis';
+import type { MatchingTier } from '../matching/server/candidateRetrieval';
 import type { RankedHumanCandidate, HumanCandidate, AuthorProfile } from '../matching/server/recipientPolicy';
 
 export type RematchRound = 1 | 2;
@@ -38,6 +40,7 @@ export interface RematchScan {
   worryId: string;
   author: AuthorProfile;
   matchingCategories: string[];
+  llmAnalysis?: ConcernAnalysis;
   humanDeliveryCount: number;
   humanDeliveryLimit: number;
   initialDeliveryBatchId?: unknown;
@@ -57,6 +60,17 @@ export interface RematchScan {
 export interface SelectedRematchRecipient extends RankedHumanCandidate {
   selectionType: DeliverySelectionType;
   slotIndex: number;
+  llmMatch?: RematchDeliveryLlmMatchWriteModel;
+}
+
+export interface RematchDeliveryLlmMatchWriteModel {
+  tier: MatchingTier;
+  rank: number;
+  reason: string;
+  retrievalScore: number;
+  topicOverlap: number;
+  situationOverlap: number;
+  answerStyleOverlap: number;
 }
 
 export interface RematchBatchWriteModel {
@@ -93,6 +107,7 @@ export interface RematchDeliveryWriteModel {
   recipientGenderSnapshot: string;
   recipientHelpedCountSnapshot: number;
   authorGenderSnapshot: string;
+  llmMatch?: RematchDeliveryLlmMatchWriteModel;
   isAiRecipient: false;
   createdByRematchRunId: string;
   rematchEligibleAfter: unknown | null;

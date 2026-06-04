@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createInitialExperienceProfile } from '../matching/server/experienceProfile';
 import { createUserProfileFirestoreRepository } from './firestoreRepository';
 
 type StoredDoc = Record<string, unknown>;
@@ -70,6 +71,8 @@ const profile = {
   age: 20,
   interests: ['직장'] as const,
   profileColor: '#FF8B3D' as const,
+  profileStatus: 'cold_start' as const,
+  experienceProfile: createInitialExperienceProfile(['직장']),
 };
 
 test('real repository reserves nickname under nicknameReservations/{normalizedNickname}', async () => {
@@ -263,6 +266,8 @@ test('real repository completeOnboarding writes server-owned profile fields afte
   assert.equal(written?.gender, 'female');
   assert.deepEqual(written?.interests, ['직장']);
   assert.equal(written?.profileColor, '#FF8B3D');
+  assert.equal(written?.profileStatus, 'cold_start');
+  assert.deepEqual(written?.experienceProfile, createInitialExperienceProfile(['직장']));
   assert.ok(Object.hasOwn(written ?? {}, 'createdAt'));
   assert.ok(Object.hasOwn(written ?? {}, 'updatedAt'));
   assert.ok(Object.hasOwn(written ?? {}, 'lastActive'));

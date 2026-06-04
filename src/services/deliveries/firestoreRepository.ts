@@ -9,9 +9,11 @@ import type {
   DeliveryPassRepository,
   PassReplacementAttemptWriteModel,
   PassReplacementDeliveryWriteModel,
+  PassReplacementSelectedRecipient,
 } from './types';
-import type { HumanCandidate, RankedHumanCandidate } from '../matching/server/recipientPolicy';
+import type { HumanCandidate } from '../matching/server/recipientPolicy';
 import { isEligibleHumanCandidate } from '../matching/server/recipientPolicy';
+import { normalizeExperienceProfileStatus } from '../matching/server/experienceProfile';
 
 function withoutId<T extends { id: string }>(model: T): Omit<T, 'id'> {
   const { id: _id, ...rest } = model;
@@ -34,6 +36,10 @@ function userDocToCandidate(uid: string, data: FirebaseFirestore.DocumentData | 
     gender: typeof data?.gender === 'string' ? data.gender : undefined,
     interests: Array.isArray(data?.interests) ? normalizeWorryCategories(data.interests) : undefined,
     helpedCount: typeof data?.helpedCount === 'number' ? data.helpedCount : undefined,
+    profileStatus: normalizeExperienceProfileStatus(data?.profileStatus),
+    experienceProfile: data?.experienceProfile && typeof data.experienceProfile === 'object'
+      ? data.experienceProfile
+      : undefined,
     activeDeliveryCount: typeof data?.activeDeliveryCount === 'number' ? data.activeDeliveryCount : undefined,
     deleted: data?.deleted,
     status: typeof data?.status === 'string' ? data.status : undefined,
@@ -76,10 +82,10 @@ function replacementDelivery(params: {
   worryId: string;
   authorUid: string;
   authorGender: string;
-  recipient: RankedHumanCandidate;
+  recipient: PassReplacementSelectedRecipient;
   timestamp: unknown;
 }): PassReplacementDeliveryWriteModel {
-  return {
+  const delivery: PassReplacementDeliveryWriteModel = {
     id: `${params.worryId}_${params.recipient.uid}`,
     worryId: params.worryId,
     recipientUid: params.recipient.uid,
@@ -104,6 +110,12 @@ function replacementDelivery(params: {
     createdAt: params.timestamp,
     updatedAt: params.timestamp,
   };
+
+  if (params.recipient.llmMatch) {
+    delivery.llmMatch = params.recipient.llmMatch;
+  }
+
+  return delivery;
 }
 
 function attemptForCreated(params: {
@@ -260,6 +272,7 @@ export function createDeliveryPassRepository(params: {
           gender: typeof authorDoc?.data()?.gender === 'string' ? authorDoc.data()?.gender : '',
         },
         matchingCategories: stringArray(worryDoc?.data()?.matchingCategories),
+        llmAnalysis: worryDoc?.data()?.llmAnalysis,
       };
     },
 

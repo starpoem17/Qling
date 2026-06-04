@@ -72,6 +72,8 @@ test('covers every Phase 2 canonical route/state in the service policy', () => {
     'received_answer_detail',
     'answer_check',
     'chat',
+    'chat_room',
+    'report_user',
     'ranking',
     'my_page',
     'edit_interests',

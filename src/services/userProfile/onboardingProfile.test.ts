@@ -47,6 +47,21 @@ test('valid onboarding produces profile persistence contract', async () => {
     age: 14,
     interests: ['직장', '취업'],
     profileColor: '#B49BE8',
+    profileStatus: 'cold_start',
+    experienceProfile: {
+      topicScores: {
+        '직장': 1,
+        '취업': 1,
+      },
+      situationScores: {},
+      answerStyleScores: {},
+      topTopics: ['직장', '취업'],
+      topSituations: [],
+      topAnswerStyles: [],
+      profileSummary: '',
+      recentPositiveSignals: [],
+      safetyPenalty: 0,
+    },
   });
 });
 

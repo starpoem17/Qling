@@ -14,6 +14,8 @@
     "lint": "tsc --noEmit",
     "test": "tsx --test \"src/**/*.test.ts\"",
     "test:rules": "firebase emulators:exec --project qling-hyu --only firestore \"tsx --test \\\"src/**/*.rules.test.ts\\\"\"",
+    "internal:decay": "tsx scripts/runInternalJob.ts /api/internal/recalculate-experience-profiles '{\"limit\":50}'",
+    "internal:profile-summary": "tsx scripts/runInternalJob.ts /api/internal/experience-profile-summaries/run '{\"limit\":20}'",
     "start": "tsx server.ts"
   },
   "dependencies": {

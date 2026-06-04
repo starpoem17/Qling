@@ -135,6 +135,73 @@ test('valid Round 0 creates Round 1 and existing Round 1 blocks another Round 1'
   assert.equal(repo.commits, 0);
 });
 
+test('rematch uses experience matching judge and forwards llmMatch snapshots', async () => {
+  repo = repository([scan({
+    matchingCategories: ['취업'],
+    llmAnalysis: {
+      topicTags: ['취업', '진로'],
+      emotionTags: ['불안'],
+      situationTags: ['장기취준'],
+      desiredResponse: ['공감'],
+      suggestedNewTags: [],
+      riskLevel: 'low',
+      riskReason: '',
+      matchingBrief: '취업 준비가 길어지며 불안과 좌절을 함께 느끼는 고민입니다.',
+    },
+    candidates: ['a', 'b', 'c'].map(uid => ({
+      uid,
+      gender: 'female',
+      interests: ['취업'],
+      helpedCount: uid === 'b' ? 2 : 1,
+      activeDeliveryCount: 0,
+      profileStatus: 'validated',
+      experienceProfile: {
+        topicScores: { '취업': 1, '진로': 1 },
+        situationScores: { '장기취준': 1 },
+        answerStyleScores: { '공감': 1 },
+        topTopics: ['취업', '진로'],
+        topSituations: ['장기취준'],
+        topAnswerStyles: ['공감'],
+        profileSummary: '',
+        recentPositiveSignals: [],
+        safetyPenalty: 0,
+      },
+    })),
+  })], {
+    onCommit: async params => {
+      assert.deepEqual(params.recipients.map(recipient => recipient.uid), ['b', 'a', 'c']);
+      assert.deepEqual(params.recipients.map(recipient => recipient.llmMatch?.rank), [1, 2, 3]);
+      assert.equal(params.recipients[0].llmMatch?.reason, '가장 잘 맞는 후보입니다.');
+      return {
+        status: 'created',
+        worryId: params.scan.worryId,
+        batchId: 'worry1_rematch_1',
+        deliveryIds: params.recipients.map(recipient => `worry1_${recipient.uid}`),
+        recipientUids: params.recipients.map(recipient => recipient.uid),
+        createdCount: params.recipients.length,
+      };
+    },
+  });
+
+  const result = await rematchDueDeliveries({
+    db: {} as never,
+    messaging: null,
+    now,
+    repository: repo,
+    matchingJudgeProvider: async () => ({
+      rankedCandidates: [
+        { candidateId: 'b', reason: '가장 잘 맞는 후보입니다. 추가 문장은 제거됩니다.' },
+        { candidateId: 'a', reason: '두 번째 후보입니다.' },
+        { candidateId: 'c', reason: '세 번째 후보입니다.' },
+      ],
+    }),
+    pushAdapter: async () => undefined,
+  });
+
+  assert.equal(result.status, 'completed');
+  assert.equal(repo.commits, 1);
+});
+
 test('zero-initial Round 0 batch enters rematch and targets later human deliveries', async () => {
   repo = repository([scan({
     humanDeliveryCount: 0,

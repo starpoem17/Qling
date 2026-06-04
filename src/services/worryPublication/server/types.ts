@@ -1,3 +1,9 @@
+import type { ConcernAnalysis } from '../../matching/server/concernAnalysis';
+import type { MatchingTier } from '../../matching/server/candidateRetrieval';
+import type { ExperienceProfile, ExperienceProfileStatus } from '../../matching/server/experienceProfile';
+import type { MatchingJudgeProvider } from '../../matching/server/llmJudge';
+import type { HighRiskBlockResult } from './riskPolicy';
+
 export type ServerTimestampValue = unknown;
 
 export interface Phase1AuthorProfile {
@@ -11,6 +17,8 @@ export interface Phase1HumanCandidate {
   gender?: string;
   interests?: string[];
   helpedCount?: number;
+  profileStatus?: ExperienceProfileStatus;
+  experienceProfile?: Partial<ExperienceProfile>;
   activeDeliveryCount?: number;
   deleted?: boolean;
   status?: string;
@@ -22,6 +30,16 @@ export interface Phase1HumanCandidate {
 
 export type DeliverySelectionType = 'matched' | 'random';
 
+export interface DeliveryLlmMatchWriteModel {
+  tier: MatchingTier;
+  rank: number;
+  reason: string;
+  retrievalScore: number;
+  topicOverlap: number;
+  situationOverlap: number;
+  answerStyleOverlap: number;
+}
+
 export interface SelectedPhase1Recipient {
   uid: string;
   gender: string;
@@ -31,6 +49,7 @@ export interface SelectedPhase1Recipient {
   selectionType: DeliverySelectionType;
   matchOverlapCount: number;
   matchCategoriesSnapshot: string[];
+  llmMatch?: DeliveryLlmMatchWriteModel;
   slotIndex: number;
 }
 
@@ -73,6 +92,7 @@ export interface WorryWriteModel {
   validCategories: string[];
   invalidCategories: string[];
   matchingCategories: string[];
+  llmAnalysis?: ConcernAnalysis;
   moderationLogId: string;
   initialDeliveryBatchId: string;
   initialDeliveryTargetCount: 5;
@@ -127,6 +147,7 @@ export interface DeliveryWriteModel {
   recipientGenderSnapshot: string;
   recipientHelpedCountSnapshot: number;
   authorGenderSnapshot: string;
+  llmMatch?: DeliveryLlmMatchWriteModel;
   isAiRecipient: false;
   createdAt: ServerTimestampValue;
   updatedAt: ServerTimestampValue;
@@ -170,10 +191,13 @@ export interface InitialWorryPublicationRepository {
 
 export type WorryModerationProvider = (content: string, strictRetry?: boolean) => Promise<unknown>;
 export type WorrySummaryProvider = (content: string, strictRetry?: boolean) => Promise<unknown>;
+export type WorryConcernAnalyzerProvider = (content: string, strictRetry?: boolean) => Promise<unknown>;
+export type WorryMatchingJudgeProvider = MatchingJudgeProvider;
 
 export type ServerPublishWorryResult =
   | { status: 'published'; worryId: string; deliveryIds: string[]; moderationLogId: string }
   | { status: 'rejected'; reasonCode: string; userMessage: string; helpMessage?: string; moderationLogId: string; targetId: string }
+  | (HighRiskBlockResult & { moderationLogId: string; targetId: string })
   | { status: 'validation_error'; code: 'empty' | 'too_long' | 'invalid_content_type'; message: string }
   | { status: 'provider_error'; code: 'provider_error' | 'provider_invalid'; message: string; details?: unknown }
   | { status: 'server_error'; code: 'transaction_aborted' | 'firebase_unavailable'; message: string; details?: unknown };

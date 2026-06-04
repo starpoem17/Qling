@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
+import { createInitialExperienceProfile } from '../../services/matching/server/experienceProfile';
 import {
   canSubmitOnboarding,
   mapReservationResultToDuplicateState,
@@ -17,6 +18,18 @@ const validDraft: OnboardingDraft = {
   age: '20',
   interests: ['직장'],
   profileColor: '#FF8B3D',
+};
+
+const completedProfile = {
+  uid: 'user-1',
+  nickname: '라미',
+  normalizedNickname: '라미',
+  gender: 'female' as const,
+  age: 20,
+  interests: ['직장'] as const,
+  profileColor: '#FF8B3D' as const,
+  profileStatus: 'cold_start' as const,
+  experienceProfile: createInitialExperienceProfile(['직장']),
 };
 
 function canSubmit(draft: OnboardingDraft, duplicateState: OnboardingDuplicateUiState) {
@@ -64,7 +77,7 @@ test('onboarding side effects complete profile then examples then route completi
     deps: {
       async completeOnboarding() {
         calls.push('completeOnboarding');
-        return { status: 'completed', profile: { uid: 'user-1', nickname: '라미', normalizedNickname: '라미', gender: 'female', age: 20, interests: ['직장'], profileColor: '#FF8B3D' } };
+        return { status: 'completed', profile: completedProfile };
       },
       async createExamples() {
         calls.push('createExamples');
@@ -118,7 +131,7 @@ test('example creation failure blocks route transition under current implementat
     deps: {
       async completeOnboarding() {
         calls.push('completeOnboarding');
-        return { status: 'completed', profile: { uid: 'user-1', nickname: '라미', normalizedNickname: '라미', gender: 'female', age: 20, interests: ['직장'], profileColor: '#FF8B3D' } };
+        return { status: 'completed', profile: completedProfile };
       },
       async createExamples() {
         calls.push('createExamples');

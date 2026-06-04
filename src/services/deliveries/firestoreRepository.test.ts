@@ -202,6 +202,15 @@ test('active own delivery pass sets passed, decrements passer, creates attempt a
       activeDeliveryCount: 0,
       matchOverlapCount: 1,
       randomTieBreaker: 0,
+      llmMatch: {
+        tier: 'A',
+        rank: 1,
+        reason: '경험 신호가 잘 맞는 후보입니다.',
+        retrievalScore: 8,
+        topicOverlap: 2,
+        situationOverlap: 1,
+        answerStyleOverlap: 1,
+      },
     },
     existingHumanDeliveryCount: scan.existingHumanDeliveryCount,
   });
@@ -217,6 +226,15 @@ test('active own delivery pass sets passed, decrements passer, creates attempt a
   assert.equal(db.store.get('deliveries/worry1_replacement')?.status, 'active');
   assert.equal(db.store.get('deliveries/worry1_replacement')?.batchId, null);
   assert.equal(db.store.get('deliveries/worry1_replacement')?.batchRound, null);
+  assert.deepEqual(db.store.get('deliveries/worry1_replacement')?.llmMatch, {
+    tier: 'A',
+    rank: 1,
+    reason: '경험 신호가 잘 맞는 후보입니다.',
+    retrievalScore: 8,
+    topicOverlap: 2,
+    situationOverlap: 1,
+    answerStyleOverlap: 1,
+  });
   assert.equal(db.store.get('deliveries/worry1_replacement')?.replacementForDeliveryId, 'delivery1');
   assert.equal(db.store.get('worries/worry1')?.humanDeliveryCount, 2);
   assert.equal(db.store.get('worries/worry1')?.passedAt, undefined);

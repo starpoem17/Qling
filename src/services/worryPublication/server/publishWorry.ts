@@ -10,7 +10,9 @@ import {
   createInitialWorryPublicationRepository,
   serverTimestamp,
 } from './firestoreRepository';
-import { selectInitialWorryRecipients } from './recipientSelection';
+import { selectInitialExperienceRecipients } from './recipientSelection';
+import { analyzeConcernForPublication } from './concernAnalysis';
+import { buildHighRiskBlockResult, shouldBlockHighRiskConcern } from './riskPolicy';
 import { createWorrySummary } from './summary';
 import { validateWorryContent } from './validation';
 import { sendNewWorryPushesAfterCommit } from './pushLogs';
@@ -23,6 +25,8 @@ import type {
   SelectedPhase1Recipient,
   ServerPublishWorryResult,
   WorryModerationProvider,
+  WorryConcernAnalyzerProvider,
+  WorryMatchingJudgeProvider,
   WorrySummaryProvider,
   WorryWriteModel,
 } from './types';
@@ -82,6 +86,7 @@ function buildWorry(params: {
   validCategories: string[];
   invalidCategories: string[];
   matchingCategories: string[];
+  llmAnalysis: WorryWriteModel['llmAnalysis'];
   humanDeliveryCount: number;
 }): WorryWriteModel {
   const timestamp = serverTimestamp();
@@ -98,6 +103,7 @@ function buildWorry(params: {
     validCategories: params.validCategories,
     invalidCategories: params.invalidCategories,
     matchingCategories: params.matchingCategories,
+    llmAnalysis: params.llmAnalysis,
     moderationLogId: params.moderationLogId,
     initialDeliveryBatchId: params.batchId,
     initialDeliveryTargetCount: 5,
@@ -139,7 +145,7 @@ function buildDeliveries(params: {
 }): DeliveryWriteModel[] {
   return params.recipients.map(recipient => {
     const timestamp = serverTimestamp();
-    return {
+    const delivery: DeliveryWriteModel = {
       id: `${params.worryId}_${recipient.uid}`,
       worryId: params.worryId,
       recipientUid: recipient.uid,
@@ -161,6 +167,12 @@ function buildDeliveries(params: {
       updatedAt: timestamp,
       answerableUntil: null,
     };
+
+    if (recipient.llmMatch) {
+      delivery.llmMatch = recipient.llmMatch;
+    }
+
+    return delivery;
   });
 }
 
@@ -171,6 +183,8 @@ export async function publishWorryOnServer(params: {
   content: unknown;
   moderationProvider: WorryModerationProvider;
   summaryProvider?: WorrySummaryProvider;
+  concernAnalyzerProvider?: WorryConcernAnalyzerProvider;
+  matchingJudgeProvider?: WorryMatchingJudgeProvider;
   now?: () => Date;
   random?: () => number;
   repository?: InitialWorryPublicationRepository;
@@ -241,16 +255,50 @@ export async function publishWorryOnServer(params: {
     failureLogId: ids.summaryFailureLogId,
     provider: params.summaryProvider,
   });
+  const llmAnalysis = await analyzeConcernForPublication({
+    content: validation.content,
+    provider: params.concernAnalyzerProvider,
+  });
+
+  if (shouldBlockHighRiskConcern(llmAnalysis)) {
+    const riskBlock = buildHighRiskBlockResult();
+    const moderationLog = buildModerationLog({
+      id: ids.moderationLogId,
+      worryId: ids.worryId,
+      authorUid: params.author.uid,
+      content: validation.content,
+      status: 'rejected',
+      reasonCode: riskBlock.code,
+      userMessage: riskBlock.message,
+      helpMessage: riskBlock.helpMessage,
+      rawProviderResponse: {
+        moderation: moderation.rawProviderResponse,
+        concernAnalysis: llmAnalysis,
+      },
+      rawCategories: moderation.rawCategories,
+      validCategories: moderation.validCategories,
+      invalidCategories: moderation.invalidCategories,
+      matchingCategories: moderation.matchingCategories,
+    });
+    const committed = await repository.commitRejectedWorryModeration({ moderationLog });
+    return {
+      ...riskBlock,
+      moderationLogId: committed.moderationLogId,
+      targetId: committed.targetId,
+    };
+  }
 
   const candidates = await repository.fetchRecipientCandidates({
     authorUid: params.author.uid,
     minimumCandidateCount: 5,
   });
-  const selection = selectInitialWorryRecipients({
+  const selection = await selectInitialExperienceRecipients({
     author: params.author,
     candidates,
+    concern: llmAnalysis,
     matchingCategories: moderation.matchingCategories,
-    random: params.random ?? Math.random,
+    matchingJudgeProvider: params.matchingJudgeProvider,
+    random: params.random,
   });
 
   const deliveries = buildDeliveries({
@@ -290,6 +338,7 @@ export async function publishWorryOnServer(params: {
     validCategories: moderation.validCategories,
     invalidCategories: moderation.invalidCategories,
     matchingCategories: moderation.matchingCategories,
+    llmAnalysis,
     humanDeliveryCount: deliveries.length,
   });
   const batch = buildBatch({

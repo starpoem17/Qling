@@ -12,7 +12,7 @@ import fs from "fs";
 import {
   processSimpleModerationResponse,
 } from "./src/server/moderationResponses";
-import { fetchFromOpenAI, moderateAndInferWorryCategories, summarizeWorryContent } from "./src/server/moderationProvider";
+import { analyzeConcernForExperienceMatching, fetchFromOpenAI, judgeExperienceMatchingCandidates, moderateAndInferWorryCategories, summarizeWorryContent } from "./src/server/moderationProvider";
 import { registerWorryRoutes } from "./src/server/worryRoutes";
 import { registerReplyRoutes } from "./src/server/replyRoutes";
 import { registerReadStateRoutes } from "./src/server/readStateRoutes";
@@ -21,6 +21,8 @@ import { registerFeedbackRoutes } from "./src/server/feedbackRoutes";
 import { registerRematchRoutes } from "./src/server/rematchRoutes";
 import { registerAiFallbackRoutes } from "./src/server/aiFallbackRoutes";
 import { registerExampleWorryRoutes } from "./src/server/exampleWorryRoutes";
+import { registerExperienceProfileSummaryRoutes } from "./src/server/experienceProfileSummaryRoutes";
+import { registerExperienceDecayRoutes } from "./src/server/experienceDecayRoutes";
 import { registerUserAccountRoutes } from "./src/server/userAccountRoutes";
 import { registerUserProfileRoutes } from "./src/server/userProfileRoutes";
 import { registerAdminHidingRoutes } from "./src/server/adminHidingRoutes";
@@ -79,6 +81,8 @@ async function startServer() {
       auth: getAuth(),
       moderationProvider: moderateAndInferWorryCategories,
       summaryProvider: summarizeWorryContent,
+      concernAnalyzerProvider: analyzeConcernForExperienceMatching,
+      matchingJudgeProvider: judgeExperienceMatchingCandidates,
     });
     registerReplyRoutes(app, {
       db,
@@ -105,6 +109,7 @@ async function startServer() {
       db,
       messaging,
       auth: getAuth(),
+      matchingJudgeProvider: judgeExperienceMatchingCandidates,
     });
     registerFeedbackRoutes(app, {
       db,
@@ -122,6 +127,7 @@ async function startServer() {
     registerRematchRoutes(app, {
       db,
       messaging,
+      matchingJudgeProvider: judgeExperienceMatchingCandidates,
     });
     registerAiFallbackRoutes(app, {
       db,
@@ -130,6 +136,12 @@ async function startServer() {
     registerExampleWorryRoutes(app, {
       db,
       auth: getAuth(),
+    });
+    registerExperienceProfileSummaryRoutes(app, {
+      db,
+    });
+    registerExperienceDecayRoutes(app, {
+      db,
     });
     registerUserAccountRoutes(app, {
       db,
@@ -159,11 +171,15 @@ async function startServer() {
    - If good: { "status": "approved" }`, content)
       ).then(result => {
         const body = result.body;
-        if (!('status' in body) || body.status === 'invalid') {
-          return { status: 'rejected' as const, reason: '부적절한 표현이 감지되었습니다.' };
+        if (result.statusCode !== 200 || !('status' in body) || body.status !== 'approved') {
+          return {
+            status: 'rejected' as const,
+            reason: 'status' in body && body.status === 'rejected'
+              ? body.reason
+              : '부적절한 표현이 감지되었습니다.',
+          };
         }
-        if (body.status === 'approved') return { status: 'approved' as const };
-        return { status: 'rejected' as const, reason: body.reason };
+        return { status: 'approved' as const };
       }),
     });
     registerReportRoutes(app, { db, auth: getAuth() });
@@ -239,6 +255,12 @@ async function startServer() {
     registerExampleWorryRoutes(app, {
       db: null,
       auth: {} as never,
+    });
+    registerExperienceProfileSummaryRoutes(app, {
+      db: null,
+    });
+    registerExperienceDecayRoutes(app, {
+      db: null,
     });
     registerUserAccountRoutes(app, {
       db: null,

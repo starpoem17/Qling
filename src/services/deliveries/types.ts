@@ -1,4 +1,6 @@
+import type { MatchingTier } from '../matching/server/candidateRetrieval';
 import type { HumanCandidate, RankedHumanCandidate } from '../matching/server/recipientPolicy';
+import type { MatchingJudgeProvider } from '../matching/server/llmJudge';
 
 export type ServerTimestampValue = unknown;
 export type ReplacementStatus = 'created' | 'shortfall' | 'not_applicable';
@@ -59,6 +61,15 @@ export interface PassReplacementDeliveryWriteModel {
   recipientGenderSnapshot: string;
   recipientHelpedCountSnapshot: number;
   authorGenderSnapshot: string;
+  llmMatch?: {
+    tier: MatchingTier;
+    rank: number;
+    reason: string;
+    retrievalScore: number;
+    topicOverlap: number;
+    situationOverlap: number;
+    answerStyleOverlap: number;
+  };
   isAiRecipient: false;
   createdByPassDeliveryId: string;
   replacementForDeliveryId: string;
@@ -74,6 +85,19 @@ export interface PassReplacementScan {
   replierUids: Set<string>;
   author: { uid: string; gender: string };
   matchingCategories: string[];
+  llmAnalysis?: unknown;
+}
+
+export interface PassReplacementSelectedRecipient extends RankedHumanCandidate {
+  llmMatch?: {
+    tier: MatchingTier;
+    rank: number;
+    reason: string;
+    retrievalScore: number;
+    topicOverlap: number;
+    situationOverlap: number;
+    answerStyleOverlap: number;
+  };
 }
 
 export interface DeliveryPassRepository {
@@ -81,7 +105,7 @@ export interface DeliveryPassRepository {
   commitPassDelivery(params: {
     uid: string;
     deliveryId: string;
-    selectedRecipient: RankedHumanCandidate | null;
+    selectedRecipient: PassReplacementSelectedRecipient | null;
     existingHumanDeliveryCount: number;
   }): Promise<DeliveryPassInternalResult | { status: 'candidate_unavailable' }>;
   markReplacementPushResult(params: {
@@ -91,3 +115,5 @@ export interface DeliveryPassRepository {
     warnings: string[];
   }): Promise<void>;
 }
+
+export type PassMatchingJudgeProvider = MatchingJudgeProvider;

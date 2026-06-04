@@ -148,6 +148,18 @@ test('onboarding profile route persists required age, gender, interests, and nic
         age: 99,
         interests: ['직장'],
         profileColor: '#4FB8C9',
+        profileStatus: 'cold_start',
+        experienceProfile: {
+          topicScores: { '직장': 1 },
+          situationScores: {},
+          answerStyleScores: {},
+          topTopics: ['직장'],
+          topSituations: [],
+          topAnswerStyles: [],
+          profileSummary: '',
+          recentPositiveSignals: [],
+          safetyPenalty: 0,
+        },
       });
       return { status: 'completed', profile: params };
     },

@@ -124,6 +124,70 @@ test('publish route uses verified author profile and ignores body identity/profi
   assert.equal(res.statusCode, 200);
 });
 
+test('publish route forwards concern analyzer provider to publication service', async () => {
+  const handlers: Array<(req: unknown, res: unknown, next: () => void) => unknown> = [];
+  const app = {
+    post(path: string, ...routeHandlers: typeof handlers) {
+      assert.equal(path, '/api/worries/publish');
+      handlers.push(...routeHandlers);
+    },
+  };
+  const concernAnalyzerProvider = async () => ({
+    topicTags: ['취업'],
+    emotionTags: ['불안'],
+    situationTags: ['장기취준'],
+    desiredResponse: ['공감'],
+    suggestedNewTags: [],
+    riskLevel: 'low',
+    riskReason: '',
+    matchingBrief: '취업 고민이 길어지며 공감 답변이 필요한 상황입니다.',
+  });
+  const matchingJudgeProvider = async () => ({ rankedCandidates: [] });
+  let forwardedConcernProvider: unknown = null;
+  let forwardedJudgeProvider: unknown = null;
+
+  registerWorryRoutes(app as never, {
+    auth: {
+      verifyIdToken: async () => ({ uid: 'verified-user' }),
+    } as never,
+    db: {
+      collection: () => ({
+        doc: () => ({
+          get: async () => ({
+            data: () => ({
+              gender: 'female',
+              interests: ['취업'],
+            }),
+          }),
+        }),
+      }),
+    } as never,
+    messaging: null,
+    moderationProvider: async () => ({ status: 'approved', categories: ['취업'] }),
+    concernAnalyzerProvider,
+    matchingJudgeProvider,
+    publishWorry: async params => {
+      forwardedConcernProvider = params.concernAnalyzerProvider;
+      forwardedJudgeProvider = params.matchingJudgeProvider;
+      return {
+        status: 'published',
+        worryId: 'worry1',
+        deliveryIds: ['delivery1'],
+        moderationLogId: 'mod1',
+      };
+    },
+  });
+
+  const req = { headers: { authorization: 'Bearer token' }, body: { content: 'content' } };
+  const res = createRes();
+  await handlers[0](req as never, res as never, () => undefined);
+  await handlers[1](req as never, res as never, () => undefined);
+
+  assert.equal(forwardedConcernProvider, concernAnalyzerProvider);
+  assert.equal(forwardedJudgeProvider, matchingJudgeProvider);
+  assert.equal(res.statusCode, 200);
+});
+
 test('publish route blocks deleted user before service call and allows missing deleted field', async () => {
   const capture = (userData: Record<string, unknown>) => {
     const handlers: Array<(req: unknown, res: unknown, next: () => void) => unknown> = [];
@@ -195,6 +259,7 @@ test('publish route maps auth validation moderation provider and server errors',
   const cases = [
     [{ status: 'validation_error', code: 'empty', message: 'empty' }, 400],
     [{ status: 'rejected', reasonCode: 'spam_promotion', userMessage: 'blocked', targetId: 'mod1' }, 200],
+    [{ status: 'risk_blocked', code: 'high_risk', message: 'safe first', helpMessage: 'call 109', moderationLogId: 'mod1', targetId: 'worry1' }, 200],
     [{ status: 'provider_error', code: 'provider_error', message: 'down', details: 'x' }, 502],
     [{ status: 'server_error', code: 'eligible_recipient_shortfall', message: 'not enough users' }, 500],
   ] as const;
@@ -207,6 +272,7 @@ test('publish route maps auth validation moderation provider and server errors',
     await route.handlers[1](req as never, res as never, () => undefined);
     assert.equal(res.statusCode, statusCode);
     assert.equal(Boolean((res.body as { error?: unknown }).error), statusCode >= 400);
+    assert.equal('targetId' in (res.body as Record<string, unknown>), false);
   }
 
   const thrown = capturePublishRoute({ throws: true });

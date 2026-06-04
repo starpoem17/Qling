@@ -135,6 +135,7 @@ test('discovers every presentational screen file under src/screens', () => {
     listPresentationalScreenFiles().map(relativeProjectPath),
     [
       'src/screens/answerCheck/AnswerCheckScreen.tsx',
+      'src/screens/chat/ChatRoomScreen.tsx',
       'src/screens/chat/ChatScreen.tsx',
       'src/screens/loadingShell/LoadingShellScreen.tsx',
       'src/screens/loadingShell/LoginScreen.tsx',
@@ -145,6 +146,7 @@ test('discovers every presentational screen file under src/screens', () => {
       'src/screens/ranking/RankingScreen.tsx',
       'src/screens/receivedWorries/ReceivedWorriesScreen.tsx',
       'src/screens/replyDetail/ReplyDetailScreen.tsx',
+      'src/screens/report/ReportUserScreen.tsx',
       'src/screens/writeForm/WriteFormScreen.tsx',
       'src/screens/writeForm/WriteReplySuccessScreen.tsx',
       'src/screens/writeForm/WriteWorryScreen.tsx',

@@ -5,6 +5,8 @@ import type { Messaging } from 'firebase-admin/messaging';
 import { createRequireFirebaseAuth, type AuthenticatedRequest } from './auth';
 import {
   publishWorryOnServer,
+  type WorryConcernAnalyzerProvider,
+  type WorryMatchingJudgeProvider,
   type WorryModerationProvider,
   type WorrySummaryProvider,
 } from '../services/worryPublication/server';
@@ -16,6 +18,12 @@ function sendPublicationResult(res: express.Response, result: Awaited<ReturnType
   }
 
   if (result.status === 'rejected') {
+    const { targetId: _targetId, ...body } = result;
+    res.status(200).json(body);
+    return;
+  }
+
+  if (result.status === 'risk_blocked') {
     const { targetId: _targetId, ...body } = result;
     res.status(200).json(body);
     return;
@@ -40,6 +48,8 @@ export function registerWorryRoutes(app: express.Express, deps: {
   auth: Auth;
   moderationProvider: WorryModerationProvider;
   summaryProvider?: WorrySummaryProvider;
+  concernAnalyzerProvider?: WorryConcernAnalyzerProvider;
+  matchingJudgeProvider?: WorryMatchingJudgeProvider;
   publishWorry?: typeof publishWorryOnServer;
 }): void {
   if (!deps.db) {
@@ -73,6 +83,8 @@ export function registerWorryRoutes(app: express.Express, deps: {
           content: req.body?.content,
           moderationProvider: deps.moderationProvider,
           summaryProvider: deps.summaryProvider,
+          concernAnalyzerProvider: deps.concernAnalyzerProvider,
+          matchingJudgeProvider: deps.matchingJudgeProvider,
         });
 
         sendPublicationResult(res, result);

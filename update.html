@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qling 매칭 알고리즘 구현 업데이트</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 0 24px 48px;
+      background: #ffffff;
+    }
+    h1, h2, h3 {
+      line-height: 1.25;
+      color: #111827;
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    h2 {
+      margin-top: 36px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 21px;
+    }
+    h3 {
+      margin-top: 24px;
+      font-size: 17px;
+    }
+    .meta {
+      color: #6b7280;
+      margin-bottom: 28px;
+    }
+    .status {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #ecfdf5;
+      color: #047857;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    ul {
+      padding-left: 22px;
+    }
+    code {
+      background: #f3f4f6;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.92em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 20px;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 10px 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: #f9fafb;
+      font-weight: 700;
+    }
+    .note {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Qling 매칭 알고리즘 구현 업데이트</h1>
+  <p class="meta">작성일: 2026-06-04 / 기준 문서: <code>matching.md</code>, <code>docs/PRD.md</code></p>
+  <p><span class="status">구현 및 테스트 완료</span></p>
+
+  <h2>1. 전체 요약</h2>
+  <p>
+    <code>matching.md</code>에 정리된 경험 기반 매칭 알고리즘을 기존 서버 코드에 단계적으로 반영했다.
+    기존 단순 카테고리/랜덤 중심 매칭에서, 고민 분석, 경험 프로필, 후보 검색, LLM Judge, tier 기반 후처리,
+    pass/rematch 대체 매칭, 프로필 학습, high risk 차단, profile summary 재생성, 90일 decay까지 포함하는 구조로 확장했다.
+  </p>
+
+  <h2>2. 개발 규칙 및 문서 정리</h2>
+  <ul>
+    <li>루트 문서와 실제 코드 구조를 확인해 개발 규칙과 코드 구조를 <code>codex.md</code>로 정리했다.</li>
+    <li><code>docs/PRD.md</code>는 source of truth로 유지했고 수정하지 않았다.</li>
+    <li><code>.env.example</code>에 필요한 환경변수 키 이름만 추가했다.</li>
+    <li>실제 API 키는 코드나 커밋 대상 파일에 넣지 않는 방향으로 유지했다.</li>
+  </ul>
+
+  <h2>3. 매칭 온톨로지 및 Concern Analysis</h2>
+  <ul>
+    <li>경험 기반 매칭용 ontology v1을 추가했다.</li>
+    <li>topic, emotion, situation, desired response tag를 정규화하는 구조를 추가했다.</li>
+    <li>고민 발행 시 LLM concern analysis를 수행하고 <code>worries.llmAnalysis</code>에 저장하도록 연결했다.</li>
+    <li>LLM provider 실패나 invalid output 발생 시 fallback concern analysis를 사용해 발행 자체가 중단되지 않도록 했다.</li>
+  </ul>
+  <p>주요 파일:</p>
+  <ul>
+    <li><code>src/services/matching/server/ontology.ts</code></li>
+    <li><code>src/services/matching/server/concernAnalysis.ts</code></li>
+    <li><code>src/services/worryPublication/server/concernAnalysis.ts</code></li>
+    <li><code>src/server/moderationProvider.ts</code></li>
+  </ul>
+
+  <h2>4. Experience Profile 저장 및 백필</h2>
+  <ul>
+    <li><code>users.profileStatus</code>와 <code>users.experienceProfile</code> 구조를 추가했다.</li>
+    <li>온보딩 저장 시 기존 관심사 데이터를 experience topic으로 보수적으로 매핑하도록 했다.</li>
+    <li>기존 유저 대상 백필 스크립트를 추가했다.</li>
+    <li>실제 Firestore 백필을 실행해 기존 활성 유저의 누락 필드를 채웠고, 백필 후 누락 유저가 0명인 것을 확인했다.</li>
+  </ul>
+  <p>주요 파일:</p>
+  <ul>
+    <li><code>src/services/matching/server/experienceProfile.ts</code></li>
+    <li><code>src/services/matching/server/interestTopicMapping.ts</code></li>
+    <li><code>src/services/userProfile/onboardingProfile.ts</code></li>
+    <li><code>src/services/userProfile/firestoreRepository.ts</code></li>
+    <li><code>scripts/backfillExperienceProfiles.ts</code></li>
+  </ul>
+
+  <h2>5. 후보 검색 및 Tier 분류</h2>
+  <ul>
+    <li>후보 검색 점수식을 구현했다: <code>2 * topic_overlap + 3 * situation_overlap + 1 * answerStyle_overlap</code>.</li>
+    <li>Tier A/B/C/Exploration 분류를 구현했다.</li>
+    <li>삭제, 비활성, 봇, active delivery limit 초과 유저를 제외하도록 했다.</li>
+    <li>cold start 유저는 Exploration으로 분류해 별도 quota에서만 사용되도록 했다.</li>
+  </ul>
+  <p>주요 파일:</p>
+  <ul>
+    <li><code>src/services/matching/server/candidateRetrieval.ts</code></li>
+    <li><code>src/services/matching/server/recipientPolicy.ts</code></li>
+  </ul>
+
+  <h2>6. LLM Judge 및 후처리</h2>
+  <ul>
+    <li>후보 최대 20명을 LLM Judge에 넘겨 적합도 순위를 받는 구조를 추가했다.</li>
+    <li>LLM Judge 결과는 candidate id dedupe, unknown candidate 제거, invalid output retry를 거친다.</li>
+    <li>후처리에서 최종 delivery 5명을 tier quota에 따라 선택한다.</li>
+    <li>선택 결과는 <code>deliveries.llmMatch</code>에 snapshot으로 저장한다.</li>
+    <li>테스트에서는 mock provider를 사용해 실제 API 호출 없이 검증한다.</li>
+  </ul>
+  <p>주요 파일:</p>
+  <ul>
+    <li><code>src/services/matching/server/llmJudge.ts</code></li>
+    <li><code>src/services/matching/server/postProcessing.ts</code></li>
+    <li><code>src/services/matching/server/experienceRecipientSelection.ts</code></li>
+    <li><code>src/server/moderationProvider.ts</code></li>
+  </ul>
+
+  <h2>7. 최초 발행 매칭 적용 및 Underfill Fallback</h2>
+  <ul>
+    <li>고민 발행 시 기존 초기 전달 로직을 경험 기반 매칭으로 교체했다.</li>
+    <li>경험 기반 매칭 결과가 5명 미만이면 기존 legacy 랭킹으로 부족한 슬롯을 보충하도록 했다.</li>
+    <li>이 fallback으로 cold start 유저가 많은 초기 운영 상태에서도 delivery underfill 위험을 줄였다.</li>
+  </ul>
+  <p>주요 파일:</p>
+  <ul>
+    <li><code>src/services/worryPublication/server/publishWorry.ts</code></li>
+    <li><code>src/services/worryPublication/server/recipientSelection.ts</code></li>
+  </ul>
+
+  <h2>8. Pass 및 Rematch 매칭 적용</h2>
+  <ul>
+    <li>pass replacement 후보 선정에 경험 기반 매칭을 적용했다.</li>
+    <li>rematch due deliveries에도 경험 기반 매칭과 LLM Judge를 연결했다.</li>
+    <li>경험 매칭 결과가 부족하면 legacy fallback으로 보충해 전달 수 부족을 방지했다.</li>
+    <li>replacement delivery에도 <code>llmMatch</code> snapshot이 저장되도록 했다.</li>
+  </ul>
+  <p>주요 파일:</p>
+  <ul>
+    <li><code>src/services/deliveries/recipientSelection.ts</code></li>
+    <li><code>src/services/deliveries/passDelivery.ts</code></li>
+    <li><code>src/services/rematch/policy.ts</code></li>
+    <li><code>src/services/rematch/rematchDueDeliveries.ts</code></li>
+  </ul>
+
+  <h2>9. High Risk 처리</h2>
+  <ul>
+    <li><code>llmAnalysis.riskLevel === "high"</code>인 고민은 매칭과 배송 생성을 중단하도록 했다.</li>
+    <li>사용자에게 안전 안내 메시지와 전문기관 안내를 반환한다.</li>
+    <li><code>worries</code>, <code>deliveryBatches</code>, <code>deliveries</code>는 생성하지 않는다.</li>
+    <li><code>moderationLogs</code>에는 <code>reasonCode: high_risk</code>로 기록한다.</li>
+    <li>route 응답은 기존 rejected와 유사하게 HTTP 200으로 내려가며 내부 <code>targetId</code>는 제거한다.</li>
+  </ul>
+  <p>주요 파일:</p>
+  <ul>
+    <li><code>src/services/worryPublication/server/riskPolicy.ts</code></li>
+    <li><code>src/services/worryPublication/server/publishWorry.ts</code></li>
+    <li><code>src/server/worryRoutes.ts</code></li>
+  </ul>
+
+  <h2>10. Experience Profile 학습</h2>
+  <ul>
+    <li>답변 작성 시 concern tag 기반으로 <code>topicScores</code>, <code>situationScores</code>, <code>answerStyleScores</code>에 0.5를 반영한다.</li>
+    <li>좋아요 수신 시 같은 score에 2를 반영하고 <code>helpedCount</code>를 증가시킨다.</li>
+    <li>답변 moderation fail 시 <code>safetyPenalty</code>를 증가시킨다.</li>
+    <li>이벤트 발생 시 <code>cold_start</code> 프로필은 <code>light</code>로 승격한다.</li>
+  </ul>
+  <p>주요 파일:</p>
+  <ul>
+    <li><code>src/services/matching/server/profileSignals.ts</code></li>
+    <li><code>src/services/replyPublication/server/firestoreRepository.ts</code></li>
+    <li><code>src/services/replyFeedback/serverFirestore.ts</code></li>
+  </ul>
+
+  <h2>11. Profile Summary 재생성</h2>
+  <ul>
+    <li><code>experienceProfile.profileSummary</code> 재생성 메타 필드를 추가했다.</li>
+    <li>재생성 조건을 구현했다: helpedCount +3, topTopics 변경, 7일 경과, moderation event.</li>
+    <li>LLM 호출은 Firestore transaction 밖에서 수행하도록 job queue 구조를 만들었다.</li>
+    <li><code>experienceProfileSummaryJobs</code> queued job을 internal route로 처리한다.</li>
+    <li>OpenAI provider는 env의 <code>OPENAI_API_KEY</code>만 사용하며 테스트에서는 mock provider를 사용한다.</li>
+  </ul>
+  <p>주요 파일:</p>
+  <ul>
+    <li><code>src/services/matching/server/profileSummary.ts</code></li>
+    <li><code>src/services/matching/server/profileSummaryPolicy.ts</code></li>
+    <li><code>src/services/matching/server/profileSummaryJobs.ts</code></li>
+    <li><code>src/server/experienceProfileSummaryProvider.ts</code></li>
+    <li><code>src/server/experienceProfileSummaryRoutes.ts</code></li>
+  </ul>
+  <p>Internal route:</p>
+  <ul>
+    <li><code>POST /api/internal/experience-profile-summaries/run</code></li>
+    <li><code>INTERNAL_JOB_SECRET</code> 필요</li>
+  </ul>
+
+  <h2>12. 90일 Experience Decay</h2>
+  <ul>
+    <li>정확한 decay를 위해 <code>experienceSignals</code> 원장 컬렉션을 추가했다.</li>
+    <li>답변 작성, 좋아요 수신, 답변 moderation fail 시 signal을 dual-write한다.</li>
+    <li>기존 <code>experienceProfile</code> 즉시 업데이트는 유지해 job 실행 전 매칭 품질 저하를 막았다.</li>
+    <li><code>experienceProfileDecayPending</code> 유저를 대상으로 최근 90일 signal만 재합산한다.</li>
+    <li>90일이 지난 signal은 재계산에서 제외된다.</li>
+    <li>재계산 후 <code>experienceProfileDecayPending</code>을 false로 돌리고 <code>experienceProfileRecalculatedAt</code>을 기록한다.</li>
+  </ul>
+  <p>주요 파일:</p>
+  <ul>
+    <li><code>src/services/matching/server/experienceSignals.ts</code></li>
+    <li><code>src/services/matching/server/experienceDecay.ts</code></li>
+    <li><code>src/server/experienceDecayRoutes.ts</code></li>
+  </ul>
+  <p>Internal route:</p>
+  <ul>
+    <li><code>POST /api/internal/recalculate-experience-profiles</code></li>
+    <li><code>INTERNAL_JOB_SECRET</code> 필요</li>
+  </ul>
+
+  <h2>13. Firebase / Firestore 반영</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>대상</th>
+        <th>반영 내용</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>users</code></td>
+        <td><code>profileStatus</code>, <code>experienceProfile</code>, <code>experienceProfileDecayPending</code>, <code>experienceProfileLastSignalAt</code>, <code>experienceProfileRecalculatedAt</code></td>
+      </tr>
+      <tr>
+        <td><code>worries</code></td>
+        <td><code>llmAnalysis</code></td>
+      </tr>
+      <tr>
+        <td><code>deliveries</code></td>
+        <td><code>llmMatch</code></td>
+      </tr>
+      <tr>
+        <td><code>experienceProfileSummaryJobs</code></td>
+        <td>프로필 요약 재생성 job queue</td>
+      </tr>
+      <tr>
+        <td><code>experienceSignals</code></td>
+        <td>최근 90일 decay 계산용 이벤트 원장</td>
+      </tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>새 서버 소유 필드는 클라이언트가 직접 create/update/delete 할 수 없도록 rules에 반영했다.</li>
+    <li><code>experienceProfileSummaryJobs</code>와 <code>experienceSignals</code>는 클라이언트 read/write 모두 차단했다.</li>
+  </ul>
+
+  <h2>14. 서버 및 환경변수</h2>
+  <ul>
+    <li><code>server.ts</code>에 concern analyzer, matching judge, summary job route, decay route를 연결했다.</li>
+    <li><code>OPENAI_API_KEY</code>는 코드에 저장하지 않고 env에서만 읽는다.</li>
+    <li><code>FIREBASE_SERVICE_ACCOUNT</code>는 백필/서버 Admin SDK 초기화에 사용한다.</li>
+    <li><code>INTERNAL_JOB_SECRET</code>은 internal job route 보호에 사용한다.</li>
+  </ul>
+
+  <h2>15. 테스트 결과</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>검증 항목</th>
+        <th>결과</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>npm run lint</code></td>
+        <td>통과</td>
+      </tr>
+      <tr>
+        <td>핵심 서버/매칭 테스트</td>
+        <td><code>164/164</code> 통과</td>
+      </tr>
+      <tr>
+        <td>Firestore rules 테스트</td>
+        <td><code>82/82</code> 통과</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>16. 남은 운영 작업</h2>
+  <div class="note">
+    코드에는 Render Cron Job에서 바로 실행할 수 있는 npm 명령을 추가했다. Render 대시보드에서 아래 cron job 2개를 등록해야 자동 처리된다.
+  </div>
+  <ul>
+    <li>환경변수: <code>QLING_INTERNAL_BASE_URL=https://qling-hangyeol-hyu.onrender.com</code></li>
+    <li>환경변수: <code>INTERNAL_JOB_SECRET</code>는 web service와 cron job에 같은 값으로 설정한다.</li>
+    <li>Decay cron command: <code>npm run internal:decay</code></li>
+    <li>Profile summary cron command: <code>npm run internal:profile-summary</code></li>
+    <li>권장 schedule: summary는 10분마다 <code>*/10 * * * *</code>, decay는 하루 1회 <code>0 18 * * *</code> UTC 기준으로 등록한다.</li>
+    <li>온보딩 UI의 새 matching tag 입력 화면은 다른 개발 파트에서 반영 예정이며, 반영 후 저장값 연동만 확인하면 된다.</li>
+  </ul>
+
+  <h2>17. Cron 실행 검증 보강</h2>
+  <ul>
+    <li><code>scripts/runInternalJob.ts</code>의 실행 로직을 <code>src/server/internalJobRunner.ts</code>로 분리했다.</li>
+    <li>Render Cron Job 명령은 기존처럼 <code>npm run internal:decay</code>, <code>npm run internal:profile-summary</code>를 사용한다.</li>
+    <li>테스트에서는 fetch provider를 mock으로 주입해 실제 API 호출 없이 내부 route 호출 형식, Bearer 인증 헤더, JSON body, 실패 응답 처리를 검증한다.</li>
+    <li>성공/실패 로그에 <code>INTERNAL_JOB_SECRET</code> 값이 노출되지 않는 조건을 테스트로 고정했다.</li>
+  </ul>
+
+  <h2>18. 주의 사항</h2>
+  <ul>
+    <li>API key는 절대 커밋하면 안 된다.</li>
+    <li>LLM 관련 테스트는 provider DI/mock 구조로 되어 있어 실제 API 호출 없이 검증한다.</li>
+    <li><code>docs/PRD.md</code>는 수정하지 않았다.</li>
+    <li>실제 배포 전 Firestore rules 배포와 Render 환경변수 확인이 필요하다.</li>
+  </ul>
+</body>
+</html>

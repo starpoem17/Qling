@@ -3,6 +3,7 @@ import type { Firestore } from 'firebase-admin/firestore';
 import type { Messaging } from 'firebase-admin/messaging';
 import { requireInternalJobSecret } from './internalAuth';
 import { rematchDueDeliveries, type RematchDueDeliveriesResult } from '../services/rematch';
+import type { MatchingJudgeProvider } from '../services/matching/server/llmJudge';
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
@@ -12,6 +13,7 @@ type RematchService = {
     now?: Date;
     dryRun?: boolean;
     limit?: number;
+    matchingJudgeProvider?: MatchingJudgeProvider;
   }): Promise<RematchDueDeliveriesResult>;
 };
 
@@ -68,6 +70,7 @@ function sendResult(res: express.Response, result: RematchDueDeliveriesResult): 
 export function registerRematchRoutes(app: express.Express, deps: {
   db: Firestore | null;
   messaging: Messaging | null;
+  matchingJudgeProvider?: MatchingJudgeProvider;
   service?: RematchService;
 }): void {
   if (!deps.db) {
@@ -89,6 +92,7 @@ export function registerRematchRoutes(app: express.Express, deps: {
       now,
       dryRun,
       limit: limit ?? DEFAULT_LIMIT,
+      matchingJudgeProvider: deps.matchingJudgeProvider,
     }),
   };
 
@@ -105,11 +109,13 @@ export function registerRematchRoutes(app: express.Express, deps: {
     }
 
     try {
-      const result = await service.rematchDueDeliveries({
+      const serviceParams = {
         now: body.now,
         dryRun: body.dryRun,
         limit: body.limit,
-      });
+        ...(deps.matchingJudgeProvider ? { matchingJudgeProvider: deps.matchingJudgeProvider } : {}),
+      };
+      const result = await service.rematchDueDeliveries(serviceParams);
       sendResult(res, result);
     } catch (error) {
       res.status(500).json({

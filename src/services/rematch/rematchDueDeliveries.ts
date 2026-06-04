@@ -6,8 +6,7 @@ import {
   calculateTargetCount,
   chooseNextRematchSource,
   getRematchEligibleAfter,
-  randomSlotAvailable,
-  selectRematchRecipients,
+  selectExperienceRematchRecipients,
 } from './policy';
 import type {
   CommittedRematchBatch,
@@ -15,6 +14,7 @@ import type {
   RematchPushAdapter,
   RematchRepository,
 } from './types';
+import type { MatchingJudgeProvider } from '../matching/server/llmJudge';
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
@@ -32,6 +32,7 @@ export async function rematchDueDeliveries(params: {
   dryRun?: boolean;
   repository?: RematchRepository;
   random?: () => number;
+  matchingJudgeProvider?: MatchingJudgeProvider;
   pushAdapter?: RematchPushAdapter;
 }): Promise<RematchDueDeliveriesResult> {
   const now = params.now ?? new Date();
@@ -79,11 +80,6 @@ export async function rematchDueDeliveries(params: {
         continue;
       }
 
-      const sourceDeliveries = scan.sourceDeliveries.filter(delivery => (
-        delivery.worryId === scan.worryId
-        && delivery.batchId === source.sourceBatch.id
-        && delivery.isAiRecipient !== true
-      ));
       const targetCount = calculateTargetCount({ scan, sourceBatchId: source.sourceBatch.id });
       if (targetCount <= 0) {
         results.push({
@@ -98,11 +94,10 @@ export async function rematchDueDeliveries(params: {
       }
 
       dueCount += 1;
-      const recipients = selectRematchRecipients({
+      const recipients = await selectExperienceRematchRecipients({
         scan,
         targetCount,
-        includeRandom: randomSlotAvailable(sourceDeliveries),
-        random: params.random ?? Math.random,
+        matchingJudgeProvider: params.matchingJudgeProvider,
       });
       const rematchEligibleAfter = getRematchEligibleAfter({
         nextRound: source.nextRound,

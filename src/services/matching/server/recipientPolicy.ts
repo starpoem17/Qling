@@ -1,4 +1,5 @@
 import { normalizeWorryCategories } from '@midnight-radio/domain';
+import type { ExperienceProfile, ExperienceProfileStatus } from './experienceProfile';
 
 export const ACTIVE_DELIVERY_LIMIT = 10;
 
@@ -7,6 +8,8 @@ export interface HumanCandidate {
   gender?: string;
   interests?: string[];
   helpedCount?: number;
+  profileStatus?: ExperienceProfileStatus;
+  experienceProfile?: Partial<ExperienceProfile>;
   activeDeliveryCount?: number;
   deleted?: boolean;
   status?: string;
