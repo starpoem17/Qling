@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Notification icon">
+<g id="Frame">
+<path id="Vector" d="M19.7216 21.4583V19.6528C19.7216 18.6951 19.3411 17.7766 18.6639 17.0993C17.9867 16.4221 17.0682 16.0417 16.1105 16.0417H8.88824C7.93051 16.0417 7.01201 16.4221 6.3348 17.0993C5.65758 17.7766 5.27713 18.6951 5.27713 19.6528V21.4583" stroke="var(--stroke-0, white)" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_2" d="M12.4993 12.4306C14.4937 12.4306 16.1105 10.8138 16.1105 8.81944C16.1105 6.82508 14.4937 5.20833 12.4993 5.20833C10.505 5.20833 8.88824 6.82508 8.88824 8.81944C8.88824 10.8138 10.505 12.4306 12.4993 12.4306Z" stroke="var(--stroke-0, white)" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<circle id="Ellipse 1" cx="12.5" cy="12.5" r="11.5" stroke="var(--stroke-0, white)" stroke-width="2"/>
+</g>
+</svg>

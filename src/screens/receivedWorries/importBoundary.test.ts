@@ -65,13 +65,15 @@ test('received-worries container keeps service imports in the allowed boundary',
 
 test('received-worries top-left eye is presentational and my-page action is explicit', () => {
   const source = fs.readFileSync(presentationalScreenPath, 'utf8');
-  const sharedHeaderSource = fs.readFileSync(path.join(process.cwd(), 'src/screens/shared/QlingPeekHeader.tsx'), 'utf8');
 
-  assert.match(sharedHeaderSource, /role="presentation"/);
-  assert.match(sharedHeaderSource, /aria-hidden="true"/);
-  assert.match(sharedHeaderSource, /aria-label="마이페이지 열기"/);
-  assert.match(source, /QlingPeekHeader/);
-  assert.match(source, /onOpenMyPage=\{props\.onOpenMyPage\}/);
+  assert.match(source, /profile_icon\.svg/);
+  assert.match(source, /my_page_icon\.svg/);
+  assert.match(source, /role="presentation"/);
+  assert.match(source, /aria-hidden="true"/);
+  assert.match(source, /aria-label="마이페이지 열기"/);
+  assert.match(source, /<ReplyStaticHeader onOpenMyPage=\{props\.onOpenMyPage\} \/>/);
+  assert.doesNotMatch(source, /QlingPeekHeader/);
+  assert.doesNotMatch(source, /useScrollPeekHeader/);
   assert.doesNotMatch(source, /10:46|status bar|battery|network|home indicator/);
 });
 
@@ -104,7 +106,8 @@ test('received-worries loading empty and privacy source stay PRD-scoped', () => 
 
   assert.match(source, /FigmaTabLoading/);
   assert.doesNotMatch(source, /skeleton|placeholder/i);
-  assert.match(source, /다른 사람들의 고민을 기다리는 중이에요/);
+  assert.match(source, /ReplyFeedIntro/);
+  assert.doesNotMatch(source, /다른 사람들의 고민을 기다리는 중이에요/);
   assert.match(source, /aria-label="받은 고민 빈 상태"/);
   assert.doesNotMatch(source, /<EmptyState/);
   for (const forbidden of ['nickname', 'gender', 'age', 'interests', 'senderUid', 'authorUid', 'publisher']) {

@@ -304,17 +304,23 @@ test('peek header screens use transform layout without scroll-time height transi
   const myWorriesSource = fs.readFileSync(path.join(process.cwd(), 'src/screens/myPage/MyWorriesScreen.tsx'), 'utf8');
   const scrollAreaSource = fs.readFileSync(path.join(process.cwd(), 'src/screens/shared/PeekHeaderScrollArea.tsx'), 'utf8');
 
-  for (const source of [receivedSource, myWorriesSource]) {
-    assert.match(source, /h-\[836px\]/);
-    assert.match(source, /h-\[752px\]/);
-    assert.match(source, /--qling-peek-progress/);
-    assert.match(source, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
-    assert.doesNotMatch(source, /contentHeightClassName/);
-    assert.doesNotMatch(source, /transition-\[height\]/);
-    assert.match(source, /PeekHeaderScrollArea/);
-    assert.match(source, /blockLoadingScroll/);
-    assert.match(source, /touch-none overscroll-none overflow-hidden/);
-  }
+  assert.match(myWorriesSource, /h-\[836px\]/);
+  assert.match(myWorriesSource, /h-\[752px\]/);
+  assert.match(myWorriesSource, /--qling-peek-progress/);
+  assert.match(myWorriesSource, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
+  assert.doesNotMatch(myWorriesSource, /contentHeightClassName/);
+  assert.doesNotMatch(myWorriesSource, /transition-\[height\]/);
+  assert.match(myWorriesSource, /PeekHeaderScrollArea/);
+  assert.match(myWorriesSource, /blockLoadingScroll/);
+  assert.match(myWorriesSource, /touch-none overscroll-none overflow-hidden/);
+
+  assert.match(receivedSource, /CreamContentBackground/);
+  assert.match(receivedSource, /top-\[74px\] h-\[752px\]/);
+  assert.match(receivedSource, /overflow-y-auto rounded-t-\[32px\] px-4 pb-\[108px\] pt-4/);
+  assert.doesNotMatch(receivedSource, /--qling-peek-progress/);
+  assert.doesNotMatch(receivedSource, /translateY\(calc/);
+  assert.doesNotMatch(receivedSource, /PeekHeaderScrollArea/);
+  assert.doesNotMatch(receivedSource, /useScrollPeekHeader/);
 
   assert.match(scrollAreaSource, /useState\(false\)/);
   assert.match(scrollAreaSource, /resetPeekHeaderScrollElement\(scroller\)/);

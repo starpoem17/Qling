@@ -70,6 +70,12 @@ test('received-worries ready state renders waiting count from feed items', () =>
   assert.match(html, /답변하기/);
   assert.match(html, /다른 친구의 고민에 마음을 나눠주세요/);
   assert.match(html, /지금 <strong class="text-\[#e8631a\]">2명<\/strong>이 답변을 기다리고 있어요/);
+
+  const source = fs.readFileSync(path.join(process.cwd(), 'src/screens/receivedWorries/ReceivedWorriesScreen.tsx'), 'utf8');
+  assert.doesNotMatch(source, /useScrollPeekHeader/);
+  assert.doesNotMatch(source, /PeekHeaderScrollArea/);
+  assert.doesNotMatch(source, /QlingPeekHeader/);
+  assert.doesNotMatch(source, /qling-peek-progress|translateY\(calc/);
 });
 
 test('received-worries contract represents loading, error, and empty states', () => {
@@ -115,21 +121,24 @@ test('received-worries contract exposes my-page intent without reply duplicate i
   assert.equal(Object.keys(callbacks).includes('onReply'), false);
 });
 
-test('received-worries empty state renders Figma copy in a non-scroll static card', () => {
+test('received-worries empty state renders the fixed Figma intro without an empty card', () => {
   const html = renderToStaticMarkup(ReceivedWorriesScreen(baseProps({
     state: { status: 'empty', message: '지금은 도착한 고민이 없어요.' },
     items: [],
+    waitingCount: 0,
   })));
 
-  assert.match(html, /다른 사람들의 고민을 기다리는 중이에요/);
-  assert.equal((html.match(/다른 사람들의 고민을 기다리는 중이에요/g) ?? []).length, 1);
+  assert.match(html, /답변하기/);
+  assert.match(html, /다른 친구의 고민에 마음을 나눠주세요/);
+  assert.match(html, /지금 <strong class="text-\[#e8631a\]">0명<\/strong>이 답변을 기다리고 있어요/);
+  assert.doesNotMatch(html, /다른 사람들의 고민을 기다리는 중이에요/);
   assert.doesNotMatch(html, /지금은 도착한 고민이 없어요\./);
   assert.doesNotMatch(html, /첫 고민을 남겨보세요/);
   assert.doesNotMatch(html, /고민 쓰기|다시 시도|네트워크/);
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
-  assert.match(html, /h-\[752px\] touch-none overscroll-none overflow-hidden rounded-t-\[32px\] bg-\[#fff1d1\] px-4 pt-5/);
-  assert.match(html, /h-\[135px\] w-full items-center justify-center overflow-hidden rounded-\[18px\]/);
+  assert.match(html, /absolute left-0 top-\[74px\] h-\[752px\] w-full rounded-t-\[32px\] bg-\[#fff1d1\]/);
+  assert.match(html, /absolute left-0 top-\[74px\] h-\[752px\] w-full touch-none overscroll-none overflow-hidden rounded-t-\[32px\] px-4 pt-4/);
   assert.doesNotMatch(html, /받은 고민 목록/);
   assert.doesNotMatch(html, /overflow-y-auto/);
 
@@ -140,6 +149,7 @@ test('received-worries empty state renders Figma copy in a non-scroll static car
   assert.match(emptyBranch, /onTouchMove=\{blockLoadingScroll\}/);
   assert.doesNotMatch(emptyBranch, /PeekHeaderScrollArea/);
   assert.doesNotMatch(emptyBranch, /overflow-y-auto/);
+  assert.doesNotMatch(emptyBranch, /QlingCard/);
 });
 
 test('received-worries loading state renders the Figma spinner status without visible copy', () => {
@@ -151,7 +161,7 @@ test('received-worries loading state renders the Figma spinner status without vi
   assert.match(html, /role="status"/);
   assert.match(html, /aria-live="polite"/);
   assert.match(html, /data-testid="figma-tab-loading-indicator"/);
-  assert.match(html, /left-1\/2 top-\[306px\] h-10 w-10/);
+  assert.match(html, /left-1\/2 h-10 w-10 -translate-x-1\/2 top-\[332px\]/);
   assert.match(html, /답변할 고민을 불러오는 중이에요\./);
   assert.doesNotMatch(html, /고민을 불러오고 있어요/);
   assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
@@ -159,9 +169,9 @@ test('received-worries loading state renders the Figma spinner status without vi
   assert.match(html, /mx-auto flex h-full w-full max-w-\[480px\] justify-center overflow-hidden/);
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
-  assert.match(html, /h-\[100px\]/);
+  assert.match(html, /h-\[74px\]/);
   assert.match(html, /bg-\[#ff8b3d\]/);
-  assert.match(html, /h-\[752px\] touch-none overscroll-none overflow-hidden/);
+  assert.match(html, /top-\[74px\] h-\[752px\] w-full touch-none overscroll-none overflow-hidden/);
   assert.doesNotMatch(html, /h-\[752px\] overflow-y-auto/);
   assert.doesNotMatch(html, /w-\[100dvw\]/);
   assert.doesNotMatch(html, /min-h-\[calc\(100dvh-180px\)\]/);
@@ -174,4 +184,5 @@ test('received-worries loading state renders the Figma spinner status without vi
   assert.match(loadingBranch, /onTouchMove=\{blockLoadingScroll\}/);
   assert.doesNotMatch(loadingBranch, /scrollPeekHeader\.onScroll/);
   assert.doesNotMatch(loadingBranch, /scrollPeekHeader\.onTouchStart/);
+  assert.doesNotMatch(loadingBranch, /PeekHeaderScrollArea/);
 });

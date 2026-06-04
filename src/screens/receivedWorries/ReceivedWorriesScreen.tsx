@@ -1,49 +1,33 @@
 import type { KeyboardEvent, MouseEvent, TouchEvent, WheelEvent } from 'react';
-import type { CSSProperties } from 'react';
-import { CircleAlert, MessageCircle } from 'lucide-react';
-import {
-  ErrorState,
-  QlingCard,
-} from '../shared/ui';
+import { ErrorState, QlingCard } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
-import { PeekHeaderScrollArea } from '../shared/PeekHeaderScrollArea';
-import { QlingPeekHeader } from '../shared/QlingPeekHeader';
-import { useScrollPeekHeader } from '../shared/scrollPeekHeader';
 import type { ReceivedWorriesScreenProps } from './contract';
+
+const headerEyeUrl = new URL('../../../assets/reply/profile_icon.svg', import.meta.url).href;
+const myPageIconUrl = new URL('../../../assets/reply/my_page_icon.svg', import.meta.url).href;
+const titleChatIconUrl = new URL('../../../assets/reply/title_chat_icon.svg', import.meta.url).href;
+const waitingCountIconUrl = new URL('../../../assets/reply/waiting_count_icon.svg', import.meta.url).href;
 
 export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   const passingDeliveryIds = new Set(props.passingDeliveryIds);
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
-  const scrollPeekHeader = useScrollPeekHeader();
-  const contentClassName = 'qling-received-worries-font h-[836px] rounded-t-[32px] bg-[#fff1d1] px-4 pt-5 transform-gpu';
-  const loadingContentClassName = 'qling-received-worries-font h-[752px] touch-none overscroll-none overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5';
-  const contentStyle = {
-    '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
-    transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))',
-  } as CSSProperties;
-
-  const header = (
-    <QlingPeekHeader
-      isCollapsed={scrollPeekHeader.isHeaderCollapsed}
-      maskIdPrefix="received-worries"
-      onOpenMyPage={props.onOpenMyPage}
-    />
-  );
 
   if (props.state.status === 'loading') {
     return (
       <section className={screenClassName}>
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
-            {header}
+            <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
+            <CreamContentBackground />
             <section
-              className={`relative ${loadingContentClassName}`}
+              className="qling-received-worries-font absolute left-0 top-[74px] h-[752px] w-full touch-none overscroll-none overflow-hidden rounded-t-[32px]"
+              aria-label="받은 고민 로딩 상태"
               onWheel={blockLoadingScroll}
               onTouchMove={blockLoadingScroll}
             >
-              <FigmaTabLoading label={props.state.label} />
+              <FigmaTabLoading label={props.state.label} className="top-[332px]" />
             </section>
           </div>
         </div>
@@ -56,10 +40,11 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
       <section className={screenClassName}>
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
-            {header}
-            <PeekHeaderScrollArea className={contentClassName} style={contentStyle} resetKey="received-worries-error">
+            <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
+            <CreamContentBackground />
+            <section className="qling-received-worries-font absolute left-0 top-[74px] h-[752px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[108px] pt-4 [-webkit-overflow-scrolling:touch]">
               <ErrorState title="답변 피드를 불러오지 못했어요" message={props.state.message} />
-            </PeekHeaderScrollArea>
+            </section>
           </div>
         </div>
       </section>
@@ -71,18 +56,15 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
       <section className={screenClassName}>
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
-            {header}
+            <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
+            <CreamContentBackground />
             <section
-              className="qling-received-worries-font h-[752px] touch-none overscroll-none overflow-hidden rounded-t-[32px] bg-[#fff1d1] px-4 pt-5"
+              className="qling-received-worries-font absolute left-0 top-[74px] h-[752px] w-full touch-none overscroll-none overflow-hidden rounded-t-[32px] px-4 pt-4"
               aria-label="받은 고민 빈 상태"
               onWheel={blockLoadingScroll}
               onTouchMove={blockLoadingScroll}
             >
-              <QlingCard className="relative flex h-[135px] w-full items-center justify-center overflow-hidden rounded-[18px] border-0 bg-white p-0 text-center shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
-                <p className="w-[325px] break-words text-center text-[16px] font-extrabold leading-6 tracking-[-0.03em] text-[#2a2a2a]">
-                  다른 사람들의 고민을 기다리는 중이에요
-                </p>
-              </QlingCard>
+              <ReplyFeedIntro waitingCount={props.waitingCount} />
             </section>
           </div>
         </div>
@@ -94,33 +76,14 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
     <section className={screenClassName}>
       <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
         <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
-          {header}
-          <PeekHeaderScrollArea
-            className={`${contentClassName} pb-[calc(108px+env(safe-area-inset-bottom,0px))]`}
-            style={contentStyle}
-            ariaLabel="받은 고민 목록"
-            resetKey="received-worries-ready"
+          <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
+          <CreamContentBackground />
+          <section
+            className="qling-received-worries-font absolute left-0 top-[74px] h-[752px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[108px] pt-4 [-webkit-overflow-scrolling:touch]"
+            aria-label="받은 고민 목록"
           >
             <div className="grid gap-[14px]">
-              <div className="flex items-center gap-2 pt-0.5">
-                <div className="min-w-0 flex-1">
-                  <h1 className="pl-2 text-[22px] font-extrabold leading-normal tracking-[-0.02em] text-[#f26c0f]">
-                    답변하기
-                  </h1>
-                  <p className="pl-2 text-[13px] font-medium leading-normal tracking-[-0.01em] text-[#8a8a8a]">
-                    다른 친구의 고민에 마음을 나눠주세요
-                  </p>
-                </div>
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ffe4cc] text-[#ff8b3d]" aria-hidden="true">
-                  <MessageCircle className="h-[22px] w-[22px] fill-[#ff8b3d] text-[#ff8b3d]" />
-                </div>
-              </div>
-              <div className="flex items-center gap-[9px] overflow-hidden rounded-[14px] bg-[#ffe4cc] px-[14px] py-3 text-[13.5px] font-bold leading-normal tracking-[-0.01em] text-[#7a4b22]">
-                <CircleAlert className="h-[17px] w-[17px] shrink-0 text-[#e8631a]" aria-hidden="true" />
-                <p className="min-w-0 flex-1">
-                  지금 <strong className="text-[#e8631a]">{props.waitingCount}명</strong>이 답변을 기다리고 있어요
-                </p>
-              </div>
+              <ReplyFeedIntro waitingCount={props.waitingCount} />
               {props.items.map(item => {
                 const isPassing = passingDeliveryIds.has(item.deliveryId);
                 const content = item.bodyText ?? item.previewText;
@@ -179,10 +142,78 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                 );
               })}
             </div>
-          </PeekHeaderScrollArea>
+          </section>
         </div>
       </div>
     </section>
+  );
+}
+
+function ReplyStaticHeader({ onOpenMyPage }: { readonly onOpenMyPage: () => void }) {
+  return (
+    <header
+      className="absolute left-0 top-0 h-[74px] w-full touch-none overscroll-none bg-[#ff8b3d]"
+      onTouchMove={blockLoadingScroll}
+      onWheel={blockLoadingScroll}
+    >
+      <img
+        src={headerEyeUrl}
+        alt=""
+        role="presentation"
+        aria-hidden="true"
+        className="absolute left-8 top-5 h-[38.179px] w-[48.001px]"
+        draggable={false}
+      />
+      <button
+        type="button"
+        aria-label="마이페이지 열기"
+        onClick={onOpenMyPage}
+        className="absolute left-[327px] top-[21px] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+      >
+        <img
+          src={myPageIconUrl}
+          alt=""
+          aria-hidden="true"
+          className="absolute left-3 top-3 h-[25px] w-[25px]"
+          draggable={false}
+        />
+      </button>
+    </header>
+  );
+}
+
+function CreamContentBackground() {
+  return (
+    <div
+      aria-hidden="true"
+      className="absolute left-0 top-[74px] h-[752px] w-full rounded-t-[32px] bg-[#fff1d1]"
+    />
+  );
+}
+
+function ReplyFeedIntro({ waitingCount }: { readonly waitingCount: number }) {
+  return (
+    <>
+      <div className="flex items-center gap-2 overflow-hidden pt-0.5">
+        <div className="min-w-0 flex-1">
+          <h1 className="w-[187px] pl-2 text-[22px] font-extrabold leading-normal tracking-[-0.44px] text-[#f26c0f]">
+            답변하기
+          </h1>
+          <p className="w-[275px] pl-2 text-[13px] font-medium leading-normal tracking-[-0.13px] text-[#8a8a8a]">
+            다른 친구의 고민에 마음을 나눠주세요
+          </p>
+        </div>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ffe4cc]" aria-hidden="true">
+          <img src={titleChatIconUrl} alt="" className="h-[22px] w-[22px]" draggable={false} />
+        </div>
+      </div>
+      <div className="flex items-center gap-[9px] overflow-hidden rounded-[14px] bg-[#ffe4cc] px-[14px] py-3 text-[13.5px] font-bold leading-normal tracking-[-0.135px] text-[#7a4b22]">
+        <img src={waitingCountIconUrl} alt="" className="h-[17px] w-[17px] shrink-0" aria-hidden="true" draggable={false} />
+        <p className="min-w-0 flex-1">
+          지금 <strong className="text-[#e8631a]">{waitingCount}명</strong>이 답변을 기다리고 있어요
+        </p>
+      </div>
+    </>
   );
 }
 
