@@ -117,8 +117,17 @@ export function ChatRoomScreen({
   const [inputLayerTarget, setInputLayerTarget] = useState<HTMLElement | null>(null);
   const [viewportMetrics, setViewportMetrics] = useState({ canvasHeight: 852, keyboardOffset: 0, scale: 1 });
   const viewportMetricsRef = useRef<ChatRoomViewportMetrics>(viewportMetrics);
+  const keyboardActiveRef = useRef(false);
+  const lockedDocumentScrollYRef = useRef(0);
+  const messageInputFocusedRef = useRef(false);
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
   const safeInputRef = useRef<HTMLDivElement>(null);
+
+  const restoreKeyboardDocumentScroll = () => {
+    if (!keyboardActiveRef.current) return;
+    const lockedScrollY = lockedDocumentScrollYRef.current;
+    if (window.scrollY !== lockedScrollY) window.scrollTo(window.scrollX, lockedScrollY);
+  };
 
   useEffect(() => {
     const updateViewportMetrics = () => {
@@ -128,6 +137,15 @@ export function ChatRoomScreen({
       const layoutHeight = document.documentElement.clientHeight || window.innerHeight || visualViewport?.height || 852;
       const keyboardOffset = Math.max(0, layoutHeight - (visualViewport?.height ?? layoutHeight) - (visualViewport?.offsetTop ?? 0));
       const nextKeyboardOffset = keyboardOffset / scale;
+      const isKeyboardActive = nextKeyboardOffset > 0;
+
+      if (isKeyboardActive) {
+        keyboardActiveRef.current = true;
+        requestAnimationFrame(restoreKeyboardDocumentScroll);
+      } else {
+        keyboardActiveRef.current = false;
+        if (!messageInputFocusedRef.current) lockedDocumentScrollYRef.current = window.scrollY;
+      }
 
       if (document.activeElement instanceof HTMLElement && document.activeElement.matches('[data-chat-room-message-input]')) {
         logChatRoomKeyboardViewport('viewport metrics update', {
@@ -161,6 +179,44 @@ export function ChatRoomScreen({
       window.removeEventListener('resize', updateViewportMetrics);
       window.removeEventListener('orientationchange', updateViewportMetrics);
       window.visualViewport?.removeEventListener('resize', updateViewportMetrics);
+    };
+  }, []);
+
+  useEffect(() => {
+    lockedDocumentScrollYRef.current = window.scrollY;
+
+    const restoreAfterViewportChange = () => {
+      requestAnimationFrame(restoreKeyboardDocumentScroll);
+    };
+    const handleDocumentScroll = () => {
+      if (!keyboardActiveRef.current) {
+        if (!messageInputFocusedRef.current) lockedDocumentScrollYRef.current = window.scrollY;
+        return;
+      }
+      restoreKeyboardDocumentScroll();
+    };
+    const handleNonMessageScroll = (event: TouchEvent | WheelEvent) => {
+      if (!keyboardActiveRef.current) return;
+      const scroller = messagesScrollerRef.current;
+      if (scroller && event.target instanceof Node && scroller.contains(event.target)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      restoreKeyboardDocumentScroll();
+    };
+    const blockingListenerOptions = { passive: false, capture: true };
+
+    window.addEventListener('scroll', handleDocumentScroll, { passive: true });
+    window.visualViewport?.addEventListener('resize', restoreAfterViewportChange);
+    window.visualViewport?.addEventListener('scroll', restoreAfterViewportChange);
+    document.addEventListener('touchmove', handleNonMessageScroll, blockingListenerOptions);
+    document.addEventListener('wheel', handleNonMessageScroll, blockingListenerOptions);
+
+    return () => {
+      window.removeEventListener('scroll', handleDocumentScroll);
+      window.visualViewport?.removeEventListener('resize', restoreAfterViewportChange);
+      window.visualViewport?.removeEventListener('scroll', restoreAfterViewportChange);
+      document.removeEventListener('touchmove', handleNonMessageScroll, blockingListenerOptions);
+      document.removeEventListener('wheel', handleNonMessageScroll, blockingListenerOptions);
     };
   }, []);
 
@@ -248,15 +304,29 @@ export function ChatRoomScreen({
   };
 
   const focusSafeMessageInput = () => {
+    lockedDocumentScrollYRef.current = window.scrollY;
+    messageInputFocusedRef.current = true;
     safeInputRef.current?.focus();
   };
 
   const handleMessageFocus = () => {
+    lockedDocumentScrollYRef.current = window.scrollY;
+    messageInputFocusedRef.current = true;
     logChatRoomKeyboardViewport('input focus', viewportMetricsRef.current);
     requestAnimationFrame(() => logChatRoomKeyboardViewport('input focus raf', viewportMetricsRef.current));
+    requestAnimationFrame(restoreKeyboardDocumentScroll);
     window.setTimeout(() => logChatRoomKeyboardViewport('input focus 150ms', viewportMetricsRef.current), 150);
+    window.setTimeout(restoreKeyboardDocumentScroll, 150);
     window.setTimeout(() => logChatRoomKeyboardViewport('input focus 450ms', viewportMetricsRef.current), 450);
+    window.setTimeout(restoreKeyboardDocumentScroll, 450);
     window.setTimeout(() => logChatRoomKeyboardViewport('input focus 900ms', viewportMetricsRef.current), 900);
+    window.setTimeout(restoreKeyboardDocumentScroll, 900);
+  };
+
+  const handleMessageBlur = () => {
+    messageInputFocusedRef.current = false;
+    keyboardActiveRef.current = false;
+    lockedDocumentScrollYRef.current = window.scrollY;
   };
 
   const mineMessageIds = messages.filter(m => m.isMine).map(m => m.messageId);
@@ -282,6 +352,7 @@ export function ChatRoomScreen({
       onDraftInput={handleDraftInput}
       onMessageKeyDown={handleMessageKeyDown}
       onMessageFocus={handleMessageFocus}
+      onMessageBlur={handleMessageBlur}
       onFocusProxy={focusSafeMessageInput}
       onSend={handleSend}
     />,
@@ -312,7 +383,7 @@ export function ChatRoomScreen({
           <div data-chat-room-canvas className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
             <div
               ref={messagesScrollerRef}
-              className="absolute bottom-[calc(67px+max(0px,calc(var(--chat-keyboard-offset)-var(--chat-input-y-offset))))] left-0 top-[74px] w-[393px] overflow-y-auto bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
+              className="absolute bottom-[calc(67px+max(0px,calc(var(--chat-keyboard-offset)-var(--chat-input-y-offset))))] left-0 top-[74px] w-[393px] overflow-y-auto overscroll-contain bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
             >
             <div className="mb-[14px] flex w-full justify-center">
               <span className="rounded-full bg-[#ffe7d2] px-3 py-[4px] text-[11px] font-semibold leading-[16.5px] text-[#f26c0f]">
@@ -428,6 +499,7 @@ function ChatRoomInputBar({
   onDraftInput,
   onMessageKeyDown,
   onMessageFocus,
+  onMessageBlur,
   onFocusProxy,
   onSend,
 }: {
@@ -441,6 +513,7 @@ function ChatRoomInputBar({
   readonly onDraftInput: (event: FormEvent<HTMLDivElement>) => void;
   readonly onMessageKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
   readonly onMessageFocus: () => void;
+  readonly onMessageBlur: () => void;
   readonly onFocusProxy: () => void;
   readonly onSend: () => void;
 }) {
@@ -458,6 +531,7 @@ function ChatRoomInputBar({
         onInput={onDraftInput}
         onKeyDown={onMessageKeyDown}
         onFocus={onMessageFocus}
+        onBlur={onMessageBlur}
         aria-label="메시지 입력"
         inputMode="text"
         enterKeyHint="send"

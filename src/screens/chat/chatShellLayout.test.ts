@@ -13,6 +13,7 @@ test('chat room autoscroll stays inside the message scroller', () => {
   assert.match(chatRoomScreenSource, /const messagesScrollerRef = useRef<HTMLDivElement>\(null\)/);
   assert.match(chatRoomScreenSource, /scroller\.scrollTop = scroller\.scrollHeight/);
   assert.match(chatRoomScreenSource, /ref=\{messagesScrollerRef\}[\s\S]*className="absolute bottom-\[calc\(67px\+max\(0px,calc\(var\(--chat-keyboard-offset\)-var\(--chat-input-y-offset\)\)\)\)\] left-0 top-\[74px\] w-\[393px\] overflow-y-auto/);
+  assert.match(chatRoomScreenSource, /overflow-y-auto overscroll-contain bg-\[#fff1d1\]/);
 });
 
 test('chat room top bar is fixed outside the keyboard-offset canvas', () => {
@@ -116,8 +117,8 @@ test('chat room accounts for iPhone visual viewport and document background', ()
   assert.match(chatRoomScreenSource, /logChatRoomKeyboardViewport\('viewport metrics update'/);
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('resize', updateViewportMetrics\)/);
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('resize', updateViewportMetrics\)/);
-  assert.doesNotMatch(chatRoomScreenSource, /visualViewport\?\.addEventListener\('scroll'/);
-  assert.doesNotMatch(chatRoomScreenSource, /visualViewport\?\.removeEventListener\('scroll'/);
+  assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('scroll', restoreAfterViewportChange\)/);
+  assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('scroll', restoreAfterViewportChange\)/);
   assert.match(chatRoomScreenSource, /setViewportMetrics\(previousMetrics =>/);
   assert.match(chatRoomScreenSource, /const chatRoomDocumentBackground = '#ffffff'/);
   assert.match(chatRoomScreenSource, /const backgroundColor = menuOpen \? dimThemeColor : chatRoomDocumentBackground/);
@@ -126,6 +127,29 @@ test('chat room accounts for iPhone visual viewport and document background', ()
   assert.match(chatRoomScreenSource, /root\.style\.backgroundColor = backgroundColor/);
   assert.doesNotMatch(chatRoomScreenSource, /meta\[name="theme-color"\]/);
   assert.doesNotMatch(chatRoomScreenSource, /setAttribute\('content', '#ffffff'\)/);
+});
+
+test('chat room locks document scroll while the keyboard is active', () => {
+  assert.match(chatRoomScreenSource, /const keyboardActiveRef = useRef\(false\)/);
+  assert.match(chatRoomScreenSource, /const lockedDocumentScrollYRef = useRef\(0\)/);
+  assert.match(chatRoomScreenSource, /const messageInputFocusedRef = useRef\(false\)/);
+  assert.match(chatRoomScreenSource, /const isKeyboardActive = nextKeyboardOffset > 0/);
+  assert.match(chatRoomScreenSource, /keyboardActiveRef\.current = true/);
+  assert.match(chatRoomScreenSource, /if \(!messageInputFocusedRef\.current\) lockedDocumentScrollYRef\.current = window\.scrollY/);
+  assert.match(chatRoomScreenSource, /const restoreKeyboardDocumentScroll = \(\) => \{/);
+  assert.match(chatRoomScreenSource, /window\.scrollTo\(window\.scrollX, lockedScrollY\)/);
+  assert.match(chatRoomScreenSource, /window\.addEventListener\('scroll', handleDocumentScroll, \{ passive: true \}\)/);
+  assert.match(chatRoomScreenSource, /window\.removeEventListener\('scroll', handleDocumentScroll\)/);
+  assert.match(chatRoomScreenSource, /document\.addEventListener\('touchmove', handleNonMessageScroll, blockingListenerOptions\)/);
+  assert.match(chatRoomScreenSource, /document\.removeEventListener\('touchmove', handleNonMessageScroll, blockingListenerOptions\)/);
+  assert.match(chatRoomScreenSource, /document\.addEventListener\('wheel', handleNonMessageScroll, blockingListenerOptions\)/);
+  assert.match(chatRoomScreenSource, /document\.removeEventListener\('wheel', handleNonMessageScroll, blockingListenerOptions\)/);
+  assert.match(chatRoomScreenSource, /scroller && event\.target instanceof Node && scroller\.contains\(event\.target\)/);
+  assert.match(chatRoomScreenSource, /event\.preventDefault\(\)/);
+  assert.match(chatRoomScreenSource, /event\.stopPropagation\(\)/);
+  assert.match(chatRoomScreenSource, /onBlur=\{onMessageBlur\}/);
+  assert.match(chatRoomScreenSource, /const handleMessageBlur = \(\) => \{/);
+  assert.match(chatRoomScreenSource, /window\.setTimeout\(restoreKeyboardDocumentScroll, 900\)/);
 });
 
 test('chat list header matches the Figma vertical positions', () => {
