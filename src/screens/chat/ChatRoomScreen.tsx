@@ -456,7 +456,15 @@ function ChatRoomInputBar({
         onKeyDown={onMessageKeyDown}
         onFocus={onMessageFocus}
         aria-label="메시지 입력"
-        autoComplete="off"
+        name="qling-chat-draft"
+        inputMode="text"
+        enterKeyHint="send"
+        autoComplete="new-password"
+        autoCorrect="off"
+        autoCapitalize="sentences"
+        spellCheck={false}
+        data-lpignore="true"
+        data-1p-ignore="true"
         className="bg-transparent text-transparent outline-none caret-transparent"
         style={safeInputStyle}
       />
