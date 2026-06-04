@@ -52,7 +52,17 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(chatRoomScreenSource, /absolute bottom-\[calc\(67px\+max\(0px,calc\(var\(--chat-keyboard-offset\)-var\(--chat-input-y-offset\)\)\)\)\] left-0 top-\[74px\] w-\[393px\] overflow-y-auto/);
   assert.match(reportUserScreenSource, /min-h-0 flex-1 overflow-y-auto/);
 
-  assert.match(chatRoomScreenSource, /absolute bottom-\[max\(0px,calc\(var\(--chat-keyboard-offset\)-var\(--chat-input-y-offset\)\)\)\] left-0 h-\[67px\] w-\[393px\]/);
+  assert.match(chatRoomScreenSource, /import \{ createPortal \} from 'react-dom'/);
+  assert.match(chatRoomScreenSource, /const \[inputLayerTarget, setInputLayerTarget\] = useState<HTMLElement \| null>\(null\)/);
+  assert.match(chatRoomScreenSource, /setInputLayerTarget\(document\.body\)/);
+  assert.match(chatRoomScreenSource, /const inputLayer = inputLayerTarget \? createPortal\(/);
+  assert.match(chatRoomScreenSource, /<ChatRoomInputBar[\s\S]*style=\{inputBarStyle\}/);
+  assert.match(chatRoomScreenSource, /function ChatRoomInputBar/);
+  assert.match(chatRoomScreenSource, /<div className="fixed z-10 border-t border-\[#ede3d6\] bg-white qling-figma-font" style=\{style\}>/);
+  assert.match(chatRoomScreenSource, /left: `calc\(50% - \$\{\(393 \* viewportMetrics\.scale\) \/ 2\}px\)`/);
+  assert.match(chatRoomScreenSource, /bottom: `\$\{inputBarBottom\}px`/);
+  assert.doesNotMatch(chatRoomScreenSource, /absolute bottom-\[max\(0px,calc\(var\(--chat-keyboard-offset\)-var\(--chat-input-y-offset\)\)\)\] left-0 h-\[67px\] w-\[393px\]/);
+  assert.doesNotMatch(chatRoomScreenSource, /className="fixed z-10[^"]*translate/);
   assert.doesNotMatch(chatRoomScreenSource, /bottom-0 left-0 h-\[max\(0px,calc\(var\(--chat-keyboard-offset\)/);
   assert.doesNotMatch(chatRoomScreenSource, /top-\[790px\]/);
   assert.match(reportUserScreenSource, /flex h-full min-h-0 flex-col/);

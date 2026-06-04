@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '../../lib/utils';
 import { ErrorState, profileImageUrlForColor } from '../shared/ui';
 
@@ -19,6 +20,13 @@ type ChatRoomCanvasStyle = CSSProperties & {
 
 type ChatRoomTopBarStyle = CSSProperties & {
   readonly transform: string;
+};
+
+type ChatRoomInputBarStyle = CSSProperties & {
+  readonly left: string;
+  readonly bottom: string;
+  readonly width: string;
+  readonly height: string;
 };
 
 export interface ChatMessage {
@@ -62,6 +70,7 @@ export function ChatRoomScreen({
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [inputLayerTarget, setInputLayerTarget] = useState<HTMLElement | null>(null);
   const [viewportMetrics, setViewportMetrics] = useState({ canvasHeight: 852, keyboardOffset: 0, scale: 1 });
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
 
@@ -101,6 +110,10 @@ export function ChatRoomScreen({
   }, []);
 
   useEffect(() => {
+    setInputLayerTarget(document.body);
+  }, []);
+
+  useEffect(() => {
     const root = document.getElementById('root');
     const previousHtmlBackground = document.documentElement.style.backgroundColor;
     const previousBodyBackground = document.body.style.backgroundColor;
@@ -126,6 +139,13 @@ export function ChatRoomScreen({
   };
   const topBarStyle: ChatRoomTopBarStyle = {
     transform: `translateX(-50%) scale(${viewportMetrics.scale})`,
+  };
+  const inputBarBottom = Math.max(0, viewportMetrics.keyboardOffset - chatInputYOffset) * viewportMetrics.scale;
+  const inputBarStyle: ChatRoomInputBarStyle = {
+    left: `calc(50% - ${(393 * viewportMetrics.scale) / 2}px)`,
+    bottom: `${inputBarBottom}px`,
+    width: `${393 * viewportMetrics.scale}px`,
+    height: `${67 * viewportMetrics.scale}px`,
   };
 
   useEffect(() => {
@@ -155,6 +175,19 @@ export function ChatRoomScreen({
 
   const mineMessageIds = messages.filter(m => m.isMine).map(m => m.messageId);
   const unreadThresholdIndex = mineMessageIds.length - (opponentUnreadCount || 0);
+  const inputLayer = inputLayerTarget ? createPortal(
+    <ChatRoomInputBar
+      draft={draft}
+      sendError={sendError}
+      isSending={isSending}
+      scale={viewportMetrics.scale}
+      style={inputBarStyle}
+      onDraftChange={setDraft}
+      onMessageKeyDown={handleMessageKeyDown}
+      onSend={handleSend}
+    />,
+    inputLayerTarget,
+  ) : null;
 
   if (loading || error) {
     return (
@@ -177,19 +210,20 @@ export function ChatRoomScreen({
   }
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
-      <ChatRoomTopBar
-        opponent={opponent}
-        onBack={onBack}
-        onOpenMenu={() => setMenuOpen(true)}
-        style={topBarStyle}
-      />
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-        <div className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
-          <div
-            ref={messagesScrollerRef}
-            className="absolute bottom-[calc(67px+max(0px,calc(var(--chat-keyboard-offset)-var(--chat-input-y-offset))))] left-0 top-[74px] w-[393px] overflow-y-auto bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
-          >
+    <>
+      <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
+        <ChatRoomTopBar
+          opponent={opponent}
+          onBack={onBack}
+          onOpenMenu={() => setMenuOpen(true)}
+          style={topBarStyle}
+        />
+        <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+          <div className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+            <div
+              ref={messagesScrollerRef}
+              className="absolute bottom-[calc(67px+max(0px,calc(var(--chat-keyboard-offset)-var(--chat-input-y-offset))))] left-0 top-[74px] w-[393px] overflow-y-auto bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
+            >
             <div className="mb-[14px] flex w-full justify-center">
               <span className="rounded-full bg-[#ffe7d2] px-3 py-[4px] text-[11px] font-semibold leading-[16.5px] text-[#f26c0f]">
                 {worryInfo?.createdAtStr || '날짜 정보 없음'}
@@ -265,60 +299,109 @@ export function ChatRoomScreen({
                 );
               })}
             </div>
-          </div>
-
-          <div className="absolute bottom-[max(0px,calc(var(--chat-keyboard-offset)-var(--chat-input-y-offset)))] left-0 h-[67px] w-[393px] border-t-[0.8px] border-[#ede3d6] bg-white">
-            {sendError && (
-              <div className="absolute bottom-[67px] left-4 right-4 rounded-[12px] bg-white px-3 py-2 text-center text-[12px] font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]">
-                {sendError}
-              </div>
-            )}
-            <div className="absolute left-[14px] top-[12.2px] flex h-[38px] w-[38px] items-center justify-center rounded-full bg-[#fff0e2]">
-              <button type="button" aria-label="첨부 추가" className="flex h-full w-full items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]">
-                <img src={roomPlusIconUrl} alt="" aria-hidden="true" className="h-[18px] w-[18px]" draggable={false} />
-              </button>
             </div>
-            <div className="absolute left-[60px] top-[10.2px] flex min-h-[40px] w-[269px] items-center rounded-[21px] border-[0.8px] border-[#ede3d6] bg-[#fff4e8] px-[16.8px] py-[0.8px]">
-                <input
-                  type="text"
-                  value={draft}
-                  onChange={e => setDraft(e.target.value)}
-                onKeyDown={handleMessageKeyDown}
-                  placeholder="메시지를 입력해 주세요"
-                className="w-full bg-transparent text-[14px] font-normal leading-5 text-[#2b2620] outline-none placeholder:text-[#a39e96]"
-                />
-              </div>
-              <button
-                type="button"
-              onClick={() => void handleSend()}
-                disabled={!draft.trim() || isSending}
-              aria-label="메시지 보내기"
-              className="absolute left-[337px] top-[8.2px] flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#ff8b3d] shadow-[0_4px_6px_rgb(255_122_26/0.4)] transition-transform active:scale-95 disabled:opacity-45 focus:outline-none focus:ring-2 focus:ring-[#f26c0f]"
-              >
-              <img src={roomSendIconUrl} alt="" aria-hidden="true" className="h-5 w-5" draggable={false} />
-              </button>
           </div>
         </div>
-      </div>
-      {menuOpen && (
-        <ChatRoomActionSheet
-          keyboardOffset={viewportMetrics.keyboardOffset * viewportMetrics.scale}
-          onClose={() => setMenuOpen(false)}
-          onNotificationOff={() => {
-            setMenuOpen(false);
-            alert('알림이 꺼졌습니다.');
+        {menuOpen && (
+          <ChatRoomActionSheet
+            keyboardOffset={viewportMetrics.keyboardOffset * viewportMetrics.scale}
+            onClose={() => setMenuOpen(false)}
+            onNotificationOff={() => {
+              setMenuOpen(false);
+              alert('알림이 꺼졌습니다.');
+            }}
+            onBlock={() => {
+              setMenuOpen(false);
+              onLeaveChat();
+            }}
+            onReport={() => {
+              setMenuOpen(false);
+              onReportUser();
+            }}
+          />
+        )}
+      </section>
+      {inputLayer}
+    </>
+  );
+}
+
+function ChatRoomInputBar({
+  draft,
+  sendError,
+  isSending,
+  scale,
+  style,
+  onDraftChange,
+  onMessageKeyDown,
+  onSend,
+}: {
+  readonly draft: string;
+  readonly sendError: string | null;
+  readonly isSending: boolean;
+  readonly scale: number;
+  readonly style: ChatRoomInputBarStyle;
+  readonly onDraftChange: (draft: string) => void;
+  readonly onMessageKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
+  readonly onSend: () => void;
+}) {
+  const px = (value: number) => `${value * scale}px`;
+
+  return (
+    <div className="fixed z-10 border-t border-[#ede3d6] bg-white qling-figma-font" style={style}>
+      {sendError && (
+        <div
+          className="absolute rounded-[12px] bg-white text-center font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]"
+          style={{
+            bottom: px(67),
+            left: px(16),
+            right: px(16),
+            padding: `${px(8)} ${px(12)}`,
+            fontSize: px(12),
           }}
-          onBlock={() => {
-            setMenuOpen(false);
-            onLeaveChat();
-          }}
-          onReport={() => {
-            setMenuOpen(false);
-            onReportUser();
-          }}
-        />
+        >
+          {sendError}
+        </div>
       )}
-    </section>
+      <div
+        className="absolute flex items-center justify-center rounded-full bg-[#fff0e2]"
+        style={{ left: px(14), top: px(12.2), width: px(38), height: px(38) }}
+      >
+        <button type="button" aria-label="첨부 추가" className="flex h-full w-full items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]">
+          <img src={roomPlusIconUrl} alt="" aria-hidden="true" style={{ width: px(18), height: px(18) }} draggable={false} />
+        </button>
+      </div>
+      <div
+        className="absolute flex items-center rounded-[21px] border border-[#ede3d6] bg-[#fff4e8]"
+        style={{
+          left: px(60),
+          top: px(10.2),
+          minHeight: px(40),
+          width: px(269),
+          padding: `${px(0.8)} ${px(16.8)}`,
+        }}
+      >
+        <input
+          type="text"
+          value={draft}
+          onChange={event => onDraftChange(event.target.value)}
+          onKeyDown={onMessageKeyDown}
+          placeholder="메시지를 입력해 주세요"
+          className="w-full bg-transparent font-normal text-[#2b2620] outline-none placeholder:text-[#a39e96]"
+          style={{ fontSize: px(14), lineHeight: px(20) }}
+        />
+      </div>
+      <button
+        type="button"
+        onClick={() => void onSend()}
+        disabled={!draft.trim() || isSending}
+        aria-label="메시지 보내기"
+        className="absolute flex items-center justify-center rounded-full bg-[#ff8b3d] shadow-[0_4px_6px_rgb(255_122_26/0.4)] transition-transform active:scale-95 disabled:opacity-45 focus:outline-none focus:ring-2 focus:ring-[#f26c0f]"
+        style={{ left: px(337), top: px(8.2), width: px(42), height: px(42) }}
+      >
+        <img src={roomSendIconUrl} alt="" aria-hidden="true" style={{ width: px(20), height: px(20) }} draggable={false} />
+      </button>
+    </div>
   );
 }
 
