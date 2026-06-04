@@ -12,7 +12,7 @@ test('chat room autoscroll stays inside the message scroller', () => {
   assert.doesNotMatch(chatRoomScreenSource, /behavior:\s*'smooth'/);
   assert.match(chatRoomScreenSource, /const messagesScrollerRef = useRef<HTMLDivElement>\(null\)/);
   assert.match(chatRoomScreenSource, /scroller\.scrollTop = scroller\.scrollHeight/);
-  assert.match(chatRoomScreenSource, /ref=\{messagesScrollerRef\}[\s\S]*className="absolute bottom-\[calc\(67px\+var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)\)\] left-0 top-\[74px\] w-\[393px\] overflow-y-auto/);
+  assert.match(chatRoomScreenSource, /ref=\{messagesScrollerRef\}[\s\S]*className="absolute bottom-\[calc\(67px\+var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)-var\(--chat-input-y-offset\)\)\] left-0 top-\[74px\] w-\[393px\] overflow-y-auto/);
 });
 
 test('chat shell routes fill the app shell without extending under bottom navigation', () => {
@@ -29,6 +29,8 @@ test('chat screens keep 393px canvas width while chat room uses viewport height'
   assert.match(chatScreenSource, /style=\{\{ transform: `scale\(\$\{canvasScale\}\)` \}\}/);
 
   assert.match(chatRoomScreenSource, /const \[viewportMetrics, setViewportMetrics\] = useState\(\{ canvasHeight: 852, keyboardOffset: 0, scale: 1 \}\)/);
+  assert.match(chatRoomScreenSource, /const chatInputYOffset = 10/);
+  assert.match(chatRoomScreenSource, /'--chat-input-y-offset': `\$\{chatInputYOffset\}px`/);
   assert.match(chatRoomScreenSource, /canvasHeight: layoutHeight \/ scale/);
   assert.match(chatRoomScreenSource, /transform: `scale\(\$\{viewportMetrics\.scale\}\)`/);
   assert.match(chatRoomScreenSource, /relative w-\[393px\] shrink-0 origin-top overflow-hidden/);
@@ -40,11 +42,11 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(chatScreenSource, /absolute left-0 top-\[136px\] h-\[716px\] w-full overflow-y-auto/);
   assert.match(chatScreenSource, /CreamContentBackground/);
   assert.match(chatScreenSource, /touch-none overscroll-none overflow-hidden rounded-t-\[30px\]/);
-  assert.match(chatRoomScreenSource, /absolute bottom-\[calc\(67px\+var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)\)\] left-0 top-\[74px\] w-\[393px\] overflow-y-auto/);
+  assert.match(chatRoomScreenSource, /absolute bottom-\[calc\(67px\+var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)-var\(--chat-input-y-offset\)\)\] left-0 top-\[74px\] w-\[393px\] overflow-y-auto/);
   assert.match(reportUserScreenSource, /min-h-0 flex-1 overflow-y-auto/);
 
-  assert.match(chatRoomScreenSource, /absolute bottom-\[calc\(var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)\)\] left-0 h-\[67px\] w-\[393px\]/);
-  assert.match(chatRoomScreenSource, /absolute bottom-0 left-0 h-\[calc\(var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)\)\] w-\[393px\] bg-white" aria-hidden="true"/);
+  assert.match(chatRoomScreenSource, /absolute bottom-\[calc\(var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)-var\(--chat-input-y-offset\)\)\] left-0 h-\[67px\] w-\[393px\]/);
+  assert.match(chatRoomScreenSource, /absolute bottom-0 left-0 h-\[max\(0px,calc\(var\(--chat-keyboard-offset\)\+var\(--qling-space-safe-bottom\)-var\(--chat-input-y-offset\)\)\)\] w-\[393px\] bg-white" aria-hidden="true"/);
   assert.doesNotMatch(chatRoomScreenSource, /top-\[790px\]/);
   assert.match(chatRoomScreenSource, /ChatRoomTopBar/);
   assert.match(reportUserScreenSource, /flex h-full min-h-0 flex-col/);

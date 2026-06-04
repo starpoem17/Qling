@@ -9,9 +9,11 @@ const roomNotificationOffIconUrl = new URL('../../../assets/chat/room_notificati
 const roomBlockIconUrl = new URL('../../../assets/chat/room_block.svg', import.meta.url).href;
 const roomReportIconUrl = new URL('../../../assets/chat/room_report.svg', import.meta.url).href;
 const dimThemeColor = '#8b7b62';
+const chatInputYOffset = 10;
 
 type ChatRoomCanvasStyle = CSSProperties & {
   readonly '--chat-keyboard-offset': string;
+  readonly '--chat-input-y-offset': string;
 };
 
 export interface ChatMessage {
@@ -112,6 +114,7 @@ export function ChatRoomScreen({
 
   const canvasStyle: ChatRoomCanvasStyle = {
     '--chat-keyboard-offset': `${viewportMetrics.keyboardOffset}px`,
+    '--chat-input-y-offset': `${chatInputYOffset}px`,
     height: `${viewportMetrics.canvasHeight}px`,
     transform: `scale(${viewportMetrics.scale})`,
   };
@@ -175,7 +178,7 @@ export function ChatRoomScreen({
 
           <div
             ref={messagesScrollerRef}
-            className="absolute bottom-[calc(67px+var(--chat-keyboard-offset)+var(--qling-space-safe-bottom))] left-0 top-[74px] w-[393px] overflow-y-auto bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
+            className="absolute bottom-[calc(67px+var(--chat-keyboard-offset)+var(--qling-space-safe-bottom)-var(--chat-input-y-offset))] left-0 top-[74px] w-[393px] overflow-y-auto bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
           >
             <div className="mb-[14px] flex w-full justify-center">
               <span className="rounded-full bg-[#ffe7d2] px-3 py-[4px] text-[11px] font-semibold leading-[16.5px] text-[#f26c0f]">
@@ -254,9 +257,9 @@ export function ChatRoomScreen({
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 h-[calc(var(--chat-keyboard-offset)+var(--qling-space-safe-bottom))] w-[393px] bg-white" aria-hidden="true" />
+          <div className="absolute bottom-0 left-0 h-[max(0px,calc(var(--chat-keyboard-offset)+var(--qling-space-safe-bottom)-var(--chat-input-y-offset)))] w-[393px] bg-white" aria-hidden="true" />
 
-          <div className="absolute bottom-[calc(var(--chat-keyboard-offset)+var(--qling-space-safe-bottom))] left-0 h-[67px] w-[393px] border-t-[0.8px] border-[#ede3d6] bg-white">
+          <div className="absolute bottom-[calc(var(--chat-keyboard-offset)+var(--qling-space-safe-bottom)-var(--chat-input-y-offset))] left-0 h-[67px] w-[393px] border-t-[0.8px] border-[#ede3d6] bg-white">
             {sendError && (
               <div className="absolute bottom-[67px] left-4 right-4 rounded-[12px] bg-white px-3 py-2 text-center text-[12px] font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]">
                 {sendError}
