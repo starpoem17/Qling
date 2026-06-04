@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export interface ReportUserScreenProps {
@@ -38,16 +37,21 @@ export function ReportUserScreen({
     <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]">
       <div className="mx-auto flex h-full w-full max-w-[480px] flex-col bg-[#ff8b3d]">
         {/* Top Bar Area */}
-        <div className="flex pt-[48px] h-[115px] shrink-0 w-full items-end justify-between px-4 pb-4 text-white z-20 bg-[#ff8b3d] relative">
-          <button type="button" onClick={onBack} className="relative z-10 flex h-8 w-8 items-center justify-center focus:outline-none shrink-0" aria-label="뒤로가기">
-            <ChevronLeft className="h-6 w-6" strokeWidth={3} />
+        <div className="relative h-[115px] shrink-0 w-full z-20 bg-[#ff8b3d]">
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="뒤로가기"
+            className="absolute left-[14px] top-[49px] h-[44px] w-[28px] rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white z-10"
+          >
+            <span aria-hidden="true" className="absolute left-[8px] top-0 font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-[38px] text-white">
+              ‹
+            </span>
           </button>
           
-          <div className="absolute inset-x-0 bottom-4 flex justify-center pointer-events-none">
-            <h1 className="text-[18px] font-bold">신고하기</h1>
-          </div>
-          
-          <div className="w-8 shrink-0"></div>
+          <h1 className="absolute left-0 top-[60px] w-full text-center text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] font-sans text-white pointer-events-none">
+            신고하기
+          </h1>
         </div>
 
         {/* Report Content Area */}

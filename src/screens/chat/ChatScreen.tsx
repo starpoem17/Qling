@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, MoreVertical, Search, UserCircle2 } from 'lucide-react';
+import { MoreVertical, Search, CircleUserRound } from 'lucide-react';
 import { profileImageUrlForColor } from '../shared/ui';
 
 export interface ChatListItem {
@@ -37,13 +37,27 @@ export function ChatScreen({
     <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d] text-[#2a2a2a]" onClick={() => setOpenMenuId(null)}>
       <div className="mx-auto flex h-full w-full max-w-[480px] flex-col overflow-hidden bg-[#ff8b3d]">
         {/* Top Bar Area */}
-        <div className="flex pt-[48px] h-[115px] shrink-0 w-full items-end justify-between px-6 pb-4 text-white z-20 bg-[#ff8b3d]">
-          <button type="button" onClick={() => onBack && onBack()} className="focus:outline-none">
-            <ChevronLeft className="w-7 h-7" strokeWidth={3} />
+        <div className="relative h-[115px] shrink-0 w-full z-20 bg-[#ff8b3d]">
+          <button
+            type="button"
+            onClick={() => onBack && onBack()}
+            aria-label="뒤로가기"
+            className="absolute left-[14px] top-[49px] h-[44px] w-[28px] rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white"
+          >
+            <span aria-hidden="true" className="absolute left-[8px] top-0 font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-[38px] text-white">
+              ‹
+            </span>
           </button>
-          <h1 className="text-[18px] font-bold mb-1">채팅</h1>
-          <button type="button" onClick={() => onProfileClick && onProfileClick()} className="focus:outline-none mb-1">
-            <UserCircle2 className="w-8 h-8" strokeWidth={1.5} />
+          <h1 className="absolute left-0 top-[60px] w-full text-center text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] font-sans text-white pointer-events-none">
+            채팅
+          </h1>
+          <button
+            type="button"
+            aria-label="마이페이지 열기"
+            onClick={() => onProfileClick && onProfileClick()}
+            className="absolute right-[14px] top-[53.5px] flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+          >
+            <CircleUserRound className="h-[25px] w-[25px]" aria-hidden="true" />
           </button>
         </div>
 
