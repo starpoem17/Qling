@@ -4,7 +4,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { Children, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { QlingPeekHeader } from '../shared/QlingPeekHeader';
 import { MyWorriesScreen } from './MyWorriesScreen';
 import type { MyWorriesScreenProps } from './contract';
 
@@ -82,12 +81,10 @@ test('my worries screen actions match PRD entry points', () => {
     },
   }));
 
-  const eye = findElement(tree, candidate => candidate.type === QlingPeekHeader);
-  assert.ok(eye);
-  assert.equal(eye.type, QlingPeekHeader);
-  assert.equal(propsOf(eye).eyeTestId, 'my-worries-top-left-eye');
+  const header = findElement(tree, candidate => typeof candidate.type === 'function' && candidate.type.name === 'MyWorriesStaticHeader');
+  assert.ok(header);
 
-  const openMyPage = propsOf(eye).onOpenMyPage;
+  const openMyPage = propsOf(header).onOpenMyPage;
   assert.equal(typeof openMyPage, 'function');
   (openMyPage as () => void)();
   click(findButtonByAriaLabel(tree, /고민 작성 화면으로 이동/));
@@ -103,9 +100,9 @@ test('my worries write button uses the transformed Figma canvas coordinates', ()
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
   assert.match(html, /고민 작성 화면으로 이동/);
-  assert.match(html, /absolute left-\[302px\] z-40 flex h-\[59\.5px\] w-\[59\.5px\]/);
-  assert.match(html, /top:min\(683px, calc\(\(100dvh - var\(--qling-space-nav-height\) - 29\.5px - 59\.5px\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\)\)/);
-  assert.match(html, /my_concerns\/send\.svg/);
+  assert.match(html, /absolute left-\[258px\] top-\[710px\] z-40 flex items-center gap-\[7px\]/);
+  assert.match(html, /고민 쓰기/);
+  assert.doesNotMatch(html, /my_concerns\/send\.svg/);
   assert.doesNotMatch(html, /fixed bottom-\[calc\(var\(--qling-space-nav-height\)\+29\.5px\)\]/);
 });
 
@@ -113,31 +110,34 @@ test('my worries my-page button aligns to the Figma header icon position', () =>
   const html = renderToStaticMarkup(MyWorriesScreen(baseProps()));
 
   assert.match(html, /aria-label="마이페이지 열기"/);
-  assert.match(html, /left-\[333\.5px\]/);
-  assert.match(html, /top-\[53\.5px\]/);
+  assert.match(html, /left-\[327px\] top-\[21px\] h-\[49px\] w-\[49px\]/);
+  assert.match(html, /left-3 top-3 h-\[25px\] w-\[25px\]/);
 });
 
-test('my worries empty state renders Figma copy in a non-scroll static card', () => {
+test('my worries empty state renders Figma intro without the previous static card', () => {
   const html = renderToStaticMarkup(MyWorriesScreen(baseProps({
     state: { status: 'empty', message: '첫 고민을 남겨보세요.' },
     items: [],
   })));
 
-  assert.match(html, /첫 고민을 올려보세요!/);
-  assert.match(html, /오른쪽 아래 버튼으로 고민을 작성할 수 있어요/);
+  assert.match(html, /나의 고민 빈 상태/);
+  assert.match(html, /나의 고민/);
+  assert.match(html, /내가 남긴 고민과 받은 답변이에요/);
+  assert.match(html, /내 활동 요약/);
+  assert.doesNotMatch(html, /첫 고민을 올려보세요!/);
+  assert.doesNotMatch(html, /오른쪽 아래 버튼으로 고민을 작성할 수 있어요/);
   assert.doesNotMatch(html, /첫 고민을 남겨보세요\./);
   assert.match(html, /고민 작성 화면으로 이동/);
-  assert.doesNotMatch(html, /고민 쓰기/);
+  assert.match(html, /고민 쓰기/);
   assert.equal((html.match(/고민 작성 화면으로 이동/g) ?? []).length, 1);
-  assert.match(html, /h-\[733px\] touch-none overscroll-none overflow-hidden rounded-t-\[32px\] bg-\[#fff1d1\] px-4 pt-\[30px\]/);
-  assert.match(html, /h-\[168px\] w-full overflow-hidden rounded-\[18px\]/);
-  assert.match(html, /absolute left-\[18px\] top-\[60px\] w-\[325px\]/);
+  assert.match(html, /absolute left-0 top-\[74px\] h-\[733px\] w-full touch-none overscroll-none overflow-hidden rounded-t-\[32px\] px-4 pt-4/);
+  assert.doesNotMatch(html, /h-\[168px\] w-full overflow-hidden rounded-\[18px\]/);
   assert.doesNotMatch(html, /나의 고민 목록/);
   assert.doesNotMatch(html, /overflow-y-auto/);
 
   const source = fs.readFileSync(path.join(process.cwd(), 'src/screens/myPage/MyWorriesScreen.tsx'), 'utf8');
   const emptyStart = source.indexOf("props.state.status === 'empty'");
-  const emptyBranch = source.slice(emptyStart, source.indexOf('            ) : (', emptyStart));
+  const emptyBranch = source.slice(emptyStart, source.indexOf('          ) : (', emptyStart));
   assert.match(emptyBranch, /onWheel=\{blockLoadingScroll\}/);
   assert.match(emptyBranch, /onTouchMove=\{blockLoadingScroll\}/);
   assert.doesNotMatch(emptyBranch, /PeekHeaderScrollArea/);
@@ -153,15 +153,15 @@ test('my worries loading state renders the Figma spinner status without visible 
   assert.match(html, /role="status"/);
   assert.match(html, /aria-live="polite"/);
   assert.match(html, /data-testid="figma-tab-loading-indicator"/);
-  assert.match(html, /left-1\/2 top-\[306px\] h-10 w-10/);
+  assert.match(html, /left-1\/2 h-10 w-10 -translate-x-1\/2 top-\[332px\]/);
   assert.match(html, /작성한 고민을 불러오고 있습니다\./);
   assert.doesNotMatch(html, /나의 고민을 불러오는 중/);
   assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] -mb-\[var\(--qling-space-scroll-bottom\)\] -mt-6 h-dvh overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /mx-auto flex h-full w-full max-w-\[480px\] justify-center overflow-hidden/);
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
-  assert.match(html, /h-\[752px\] touch-none overscroll-none overflow-hidden/);
-  assert.doesNotMatch(html, /h-\[752px\] overflow-y-auto/);
+  assert.match(html, /top-\[74px\] h-\[733px\] w-full touch-none overscroll-none overflow-hidden/);
+  assert.doesNotMatch(html, /h-\[733px\] w-full overflow-y-auto/);
   assert.match(html, /bg-\[#ff8b3d\]/);
   assert.doesNotMatch(html, /w-\[100dvw\]/);
   assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
@@ -170,8 +170,8 @@ test('my worries loading state renders the Figma spinner status without visible 
   const loadingBranch = source.slice(source.indexOf("props.state.status === 'loading'"), source.indexOf("props.state.status === 'error'"));
   assert.match(loadingBranch, /onWheel=\{blockLoadingScroll\}/);
   assert.match(loadingBranch, /onTouchMove=\{blockLoadingScroll\}/);
-  assert.doesNotMatch(loadingBranch, /scrollPeekHeader\.onScroll/);
-  assert.doesNotMatch(loadingBranch, /scrollPeekHeader\.onTouchStart/);
+  assert.doesNotMatch(loadingBranch, /scrollPeekHeader/);
+  assert.doesNotMatch(loadingBranch, /PeekHeaderScrollArea/);
 });
 
 test('my worries DOM does not render answer writer private data', () => {
@@ -196,12 +196,6 @@ type TestElement = ReactElement<Record<string, unknown>>;
 function findButtonByAriaLabel(tree: ReactNode, pattern: RegExp): TestElement {
   const element = findElement(tree, candidate => candidate.type === 'button' && pattern.test(String(candidate.props['aria-label'] ?? '')));
   assert.ok(element, `button matching ${pattern} not found`);
-  return element;
-}
-
-function findElementByTestId(tree: ReactNode, testId: string): TestElement {
-  const element = findElement(tree, candidate => candidate.props['data-testid'] === testId);
-  assert.ok(element, `element ${testId} not found`);
   return element;
 }
 

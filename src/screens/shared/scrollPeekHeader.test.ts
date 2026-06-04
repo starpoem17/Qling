@@ -304,13 +304,15 @@ test('peek header screens use transform layout without scroll-time height transi
   const myWorriesSource = fs.readFileSync(path.join(process.cwd(), 'src/screens/myPage/MyWorriesScreen.tsx'), 'utf8');
   const scrollAreaSource = fs.readFileSync(path.join(process.cwd(), 'src/screens/shared/PeekHeaderScrollArea.tsx'), 'utf8');
 
-  assert.match(myWorriesSource, /h-\[836px\]/);
-  assert.match(myWorriesSource, /h-\[752px\]/);
-  assert.match(myWorriesSource, /--qling-peek-progress/);
-  assert.match(myWorriesSource, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
+  assert.match(myWorriesSource, /CreamContentBackground/);
+  assert.match(myWorriesSource, /top-\[74px\] h-\[733px\]/);
+  assert.match(myWorriesSource, /overflow-y-auto rounded-t-\[32px\] px-4 pb-\[180px\] pt-4/);
+  assert.doesNotMatch(myWorriesSource, /--qling-peek-progress/);
+  assert.doesNotMatch(myWorriesSource, /translateY\(calc/);
   assert.doesNotMatch(myWorriesSource, /contentHeightClassName/);
   assert.doesNotMatch(myWorriesSource, /transition-\[height\]/);
-  assert.match(myWorriesSource, /PeekHeaderScrollArea/);
+  assert.doesNotMatch(myWorriesSource, /PeekHeaderScrollArea/);
+  assert.doesNotMatch(myWorriesSource, /useScrollPeekHeader/);
   assert.match(myWorriesSource, /blockLoadingScroll/);
   assert.match(myWorriesSource, /touch-none overscroll-none overflow-hidden/);
 
