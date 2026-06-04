@@ -450,13 +450,12 @@ function ChatRoomInputBar({
       <input
         ref={safeInputRef}
         data-chat-room-message-input
-        type="text"
+        type="search"
         value={draft}
         onChange={onDraftChange}
         onKeyDown={onMessageKeyDown}
         onFocus={onMessageFocus}
         aria-label="메시지 입력"
-        name="qling-chat-draft"
         inputMode="text"
         enterKeyHint="send"
         autoComplete="new-password"

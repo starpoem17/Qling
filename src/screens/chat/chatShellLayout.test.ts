@@ -72,6 +72,8 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(chatRoomScreenSource, /<div data-chat-room-input-bar className="fixed z-10 border-t border-\[#ede3d6\] bg-white qling-figma-font" style=\{style\}>/);
   assert.match(chatRoomScreenSource, /data-chat-room-message-input/);
   assert.match(chatRoomScreenSource, /ref=\{safeInputRef\}[\s\S]*data-chat-room-message-input/);
+  assert.match(chatRoomScreenSource, /type="search"/);
+  assert.doesNotMatch(chatRoomScreenSource, /name="qling-chat-draft"/);
   assert.match(chatRoomScreenSource, /autoComplete="new-password"/);
   assert.match(chatRoomScreenSource, /enterKeyHint="send"/);
   assert.match(chatRoomScreenSource, /data-lpignore="true"/);
