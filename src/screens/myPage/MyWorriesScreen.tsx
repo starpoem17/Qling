@@ -1,4 +1,4 @@
-import type { TouchEvent, WheelEvent } from 'react';
+import type { CSSProperties, TouchEvent, WheelEvent } from 'react';
 import {
   ErrorState,
   QlingCard,
@@ -15,13 +15,17 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
+  const writeButtonStyle = {
+    top: `min(710px, calc((100dvh - var(--qling-space-nav-height)) / (${canvasScale}) - 62px))`,
+  } satisfies CSSProperties;
 
   const writeButton = (
     <button
       type="button"
       aria-label="고민 작성 화면으로 이동"
       onClick={props.onWriteWorry}
-      className="absolute left-[258px] top-[710px] z-40 flex items-center gap-[7px] overflow-hidden rounded-full bg-[#ff8b3d] py-[14px] pl-[18px] pr-5 text-white shadow-[0_5px_14px_rgb(255_139_61/0.45)] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-white"
+      className="absolute left-[258px] z-40 flex items-center gap-[7px] overflow-hidden rounded-full bg-[#ff8b3d] py-[14px] pl-[18px] pr-5 text-white shadow-[0_5px_14px_rgb(255_139_61/0.45)] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-white"
+      style={writeButtonStyle}
     >
       <span className="relative h-4 w-4 shrink-0" aria-hidden="true">
         <span className="absolute left-0.5 top-[6.7px] h-[2.6px] w-[15px] rounded-sm bg-white" />
@@ -102,7 +106,6 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
             </section>
           )}
 
-          <FixedBottomFade />
           {writeButton}
         </div>
       </div>
@@ -149,15 +152,6 @@ function CreamContentBackground() {
     <div
       aria-hidden="true"
       className="absolute left-0 top-[74px] h-[733px] w-full overflow-hidden rounded-t-[32px] bg-[#fff1d1]"
-    />
-  );
-}
-
-function FixedBottomFade() {
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute left-0 top-[558px] z-30 h-[120px] w-full bg-gradient-to-b from-[rgba(255,241,209,0)] via-[rgba(255,241,209,0.92)] via-[70%] to-[#fff1d1] opacity-80"
     />
   );
 }

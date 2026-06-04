@@ -100,10 +100,20 @@ test('my worries write button uses the transformed Figma canvas coordinates', ()
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
   assert.match(html, /고민 작성 화면으로 이동/);
-  assert.match(html, /absolute left-\[258px\] top-\[710px\] z-40 flex items-center gap-\[7px\]/);
+  assert.match(html, /absolute left-\[258px\] z-40 flex items-center gap-\[7px\]/);
+  assert.match(html, /style="top:min\(710px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 62px\)\)"/);
   assert.match(html, /고민 쓰기/);
   assert.doesNotMatch(html, /my_concerns\/send\.svg/);
   assert.doesNotMatch(html, /fixed bottom-\[calc\(var\(--qling-space-nav-height\)\+29\.5px\)\]/);
+});
+
+test('my worries screen does not render the fixed bottom fade overlay', () => {
+  const html = renderToStaticMarkup(MyWorriesScreen(baseProps()));
+
+  assert.doesNotMatch(html, /FixedBottomFade/);
+  assert.doesNotMatch(html, /bg-gradient-to-b/);
+  assert.doesNotMatch(html, /top-\[558px\]/);
+  assert.doesNotMatch(html, /from-\[rgba\(255,241,209,0\)\]/);
 });
 
 test('my worries my-page button aligns to the Figma header icon position', () => {

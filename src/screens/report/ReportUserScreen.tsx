@@ -34,8 +34,8 @@ export function ReportUserScreen({
   };
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]">
-      <div className="mx-auto flex h-full w-full max-w-[480px] flex-col bg-[#ff8b3d]">
+    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[calc(100%+1.5rem)] overflow-hidden bg-[#ff8b3d]">
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-[480px] flex-col bg-[#ff8b3d]">
         {/* Top Bar Area */}
         <div className="flex flex-col w-full z-20 bg-[#ff8b3d] shrink-0 pt-[calc(env(safe-area-inset-top,20px)+20px)] pb-4 relative">
           <div className="flex items-start justify-between px-2">
@@ -56,9 +56,9 @@ export function ReportUserScreen({
         </div>
 
         {/* Report Content Area */}
-        <div className="flex-1 w-full bg-[#fff5eb] rounded-t-[24px] overflow-hidden flex flex-col relative z-10 shadow-[0_-4px_16px_rgb(0_0_0/0.05)] pt-8 px-5 pb-[calc(20px+env(safe-area-inset-bottom,0px))]">
-          <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto">
+        <div className="relative z-10 flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-t-[24px] bg-[#fff5eb] px-5 pb-[calc(20px+env(safe-area-inset-bottom,0px))] pt-8 shadow-[0_-4px_16px_rgb(0_0_0/0.05)]">
+          <div className="flex h-full min-h-0 flex-col">
+            <div className="min-h-0 flex-1 overflow-y-auto">
               {/* Headings */}
               <div className="mb-6">
                 <h2 className="text-[20px] font-bold text-[#2a2a2a] mb-2 leading-tight">

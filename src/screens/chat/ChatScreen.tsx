@@ -34,8 +34,8 @@ export function ChatScreen({
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d] text-[#2a2a2a]" onClick={() => setOpenMenuId(null)}>
-      <div className="mx-auto flex h-full w-full max-w-[480px] flex-col overflow-hidden bg-[#ff8b3d]">
+    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[calc(100%+1.5rem)] overflow-hidden bg-[#ff8b3d] text-[#2a2a2a]" onClick={() => setOpenMenuId(null)}>
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-[480px] flex-col overflow-hidden bg-[#ff8b3d]">
         {/* Top Bar Area */}
         <div className="flex flex-col w-full z-20 bg-[#ff8b3d] shrink-0 pt-[calc(env(safe-area-inset-top,20px)+20px)] pb-4 relative">
           <div className="flex items-start justify-between px-2">
@@ -76,7 +76,7 @@ export function ChatScreen({
         </div>
 
         {/* Bottom Sheet Area */}
-        <div className="mt-6 flex-1 w-full overflow-y-auto px-[18px] pt-6 pb-[calc(108px+env(safe-area-inset-bottom,0px))] bg-[#fff1d1] rounded-t-[30px] z-10 scrollbar-hide">
+        <div className="z-10 mt-6 min-h-0 w-full flex-1 overflow-y-auto rounded-t-[30px] bg-[#fff1d1] px-[18px] pb-[calc(108px+env(safe-area-inset-bottom,0px))] pt-6 scrollbar-hide">
           {loading ? (
              <div className="flex justify-center py-10 text-[#b8b8b8] text-[14px] font-bold">목록을 불러오는 중입니다...</div>
           ) : chats && chats.length > 0 ? (

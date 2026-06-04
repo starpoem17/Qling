@@ -44,10 +44,12 @@ export function ChatRoomScreen({
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesScrollerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const scroller = messagesScrollerRef.current;
+    if (!scroller) return;
+    scroller.scrollTop = scroller.scrollHeight;
   }, [messages]);
 
   const handleSend = async () => {
@@ -68,8 +70,8 @@ export function ChatRoomScreen({
 
   if (loading || error) {
     return (
-      <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
-        <div className="mx-auto flex h-full w-full max-w-[480px] flex-col">
+      <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[calc(100%+1.5rem)] overflow-hidden bg-[#fff1d1]">
+        <div className="mx-auto flex h-full min-h-0 w-full max-w-[480px] flex-col">
           <div className="flex flex-col w-full z-20 bg-[#ff8b3d] shrink-0 pt-[calc(env(safe-area-inset-top,20px)+20px)] pb-4 relative">
             <div className="flex items-start justify-between px-2">
               <button
@@ -87,7 +89,7 @@ export function ChatRoomScreen({
               </h1>
             </div>
           </div>
-          <div className="pt-[40px] px-[24px] flex-1">
+          <div className="min-h-0 flex-1 px-[24px] pt-[40px]">
             {error ? <ErrorState title="오류" message={error} /> : <div className="text-center font-bold text-[#b8b8b8]">로딩 중...</div>}
           </div>
         </div>
@@ -96,8 +98,8 @@ export function ChatRoomScreen({
   }
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]" onClick={() => setMenuOpen(false)}>
-      <div className="mx-auto flex h-full w-full max-w-[480px] flex-col bg-[#ff8b3d]">
+    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[calc(100%+1.5rem)] overflow-hidden bg-[#ff8b3d]" onClick={() => setMenuOpen(false)}>
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-[480px] flex-col bg-[#ff8b3d]">
         {/* Top Bar Area */}
         <div className="flex flex-col w-full z-20 bg-[#ff8b3d] shrink-0 pt-[calc(env(safe-area-inset-top,20px)+20px)] pb-4 relative">
           <div className="flex items-start justify-between px-2">
@@ -145,8 +147,8 @@ export function ChatRoomScreen({
         </div>
         
         {/* Chat Content Area */}
-        <div className="flex-1 w-full bg-[#fff1d1] rounded-t-[24px] overflow-hidden flex flex-col relative z-10 shadow-[0_-4px_16px_rgb(0_0_0/0.05)]">
-          <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-hide">
+        <div className="relative z-10 flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-t-[24px] bg-[#fff1d1] shadow-[0_-4px_16px_rgb(0_0_0/0.05)]">
+          <div ref={messagesScrollerRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-6 scrollbar-hide">
             {/* Date Pill */}
             <div className="w-full flex justify-center mb-6">
                <span className="bg-[#ffe8d6] text-[#ff8b3d] px-[14px] py-[6px] rounded-full text-[13px] font-bold tracking-tight">
@@ -226,12 +228,11 @@ export function ChatRoomScreen({
                   </div>
                 );
               })}
-              <div ref={messagesEndRef} className="h-[2px]" />
             </div>
           </div>
 
           {/* Input Area */}
-          <div className="w-full bg-white px-4 py-3 shadow-[0_-4px_16px_rgb(0_0_0/0.03)] z-20 pb-[calc(12px+env(safe-area-inset-bottom,0px))]">
+          <div className="z-20 w-full shrink-0 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] shadow-[0_-4px_16px_rgb(0_0_0/0.03)]">
             {sendError && (
               <div className="mb-2 text-center text-[12px] font-bold text-red-500">
                 {sendError}
