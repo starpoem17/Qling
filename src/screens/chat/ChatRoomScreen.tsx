@@ -1,7 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
 import { cn } from '../../lib/utils';
-import { MoreVertical, Plus, Send } from 'lucide-react';
 import { ErrorState, profileImageUrlForColor } from '../shared/ui';
+
+const roomPlusIconUrl = new URL('../../../assets/chat/room_plus.svg', import.meta.url).href;
+const roomSendIconUrl = new URL('../../../assets/chat/room_send.svg', import.meta.url).href;
+const roomMoreIconUrl = new URL('../../../assets/chat/room_more.svg', import.meta.url).href;
+const roomNotificationOffIconUrl = new URL('../../../assets/chat/room_notification_off.svg', import.meta.url).href;
+const roomBlockIconUrl = new URL('../../../assets/chat/room_block.svg', import.meta.url).href;
+const roomReportIconUrl = new URL('../../../assets/chat/room_report.svg', import.meta.url).href;
 
 export interface ChatMessage {
   messageId: string;
@@ -45,6 +51,7 @@ export function ChatRoomScreen({
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
+  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 
   useEffect(() => {
     const scroller = messagesScrollerRef.current;
@@ -65,32 +72,28 @@ export function ChatRoomScreen({
     setIsSending(false);
   };
 
+  const handleMessageKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' || event.shiftKey) return;
+    event.preventDefault();
+    void handleSend();
+  };
+
   const mineMessageIds = messages.filter(m => m.isMine).map(m => m.messageId);
   const unreadThresholdIndex = mineMessageIds.length - (opponentUnreadCount || 0);
 
   if (loading || error) {
     return (
-      <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[calc(100%+1.5rem)] overflow-hidden bg-[#fff1d1]">
-        <div className="mx-auto flex h-full min-h-0 w-full max-w-[480px] flex-col">
-          <div className="flex flex-col w-full z-20 bg-[#ff8b3d] shrink-0 pt-[calc(env(safe-area-inset-top,20px)+20px)] pb-4 relative">
-            <div className="flex items-start justify-between px-2">
-              <button
-                type="button"
-                onClick={onBack}
-                aria-label="뒤로가기"
-                className="flex h-[44px] w-[36px] items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white shrink-0"
-              >
-                <span aria-hidden="true" className="font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-none text-white pr-1">
-                  ‹
-                </span>
-              </button>
-              <h1 className="flex-1 text-center text-[17px] font-extrabold leading-[44px] tracking-[-0.34px] font-sans text-white pointer-events-none pr-8">
-                채팅
-              </h1>
+      <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
+        <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+          <div className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={{ transform: `scale(${canvasScale})` }}>
+            <ChatRoomTopBar
+              opponent={opponent}
+              onBack={onBack}
+              onOpenMenu={() => setMenuOpen(true)}
+            />
+            <div className="absolute left-0 top-[74px] flex h-[778px] w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
+              {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
             </div>
-          </div>
-          <div className="min-h-0 flex-1 px-[24px] pt-[40px]">
-            {error ? <ErrorState title="오류" message={error} /> : <div className="text-center font-bold text-[#b8b8b8]">로딩 중...</div>}
           </div>
         </div>
       </section>
@@ -98,77 +101,40 @@ export function ChatRoomScreen({
   }
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mt-6 h-[calc(100%+1.5rem)] overflow-hidden bg-[#ff8b3d]" onClick={() => setMenuOpen(false)}>
-      <div className="mx-auto flex h-full min-h-0 w-full max-w-[480px] flex-col bg-[#ff8b3d]">
-        {/* Top Bar Area */}
-        <div className="flex flex-col w-full z-20 bg-[#ff8b3d] shrink-0 pt-[calc(env(safe-area-inset-top,20px)+20px)] pb-4 relative">
-          <div className="flex items-start justify-between px-2">
-            <button
-              type="button"
-              onClick={onBack}
-              aria-label="뒤로가기"
-              className="flex h-[44px] w-[36px] items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white shrink-0"
-            >
-              <span aria-hidden="true" className="font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-none text-white pr-1">
-                ‹
+    <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
+      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+        <div className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={{ transform: `scale(${canvasScale})` }}>
+          <ChatRoomTopBar
+            opponent={opponent}
+            onBack={onBack}
+            onOpenMenu={() => setMenuOpen(true)}
+          />
+
+          <div
+            ref={messagesScrollerRef}
+            className="absolute left-0 top-[74px] h-[716px] w-[393px] overflow-y-auto bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
+          >
+            <div className="mb-[14px] flex w-full justify-center">
+              <span className="rounded-full bg-[#ffe7d2] px-3 py-[4px] text-[11px] font-semibold leading-[16.5px] text-[#f26c0f]">
+                {worryInfo?.createdAtStr || '날짜 정보 없음'}
               </span>
-            </button>
-            
-            <div className="flex flex-col items-center justify-start flex-1 px-2 pointer-events-none">
-               <div className="relative mb-[6px] shrink-0 pointer-events-auto">
-                 <img 
-                   src={profileImageUrlForColor(opponent?.profileColor || '#ffd43b')}
-                   alt="프로필"
-                   className="w-[42px] h-[42px] rounded-full object-cover shadow-sm bg-white"
-                 />
-                 <div className="absolute bottom-0 right-0 w-[12px] h-[12px] bg-[#22c55e] border-[2px] border-[#ff8b3d] rounded-full"></div>
-               </div>
-               <span className="text-[17px] font-extrabold tracking-tight leading-none mb-1 truncate w-full text-center text-white">{opponent?.nickname || '대화방'}</span>
-               <span className="text-[12px] font-medium text-white/90 shrink-0">답변 채택률 92%</span>
             </div>
 
-            <div className="relative shrink-0 flex items-start justify-center h-[44px] w-[36px]">
-              <button 
-                type="button" 
-                onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
-                className="flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
-              >
-                <MoreVertical className="h-[26px] w-[26px]" strokeWidth={2.5} />
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-[100%] mt-1 w-[160px] bg-white rounded-[14px] shadow-[0_4px_16px_rgb(0_0_0/0.15)] overflow-hidden z-30 pointer-events-auto">
-                  <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); alert('알림이 꺼졌습니다.'); }}>알림 끄기</button>
-                  <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#2a2a2a] hover:bg-gray-50 border-b border-gray-100" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onLeaveChat(); }}>채팅방 나가기</button>
-                  <button type="button" className="w-full text-left px-5 py-3.5 text-[15px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={(e) => { e.stopPropagation(); setMenuOpen(false); onReportUser(); }}>신고하기</button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        
-        {/* Chat Content Area */}
-        <div className="relative z-10 flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-t-[24px] bg-[#fff1d1] shadow-[0_-4px_16px_rgb(0_0_0/0.05)]">
-          <div ref={messagesScrollerRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-6 scrollbar-hide">
-            {/* Date Pill */}
-            <div className="w-full flex justify-center mb-6">
-               <span className="bg-[#ffe8d6] text-[#ff8b3d] px-[14px] py-[6px] rounded-full text-[13px] font-bold tracking-tight">
-                  {worryInfo?.createdAtStr || '날짜 정보 없음'}
-               </span>
-            </div>
-
-            {/* Worry Card */}
-            <div className="w-full bg-white rounded-[20px] p-5 shadow-[0_4px_12px_rgb(0_0_0/0.04)] mb-8">
-               <span className="bg-[#ffe8d6] text-[#ff8b3d] px-[10px] py-[4px] rounded-[8px] text-[12px] font-bold inline-block mb-3">
+            <div className="mb-[14px] h-[99.425px] w-full rounded-[14px] border-[0.8px] border-[#f1e7da] bg-white px-[14.8px] py-[12.8px] shadow-[0_2px_8px_rgb(120_90_60/0.07)]">
+              <div className="mb-[8px] flex h-[30.2px] items-center">
+                <span className="rounded-full bg-[#ffe7d2] px-[7.2px] py-[2px] font-['Qling_Noto_Sans_KR_Black'] text-[10px] font-black leading-[15px] text-[#f26c0f]">
                   {worryInfo?.category || '고민'}
-               </span>
-               <h3 className="text-[16px] font-bold text-[#2a2a2a] leading-[1.4] tracking-tight mb-2">
-                  {worryInfo?.title || '게시글 정보 불러오는 중...'}
-               </h3>
-               <p className="text-[13px] font-medium text-[#b8b8b8]">이 고민의 답변에서 시작된 대화예요</p>
+                </span>
+              </div>
+              <h3 className="truncate text-[13px] font-semibold leading-[21.125px] tracking-[-0.325px] text-[#2b2620]">
+                {worryInfo?.title || '게시글 정보 불러오는 중...'}
+              </h3>
+              <p className="pt-[6px] text-[11px] font-normal leading-[16.5px] text-[#a39e96]">
+                이 고민의 답변에서 시작된 대화예요
+              </p>
             </div>
 
-            {/* Messages */}
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-[14px]">
               {messages.map((msg, index) => {
                 const showProfile = !msg.isMine && (index === 0 || messages[index - 1].isMine);
                 
@@ -182,45 +148,39 @@ export function ChatRoomScreen({
                 return (
                   <div key={msg.messageId} className={cn('flex w-full', msg.isMine ? 'justify-end' : 'justify-start')}>
                     {!msg.isMine && (
-                       <div className="flex items-start gap-[10px] max-w-[85%]">
-                          {/* Opponent Avatar */}
-                          <div className="relative shrink-0 mt-1">
+                      <div className="flex max-w-full items-end gap-2">
+                        <div className="relative h-full min-h-[31px] w-[34px] shrink-0 self-stretch">
                              {showProfile ? (
                                 <>
                                   <img 
-                                    src={profileImageUrlForColor(opponent?.profileColor || '#ffd43b')}
+                                    src={profileImageUrlForColor(opponent?.profileColor || '#FF8B3D')}
                                     alt="프로필"
-                                    className="w-[38px] h-[38px] rounded-full object-cover shadow-sm bg-white"
+                                    className="absolute left-[0.4px] top-[0.5px] h-[30px] w-[30px] rounded-full object-cover"
                                   />
-                                  <div className="absolute bottom-0 right-0 w-[10px] h-[10px] bg-[#22c55e] border-[1.5px] border-[#fff1d1] rounded-full"></div>
                                 </>
                              ) : (
-                                <div className="w-[38px] h-[38px]"></div> // Empty space for alignment
+                               <span className="block h-[30px] w-[30px]" aria-hidden="true" />
                              )}
                           </div>
                           
-                          <div className="flex flex-col items-start gap-1">
-                             <div className="bg-white text-[#2a2a2a] rounded-tr-[18px] rounded-br-[18px] rounded-bl-[18px] px-[18px] py-[12px] shadow-[0_2px_8px_rgb(0_0_0/0.03)] text-[15px] font-medium leading-[1.5] tracking-[-0.3px] break-words">
+                        <div className="w-fit max-w-[199px] rounded-bl-[18px] rounded-br-[18px] rounded-tl-[7px] rounded-tr-[18px] border-[0.8px] border-[#f1e7da] bg-white px-[14px] py-[10.4px] text-[14px] font-normal leading-[22.75px] tracking-[-0.35px] text-[#2b2620] shadow-[0_2px_4px_rgb(120_90_60/0.07)]">
                                 {msg.content}
                              </div>
-                          </div>
                           
-                          {/* Time - Left side for opponent */}
-                          <div className="flex flex-col items-start justify-end shrink-0 pb-1 gap-[2px]">
-                             <span className="text-[11px] font-bold text-[#b8b8b8]">{msg.createdAtStr}</span>
+                        <div className="flex h-[18px] w-[43px] shrink-0 items-end pb-[2px]">
+                          <span className="whitespace-nowrap text-[10.5px] font-normal leading-[15.75px] text-[#a39e96]">{msg.createdAtStr}</span>
                           </div>
                        </div>
                     )}
                     
                     {msg.isMine && (
-                       <div className="flex items-end gap-2 max-w-[85%]">
-                          {/* Read Status and Time - Right side for mine */}
-                          <div className="flex flex-col items-end justify-end shrink-0 pb-1 gap-[2px]">
-                             {readStatusText && <span className="text-[11px] font-bold text-[#ff8b3d]">{readStatusText}</span>}
-                             <span className="text-[11px] font-bold text-[#b8b8b8]">{msg.createdAtStr}</span>
+                      <div className="flex max-w-[317px] items-end justify-end gap-2">
+                        <div className="flex shrink-0 flex-col items-end justify-end gap-[2px] pb-[2px]">
+                          {readStatusText && <span className="whitespace-nowrap text-[10.5px] font-semibold leading-[15.75px] text-[#f26c0f]">{readStatusText}</span>}
+                          <span className="whitespace-nowrap text-[10.5px] font-normal leading-[15.75px] text-[#a39e96]">{msg.createdAtStr}</span>
                           </div>
 
-                          <div className="bg-[#ff8b3d] text-white rounded-tl-[18px] rounded-bl-[18px] rounded-br-[18px] px-[18px] py-[12px] shadow-[0_2px_8px_rgb(0_0_0/0.08)] text-[15px] font-bold leading-[1.5] tracking-[-0.3px] break-words">
+                        <div className="w-fit max-w-[236px] rounded-bl-[18px] rounded-br-[18px] rounded-tl-[18px] rounded-tr-[7px] bg-[#ff8a2e] px-[14px] py-[10.4px] text-[14px] font-normal leading-[22.75px] tracking-[-0.35px] text-white shadow-[0_4px_6px_rgb(255_122_26/0.32)]">
                              {msg.content}
                           </div>
                        </div>
@@ -231,39 +191,173 @@ export function ChatRoomScreen({
             </div>
           </div>
 
-          {/* Input Area */}
-          <div className="z-20 w-full shrink-0 bg-white px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] shadow-[0_-4px_16px_rgb(0_0_0/0.03)]">
+          <div className="absolute left-0 top-[790px] h-[67px] w-[393px] border-t-[0.8px] border-[#ede3d6] bg-white">
             {sendError && (
-              <div className="mb-2 text-center text-[12px] font-bold text-red-500">
+              <div className="absolute bottom-[67px] left-4 right-4 rounded-[12px] bg-white px-3 py-2 text-center text-[12px] font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]">
                 {sendError}
               </div>
             )}
-            <div className="flex items-center gap-3">
-              <button type="button" className="w-[38px] h-[38px] rounded-full bg-[#fff1d1] text-[#ff8b3d] flex items-center justify-center shrink-0 focus:outline-none">
-                <Plus className="w-6 h-6" strokeWidth={2.5} />
+            <div className="absolute left-[14px] top-[12.2px] flex h-[38px] w-[38px] items-center justify-center rounded-full bg-[#fff0e2]">
+              <button type="button" aria-label="첨부 추가" className="flex h-full w-full items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]">
+                <img src={roomPlusIconUrl} alt="" aria-hidden="true" className="h-[18px] w-[18px]" draggable={false} />
               </button>
-              <div className="flex-1 relative">
+            </div>
+            <div className="absolute left-[60px] top-[10.2px] flex min-h-[40px] w-[269px] items-center rounded-[21px] border-[0.8px] border-[#ede3d6] bg-[#fff4e8] px-[16.8px] py-[0.8px]">
                 <input
                   type="text"
                   value={draft}
                   onChange={e => setDraft(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                onKeyDown={handleMessageKeyDown}
                   placeholder="메시지를 입력해 주세요"
-                  className="w-full rounded-[24px] bg-[#fff1d1] border-none px-[18px] py-[12px] text-[15px] font-medium text-[#2a2a2a] placeholder:text-[#c4a984] focus:outline-none focus:ring-1 focus:ring-[#ff8b3d]"
+                className="w-full bg-transparent text-[14px] font-normal leading-5 text-[#2b2620] outline-none placeholder:text-[#a39e96]"
                 />
               </div>
               <button
                 type="button"
-                onClick={handleSend}
+              onClick={() => void handleSend()}
                 disabled={!draft.trim() || isSending}
-                className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#ff8b3d] text-white shrink-0 shadow-sm focus:outline-none transition-transform active:scale-95 disabled:bg-[#ffe8d6] disabled:text-[#ffb587]"
+              aria-label="메시지 보내기"
+              className="absolute left-[337px] top-[8.2px] flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#ff8b3d] shadow-[0_4px_6px_rgb(255_122_26/0.4)] transition-transform active:scale-95 disabled:opacity-45 focus:outline-none focus:ring-2 focus:ring-[#f26c0f]"
               >
-                <Send className="w-5 h-5 ml-[2px]" strokeWidth={2} />
+              <img src={roomSendIconUrl} alt="" aria-hidden="true" className="h-5 w-5" draggable={false} />
               </button>
-            </div>
           </div>
+
+          {menuOpen && (
+            <ChatRoomActionSheet
+              onClose={() => setMenuOpen(false)}
+              onNotificationOff={() => {
+                setMenuOpen(false);
+                alert('알림이 꺼졌습니다.');
+              }}
+              onBlock={() => {
+                setMenuOpen(false);
+                onLeaveChat();
+              }}
+              onReport={() => {
+                setMenuOpen(false);
+                onReportUser();
+              }}
+            />
+          )}
         </div>
       </div>
     </section>
+  );
+}
+
+function ChatRoomTopBar({
+  opponent,
+  onBack,
+  onOpenMenu,
+}: {
+  readonly opponent: { nickname: string; profileColor: string } | null;
+  readonly onBack: () => void;
+  readonly onOpenMenu: () => void;
+}) {
+  return (
+    <header className="absolute left-0 top-0 z-20 h-[74px] w-[393px] bg-[#ff8b3d]">
+      <button
+        type="button"
+        onClick={onBack}
+        aria-label="뒤로가기"
+        className="absolute left-[11px] top-[18px] flex h-12 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+      >
+        <span aria-hidden="true" className="font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-none">
+          ‹
+        </span>
+      </button>
+      <div className="absolute left-[126px] top-[28px] h-[30px] w-[30px]">
+        <img
+          src={profileImageUrlForColor(opponent?.profileColor || '#FF8B3D')}
+          alt="프로필"
+          className="h-[30px] w-[30px] rounded-full object-cover"
+          draggable={false}
+        />
+        <span className="absolute left-[21px] top-5 h-[11px] w-[11px] rounded-full border-[1.6px] border-[#fff4e8] bg-[#3fc36b]" aria-hidden="true" />
+      </div>
+      <div className="absolute left-[170px] top-[25px] flex w-[83px] flex-col items-start">
+        <span className="max-w-[130px] truncate text-[16px] font-extrabold leading-5 tracking-[-0.4px] text-white">
+          {opponent?.nickname || '대화방'}
+        </span>
+        <span className="whitespace-nowrap text-[11.5px] font-medium leading-[17.25px] text-white/80">
+          답변 채택률 92%
+        </span>
+      </div>
+      <button
+        type="button"
+        aria-label="채팅방 메뉴 열기"
+        onClick={onOpenMenu}
+        className="absolute left-[339px] top-[27px] flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+      >
+        <img src={roomMoreIconUrl} alt="" aria-hidden="true" className="h-[22px] w-[22px]" draggable={false} />
+      </button>
+    </header>
+  );
+}
+
+function ChatRoomActionSheet({
+  onClose,
+  onNotificationOff,
+  onBlock,
+  onReport,
+}: {
+  readonly onClose: () => void;
+  readonly onNotificationOff: () => void;
+  readonly onBlock: () => void;
+  readonly onReport: () => void;
+}) {
+  return (
+    <div className="absolute inset-0 z-30 bg-[rgba(40,30,20,0.42)]" role="presentation" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="채팅방 메뉴"
+        className="absolute left-[-3px] top-[597px] flex h-[284px] w-[393px] flex-col items-start overflow-hidden rounded-tl-[22px] rounded-tr-[22px] bg-white pb-[26px] pt-[10px]"
+        onClick={event => event.stopPropagation()}
+      >
+        <div className="flex w-full justify-center overflow-hidden pb-2">
+          <span className="h-1 w-10 rounded-[2px] bg-[#e6dccf]" aria-hidden="true" />
+        </div>
+        <ActionSheetButton iconUrl={roomNotificationOffIconUrl} label="알림 끄기" onClick={onNotificationOff} />
+        <ActionSheetButton iconUrl={roomBlockIconUrl} label="차단하기" danger onClick={onBlock} />
+        <ActionSheetButton iconUrl={roomReportIconUrl} label="신고하기" danger onClick={onReport} />
+        <div className="h-2 w-[393px] shrink-0 bg-[#f4efe7]" />
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex h-[72px] w-full shrink-0 items-start justify-center py-[15px] font-['Qling_Noto_Sans_KR'] text-[15px] font-bold leading-[22px] text-[#8a857c] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset"
+        >
+          취소
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ActionSheetButton({
+  iconUrl,
+  label,
+  danger = false,
+  onClick,
+}: {
+  readonly iconUrl: string;
+  readonly label: string;
+  readonly danger?: boolean;
+  readonly onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full shrink-0 items-center gap-3 overflow-hidden px-5 py-[15px] text-left focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset"
+    >
+      <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden="true">
+        <img src={iconUrl} alt="" className="max-h-4 max-w-4" draggable={false} />
+      </span>
+      <span className={cn("font-['Qling_Noto_Sans_KR'] text-[15px] font-medium leading-[22px]", danger ? 'text-[#e5484d]' : 'text-[#2b2620]')}>
+        {label}
+      </span>
+    </button>
   );
 }

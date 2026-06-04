@@ -171,6 +171,8 @@ test('keeps every bottom-navigation route on the content scroll policy', () => {
 
   assert.equal(routeRenderingBoundaryForRoute('edit_interests').mountsBottomNavigation, false);
   assert.equal(routeRenderingBoundaryForRoute('edit_interests').mainScrollMode, 'route');
+  assert.equal(routeRenderingBoundaryForRoute({ route: 'chat_room', chatId: 'chat-1' }).mountsBottomNavigation, false);
+  assert.equal(routeRenderingBoundaryForRoute({ route: 'chat_room', chatId: 'chat-1' }).mainScrollMode, 'route');
 });
 
 test('keeps route rendering policy outside App.tsx branch helpers', () => {
