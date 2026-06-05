@@ -31,6 +31,7 @@ import {
   type AppRouteViewState,
 } from './services/appShell/prdNavigationPolicy';
 import { routeRenderingBoundaryForRoute } from './services/appShell/routeRenderingBoundary';
+import { shouldRenderFilterAlert } from './services/appShell/filterAlertPolicy';
 import { withAuthProfileUid } from './services/authProfile/profileIdentity';
 import {
   ReceivedWorriesContainer,
@@ -353,7 +354,7 @@ export default function App() {
       )}
     >
       <AnimatePresence>
-        {filterAlert && (
+        {shouldRenderFilterAlert(filterAlert) && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
