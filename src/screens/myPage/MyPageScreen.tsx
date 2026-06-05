@@ -19,6 +19,8 @@ const settingLabels: Record<MyPageSettingItem, string> = {
   delete_account: '회원 탈퇴',
 };
 
+const PRIVACY_POLICY_FEEDBACK_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe88_R7B_cP_pIa7aIe-Fcb1gRYeDfBETNpehOODMrEY0skVQ/viewform?usp=publish-editor';
+
 const editInterestsFigmaOrder = [
   '진로',
   '취업',
@@ -340,6 +342,7 @@ function SettingIcon({ item }: { readonly item: MyPageSettingItem }) {
 
 export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () => void }) {
   const policyBody = props.body?.trim();
+  const shouldShowFeedbackLink = props.state.status === 'ready' && Boolean(policyBody);
   const cardContent = props.state.status === 'loading'
     ? props.state.label
     : props.state.status === 'error'
@@ -373,6 +376,16 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
               className="whitespace-pre-wrap text-[13px] font-semibold leading-[150%] tracking-[-0.05em] text-[#1a1a1e]"
               role={props.state.status === 'error' ? 'alert' : undefined}
             >
+              {shouldShowFeedbackLink && (
+                <a
+                  href={PRIVACY_POLICY_FEEDBACK_FORM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mb-4 block underline underline-offset-2"
+                >
+                  갈피 UIUX 디자인 파일
+                </a>
+              )}
               {cardContent}
             </div>
           </article>

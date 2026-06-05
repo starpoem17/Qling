@@ -144,6 +144,29 @@ test('reply and worry read models map to list props without example labels', () 
   assert.equal(Object.hasOwn(answerItem, 'exampleLabel'), false);
 });
 
+test('my answer mapping shows saved LLM summary text without legacy ellipsis', () => {
+  const exactText = '01234567890123456789012345678901234567890123456789';
+  const answerItem = mapMyGivenReplyToListItem({
+    id: 'reply-summary',
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+    content: 'raw',
+    createdAt: null,
+    source: 'prd_replies',
+    senderId: 'sender',
+    receiverId: 'receiver',
+    originalContent: '원문 전체에는 더 긴 내용이 들어 있습니다.',
+    refinedContent: 'refined',
+    summaryText: exactText,
+    isRead: false,
+    feedback: undefined,
+    categories: [],
+  } as never);
+
+  assert.equal(answerItem.originalWorryPreview, exactText);
+  assert.doesNotMatch(answerItem.originalWorryPreview, /\.\.\.$/);
+});
+
 test('my answer feedback visibility follows PRD for like dislike and comments', () => {
   const baseReply = {
     deliveryId: 'delivery-1',
@@ -258,7 +281,7 @@ test('my worry mapping falls back to 일상 and keeps answer writer private data
   }
 });
 
-test('my-page fallback summaries truncate at 50 characters only when needed', () => {
+test('my-page fallback summaries truncate my worries only when needed', () => {
   const exactText = '01234567890123456789012345678901234567890123456789';
   const replyItem = mapMyGivenReplyToListItem({
     id: 'reply-fallback',
@@ -287,7 +310,7 @@ test('my-page fallback summaries truncate at 50 characters only when needed', ()
     },
   });
 
-  assert.equal(replyItem.originalWorryPreview, `${exactText}...`);
+  assert.equal(replyItem.originalWorryPreview, `${exactText}x`);
   assert.equal(worryItem.summaryText, `${exactText}...`);
   assert.equal(`${exactText}...`.length, 53);
 });

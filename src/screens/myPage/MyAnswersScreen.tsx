@@ -31,7 +31,9 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
   readonly onConfirmChatStartConfirmation: () => void;
 }) {
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
-  const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
+  const tabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
+  const contentViewportHeight = `min(752px, max(320px, calc((${tabViewportHeight}) / (${canvasScale}) - 100px)))`;
+  const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font text-[#1a1a1e]';
 
   return (
@@ -43,6 +45,7 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
           {props.state.status === 'loading' ? (
             <section
               className="relative h-[752px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
+              style={{ height: contentViewportHeight }}
               onWheel={blockLockedScroll}
               onTouchMove={blockLockedScroll}
             >
@@ -51,6 +54,7 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
           ) : props.state.status === 'error' ? (
             <section
               className="relative h-[752px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
+              style={{ height: contentViewportHeight }}
               onWheel={blockLockedScroll}
               onTouchMove={blockLockedScroll}
             >
@@ -61,12 +65,14 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
           ) : props.state.status === 'empty' ? (
             <section
               className="relative h-[752px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
+              style={{ height: contentViewportHeight }}
               onWheel={blockLockedScroll}
               onTouchMove={blockLockedScroll}
             />
           ) : (
             <section
               className="relative h-[752px] overflow-y-auto overscroll-contain px-4 pb-[calc(108px+env(safe-area-inset-bottom,0px))] pt-[27px] [-webkit-overflow-scrolling:touch]"
+              style={{ height: contentViewportHeight }}
               aria-label="내가 쓴 답변 목록"
             >
               <div className="grid gap-[19px]">

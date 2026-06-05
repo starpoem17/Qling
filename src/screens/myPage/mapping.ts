@@ -54,7 +54,7 @@ function dateLabel(value: DisplayDateInput, options?: DisplayDateOptions): strin
 export function mapMyGivenReplyToListItem(reply: ReplyReadModelItem, _selectedReplyId?: string, options?: DisplayDateOptions): MyAnswerListItemProps {
   const feedbackLabel = reply.feedback === 'helpful' ? '받은 하트' : undefined;
   const feedbackComment = reply.feedback === 'helpful' ? reply.publisherComment?.trim() : undefined;
-  const originalWorryPreview = reply.summaryText ?? fallbackSummary(reply.replyToContent ?? reply.originalContent);
+  const originalWorryPreview = reply.summaryText ?? reply.replyToContent ?? reply.originalContent;
   const categoryLabel = firstUserFacingCategory((reply as ReplyReadModelItem & {
     readonly categories?: readonly string[];
     readonly validCategories?: readonly string[];

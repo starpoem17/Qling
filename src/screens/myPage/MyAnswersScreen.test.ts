@@ -58,10 +58,12 @@ test('my answers screen uses the fixed 393px Figma canvas and ready-only body sc
 
   assert.match(html, /h-\[852px\] w-\[393px\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] -mb-\[var\(--qling-space-scroll-bottom\)\] -mt-6 h-\[calc\(var\(--qling-visual-viewport-height\)-var\(--qling-space-nav-height\)\)\] overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /aria-label="내가 쓴 답변 목록"/);
   assert.match(html, /<header[^>]*h-\[100px\][\s\S]*<section[^>]*aria-label="내가 쓴 답변 목록"/);
   assert.match(html, /relative h-\[752px\] overflow-y-auto overscroll-contain/);
   assert.match(html, /pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
+  assert.match(html, /height:min\(752px, max\(320px, calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 100px\)\)\)/);
   assert.doesNotMatch(html, /data-qling-peek-header-content/);
   assert.doesNotMatch(html, /qling-peek-progress/);
   assert.doesNotMatch(html, /transform:translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
