@@ -54,9 +54,11 @@ test('chat shell routes fill the app shell without extending under bottom naviga
 });
 
 test('chat screens keep 393px canvas width while chat room uses viewport height', () => {
-  assert.match(chatScreenSource, /const canvasScale = 'calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)'/);
+  assert.match(chatScreenSource, /import \{ FigmaCanvasFrame, profileImageUrlForColor \} from '\.\.\/shared\/ui'/);
+  assert.match(chatScreenSource, /<FigmaCanvasFrame>/);
   assert.match(chatScreenSource, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden/);
-  assert.match(chatScreenSource, /style=\{\{ transform: `scale\(\$\{canvasScale\}\)` \}\}/);
+  assert.doesNotMatch(chatScreenSource, /const canvasScale = /);
+  assert.doesNotMatch(chatScreenSource, /style=\{\{ transform: `scale\(\$\{canvasScale\}\)` \}\}/);
 
   assert.match(chatRoomScreenSource, /const \[viewportMetrics, setViewportMetrics\] = useState<ChatRoomViewportMetrics>\(\{ canvasHeight: 852, scale: 1, viewportOffsetTop: 0 \}\)/);
   assert.doesNotMatch(chatRoomScreenSource, /chatInputYOffset/);

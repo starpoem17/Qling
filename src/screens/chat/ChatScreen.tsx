@@ -1,5 +1,5 @@
 import { useState, type TouchEvent, type WheelEvent } from 'react';
-import { profileImageUrlForColor } from '../shared/ui';
+import { FigmaCanvasFrame, profileImageUrlForColor } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import { filterChatsByOpponentName } from './chatListSearch';
 
@@ -41,7 +41,6 @@ export function ChatScreen({
 }) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font';
   const visibleChats = filterChatsByOpponentName(chats ?? [], searchQuery);
@@ -49,8 +48,8 @@ export function ChatScreen({
 
   return (
     <section className={screenClassName} onClick={() => setOpenMenuId(null)}>
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-        <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
+      <FigmaCanvasFrame>
+        <div className={canvasClassName}>
           <ChatStaticHeader
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -112,7 +111,7 @@ export function ChatScreen({
             />
           )}
         </div>
-      </div>
+      </FigmaCanvasFrame>
     </section>
   );
 }

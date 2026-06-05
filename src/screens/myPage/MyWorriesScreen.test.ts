@@ -116,15 +116,16 @@ test('my worries screen actions match PRD entry points', () => {
   assert.equal(openedWrite, true);
 });
 
-test('my worries write button uses the transformed Figma canvas coordinates', () => {
+test('my worries write button uses the unscaled Figma canvas coordinates', () => {
   const html = renderToStaticMarkup(MyWorriesScreen(baseProps()));
 
   assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] -mb-\[var\(--qling-space-scroll-bottom\)\] -mt-6 h-\[calc\(var\(--qling-visual-viewport-height\)-var\(--qling-space-nav-height\)\)\] overflow-hidden bg-\[#ff8b3d\]/);
-  assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
-  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.match(html, /mx-auto flex h-full w-full max-w-\[393px\] justify-center overflow-hidden/);
+  assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 overflow-hidden bg-\[#ff8b3d\]/);
+  assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /고민 작성 화면으로 이동/);
   assert.match(html, /absolute left-\[258px\] z-40 flex items-center gap-\[7px\]/);
-  assert.match(html, /style="top:min\(710px, calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 62px\)\)"/);
+  assert.match(html, /style="top:min\(710px, calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) - 62px\)\)"/);
   assert.match(html, /my_concerns\/write_plus\.svg/);
   assert.match(html, /h-\[15\.563px\] w-\[15\.563px\] shrink-0/);
   assert.match(html, /고민 쓰기/);
@@ -167,7 +168,7 @@ test('my worries empty state renders Figma intro without the previous static car
   assert.match(html, /고민 쓰기/);
   assert.equal((html.match(/고민 작성 화면으로 이동/g) ?? []).length, 1);
   assert.match(html, /absolute left-0 top-\[74px\] w-full touch-none overscroll-none overflow-hidden rounded-t-\[32px\] px-4 pt-4/);
-  assert.match(html, /style="height:min\(733px, max\(320px, calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 74px\)\)\)"/);
+  assert.match(html, /style="height:min\(733px, max\(320px, calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) - 74px\)\)\)"/);
   assert.doesNotMatch(html, /h-\[168px\] w-full overflow-hidden rounded-\[18px\]/);
   assert.doesNotMatch(html, /나의 고민 목록/);
   assert.doesNotMatch(html, /overflow-y-auto/);
@@ -194,11 +195,11 @@ test('my worries loading state renders the Figma spinner status without visible 
   assert.match(html, /작성한 고민을 불러오고 있습니다\./);
   assert.doesNotMatch(html, /나의 고민을 불러오는 중/);
   assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] -mb-\[var\(--qling-space-scroll-bottom\)\] -mt-6 h-\[calc\(var\(--qling-visual-viewport-height\)-var\(--qling-space-nav-height\)\)\] overflow-hidden bg-\[#ff8b3d\]/);
-  assert.match(html, /mx-auto flex h-full w-full max-w-\[480px\] justify-center overflow-hidden/);
-  assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
-  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.match(html, /mx-auto flex h-full w-full max-w-\[393px\] justify-center overflow-hidden/);
+  assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 overflow-hidden bg-\[#ff8b3d\]/);
+  assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /top-\[74px\] w-full touch-none overscroll-none overflow-hidden/);
-  assert.match(html, /height:min\(733px, max\(320px, calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 74px\)\)\)/);
+  assert.match(html, /height:min\(733px, max\(320px, calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) - 74px\)\)\)/);
   assert.doesNotMatch(html, /h-\[733px\] w-full overflow-y-auto/);
   assert.match(html, /bg-\[#ff8b3d\]/);
   assert.doesNotMatch(html, /w-\[100dvw\]/);

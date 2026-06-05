@@ -125,10 +125,13 @@ test('write reply screen uses Figma canvas positions while keeping the send butt
 
   assert.match(html, /w-\[393px\]/);
   assert.match(html, /h-\[852px\]/);
-  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.match(html, /max-w-\[393px\]/);
+  assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /top-\[227px\]/);
-  assert.match(html, /height:min\(434px, max\(240px, calc\(min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 88px\)\) - 250px\)\)\)/);
-  assert.match(html, /top:min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 88px\)\)/);
+  assert.match(html, /height:min\(434px, max\(240px, calc\(min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) - 88px\)\) - 250px\)\)\)/);
+  assert.match(html, /top:min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) - 88px\)\)/);
+  assert.doesNotMatch(html, /max-w-\[480px\]/);
+  assert.doesNotMatch(html, /writeCanvasScale/);
   assert.doesNotMatch(html, /min-height:calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \* 852 \/ 393\)/);
   assert.doesNotMatch(html, /100dvh-var\(--qling-space-scroll-bottom\)/);
   assert.doesNotMatch(html, /mt-6 flex h-12 w-\[267px\]/);

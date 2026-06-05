@@ -1,6 +1,6 @@
 import { Heart, MessageSquare } from 'lucide-react';
 import { useState, type ReactNode, type TouchEvent, type WheelEvent } from 'react';
-import { ErrorState, SuccessBadge } from '../shared/ui';
+import { ErrorState, FigmaCanvasFrame, SuccessBadge } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import { ChatStartConfirmationPopup } from '../shared/ChatStartConfirmationPopup';
 import type { MyAnswersScreenProps } from './contract';
@@ -30,16 +30,15 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
   readonly onCancelChatStartConfirmation: () => void;
   readonly onConfirmChatStartConfirmation: () => void;
 }) {
-  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
   const tabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
-  const contentViewportHeight = `min(752px, max(320px, calc((${tabViewportHeight}) / (${canvasScale}) - 100px)))`;
+  const contentViewportHeight = `min(752px, max(320px, calc(${tabViewportHeight} - 100px)))`;
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d]';
-  const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font text-[#1a1a1e]';
+  const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 overflow-hidden bg-[#ff8b3d] qling-figma-font text-[#1a1a1e]';
 
   return (
     <section className={screenClassName}>
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-        <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
+      <FigmaCanvasFrame>
+        <div className={canvasClassName}>
           <MyAnswersHeader onBack={props.onBack} />
 
           {props.state.status === 'loading' ? (
@@ -95,7 +94,7 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
             />
           )}
         </div>
-      </div>
+      </FigmaCanvasFrame>
     </section>
   );
 }

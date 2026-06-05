@@ -1,9 +1,8 @@
 import { ChevronDown, Pencil } from 'lucide-react';
-import { FigmaTopBar } from '../shared/ui';
+import { FigmaCanvasFrame, FigmaTopBar } from '../shared/ui';
 import type { WriteFormScreenProps } from './contract';
 
-const writeCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
-const sendButtonTop = `min(684px, calc((100dvh - var(--qling-space-nav-height)) / (${writeCanvasScale}) - 88px))`;
+const sendButtonTop = 'min(684px, calc((100dvh - var(--qling-space-nav-height)) - 88px))';
 const inputAreaHeight = `min(434px, max(240px, calc(${sendButtonTop} - 250px)))`;
 const topBoxSummaryLimit = 25;
 
@@ -15,11 +14,8 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
 
   return (
     <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-        <div
-          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1]"
-          style={{ transform: `scale(${writeCanvasScale})` }}
-        >
+      <FigmaCanvasFrame>
+        <div className="relative h-[852px] w-[393px] shrink-0 overflow-hidden bg-[#fff1d1]">
       {FigmaTopBar({ title: '답변 작성', onBack: props.onBack, backLabel: '답변하기로 돌아가기' })}
 
       <section className="absolute left-4 right-4 top-[127px] h-[79px] overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
@@ -140,7 +136,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
         </div>
       )}
         </div>
-      </div>
+      </FigmaCanvasFrame>
     </section>
   );
 }

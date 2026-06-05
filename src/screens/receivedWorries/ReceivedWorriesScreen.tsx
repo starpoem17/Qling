@@ -1,5 +1,5 @@
 import type { KeyboardEvent, MouseEvent, TouchEvent, WheelEvent } from 'react';
-import { ErrorState, QlingCard } from '../shared/ui';
+import { ErrorState, FigmaCanvasFrame, QlingCard } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import type { ReceivedWorriesScreenProps } from './contract';
 
@@ -11,17 +11,16 @@ const cardSummaryLimit = 50;
 
 export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   const passingDeliveryIds = new Set(props.passingDeliveryIds);
-  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
   const tabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
-  const contentViewportHeight = `min(752px, max(320px, calc((${tabViewportHeight}) / (${canvasScale}) - 74px)))`;
+  const contentViewportHeight = `min(752px, max(320px, calc((${tabViewportHeight}) - 74px)))`;
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
 
   if (props.state.status === 'loading') {
     return (
       <section className={screenClassName}>
-        <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-          <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
+        <FigmaCanvasFrame>
+          <div className={canvasClassName}>
             <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
             <CreamContentBackground height={contentViewportHeight} />
             <section
@@ -34,7 +33,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
               <FigmaTabLoading label={props.state.label} className="top-[332px]" />
             </section>
           </div>
-        </div>
+        </FigmaCanvasFrame>
       </section>
     );
   }
@@ -42,8 +41,8 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   if (props.state.status === 'error') {
     return (
       <section className={screenClassName}>
-        <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-          <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
+        <FigmaCanvasFrame>
+          <div className={canvasClassName}>
             <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
             <CreamContentBackground height={contentViewportHeight} />
             <section
@@ -53,7 +52,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
               <ErrorState title="답변 피드를 불러오지 못했어요" message={props.state.message} />
             </section>
           </div>
-        </div>
+        </FigmaCanvasFrame>
       </section>
     );
   }
@@ -61,8 +60,8 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   if (props.state.status === 'empty') {
     return (
       <section className={screenClassName}>
-        <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-          <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
+        <FigmaCanvasFrame>
+          <div className={canvasClassName}>
             <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
             <CreamContentBackground height={contentViewportHeight} />
             <section
@@ -75,15 +74,15 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
               <ReplyFeedIntro waitingCount={props.waitingCount} />
             </section>
           </div>
-        </div>
+        </FigmaCanvasFrame>
       </section>
     );
   }
 
   return (
     <section className={screenClassName}>
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-        <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
+      <FigmaCanvasFrame>
+        <div className={canvasClassName}>
           <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
           <CreamContentBackground height={contentViewportHeight} />
           <section
@@ -153,7 +152,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
             </div>
           </section>
         </div>
-      </div>
+      </FigmaCanvasFrame>
     </section>
   );
 }

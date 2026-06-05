@@ -79,6 +79,20 @@ export function MobileAppShell({
   );
 }
 
+export function FigmaCanvasFrame({
+  children,
+  className,
+}: {
+  readonly children: ReactNode;
+  readonly className?: string;
+}) {
+  return (
+    <div className={cn('mx-auto flex h-full w-full max-w-[393px] justify-center overflow-hidden', className)}>
+      {children}
+    </div>
+  );
+}
+
 export function BottomNavigation({
   tabs,
   activeTab,

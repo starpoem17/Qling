@@ -1,6 +1,7 @@
 import type { CSSProperties, TouchEvent, WheelEvent } from 'react';
 import {
   ErrorState,
+  FigmaCanvasFrame,
   QlingCard,
 } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
@@ -14,13 +15,12 @@ const writePlusUrl = new URL('../../../assets/my_concerns/write_plus.svg', impor
 const cardSummaryLimit = 50;
 
 export function MyWorriesScreen(props: MyWorriesScreenProps) {
-  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
   const tabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
-  const contentViewportHeight = `min(733px, max(320px, calc((${tabViewportHeight}) / (${canvasScale}) - 74px)))`;
+  const contentViewportHeight = `min(733px, max(320px, calc((${tabViewportHeight}) - 74px)))`;
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d]';
-  const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
+  const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 overflow-hidden bg-[#ff8b3d]';
   const writeButtonStyle = {
-    top: `min(710px, calc((${tabViewportHeight}) / (${canvasScale}) - 62px))`,
+    top: `min(710px, calc((${tabViewportHeight}) - 62px))`,
   } satisfies CSSProperties;
 
   const writeButton = (
@@ -40,8 +40,8 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
 
   return (
     <section className={screenClassName}>
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-        <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
+      <FigmaCanvasFrame>
+        <div className={canvasClassName}>
           <MyWorriesStaticHeader onOpenMyPage={props.onOpenMyPage} />
           <CreamContentBackground height={contentViewportHeight} />
 
@@ -115,7 +115,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
 
           {writeButton}
         </div>
-      </div>
+      </FigmaCanvasFrame>
     </section>
   );
 }

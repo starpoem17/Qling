@@ -306,7 +306,8 @@ test('peek header screens use transform layout without scroll-time height transi
 
   assert.match(myWorriesSource, /CreamContentBackground/);
   assert.match(myWorriesSource, /tabViewportHeight = 'calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)'/);
-  assert.match(myWorriesSource, /contentViewportHeight = `min\(733px, max\(320px, calc\(\(\$\{tabViewportHeight\}\) \/ \(\$\{canvasScale\}\) - 74px\)\)\)`/);
+  assert.match(myWorriesSource, /contentViewportHeight = `min\(733px, max\(320px, calc\(\(\$\{tabViewportHeight\}\) - 74px\)\)\)`/);
+  assert.doesNotMatch(myWorriesSource, /canvasScale/);
   assert.match(myWorriesSource, /top-\[74px\] w-full/);
   assert.match(myWorriesSource, /overflow-y-auto rounded-t-\[32px\] px-4 pb-\[calc\(180px\+env\(safe-area-inset-bottom,0px\)\)\] pt-4/);
   assert.match(myWorriesSource, /style=\{\{ height: contentViewportHeight \}\}/);
@@ -321,7 +322,8 @@ test('peek header screens use transform layout without scroll-time height transi
 
   assert.match(receivedSource, /CreamContentBackground/);
   assert.match(receivedSource, /tabViewportHeight = 'calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)'/);
-  assert.match(receivedSource, /contentViewportHeight = `min\(752px, max\(320px, calc\(\(\$\{tabViewportHeight\}\) \/ \(\$\{canvasScale\}\) - 74px\)\)\)`/);
+  assert.match(receivedSource, /contentViewportHeight = `min\(752px, max\(320px, calc\(\(\$\{tabViewportHeight\}\) - 74px\)\)\)`/);
+  assert.doesNotMatch(receivedSource, /canvasScale/);
   assert.match(receivedSource, /top-\[74px\] w-full/);
   assert.match(receivedSource, /overflow-y-auto rounded-t-\[32px\] px-4 pb-\[calc\(132px\+env\(safe-area-inset-bottom,0px\)\)\] pt-4/);
   assert.match(receivedSource, /style=\{\{ height: contentViewportHeight \}\}/);

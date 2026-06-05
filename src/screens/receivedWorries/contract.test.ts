@@ -135,11 +135,12 @@ test('received-worries empty state renders the fixed Figma intro without an empt
   assert.doesNotMatch(html, /지금은 도착한 고민이 없어요\./);
   assert.doesNotMatch(html, /첫 고민을 남겨보세요/);
   assert.doesNotMatch(html, /고민 쓰기|다시 시도|네트워크/);
+  assert.match(html, /mx-auto flex h-full w-full max-w-\[393px\] justify-center overflow-hidden/);
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
-  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /absolute left-0 top-\[74px\] w-full rounded-t-\[32px\] bg-\[#fff1d1\]/);
   assert.match(html, /absolute left-0 top-\[74px\] w-full touch-none overscroll-none overflow-hidden rounded-t-\[32px\] px-4 pt-4/);
-  assert.match(html, /height:min\(752px, max\(320px, calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 74px\)\)\)/);
+  assert.match(html, /height:min\(752px, max\(320px, calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) - 74px\)\)\)/);
   assert.doesNotMatch(html, /받은 고민 목록/);
   assert.doesNotMatch(html, /overflow-y-auto/);
 
@@ -167,13 +168,13 @@ test('received-worries loading state renders the Figma spinner status without vi
   assert.doesNotMatch(html, /고민을 불러오고 있어요/);
   assert.doesNotMatch(html, /skeleton|Skeleton|data-testid=".*skeleton/i);
   assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] -mb-\[var\(--qling-space-scroll-bottom\)\] -mt-6 h-\[calc\(var\(--qling-visual-viewport-height\)-var\(--qling-space-nav-height\)\)\] overflow-hidden bg-\[#ff8b3d\]/);
-  assert.match(html, /mx-auto flex h-full w-full max-w-\[480px\] justify-center overflow-hidden/);
+  assert.match(html, /mx-auto flex h-full w-full max-w-\[393px\] justify-center overflow-hidden/);
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
-  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /h-\[74px\]/);
   assert.match(html, /bg-\[#ff8b3d\]/);
   assert.match(html, /top-\[74px\] w-full touch-none overscroll-none overflow-hidden/);
-  assert.match(html, /height:min\(752px, max\(320px, calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 74px\)\)\)/);
+  assert.match(html, /height:min\(752px, max\(320px, calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) - 74px\)\)\)/);
   assert.doesNotMatch(html, /h-\[752px\] overflow-y-auto/);
   assert.doesNotMatch(html, /w-\[100dvw\]/);
   assert.doesNotMatch(html, /min-h-\[calc\(100dvh-180px\)\]/);
