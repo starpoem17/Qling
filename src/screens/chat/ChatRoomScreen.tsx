@@ -10,7 +10,6 @@ const roomBlockIconUrl = new URL('../../../assets/chat/room_block.svg', import.m
 const roomReportIconUrl = new URL('../../../assets/chat/room_report.svg', import.meta.url).href;
 const dimThemeColor = '#8b7b62';
 const chatRoomDocumentBackground = '#ffffff';
-const chatRoomKeyboardLockClass = 'qling-chat-room-keyboard-lock';
 const chatRoomKeyboardDebugStorageKey = 'qling.chatRoomKeyboardDebug';
 const chatRoomKeyboardDebugQueryParam = 'chatRoomKeyboardDebug';
 const chatInputBaseHeight = 67;
@@ -18,13 +17,11 @@ const chatTextareaMinHeight = 40;
 const chatTextareaMaxHeight = 60;
 
 type ChatRoomCanvasStyle = CSSProperties & {
-  readonly '--chat-keyboard-inset': string;
   readonly '--chat-input-height': string;
 };
 
 type ChatRoomViewportMetrics = {
   readonly canvasHeight: number;
-  readonly keyboardInset: number;
   readonly scale: number;
 };
 
@@ -70,7 +67,7 @@ export function ChatRoomScreen({
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState(chatTextareaMinHeight);
-  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, keyboardInset: 0, scale: 1 });
+  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, scale: 1 });
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const shouldStickToBottomRef = useRef(true);
@@ -83,16 +80,14 @@ export function ChatRoomScreen({
       const layoutHeight = window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const visibleHeight = visualViewport?.height ?? window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const offsetTop = visualViewport?.offsetTop ?? 0;
-      const keyboardInset = Math.max(0, layoutHeight - visibleHeight - offsetTop);
+      const viewportHeight = visualViewport ? visibleHeight + offsetTop : layoutHeight;
       const nextMetrics = {
-        canvasHeight: layoutHeight / scale,
-        keyboardInset: keyboardInset / scale,
+        canvasHeight: viewportHeight / scale,
         scale,
       };
 
       setViewportMetrics(previousMetrics => {
         return previousMetrics.canvasHeight === nextMetrics.canvasHeight
-          && previousMetrics.keyboardInset === nextMetrics.keyboardInset
           && previousMetrics.scale === nextMetrics.scale
           ? previousMetrics
           : nextMetrics;
@@ -136,14 +131,7 @@ export function ChatRoomScreen({
     };
   }, [menuOpen]);
 
-  useEffect(() => {
-    return () => {
-      setChatRoomKeyboardLock(false);
-    };
-  }, []);
-
   const canvasStyle: ChatRoomCanvasStyle = {
-    '--chat-keyboard-inset': `${viewportMetrics.keyboardInset}px`,
     '--chat-input-height': `${chatInputBaseHeight + Math.max(0, textareaHeight - chatTextareaMinHeight)}px`,
     height: `${viewportMetrics.canvasHeight}px`,
     transform: `scale(${viewportMetrics.scale})`,
@@ -205,12 +193,10 @@ export function ChatRoomScreen({
 
   const handleMessageInputIntent = (source: string) => {
     logChatRoomKeyboardMetric(source);
-    setChatRoomKeyboardLock(true);
   };
 
   const handleMessageInputBlur = () => {
     logChatRoomKeyboardMetric('textarea.blur');
-    setChatRoomKeyboardLock(false);
   };
 
   const mineMessageIds = messages.filter(m => m.isMine).map(m => m.messageId);
@@ -386,7 +372,7 @@ function ChatRoomInputBar({
   return (
       <div
         data-chat-room-input-bar
-        className="relative mb-[var(--chat-keyboard-inset)] h-[var(--chat-input-height)] w-[393px] shrink-0 touch-none overscroll-none border-t border-[#ede3d6] bg-white qling-figma-font"
+        className="relative h-[var(--chat-input-height)] w-[393px] shrink-0 touch-none overscroll-none border-t border-[#ede3d6] bg-white qling-figma-font"
         onTouchMove={blockStaticScroll}
         onWheel={blockStaticScroll}
       >
@@ -497,22 +483,11 @@ function blockStaticScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLEleme
   stopPropagation.call(event);
 }
 
-function setChatRoomKeyboardLock(locked: boolean) {
-  const root = document.getElementById('root');
-  document.documentElement.classList.toggle(chatRoomKeyboardLockClass, locked);
-  document.body.classList.toggle(chatRoomKeyboardLockClass, locked);
-  root?.classList.toggle(chatRoomKeyboardLockClass, locked);
-}
-
 function logChatRoomKeyboardMetric(source: string) {
   if (!isChatRoomKeyboardDebugEnabled()) return;
   const visualViewport = window.visualViewport;
-  const root = document.getElementById('root');
   console.info('[chat-room-keyboard]', {
     source,
-    locked: document.documentElement.classList.contains(chatRoomKeyboardLockClass),
-    bodyLocked: document.body.classList.contains(chatRoomKeyboardLockClass),
-    rootLocked: root?.classList.contains(chatRoomKeyboardLockClass) ?? false,
     scrollY: window.scrollY,
     documentScrollTop: document.documentElement.scrollTop,
     visualViewportHeight: visualViewport?.height ?? null,
