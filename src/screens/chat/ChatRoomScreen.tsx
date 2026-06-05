@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type CSSProperties, type ChangeEvent, type KeyboardEvent, type RefObject } from 'react';
+import { useState, useRef, useEffect, type CSSProperties, type ChangeEvent, type KeyboardEvent, type RefObject, type TouchEvent, type WheelEvent } from 'react';
 import { cn } from '../../lib/utils';
 import { ErrorState, profileImageUrlForColor } from '../shared/ui';
 
@@ -20,6 +20,7 @@ type ChatRoomCanvasStyle = CSSProperties & {
 
 type ChatRoomViewportMetrics = {
   readonly canvasHeight: number;
+  readonly offsetTop: number;
   readonly scale: number;
 };
 
@@ -65,7 +66,7 @@ export function ChatRoomScreen({
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState(chatTextareaMinHeight);
-  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, scale: 1 });
+  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, offsetTop: 0, scale: 1 });
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const shouldStickToBottomRef = useRef(true);
@@ -76,13 +77,16 @@ export function ChatRoomScreen({
       const visualWidth = visualViewport?.width ?? window.innerWidth;
       const scale = Math.max(Math.min(visualWidth, 480) / 393, 0.1);
       const visibleHeight = visualViewport?.height ?? window.innerHeight ?? document.documentElement.clientHeight ?? 852;
+      const offsetTop = visualViewport?.offsetTop ?? 0;
       const nextMetrics = {
         canvasHeight: visibleHeight / scale,
+        offsetTop: offsetTop / scale,
         scale,
       };
 
       setViewportMetrics(previousMetrics => {
         return previousMetrics.canvasHeight === nextMetrics.canvasHeight
+          && previousMetrics.offsetTop === nextMetrics.offsetTop
           && previousMetrics.scale === nextMetrics.scale
           ? previousMetrics
           : nextMetrics;
@@ -124,6 +128,7 @@ export function ChatRoomScreen({
   const canvasStyle: ChatRoomCanvasStyle = {
     '--chat-input-height': `${chatInputBaseHeight + Math.max(0, textareaHeight - chatTextareaMinHeight)}px`,
     height: `${viewportMetrics.canvasHeight}px`,
+    marginTop: `${viewportMetrics.offsetTop}px`,
     transform: `scale(${viewportMetrics.scale})`,
   };
 
@@ -346,7 +351,12 @@ function ChatRoomInputBar({
   readonly onSend: () => void;
 }) {
   return (
-      <div data-chat-room-input-bar className="relative h-[var(--chat-input-height)] w-[393px] shrink-0 border-t border-[#ede3d6] bg-white qling-figma-font">
+      <div
+        data-chat-room-input-bar
+        className="relative h-[var(--chat-input-height)] w-[393px] shrink-0 touch-none overscroll-none border-t border-[#ede3d6] bg-white qling-figma-font"
+        onTouchMove={blockStaticScroll}
+        onWheel={blockStaticScroll}
+      >
         {sendError && (
           <div className="absolute bottom-[67px] left-4 right-4 rounded-[12px] bg-white px-3 py-2 text-center text-[12px] font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]">
             {sendError}
@@ -399,7 +409,12 @@ function ChatRoomTopBar({
   readonly onOpenMenu: () => void;
 }) {
   return (
-    <header data-chat-room-top-bar className="relative z-20 h-[74px] w-[393px] shrink-0 overflow-hidden bg-[#ff8b3d] qling-figma-font">
+    <header
+      data-chat-room-top-bar
+      className="relative z-20 h-[74px] w-[393px] shrink-0 touch-none overscroll-none overflow-hidden bg-[#ff8b3d] qling-figma-font"
+      onTouchMove={blockStaticScroll}
+      onWheel={blockStaticScroll}
+    >
         <button
           type="button"
           onClick={onBack}
@@ -437,6 +452,12 @@ function ChatRoomTopBar({
         </button>
     </header>
   );
+}
+
+function blockStaticScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLElement>) {
+  const { preventDefault, stopPropagation } = event;
+  preventDefault.call(event);
+  stopPropagation.call(event);
 }
 
 function ChatRoomActionSheet({
