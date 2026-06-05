@@ -27,6 +27,16 @@ type ChatRoomViewportMetrics = {
   readonly viewportOffsetTop: number;
 };
 
+type ChatRoomDocumentLockSnapshot = {
+  readonly element: HTMLElement;
+  readonly position: string;
+  readonly inset: string;
+  readonly width: string;
+  readonly height: string;
+  readonly overflow: string;
+  readonly overscrollBehavior: string;
+};
+
 export interface ChatMessage {
   messageId: string;
   content: string;
@@ -73,6 +83,17 @@ export function ChatRoomScreen({
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const shouldStickToBottomRef = useRef(true);
+
+  useEffect(() => {
+    const root = document.getElementById('root');
+    const targets = [document.documentElement, document.body, root].filter((element): element is HTMLElement => element !== null);
+    const snapshots = targets.map(snapshotChatRoomDocumentLockStyle);
+    targets.forEach(applyChatRoomDocumentLockStyle);
+
+    return () => {
+      snapshots.forEach(restoreChatRoomDocumentLockStyle);
+    };
+  }, []);
 
   useEffect(() => {
     const updateViewportMetrics = (source: string = 'viewport.measure') => {
@@ -564,6 +585,36 @@ function readChatRoomElementRect(selector: string) {
     top: rect.top,
     height: rect.height,
   };
+}
+
+function snapshotChatRoomDocumentLockStyle(element: HTMLElement): ChatRoomDocumentLockSnapshot {
+  return {
+    element,
+    position: element.style.position,
+    inset: element.style.inset,
+    width: element.style.width,
+    height: element.style.height,
+    overflow: element.style.overflow,
+    overscrollBehavior: element.style.overscrollBehavior,
+  };
+}
+
+function applyChatRoomDocumentLockStyle(element: HTMLElement) {
+  element.style.position = 'fixed';
+  element.style.inset = '0';
+  element.style.width = '100%';
+  element.style.height = '100%';
+  element.style.overflow = 'hidden';
+  element.style.overscrollBehavior = 'none';
+}
+
+function restoreChatRoomDocumentLockStyle(snapshot: ChatRoomDocumentLockSnapshot) {
+  snapshot.element.style.position = snapshot.position;
+  snapshot.element.style.inset = snapshot.inset;
+  snapshot.element.style.width = snapshot.width;
+  snapshot.element.style.height = snapshot.height;
+  snapshot.element.style.overflow = snapshot.overflow;
+  snapshot.element.style.overscrollBehavior = snapshot.overscrollBehavior;
 }
 
 function isChatRoomKeyboardDebugEnabled() {

@@ -155,12 +155,32 @@ test('chat room blocks static area scroll without document scroll recovery', () 
   assert.match(chatRoomScreenSource, /messageInputRef\.current\?\.blur\(\)/);
 });
 
-test('chat room keyboard handling avoids document root fixed lock', () => {
+test('chat room locks document scrolling while preserving the message scroller', () => {
   assert.doesNotMatch(chatRoomScreenSource, /qling-chat-room-keyboard-lock/);
   assert.doesNotMatch(chatRoomScreenSource, /setChatRoomKeyboardLock/);
   assert.doesNotMatch(chatRoomScreenSource, /classList\.toggle/);
   assert.doesNotMatch(indexCssSource, /qling-chat-room-keyboard-lock/);
   assert.doesNotMatch(indexCssSource, /html\.qling-chat-room-keyboard-lock/);
+  assert.match(chatRoomScreenSource, /type ChatRoomDocumentLockSnapshot = \{/);
+  assert.match(chatRoomScreenSource, /const root = document\.getElementById\('root'\)/);
+  assert.match(chatRoomScreenSource, /const targets = \[document\.documentElement, document\.body, root\]\.filter\(\(element\): element is HTMLElement => element !== null\)/);
+  assert.match(chatRoomScreenSource, /const snapshots = targets\.map\(snapshotChatRoomDocumentLockStyle\)/);
+  assert.match(chatRoomScreenSource, /targets\.forEach\(applyChatRoomDocumentLockStyle\)/);
+  assert.match(chatRoomScreenSource, /snapshots\.forEach\(restoreChatRoomDocumentLockStyle\)/);
+  assert.match(chatRoomScreenSource, /function snapshotChatRoomDocumentLockStyle\(element: HTMLElement\): ChatRoomDocumentLockSnapshot/);
+  assert.match(chatRoomScreenSource, /position: element\.style\.position/);
+  assert.match(chatRoomScreenSource, /overscrollBehavior: element\.style\.overscrollBehavior/);
+  assert.match(chatRoomScreenSource, /function applyChatRoomDocumentLockStyle\(element: HTMLElement\)/);
+  assert.match(chatRoomScreenSource, /element\.style\.position = 'fixed'/);
+  assert.match(chatRoomScreenSource, /element\.style\.inset = '0'/);
+  assert.match(chatRoomScreenSource, /element\.style\.width = '100%'/);
+  assert.match(chatRoomScreenSource, /element\.style\.height = '100%'/);
+  assert.match(chatRoomScreenSource, /element\.style\.overflow = 'hidden'/);
+  assert.match(chatRoomScreenSource, /element\.style\.overscrollBehavior = 'none'/);
+  assert.match(chatRoomScreenSource, /function restoreChatRoomDocumentLockStyle\(snapshot: ChatRoomDocumentLockSnapshot\)/);
+  assert.match(chatRoomScreenSource, /snapshot\.element\.style\.position = snapshot\.position/);
+  assert.match(chatRoomScreenSource, /snapshot\.element\.style\.overscrollBehavior = snapshot\.overscrollBehavior/);
+  assert.match(chatRoomScreenSource, /data-chat-room-message-scroller[\s\S]*overflow-y-auto/);
 });
 
 test('chat room keyboard diagnostics log repeated focus viewport state in dev or PWA opt-in mode', () => {
