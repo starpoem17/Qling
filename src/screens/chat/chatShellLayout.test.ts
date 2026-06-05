@@ -53,10 +53,11 @@ test('chat shell routes fill the app shell without extending under bottom naviga
   assert.doesNotMatch(reportUserScreenSource, /h-dvh/);
 });
 
-test('chat screens keep 393px canvas width while chat room uses viewport height', () => {
+test('chat list uses the 480px tab frame while chat room keeps its scaled 393px canvas', () => {
   assert.match(chatScreenSource, /import \{ FigmaCanvasFrame, profileImageUrlForColor \} from '\.\.\/shared\/ui'/);
-  assert.match(chatScreenSource, /<FigmaCanvasFrame>/);
-  assert.match(chatScreenSource, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden/);
+  assert.match(chatScreenSource, /<FigmaCanvasFrame className="max-w-\[480px\]">/);
+  assert.match(chatScreenSource, /relative h-\[852px\] w-full max-w-\[480px\] shrink-0 origin-top overflow-hidden/);
+  assert.doesNotMatch(chatScreenSource, /const canvasClassName = 'relative h-\[852px\] w-\[393px\]/);
   assert.doesNotMatch(chatScreenSource, /const canvasScale = /);
   assert.doesNotMatch(chatScreenSource, /style=\{\{ transform: `scale\(\$\{canvasScale\}\)` \}\}/);
 
@@ -254,9 +255,24 @@ test('chat room keyboard diagnostics log repeated focus viewport state in dev or
 
 test('chat list header matches the Figma vertical positions', () => {
   assert.match(chatScreenSource, /top-\[34px\] w-full text-center text-\[17px\]/);
-  assert.match(chatScreenSource, /left-\[327px\] top-\[20px\] h-\[49px\] w-\[49px\]/);
-  assert.match(chatScreenSource, /absolute left-4 top-\[75px\] flex h-10 w-\[361px\]/);
+  assert.match(chatScreenSource, /right-\[17px\] top-\[20px\] h-\[49px\] w-\[49px\]/);
+  assert.match(chatScreenSource, /absolute left-4 right-4 top-\[75px\] flex h-10/);
+  assert.doesNotMatch(chatScreenSource, /absolute left-4 top-\[75px\] flex h-10 w-\[361px\]/);
   assert.match(chatScreenSource, /absolute left-0 top-\[136px\] h-\[716px\] w-full overflow-hidden rounded-t-\[30px\] bg-\[#fff1d1\]/);
+});
+
+test('chat list cards and empty state scale from their container width', () => {
+  assert.match(chatScreenSource, /const chatListCardStyle = \{[\s\S]*padding: 'calc\(14 \/ 361 \* 100cqw\)'/);
+  assert.match(chatScreenSource, /className="relative w-full cursor-pointer[\s\S]*\[container-type:inline-size\]"/);
+  assert.match(chatScreenSource, /className="flex w-full flex-col items-start overflow-visible" style=\{chatListCardStyle\}/);
+  assert.match(chatScreenSource, /style=\{chatListCardStyle\}/);
+  assert.match(chatScreenSource, /style=\{chatListCardAvatarStyle\}/);
+  assert.match(chatScreenSource, /style=\{chatListCardUnreadStyle\}/);
+  assert.match(chatScreenSource, /const chatEmptyStateStyle = \{[\s\S]*width: 'calc\(301 \/ 393 \* 100cqw\)'/);
+  assert.match(chatScreenSource, /className="flex flex-col items-center justify-center overflow-hidden text-center \[container-type:inline-size\]"/);
+  assert.match(chatScreenSource, /style=\{chatEmptyTipTextStyle\}/);
+  assert.match(chatScreenSource, /className="absolute bottom-0 left-0 flex w-full flex-col[\s\S]*\[container-type:inline-size\]"/);
+  assert.match(chatScreenSource, /style=\{chatListActionSheetButtonStyle\}/);
 });
 
 function readSource(relativePath: string) {
