@@ -17,6 +17,10 @@ const chatRoomTopBarHeight = 74;
 const chatRoomKeyboardOpenThreshold = 120;
 const chatTextareaMinHeight = 40;
 const chatTextareaMaxHeight = 60;
+const chatRoomBackSwipeEdgeWidth = 32;
+const chatRoomBackSwipeMinDistance = 72;
+const chatRoomBackSwipeMaxVerticalDrift = 48;
+const chatRoomBackSwipeHorizontalRatio = 1.5;
 
 type ChatRoomCanvasStyle = CSSProperties & {
   readonly '--chat-input-height': string;
@@ -26,6 +30,13 @@ type ChatRoomViewportMetrics = {
   readonly canvasHeight: number;
   readonly scale: number;
   readonly viewportOffsetTop: number;
+};
+
+type ChatRoomBackSwipeState = {
+  readonly startX: number;
+  readonly startY: number;
+  readonly tracking: boolean;
+  readonly triggered: boolean;
 };
 
 export interface ChatMessage {
@@ -80,6 +91,7 @@ export function ChatRoomScreen({
   const fullViewportHeightRef = useRef<number | null>(null);
   const keyboardInputIntentRef = useRef(false);
   const canAutoScrollAfterViewportChangeRef = useRef(false);
+  const backSwipeRef = useRef<ChatRoomBackSwipeState | null>(null);
   const previousAutoScrollInputsRef = useRef<{
     readonly messages: readonly ChatMessage[];
     readonly textareaHeight: number;
@@ -280,6 +292,46 @@ export function ChatRoomScreen({
     logChatRoomKeyboardMetric('textarea.blur');
   };
 
+  const resetBackSwipe = () => {
+    backSwipeRef.current = null;
+  };
+
+  const handleBackSwipeStart = (event: TouchEvent<HTMLElement>) => {
+    if (event.touches.length !== 1 || isChatRoomBackSwipeIgnoredTarget(event.target)) {
+      resetBackSwipe();
+      return;
+    }
+
+    const touch = event.touches[0];
+    backSwipeRef.current = touch.clientX <= chatRoomBackSwipeEdgeWidth
+      ? { startX: touch.clientX, startY: touch.clientY, tracking: true, triggered: false }
+      : null;
+  };
+
+  const handleBackSwipeMove = (event: TouchEvent<HTMLElement>) => {
+    const swipe = backSwipeRef.current;
+    if (!swipe?.tracking || swipe.triggered || event.touches.length !== 1) return;
+
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - swipe.startX;
+    const deltaY = touch.clientY - swipe.startY;
+    const absY = Math.abs(deltaY);
+
+    if (absY > 24 && absY > Math.abs(deltaX)) {
+      resetBackSwipe();
+      return;
+    }
+
+    if (
+      deltaX >= chatRoomBackSwipeMinDistance
+      && absY <= chatRoomBackSwipeMaxVerticalDrift
+      && deltaX > absY * chatRoomBackSwipeHorizontalRatio
+    ) {
+      backSwipeRef.current = { ...swipe, triggered: true };
+      onBack();
+    }
+  };
+
   const mineMessageIds = messages.filter(m => m.isMine).map(m => m.messageId);
   const unreadThresholdIndex = mineMessageIds.length - (opponentUnreadCount || 0);
   if (loading || error) {
@@ -293,7 +345,14 @@ export function ChatRoomScreen({
           onBack={onBack}
           onOpenMenu={handleOpenMenu}
         />
-        <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]" style={rootStyle}>
+        <section
+          className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]"
+          style={rootStyle}
+          onTouchStart={handleBackSwipeStart}
+          onTouchMove={handleBackSwipeMove}
+          onTouchEnd={resetBackSwipe}
+          onTouchCancel={resetBackSwipe}
+        >
           <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
             <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
               <ChatRoomTopBarSpacer isHidden={isTopBarHiddenForKeyboard} />
@@ -335,7 +394,14 @@ export function ChatRoomScreen({
         onBack={onBack}
         onOpenMenu={handleOpenMenu}
       />
-      <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]" style={rootStyle}>
+      <section
+        className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]"
+        style={rootStyle}
+        onTouchStart={handleBackSwipeStart}
+        onTouchMove={handleBackSwipeMove}
+        onTouchEnd={resetBackSwipe}
+        onTouchCancel={resetBackSwipe}
+      >
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
             <ChatRoomTopBarSpacer isHidden={isTopBarHiddenForKeyboard} />
@@ -647,6 +713,12 @@ function blockStaticScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLEleme
 
 function canScrollMessageScroller(scroller: HTMLElement) {
   return scroller.scrollHeight > scroller.clientHeight + 1;
+}
+
+function isChatRoomBackSwipeIgnoredTarget(target: EventTarget | null) {
+  return target instanceof Element && Boolean(target.closest(
+    'button, textarea, input, select, a, [role="button"], [role="dialog"], [data-chat-room-top-bar], [data-chat-room-input-bar]'
+  ));
 }
 
 function logChatRoomKeyboardMetric(source: string) {
