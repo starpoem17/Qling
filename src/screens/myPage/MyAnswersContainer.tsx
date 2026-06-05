@@ -21,7 +21,7 @@ export function MyAnswersContainer(props: MyAnswersContainerProps) {
       state={isLoadingMyGivenReplies
         ? { status: 'loading', label: '내가 쓴 답변을 불러오는 중입니다.' }
         : items.length === 0
-          ? { status: 'empty', message: '아직 내가 보낸 위로가 없어요.' }
+          ? { status: 'empty', message: '' }
           : { status: 'ready' }}
       items={items}
       onBack={() => props.setView(backRouteForRoute('my_answers'))}

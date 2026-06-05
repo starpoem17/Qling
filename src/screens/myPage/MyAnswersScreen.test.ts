@@ -61,7 +61,7 @@ test('my answers loading empty and error states keep the canvas locked without l
     items: [],
   })));
   const emptyHtml = renderToStaticMarkup(MyAnswersScreen(baseProps({
-    state: { status: 'empty', message: '아직 내가 보낸 위로가 없어요.' },
+    state: { status: 'empty', message: 'empty message must stay hidden' },
     items: [],
   })));
   const errorHtml = renderToStaticMarkup(MyAnswersScreen(baseProps({
@@ -75,7 +75,8 @@ test('my answers loading empty and error states keep the canvas locked without l
     assert.doesNotMatch(html, /absolute left-0 top-\[100px\]/);
   }
   assert.match(loadingHtml, /내가 쓴 답변을 불러오는 중입니다\./);
-  assert.match(emptyHtml, /아직 내가 보낸 위로가 없어요\./);
+  assert.doesNotMatch(emptyHtml, /empty message must stay hidden/);
+  assert.doesNotMatch(emptyHtml, /rounded-\[18px\] bg-white px-\[18px\] py-8/);
   assert.match(errorHtml, /네트워크 오류/);
 });
 

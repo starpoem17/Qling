@@ -1,6 +1,6 @@
 import { Heart, MessageSquare } from 'lucide-react';
 import type { ReactNode, TouchEvent, WheelEvent } from 'react';
-import { EmptyState, ErrorState, SuccessBadge } from '../shared/ui';
+import { ErrorState, SuccessBadge } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import type { MyAnswersScreenProps } from './contract';
 
@@ -38,11 +38,7 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
               className="relative h-[752px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
               onWheel={blockLockedScroll}
               onTouchMove={blockLockedScroll}
-            >
-              <MyAnswersStateCard>
-                <EmptyState title="아직 내가 보낸 위로가 없어요." message={props.state.message} />
-              </MyAnswersStateCard>
-            </section>
+            />
           ) : (
             <section
               className="relative h-[752px] overflow-y-auto overscroll-contain px-4 pb-[calc(108px+env(safe-area-inset-bottom,0px))] pt-[27px] [-webkit-overflow-scrolling:touch]"
