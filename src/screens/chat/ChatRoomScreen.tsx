@@ -23,6 +23,7 @@ type ChatRoomCanvasStyle = CSSProperties & {
 type ChatRoomViewportMetrics = {
   readonly canvasHeight: number;
   readonly scale: number;
+  readonly viewportOffsetTop: number;
 };
 
 export interface ChatMessage {
@@ -67,7 +68,7 @@ export function ChatRoomScreen({
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState(chatTextareaMinHeight);
-  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, scale: 1 });
+  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, scale: 1, viewportOffsetTop: 0 });
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const shouldStickToBottomRef = useRef(true);
@@ -80,15 +81,17 @@ export function ChatRoomScreen({
       const layoutHeight = window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const visibleHeight = visualViewport?.height ?? window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const offsetTop = visualViewport?.offsetTop ?? 0;
-      const viewportHeight = visualViewport ? visibleHeight + offsetTop : layoutHeight;
+      const viewportHeight = visualViewport ? visibleHeight : layoutHeight;
       const nextMetrics = {
         canvasHeight: viewportHeight / scale,
         scale,
+        viewportOffsetTop: offsetTop,
       };
 
       setViewportMetrics(previousMetrics => {
         return previousMetrics.canvasHeight === nextMetrics.canvasHeight
           && previousMetrics.scale === nextMetrics.scale
+          && previousMetrics.viewportOffsetTop === nextMetrics.viewportOffsetTop
           ? previousMetrics
           : nextMetrics;
       });
@@ -135,6 +138,9 @@ export function ChatRoomScreen({
     '--chat-input-height': `${chatInputBaseHeight + Math.max(0, textareaHeight - chatTextareaMinHeight)}px`,
     height: `${viewportMetrics.canvasHeight}px`,
     transform: `scale(${viewportMetrics.scale})`,
+  };
+  const rootStyle: CSSProperties = {
+    transform: `translateY(${viewportMetrics.viewportOffsetTop}px)`,
   };
 
   useEffect(() => {
@@ -203,7 +209,7 @@ export function ChatRoomScreen({
   const unreadThresholdIndex = mineMessageIds.length - (opponentUnreadCount || 0);
   if (loading || error) {
     return (
-      <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]">
+      <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]" style={rootStyle}>
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
             <ChatRoomTopBar
@@ -221,7 +227,7 @@ export function ChatRoomScreen({
   }
 
   return (
-    <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]">
+    <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]" style={rootStyle}>
       <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
         <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
           <ChatRoomTopBar
