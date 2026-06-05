@@ -10,20 +10,16 @@ const roomBlockIconUrl = new URL('../../../assets/chat/room_block.svg', import.m
 const roomReportIconUrl = new URL('../../../assets/chat/room_report.svg', import.meta.url).href;
 const dimThemeColor = '#8b7b62';
 const chatRoomDocumentBackground = '#ffffff';
-const chatInputYOffset = 10;
 const chatInputBaseHeight = 67;
 const chatTextareaMinHeight = 40;
 const chatTextareaMaxHeight = 60;
 
 type ChatRoomCanvasStyle = CSSProperties & {
-  readonly '--chat-keyboard-offset': string;
-  readonly '--chat-input-y-offset': string;
   readonly '--chat-input-height': string;
 };
 
 type ChatRoomViewportMetrics = {
   readonly canvasHeight: number;
-  readonly keyboardOffset: number;
   readonly scale: number;
 };
 
@@ -69,7 +65,7 @@ export function ChatRoomScreen({
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState(chatTextareaMinHeight);
-  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, keyboardOffset: 0, scale: 1 });
+  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, scale: 1 });
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const shouldStickToBottomRef = useRef(true);
@@ -79,17 +75,14 @@ export function ChatRoomScreen({
       const visualViewport = window.visualViewport;
       const visualWidth = visualViewport?.width ?? window.innerWidth;
       const scale = Math.max(Math.min(visualWidth, 480) / 393, 0.1);
-      const layoutHeight = document.documentElement.clientHeight || window.innerHeight || visualViewport?.height || 852;
-      const keyboardOffset = Math.max(0, layoutHeight - (visualViewport?.height ?? layoutHeight) - (visualViewport?.offsetTop ?? 0));
+      const visibleHeight = visualViewport?.height ?? window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const nextMetrics = {
-        canvasHeight: layoutHeight / scale,
-        keyboardOffset: keyboardOffset / scale,
+        canvasHeight: visibleHeight / scale,
         scale,
       };
 
       setViewportMetrics(previousMetrics => {
         return previousMetrics.canvasHeight === nextMetrics.canvasHeight
-          && previousMetrics.keyboardOffset === nextMetrics.keyboardOffset
           && previousMetrics.scale === nextMetrics.scale
           ? previousMetrics
           : nextMetrics;
@@ -129,8 +122,6 @@ export function ChatRoomScreen({
   }, [menuOpen]);
 
   const canvasStyle: ChatRoomCanvasStyle = {
-    '--chat-keyboard-offset': `${viewportMetrics.keyboardOffset}px`,
-    '--chat-input-y-offset': `${chatInputYOffset}px`,
     '--chat-input-height': `${chatInputBaseHeight + Math.max(0, textareaHeight - chatTextareaMinHeight)}px`,
     height: `${viewportMetrics.canvasHeight}px`,
     transform: `scale(${viewportMetrics.scale})`,
@@ -150,7 +141,7 @@ export function ChatRoomScreen({
     const scroller = messagesScrollerRef.current;
     if (!scroller) return;
     scroller.scrollTop = scroller.scrollHeight;
-  }, [messages, textareaHeight, viewportMetrics.keyboardOffset]);
+  }, [messages, textareaHeight, viewportMetrics.canvasHeight]);
 
   const handleMessagesScroll = () => {
     const scroller = messagesScrollerRef.current;
@@ -196,13 +187,13 @@ export function ChatRoomScreen({
     return (
       <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-          <div data-chat-room-canvas className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+          <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
             <ChatRoomTopBar
               opponent={opponent}
               onBack={onBack}
               onOpenMenu={handleOpenMenu}
             />
-            <div className="absolute bottom-0 left-0 top-[74px] flex w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
+            <div className="flex min-h-0 flex-1 w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
               {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
             </div>
           </div>
@@ -214,7 +205,7 @@ export function ChatRoomScreen({
   return (
     <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
       <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-        <div data-chat-room-canvas className="relative w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+        <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
           <ChatRoomTopBar
             opponent={opponent}
             onBack={onBack}
@@ -223,7 +214,7 @@ export function ChatRoomScreen({
             <div
               ref={messagesScrollerRef}
               data-chat-room-message-scroller
-              className="absolute bottom-[calc(var(--chat-input-height)+max(0px,calc(var(--chat-keyboard-offset)-var(--chat-input-y-offset))))] left-0 top-[74px] w-[393px] overflow-y-auto overscroll-contain bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
+              className="min-h-0 flex-1 w-[393px] overflow-y-auto overscroll-contain bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
               onScroll={handleMessagesScroll}
             >
             <div className="mb-[14px] flex w-full justify-center">
@@ -355,7 +346,7 @@ function ChatRoomInputBar({
   readonly onSend: () => void;
 }) {
   return (
-      <div data-chat-room-input-bar className="absolute bottom-[max(0px,calc(var(--chat-keyboard-offset)-var(--chat-input-y-offset)))] left-0 h-[var(--chat-input-height)] w-[393px] border-t border-[#ede3d6] bg-white qling-figma-font">
+      <div data-chat-room-input-bar className="relative h-[var(--chat-input-height)] w-[393px] shrink-0 border-t border-[#ede3d6] bg-white qling-figma-font">
         {sendError && (
           <div className="absolute bottom-[67px] left-4 right-4 rounded-[12px] bg-white px-3 py-2 text-center text-[12px] font-bold text-red-500 shadow-[0_2px_8px_rgb(120_90_60/0.12)]">
             {sendError}
@@ -408,7 +399,7 @@ function ChatRoomTopBar({
   readonly onOpenMenu: () => void;
 }) {
   return (
-    <header data-chat-room-top-bar className="absolute left-0 top-0 z-20 h-[74px] w-[393px] overflow-hidden bg-[#ff8b3d] qling-figma-font">
+    <header data-chat-room-top-bar className="relative z-20 h-[74px] w-[393px] shrink-0 overflow-hidden bg-[#ff8b3d] qling-figma-font">
         <button
           type="button"
           onClick={onBack}
