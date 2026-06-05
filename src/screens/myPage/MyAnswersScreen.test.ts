@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { Children, createElement, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { MyAnswersScreen } from './MyAnswersScreen';
+import { MyAnswersScreen, MyAnswersScreenView } from './MyAnswersScreen';
 import type { MyAnswersScreenProps } from './contract';
 
 function baseProps(overrides: Partial<MyAnswersScreenProps> = {}): MyAnswersScreenProps {
@@ -21,12 +22,24 @@ function baseProps(overrides: Partial<MyAnswersScreenProps> = {}): MyAnswersScre
       accessibilityLabel: '내가 쓴 답변, 카테고리 자존감, 피드백 받은 하트, 코멘트 있음',
     }],
     onBack: () => undefined,
+    onStartChat: () => undefined,
+    ...overrides,
+  };
+}
+
+function viewProps(overrides: Partial<Parameters<typeof MyAnswersScreenView>[0]> = {}): Parameters<typeof MyAnswersScreenView>[0] {
+  return {
+    ...baseProps(),
+    chatStartTarget: null,
+    onOpenChatStartConfirmation: () => undefined,
+    onCancelChatStartConfirmation: () => undefined,
+    onConfirmChatStartConfirmation: () => undefined,
     ...overrides,
   };
 }
 
 test('my answers screen renders same card format with heart and one small comment', () => {
-  const html = renderToStaticMarkup(MyAnswersScreen(baseProps()));
+  const html = renderToStaticMarkup(createElement(MyAnswersScreen, baseProps()));
 
   assert.match(html, /내가 쓴 답변/);
   assert.match(html, /자존감/);
@@ -41,7 +54,7 @@ test('my answers screen renders same card format with heart and one small commen
 });
 
 test('my answers screen uses the fixed 393px Figma canvas and ready-only body scroll area', () => {
-  const html = renderToStaticMarkup(MyAnswersScreen(baseProps()));
+  const html = renderToStaticMarkup(createElement(MyAnswersScreen, baseProps()));
 
   assert.match(html, /h-\[852px\] w-\[393px\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
@@ -56,15 +69,15 @@ test('my answers screen uses the fixed 393px Figma canvas and ready-only body sc
 });
 
 test('my answers loading empty and error states keep the canvas locked without list scrolling', () => {
-  const loadingHtml = renderToStaticMarkup(MyAnswersScreen(baseProps({
+  const loadingHtml = renderToStaticMarkup(createElement(MyAnswersScreen, baseProps({
     state: { status: 'loading', label: '내가 쓴 답변을 불러오는 중입니다.' },
     items: [],
   })));
-  const emptyHtml = renderToStaticMarkup(MyAnswersScreen(baseProps({
+  const emptyHtml = renderToStaticMarkup(createElement(MyAnswersScreen, baseProps({
     state: { status: 'empty', message: 'empty message must stay hidden' },
     items: [],
   })));
-  const errorHtml = renderToStaticMarkup(MyAnswersScreen(baseProps({
+  const errorHtml = renderToStaticMarkup(createElement(MyAnswersScreen, baseProps({
     state: { status: 'error', message: '네트워크 오류', canRetry: false },
     items: [],
   })));
@@ -81,7 +94,7 @@ test('my answers loading empty and error states keep the canvas locked without l
 });
 
 test('my answers chat start button appears only for replies with a comment', () => {
-  const html = renderToStaticMarkup(MyAnswersScreen(baseProps({
+  const html = renderToStaticMarkup(createElement(MyAnswersScreen, baseProps({
     items: [
       baseProps().items[0],
       {
@@ -100,15 +113,76 @@ test('my answers chat start button appears only for replies with a comment', () 
   assert.equal((html.match(/<button[^>]*aria-label="익명 채팅 시작하기"/g) ?? []).length, 1);
 });
 
+test('my answers chat start button opens confirmation popup before starting chat', () => {
+  const events: string[] = [];
+  const tree = MyAnswersScreenView(viewProps({
+    onStartChat: item => events.push(`start:${item.worryId}:${item.replyId}`),
+    onOpenChatStartConfirmation: item => events.push(`open:${item.worryId}:${item.replyId}`),
+  }));
+
+  click(findElement(tree, element => element.type === 'button' && element.props['aria-label'] === '익명 채팅 시작하기'));
+
+  assert.deepEqual(events, ['open:worry-1:reply-1']);
+});
+
+test('my answers chat start confirmation popup matches the Figma modal chrome', () => {
+  const html = renderToStaticMarkup(MyAnswersScreenView(viewProps({
+    chatStartTarget: baseProps().items[0],
+  })));
+
+  assert.match(html, /role="dialog"/);
+  assert.match(html, /aria-modal="true"/);
+  assert.match(html, /aria-labelledby="my-answers-chat-start-confirmation-title"/);
+  assert.match(html, /aria-describedby="my-answers-chat-start-confirmation-description"/);
+  assert.match(html, /left-\[-1px\] top-0 z-40 h-\[852px\] w-\[394px\] bg-\[rgba\(40,30,20,0\.42\)\]/);
+  assert.match(html, /left-\[42px\] top-\[251px\] z-50 h-\[288px\] w-\[310px\] rounded-\[24px\] bg-white/);
+  assert.match(html, /shadow-\[0_12px_20px_rgba\(0,0,0,0\.18\)\]/);
+  assert.match(html, /chat_start_dot\.svg/);
+  assert.match(html, /채팅을 시작할까요\?/);
+  assert.match(html, /채팅을 시작하면 서로의 닉네임을 볼 수 있고/);
+  assert.match(html, /상대방에게 채팅 시작 알림이 전송됩니다\./);
+  assert.match(html, />취소<\/button>/);
+  assert.match(html, />확인<\/button>/);
+});
+
+test('my answers chat start confirmation cancel closes without starting chat', () => {
+  const events: string[] = [];
+  const tree = MyAnswersScreenView(viewProps({
+    chatStartTarget: baseProps().items[0],
+    onCancelChatStartConfirmation: () => events.push('cancel'),
+    onConfirmChatStartConfirmation: () => events.push('confirm'),
+    onStartChat: () => events.push('start'),
+  }));
+
+  click(findElement(tree, element => element.type === 'button' && element.props.children === '취소'));
+
+  assert.deepEqual(events, ['cancel']);
+});
+
+test('my answers chat start confirmation confirm starts chat with selected reply', () => {
+  const events: string[] = [];
+  const selectedReply = baseProps().items[0];
+  const tree = MyAnswersScreenView(viewProps({
+    chatStartTarget: selectedReply,
+    onConfirmChatStartConfirmation: () => {
+      events.push(`start:${selectedReply.worryId}:${selectedReply.replyId}`);
+    },
+  }));
+
+  click(findElement(tree, element => element.type === 'button' && element.props.children === '확인'));
+
+  assert.deepEqual(events, ['start:worry-1:reply-1']);
+});
+
 test('my answers screen does not make item cards navigate to detail routes', () => {
-  const html = renderToStaticMarkup(MyAnswersScreen(baseProps()));
+  const html = renderToStaticMarkup(createElement(MyAnswersScreen, baseProps()));
 
   assert.doesNotMatch(html, /<button[^>]*aria-label="내가 쓴 답변/);
   assert.doesNotMatch(html, /my_answer_detail|read_my_reply|routeToMyReplyDetail/);
 });
 
 test('my answers screen hides dislike feedback and publisher private data from DOM', () => {
-  const html = renderToStaticMarkup(MyAnswersScreen(baseProps({
+  const html = renderToStaticMarkup(createElement(MyAnswersScreen, baseProps({
     items: [{
       replyId: 'reply-private',
       deliveryId: 'delivery-private',
@@ -137,3 +211,34 @@ test('my answers screen hides dislike feedback and publisher private data from D
   assert.match(html, /내 답변만 표시합니다\./);
   assert.match(html, /허용된 고민 context만 표시합니다\./);
 });
+
+type TestElement = ReactElement<Record<string, unknown>>;
+
+function findElement(tree: ReactNode, predicate: (element: TestElement) => boolean): TestElement {
+  const found = findOptionalElement(tree, predicate);
+  assert.ok(found, 'element not found');
+  return found;
+}
+
+function findOptionalElement(tree: ReactNode, predicate: (element: TestElement) => boolean): TestElement | null {
+  if (!isValidElement(tree)) return null;
+  const element = tree as TestElement;
+  if (predicate(element)) return element;
+  if (typeof element.type === 'function') {
+    const rendered = (element.type as (props: Record<string, unknown>) => ReactNode)(element.props);
+    const foundInRendered = findOptionalElement(rendered, predicate);
+    if (foundInRendered) return foundInRendered;
+  }
+  let found: TestElement | null = null;
+  Children.forEach(element.props.children as ReactNode, child => {
+    if (found) return;
+    found = findOptionalElement(child, predicate);
+  });
+  return found;
+}
+
+function click(element: TestElement): void {
+  const onClick = element.props.onClick;
+  assert.equal(typeof onClick, 'function');
+  (onClick as () => void)();
+}

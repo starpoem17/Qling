@@ -101,6 +101,7 @@ export type MyAnswersScreenProps = {
   readonly state: ScreenAsyncState;
   readonly items: readonly MyAnswerListItemProps[];
   readonly onBack: () => void;
+  readonly onStartChat: (item: MyAnswerListItemProps) => void;
 };
 
 export type MyWorryListItemProps = {

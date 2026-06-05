@@ -414,6 +414,7 @@ export default function App() {
               <MyAnswersContainer
                 user={user}
                 setView={setView}
+                setFilterAlert={setFilterAlert}
               />
             </motion.div>
           )}

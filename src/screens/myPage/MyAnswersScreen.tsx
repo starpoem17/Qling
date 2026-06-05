@@ -1,10 +1,36 @@
 import { Heart, MessageSquare } from 'lucide-react';
-import type { ReactNode, TouchEvent, WheelEvent } from 'react';
+import { useState, type ReactNode, type TouchEvent, type WheelEvent } from 'react';
 import { ErrorState, SuccessBadge } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import type { MyAnswersScreenProps } from './contract';
 
+const chatStartDotUrl = new URL('../../../assets/chat/chat_start_dot.svg', import.meta.url).href;
+
 export function MyAnswersScreen(props: MyAnswersScreenProps) {
+  const [chatStartTarget, setChatStartTarget] = useState<MyAnswersScreenProps['items'][number] | null>(null);
+
+  return (
+    <MyAnswersScreenView
+      {...props}
+      chatStartTarget={chatStartTarget}
+      onOpenChatStartConfirmation={setChatStartTarget}
+      onCancelChatStartConfirmation={() => setChatStartTarget(null)}
+      onConfirmChatStartConfirmation={() => {
+        if (!chatStartTarget) return;
+        const target = chatStartTarget;
+        setChatStartTarget(null);
+        props.onStartChat(target);
+      }}
+    />
+  );
+}
+
+export function MyAnswersScreenView(props: MyAnswersScreenProps & {
+  readonly chatStartTarget: MyAnswersScreenProps['items'][number] | null;
+  readonly onOpenChatStartConfirmation: (item: MyAnswersScreenProps['items'][number]) => void;
+  readonly onCancelChatStartConfirmation: () => void;
+  readonly onConfirmChatStartConfirmation: () => void;
+}) {
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font text-[#1a1a1e]';
@@ -45,9 +71,21 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
               aria-label="내가 쓴 답변 목록"
             >
               <div className="grid gap-[19px]">
-                {props.items.map(reply => <MyAnswerCard key={reply.replyId} reply={reply} />)}
+                {props.items.map(reply => (
+                  <MyAnswerCard
+                    key={reply.replyId}
+                    reply={reply}
+                    onStartChatConfirm={props.onOpenChatStartConfirmation}
+                  />
+                ))}
               </div>
             </section>
+          )}
+          {props.chatStartTarget && (
+            <ChatStartConfirmationPopup
+              onCancel={props.onCancelChatStartConfirmation}
+              onConfirm={props.onConfirmChatStartConfirmation}
+            />
           )}
         </div>
       </div>
@@ -93,7 +131,13 @@ function MyAnswersStateCard({ children }: { readonly children: ReactNode }) {
   );
 }
 
-function MyAnswerCard({ reply }: { readonly reply: MyAnswersScreenProps['items'][number] }) {
+function MyAnswerCard({
+  reply,
+  onStartChatConfirm,
+}: {
+  readonly reply: MyAnswersScreenProps['items'][number];
+  readonly onStartChatConfirm: (item: MyAnswersScreenProps['items'][number]) => void;
+}) {
   const hasComment = Boolean(reply.feedbackComment);
 
   return (
@@ -128,7 +172,7 @@ function MyAnswerCard({ reply }: { readonly reply: MyAnswersScreenProps['items']
         <button
           type="button"
           aria-label="익명 채팅 시작하기"
-          onClick={() => undefined}
+          onClick={() => onStartChatConfirm(reply)}
           className="mt-[15px] flex h-[35px] w-full items-center justify-center gap-[9px] rounded-[12px] bg-[#34c759] text-[15px] font-bold leading-none tracking-[-0.01em] text-white transition-colors hover:bg-[#2fbd52] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#34c759]"
         >
           <MessageSquare className="h-5 w-5 fill-white text-white" aria-hidden="true" />
@@ -136,6 +180,64 @@ function MyAnswerCard({ reply }: { readonly reply: MyAnswersScreenProps['items']
         </button>
       )}
     </article>
+  );
+}
+
+function ChatStartConfirmationPopup({
+  onCancel,
+  onConfirm,
+}: {
+  readonly onCancel: () => void;
+  readonly onConfirm: () => void;
+}) {
+  const titleId = 'my-answers-chat-start-confirmation-title';
+  const descriptionId = 'my-answers-chat-start-confirmation-description';
+
+  return (
+    <>
+      <div className="absolute left-[-1px] top-0 z-40 h-[852px] w-[394px] bg-[rgba(40,30,20,0.42)]" aria-hidden="true" />
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+        className="absolute left-[42px] top-[251px] z-50 h-[288px] w-[310px] rounded-[24px] bg-white shadow-[0_12px_20px_rgba(0,0,0,0.18)]"
+      >
+        <img
+          src={chatStartDotUrl}
+          alt=""
+          className="absolute left-[125px] top-[26px] h-[60px] w-[60px]"
+          aria-hidden="true"
+        />
+        <h2
+          id={titleId}
+          className="absolute left-1/2 top-[119.5px] flex -translate-x-1/2 -translate-y-1/2 flex-col justify-center whitespace-nowrap text-center font-['Qling_Noto_Sans_KR_Black'] text-[19px] font-black leading-normal tracking-[-0.38px] text-[#1a1a1e]"
+        >
+          채팅을 시작할까요?
+        </h2>
+        <p
+          id={descriptionId}
+          className="absolute left-1/2 top-[141px] w-[262px] -translate-x-1/2 text-center font-['Qling_Noto_Sans_KR'] text-[13px] font-normal leading-[19px] text-[#6e6a63]"
+        >
+          <span className="block">채팅을 시작하면 서로의 닉네임을 볼 수 있고</span>
+          <span className="block">상대방에게 채팅 시작 알림이 전송됩니다.</span>
+        </p>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="absolute left-[30px] top-[201px] h-[52px] w-[120px] rounded-[12px] border border-[#b8b8b8] bg-white text-[15px] font-bold leading-normal tracking-[-0.15px] text-[#b8b8b8] focus:outline-none focus:ring-2 focus:ring-[#b8b8b8] focus:ring-offset-2"
+        >
+          취소
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          className="absolute left-[160px] top-[201px] h-[52px] w-[120px] rounded-[12px] bg-[#ff8b3d] text-[15px] font-bold leading-normal tracking-[-0.15px] text-white focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
+        >
+          확인
+        </button>
+      </section>
+    </>
   );
 }
 
