@@ -144,8 +144,7 @@ export function ChatRoomScreen({
     transform: `translateY(${viewportMetrics.viewportOffsetTop}px)`,
   };
   const topBarLayerStyle: CSSProperties = {
-    height: `${viewportMetrics.viewportOffsetTop + chatRoomTopBarHeight * viewportMetrics.scale}px`,
-    paddingTop: `${viewportMetrics.viewportOffsetTop}px`,
+    height: `${chatRoomTopBarHeight * viewportMetrics.scale}px`,
   };
   const topBarCanvasStyle: CSSProperties = {
     transform: `scale(${viewportMetrics.scale})`,
@@ -542,13 +541,29 @@ function blockStaticScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLEleme
 function logChatRoomKeyboardMetric(source: string) {
   if (!isChatRoomKeyboardDebugEnabled()) return;
   const visualViewport = window.visualViewport;
+  const topBarLayerRect = readChatRoomElementRect('[data-chat-room-top-bar-layer]');
+  const topBarRect = readChatRoomElementRect('[data-chat-room-top-bar]');
   console.info('[chat-room-keyboard]', {
     source,
     scrollY: window.scrollY,
     documentScrollTop: document.documentElement.scrollTop,
     visualViewportHeight: visualViewport?.height ?? null,
     visualViewportOffsetTop: visualViewport?.offsetTop ?? null,
+    topBarLayerTop: topBarLayerRect?.top ?? null,
+    topBarLayerHeight: topBarLayerRect?.height ?? null,
+    topBarTop: topBarRect?.top ?? null,
+    topBarHeight: topBarRect?.height ?? null,
   });
+}
+
+function readChatRoomElementRect(selector: string) {
+  const element = document.querySelector<HTMLElement>(selector);
+  if (!element) return null;
+  const rect = element.getBoundingClientRect();
+  return {
+    top: rect.top,
+    height: rect.height,
+  };
 }
 
 function isChatRoomKeyboardDebugEnabled() {

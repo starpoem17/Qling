@@ -68,7 +68,9 @@ test('chat screens keep 393px canvas width while chat room uses viewport height'
   assert.doesNotMatch(chatRoomScreenSource, /offsetTop: offsetTop \/ scale/);
   assert.doesNotMatch(chatRoomScreenSource, /marginTop/);
   assert.match(chatRoomScreenSource, /const rootStyle: CSSProperties = \{\s*transform: `translateY\(\$\{viewportMetrics\.viewportOffsetTop\}px\)`,\s*\}/);
-  assert.match(chatRoomScreenSource, /const topBarLayerStyle: CSSProperties = \{\s*height: `\$\{viewportMetrics\.viewportOffsetTop \+ chatRoomTopBarHeight \* viewportMetrics\.scale\}px`,\s*paddingTop: `\$\{viewportMetrics\.viewportOffsetTop\}px`,\s*\}/);
+  assert.match(chatRoomScreenSource, /const topBarLayerStyle: CSSProperties = \{\s*height: `\$\{chatRoomTopBarHeight \* viewportMetrics\.scale\}px`,\s*\}/);
+  assert.doesNotMatch(chatRoomScreenSource, /topBarLayerStyle[\s\S]*paddingTop/);
+  assert.doesNotMatch(chatRoomScreenSource, /topBarLayerStyle[\s\S]*viewportOffsetTop \+ chatRoomTopBarHeight/);
   assert.match(chatRoomScreenSource, /const topBarCanvasStyle: CSSProperties = \{\s*transform: `scale\(\$\{viewportMetrics\.scale\}\)`,\s*\}/);
   assert.match(chatRoomScreenSource, /<section className="fixed inset-0 z-40 overflow-hidden bg-\[#fff1d1\]" style=\{rootStyle\}>/);
   assert.match(chatRoomScreenSource, /transform: `scale\(\$\{viewportMetrics\.scale\}\)`/);
@@ -178,6 +180,14 @@ test('chat room keyboard diagnostics log repeated focus viewport state in dev or
   assert.match(chatRoomScreenSource, /documentScrollTop: document\.documentElement\.scrollTop/);
   assert.match(chatRoomScreenSource, /visualViewportHeight: visualViewport\?\.height \?\? null/);
   assert.match(chatRoomScreenSource, /visualViewportOffsetTop: visualViewport\?\.offsetTop \?\? null/);
+  assert.match(chatRoomScreenSource, /const topBarLayerRect = readChatRoomElementRect\('\[data-chat-room-top-bar-layer\]'\)/);
+  assert.match(chatRoomScreenSource, /const topBarRect = readChatRoomElementRect\('\[data-chat-room-top-bar\]'\)/);
+  assert.match(chatRoomScreenSource, /topBarLayerTop: topBarLayerRect\?\.top \?\? null/);
+  assert.match(chatRoomScreenSource, /topBarLayerHeight: topBarLayerRect\?\.height \?\? null/);
+  assert.match(chatRoomScreenSource, /topBarTop: topBarRect\?\.top \?\? null/);
+  assert.match(chatRoomScreenSource, /topBarHeight: topBarRect\?\.height \?\? null/);
+  assert.match(chatRoomScreenSource, /function readChatRoomElementRect\(selector: string\)/);
+  assert.match(chatRoomScreenSource, /document\.querySelector<HTMLElement>\(selector\)/);
   assert.match(chatRoomScreenSource, /logChatRoomKeyboardMetric\('textarea\.blur'\)/);
   assert.match(chatRoomScreenSource, /logChatRoomKeyboardMetric\(source\)/);
   assert.match(chatRoomScreenSource, /const handleViewportResize = \(\) => updateViewportMetrics\('visualViewport\.resize'\)/);
