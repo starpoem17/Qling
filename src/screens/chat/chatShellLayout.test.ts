@@ -112,10 +112,15 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(reportUserScreenSource, /flex h-full min-h-0 flex-col/);
 });
 
-test('chat room more menu is fixed to the visible viewport bottom', () => {
+test('chat room more menu stays inside the scaled chat canvas', () => {
   assert.match(chatRoomScreenSource, /bg-\[rgba\(40,30,20,0\.42\)\]/);
   assert.match(chatRoomScreenSource, /className="fixed inset-0 z-\[60\] bg-\[rgba\(40,30,20,0\.42\)\]"/);
-  assert.match(chatRoomScreenSource, /bottom-0[\s\S]*h-\[284px\][\s\S]*rounded-tl-\[22px\] rounded-tr-\[22px\]/);
+  assert.match(chatRoomScreenSource, /scale=\{viewportMetrics\.scale\}/);
+  assert.match(chatRoomScreenSource, /width: `\$\{393 \* scale\}px`/);
+  assert.match(chatRoomScreenSource, /height: `\$\{284 \* scale\}px`/);
+  assert.match(chatRoomScreenSource, /style=\{\{ transform: `scale\(\$\{scale\}\)` \}\}/);
+  assert.match(chatRoomScreenSource, /bottom-0 left-0[\s\S]*h-\[284px\] w-\[393px\][\s\S]*rounded-tl-\[22px\] rounded-tr-\[22px\]/);
+  assert.doesNotMatch(chatRoomScreenSource, /w-\[min\(393px,100vw\)\]/);
   assert.doesNotMatch(chatRoomScreenSource, /top-\[597px\]/);
   assert.match(chatRoomScreenSource, /label="알림 끄기"/);
   assert.match(chatRoomScreenSource, /label="차단하기" danger onClick=\{onBlock\}/);

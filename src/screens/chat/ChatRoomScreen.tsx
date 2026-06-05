@@ -249,6 +249,24 @@ export function ChatRoomScreen({
             </div>
           </div>
         </section>
+        {menuOpen && (
+          <ChatRoomActionSheet
+            scale={viewportMetrics.scale}
+            onClose={() => setMenuOpen(false)}
+            onNotificationOff={() => {
+              setMenuOpen(false);
+              alert('알림이 꺼졌습니다.');
+            }}
+            onBlock={() => {
+              setMenuOpen(false);
+              onLeaveChat();
+            }}
+            onReport={() => {
+              setMenuOpen(false);
+              onReportUser();
+            }}
+          />
+        )}
       </>
     );
   }
@@ -362,24 +380,25 @@ export function ChatRoomScreen({
             />
           </div>
         </div>
-        {menuOpen && (
-          <ChatRoomActionSheet
-            onClose={() => setMenuOpen(false)}
-            onNotificationOff={() => {
-              setMenuOpen(false);
-              alert('알림이 꺼졌습니다.');
-            }}
-            onBlock={() => {
-              setMenuOpen(false);
-              onLeaveChat();
-            }}
-            onReport={() => {
-              setMenuOpen(false);
-              onReportUser();
-            }}
-          />
-        )}
       </section>
+      {menuOpen && (
+        <ChatRoomActionSheet
+          scale={viewportMetrics.scale}
+          onClose={() => setMenuOpen(false)}
+          onNotificationOff={() => {
+            setMenuOpen(false);
+            alert('알림이 꺼졌습니다.');
+          }}
+          onBlock={() => {
+            setMenuOpen(false);
+            onLeaveChat();
+          }}
+          onReport={() => {
+            setMenuOpen(false);
+            onReportUser();
+          }}
+        />
+      )}
     </>
   );
 }
@@ -599,11 +618,13 @@ function isChatRoomKeyboardDebugEnabled() {
 }
 
 function ChatRoomActionSheet({
+  scale,
   onClose,
   onNotificationOff,
   onBlock,
   onReport,
 }: {
+  readonly scale: number;
   readonly onClose: () => void;
   readonly onNotificationOff: () => void;
   readonly onBlock: () => void;
@@ -612,26 +633,36 @@ function ChatRoomActionSheet({
   return (
     <div className="fixed inset-0 z-[60] bg-[rgba(40,30,20,0.42)]" role="presentation" onClick={onClose}>
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="채팅방 메뉴"
-        className="absolute bottom-0 left-1/2 flex h-[284px] w-[min(393px,100vw)] -translate-x-1/2 flex-col items-start overflow-hidden rounded-tl-[22px] rounded-tr-[22px] bg-white pb-[26px] pt-[10px]"
-        onClick={event => event.stopPropagation()}
+        className="absolute bottom-0 left-1/2 overflow-visible"
+        style={{
+          width: `${393 * scale}px`,
+          height: `${284 * scale}px`,
+          transform: 'translateX(-50%)',
+        }}
       >
-        <div className="flex w-full justify-center overflow-hidden pb-2">
-          <span className="h-1 w-10 rounded-[2px] bg-[#e6dccf]" aria-hidden="true" />
-        </div>
-        <ActionSheetButton iconUrl={roomNotificationOffIconUrl} label="알림 끄기" onClick={onNotificationOff} />
-        <ActionSheetButton iconUrl={roomBlockIconUrl} label="차단하기" danger onClick={onBlock} />
-        <ActionSheetButton iconUrl={roomReportIconUrl} label="신고하기" danger onClick={onReport} />
-        <div className="h-2 w-[393px] shrink-0 bg-[#f4efe7]" />
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex h-[72px] w-full shrink-0 items-start justify-center py-[15px] font-['Qling_Noto_Sans_KR'] text-[15px] font-bold leading-[22px] text-[#8a857c] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset"
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="채팅방 메뉴"
+          className="absolute bottom-0 left-0 flex h-[284px] w-[393px] origin-bottom-left flex-col items-start overflow-hidden rounded-tl-[22px] rounded-tr-[22px] bg-white pb-[26px] pt-[10px]"
+          style={{ transform: `scale(${scale})` }}
+          onClick={event => event.stopPropagation()}
         >
-          취소
-        </button>
+          <div className="flex w-full justify-center overflow-hidden pb-2">
+            <span className="h-1 w-10 rounded-[2px] bg-[#e6dccf]" aria-hidden="true" />
+          </div>
+          <ActionSheetButton iconUrl={roomNotificationOffIconUrl} label="알림 끄기" onClick={onNotificationOff} />
+          <ActionSheetButton iconUrl={roomBlockIconUrl} label="차단하기" danger onClick={onBlock} />
+          <ActionSheetButton iconUrl={roomReportIconUrl} label="신고하기" danger onClick={onReport} />
+          <div className="h-2 w-full shrink-0 bg-[#f4efe7]" />
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-[72px] w-full shrink-0 items-start justify-center py-[15px] font-['Qling_Noto_Sans_KR'] text-[15px] font-bold leading-[22px] text-[#8a857c] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset"
+          >
+            취소
+          </button>
+        </div>
       </div>
     </div>
   );
