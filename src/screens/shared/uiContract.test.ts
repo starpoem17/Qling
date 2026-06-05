@@ -90,6 +90,8 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.match(cssSource, /\.qling-production-frame[\s\S]*flex-direction: column;/);
   assert.match(cssSource, /\.qling-production-frame[\s\S]*height: 100dvh;/);
   assert.match(cssSource, /\.qling-production-frame[\s\S]*overflow: hidden;/);
+  assert.match(cssSource, /--font-sans: "SUIT Variable", "Qling Noto Sans KR", "SUIT"/);
+  assert.match(cssSource, /--qling-font-sans: "SUIT Variable", "Qling Noto Sans KR", "SUIT"/);
   assert.match(source, /qling-production-root h-dvh overflow-hidden/);
   assert.match(source, /min-h-0 w-full flex-1/);
   assert.match(source, /overflow-y-auto overscroll-contain/);

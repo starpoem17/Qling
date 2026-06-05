@@ -14,11 +14,11 @@ import {
   validateNickname,
 } from './profileValidation';
 
-test('nickname validation trims before validation and storage', () => {
+test('nickname validation rejects whitespace before storage', () => {
   assert.deepEqual(validateNickname('  라미  '), {
-    valid: true,
-    nickname: '라미',
-    normalizedNickname: '라미',
+    valid: false,
+    error: 'invalidCharacters',
+    message: NICKNAME_VALIDATION_MESSAGES.invalidCharacters,
   });
 });
 
@@ -39,8 +39,8 @@ test('nickname length boundaries are enforced', () => {
     message: NICKNAME_VALIDATION_MESSAGES.tooShort,
   });
   assert.equal(validateNickname('가나').valid, true);
-  assert.equal(validateNickname('가나다라마바사아자차카타').valid, true);
-  assert.deepEqual(validateNickname('가나다라마바사아자차카타파'), {
+  assert.equal(validateNickname('가나다라마바사아자차').valid, true);
+  assert.deepEqual(validateNickname('가나다라마바사아자차카'), {
     valid: false,
     error: 'tooLong',
     message: NICKNAME_VALIDATION_MESSAGES.tooLong,

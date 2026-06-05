@@ -33,8 +33,8 @@
 }
 
 @theme {
-  --font-sans: "SUIT Variable", "SUIT", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-serif: "SUIT Variable", "SUIT", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "SUIT Variable", "Qling Noto Sans KR", "SUIT", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-serif: "SUIT Variable", "Qling Noto Sans KR", "SUIT", ui-sans-serif, system-ui, sans-serif;
 
   --color-qling-primary-orange: #e07a5f;
   --color-qling-secondary-orange: #f4a261;
@@ -59,7 +59,7 @@
   --qling-mobile-canvas-max-width: 480px;
   --qling-mobile-canvas-height: 100dvh;
   --qling-visual-viewport-height: 100dvh;
-  --qling-font-sans: "SUIT Variable", "SUIT", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --qling-font-sans: "SUIT Variable", "Qling Noto Sans KR", "SUIT", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   --qling-color-primary-orange: #e07a5f;
   --qling-color-secondary-orange: #f4a261;

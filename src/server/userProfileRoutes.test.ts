@@ -79,7 +79,7 @@ test('nickname reservation route uses verified uid and maps duplicate response',
     },
   });
 
-  const res = await route.call('/api/users/me/nickname-reservation', { nickname: ' QLING ' });
+  const res = await route.call('/api/users/me/nickname-reservation', { nickname: 'QLING' });
   assert.equal(res.statusCode, 409);
   assert.deepEqual(res.body, { status: 'duplicate', code: 'nickname_taken', message: '이미 사용 중인 닉네임이에요.' });
 });
@@ -169,7 +169,7 @@ test('onboarding profile route persists required age, gender, interests, and nic
   });
 
   const res = await route.call('/api/users/me/onboarding-profile', {
-    nickname: ' 라미 ',
+    nickname: '라미',
     gender: 'female',
     age: 99,
     interests: ['워라밸', '워라벨'],

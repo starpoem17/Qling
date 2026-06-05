@@ -11,7 +11,7 @@ export const NICKNAME_VALIDATION_MESSAGES = {
   required: '닉네임을 입력해주세요.',
   invalidCharacters: '닉네임은 한글, 영문, 숫자만 사용할 수 있어요.',
   tooShort: '닉네임은 2자 이상이어야 해요.',
-  tooLong: '닉네임은 12자 이하여야 해요.',
+  tooLong: '닉네임은 10자 이하여야 해요.',
 } as const;
 
 export const AGE_VALIDATION_MESSAGES = {
@@ -51,14 +51,17 @@ export function normalizedNicknameKey(input: string): string {
 }
 
 export function validateNickname(input: string): NicknameValidationResult {
-  const nickname = normalizeNicknameInput(input);
-  if (nickname.length === 0) {
+  if (input.trim().length === 0) {
     return invalidNickname('required');
   }
+  if (/\s/u.test(input)) {
+    return invalidNickname('invalidCharacters');
+  }
+  const nickname = normalizeNicknameInput(input);
   if (nickname.length < 2) {
     return invalidNickname('tooShort');
   }
-  if (nickname.length > 12) {
+  if (nickname.length > 10) {
     return invalidNickname('tooLong');
   }
   if (!NICKNAME_PATTERN.test(nickname)) {

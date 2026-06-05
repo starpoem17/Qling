@@ -29,7 +29,7 @@ test('valid onboarding produces profile persistence contract', async () => {
   const result = await completeOnboarding({
     uid: 'user-1',
     draft: {
-      nickname: ' QLING ',
+      nickname: 'QLING',
       gender: 'female',
       age: '14',
       interests: ['직장', '취업'],
@@ -90,9 +90,9 @@ test('duplicate-check result maps to UI states', () => {
   assert.equal(mapReservationResultToDuplicateState({ status: 'server_error', code: 'x', message: 'x' }), 'network-failed');
 });
 
-test('reservation trims and normalizes before repository call', async () => {
+test('reservation normalizes before repository call', async () => {
   const repo = repository();
-  const result = await reserveNickname({ uid: 'user-1', nickname: ' QLING ', repository: repo });
+  const result = await reserveNickname({ uid: 'user-1', nickname: 'QLING', repository: repo });
 
   assert.equal(result.status, 'available');
   assert.deepEqual(repo.writes[0], {

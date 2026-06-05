@@ -80,11 +80,11 @@ test('write worry screen forwards typing, back, and publish events', () => {
     onPublish: () => events.push('publish'),
   }));
 
-  change(findElement(tree, element => element.type === 'textarea'), '바뀐 고민');
+  change(findElement(tree, element => element.type === 'textarea'), '팉 킽 킻 킼');
   click(findButtonByAriaLabel(tree, /나의 고민으로 돌아가기/));
   click(findButtonByAriaLabel(tree, /고민 전송/));
 
-  assert.deepEqual(events, ['draft:바뀐 고민', 'back', 'publish']);
+  assert.deepEqual(events, ['draft:팉 킽 킻 킼', 'back', 'publish']);
 });
 
 test('write worry screen reflects validation disabled state and moderation copy', () => {

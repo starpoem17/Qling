@@ -225,7 +225,7 @@ function BasicStep({
           value={props.values.nickname}
           onChange={event => props.onNicknameChange(event.target.value)}
           className="absolute left-[18.5px] top-0 h-[60px] w-[210px] bg-transparent text-[16px] font-bold leading-none tracking-normal outline-none placeholder:text-[#8e9095] disabled:cursor-not-allowed disabled:opacity-60"
-          maxLength={24}
+          maxLength={10}
           placeholder="닉네임 입력"
           aria-invalid={nicknameHasError || undefined}
           aria-describedby="onboarding-nickname-message"

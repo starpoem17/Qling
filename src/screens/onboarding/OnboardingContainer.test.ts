@@ -261,9 +261,12 @@ test('onboarding cream content coordinates are rebased from the fixed panel top'
 
 test('onboarding basic screen keeps the Figma helper until validation or duplicate feedback replaces it', () => {
   const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
+  const container = fs.readFileSync('src/screens/onboarding/OnboardingContainer.tsx', 'utf8');
 
   assert.match(screen, /!\s*hasNicknameMessage && \(/);
   assert.match(screen, /2~10자 · 한글, 영문, 숫자 사용 가능/);
+  assert.match(screen, /maxLength=\{10\}/);
+  assert.match(container, /setNickname\(value\.replace\(\/\\s\/gu, ''\)\)/);
   assert.match(screen, /hasNicknameMessage && \(/);
   assert.match(screen, /id="onboarding-nickname-message"/);
 });

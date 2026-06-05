@@ -98,7 +98,7 @@ export function OnboardingContainer(props: Props) {
       disabledReason={disabled ? 'missing-required-field' : undefined}
       categoryOptions={WORRY_CATEGORIES}
       onNicknameChange={value => {
-        setNickname(value);
+        setNickname(value.replace(/\s/gu, ''));
         setDuplicateState('idle');
         setDuplicateMessage(undefined);
       }}

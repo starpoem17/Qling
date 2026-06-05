@@ -56,3 +56,10 @@ test('draft validator accepts valid worry and reply content with normalized publ
     content: '답장입니다',
   });
 });
+
+test('draft validator accepts Korean syllables with ㅋㅌㅊㅍ initials and finals', () => {
+  assert.deepEqual(validateDraftContent('팉 킽 킻 킼', 'worry'), {
+    status: 'valid',
+    content: '팉 킽 킻 킼',
+  });
+});
