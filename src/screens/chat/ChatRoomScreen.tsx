@@ -70,9 +70,11 @@ export function ChatRoomScreen({
   const [menuOpen, setMenuOpen] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState(chatTextareaMinHeight);
   const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, scale: 1, viewportOffsetTop: 0 });
+  const [isTopBarHiddenForKeyboard, setIsTopBarHiddenForKeyboard] = useState(false);
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const shouldStickToBottomRef = useRef(true);
+  const fullViewportHeightRef = useRef<number | null>(null);
 
   useEffect(() => {
     const updateViewportMetrics = (source: string = 'viewport.measure') => {
@@ -83,6 +85,13 @@ export function ChatRoomScreen({
       const visibleHeight = visualViewport?.height ?? window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const offsetTop = visualViewport?.offsetTop ?? 0;
       const viewportHeight = visualViewport ? visibleHeight : layoutHeight;
+      const nextFullViewportHeight = Math.max(layoutHeight, visibleHeight);
+      const fullViewportHeight = fullViewportHeightRef.current ?? nextFullViewportHeight;
+      if (!isTopBarHiddenForKeyboard) {
+        fullViewportHeightRef.current = nextFullViewportHeight;
+      } else if (visualViewport && visibleHeight >= fullViewportHeight - 1) {
+        setIsTopBarHiddenForKeyboard(false);
+      }
       const nextMetrics = {
         canvasHeight: viewportHeight / scale,
         scale,
@@ -115,7 +124,7 @@ export function ChatRoomScreen({
       window.visualViewport?.removeEventListener('resize', handleViewportResize);
       window.visualViewport?.removeEventListener('scroll', handleViewportScroll);
     };
-  }, []);
+  }, [isTopBarHiddenForKeyboard]);
 
   useEffect(() => {
     const root = document.getElementById('root');
@@ -144,8 +153,9 @@ export function ChatRoomScreen({
     transform: `translateY(${viewportMetrics.viewportOffsetTop}px)`,
   };
   const topBarLayerStyle: CSSProperties = {
-    height: `${viewportMetrics.viewportOffsetTop + chatRoomTopBarHeight * viewportMetrics.scale}px`,
-    paddingTop: `${viewportMetrics.viewportOffsetTop}px`,
+    height: `${(isTopBarHiddenForKeyboard ? 0 : viewportMetrics.viewportOffsetTop) + chatRoomTopBarHeight * viewportMetrics.scale}px`,
+    paddingTop: `${isTopBarHiddenForKeyboard ? 0 : viewportMetrics.viewportOffsetTop}px`,
+    transform: isTopBarHiddenForKeyboard ? `translateY(${-chatRoomTopBarHeight * viewportMetrics.scale}px)` : undefined,
   };
   const topBarCanvasStyle: CSSProperties = {
     transform: `scale(${viewportMetrics.scale})`,
@@ -205,11 +215,15 @@ export function ChatRoomScreen({
     setMenuOpen(true);
   };
 
-  const handleMessageInputIntent = (source: string) => {
+  const handleMessageInputIntent = (source: string, pointerType?: string) => {
+    if (source === 'textarea.touchstart' || pointerType === 'touch') {
+      setIsTopBarHiddenForKeyboard(true);
+    }
     logChatRoomKeyboardMetric(source);
   };
 
   const handleMessageInputBlur = () => {
+    setIsTopBarHiddenForKeyboard(false);
     logChatRoomKeyboardMetric('textarea.blur');
   };
 
@@ -421,7 +435,7 @@ function ChatRoomInputBar({
   readonly inputRef: RefObject<HTMLTextAreaElement | null>;
   readonly onDraftChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   readonly onMessageKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
-  readonly onMessageInputIntent: (source: string) => void;
+  readonly onMessageInputIntent: (source: string, pointerType?: string) => void;
   readonly onMessageInputBlur: () => void;
   readonly onSend: () => void;
 }) {
@@ -449,7 +463,7 @@ function ChatRoomInputBar({
           onChange={onDraftChange}
           onKeyDown={onMessageKeyDown}
           onTouchStart={() => onMessageInputIntent('textarea.touchstart')}
-          onPointerDown={() => onMessageInputIntent('textarea.pointerdown')}
+          onPointerDown={event => onMessageInputIntent('textarea.pointerdown', event.pointerType)}
           onFocus={() => onMessageInputIntent('textarea.focus')}
           onBlur={onMessageInputBlur}
           aria-label="메시지 입력"
