@@ -26,6 +26,7 @@ import {
   routeAfterAuthProfileLoad,
   routeAfterAccountDeletion,
   routeAfterOnboardingComplete,
+  routeAfterTutorialComplete,
   routeAfterProfileReadDenied,
   type AppRouteViewState,
 } from './services/appShell/prdNavigationPolicy';
@@ -48,6 +49,7 @@ import {
 } from './screens/myPage/MyWorriesContainer';
 import { AnswerCheckContainer } from './screens/answerCheck/AnswerCheckContainer';
 import { OnboardingContainer } from './screens/onboarding/OnboardingContainer';
+import { TutorialContainer } from './screens/tutorial/TutorialContainer';
 import {
   BottomNavigation,
   MobileAppShell,
@@ -73,6 +75,7 @@ interface UserProfile {
   helpedCount?: number;
   createdAt?: unknown;
   onboardingCompletedAt?: unknown;
+  tutorialCompletedAt?: unknown;
   exampleWorriesCreatedAt?: unknown;
   exampleWorrySeedIds?: string[];
   exampleDeliveryIds?: string[];
@@ -168,7 +171,9 @@ export default function App() {
           if (userSnap.exists()) {
             const userData = userSnap.data() as UserProfile;
             setProfile(withAuthProfileUid(userData, currentUser.uid));
-            setView(prev => routeAfterAuthProfileLoad(prev));
+            setView(prev => routeAfterAuthProfileLoad(prev, {
+              tutorialCompletedAt: userData.tutorialCompletedAt,
+            }));
             if (!userData.exampleWorriesCreatedAt) {
               void createExampleWorriesForCurrentUser(currentUser)
                 .then(async () => {
@@ -383,6 +388,20 @@ export default function App() {
                 onComplete={(completedProfile) => {
                   setProfile(withAuthProfileUid(completedProfile as UserProfile, user?.uid ?? ''));
                   setView(routeAfterOnboardingComplete());
+                  window.scrollTo(0, 0);
+                }}
+                onError={message => setFilterAlert(message)}
+              />
+            </motion.div>
+          )}
+
+          {currentRoute === 'tutorial' && (
+            <motion.div key="tutorial" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
+              <TutorialContainer
+                user={user}
+                onComplete={(completedAt) => {
+                  setProfile(current => current ? { ...current, tutorialCompletedAt: completedAt } : current);
+                  setView(routeAfterTutorialComplete());
                   window.scrollTo(0, 0);
                 }}
                 onError={message => setFilterAlert(message)}

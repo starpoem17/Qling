@@ -64,6 +64,7 @@ service cloud.firestore {
         'updatedAt',
         'lastActive',
         'lastTokenRefresh',
+        'tutorialCompletedAt',
         'notificationPermission',
         'isInstalledPWA'
       ];

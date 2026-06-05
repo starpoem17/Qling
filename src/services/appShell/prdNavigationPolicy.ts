@@ -6,6 +6,7 @@ export type AppRoute =
   | 'splash'
   | 'loading'
   | 'login'
+  | 'tutorial'
   | 'onboarding'
   | 'onboarding_basic'
   | 'onboarding_duplicate_check'
@@ -49,6 +50,10 @@ export type AppRouteViewState = AppRoute | AppRouteState;
 export const DEFAULT_AUTHENTICATED_TAB: PrdAppTab = '답변하기';
 export const DEFAULT_AUTHENTICATED_ROUTE: AppRoute = 'received_worries';
 export const ANSWER_FEED_ROUTE_ALIASES = [DEFAULT_AUTHENTICATED_TAB, DEFAULT_AUTHENTICATED_ROUTE] as const;
+
+export type TutorialCompletionProfile = {
+  readonly tutorialCompletedAt?: unknown;
+};
 
 export const MY_PAGE_MORE_ITEMS = [
   'privacy_policy',
@@ -106,9 +111,16 @@ export function resolveAppRouteState(_previousRoute: AppRouteViewState, nextRout
   return nextRoute;
 }
 
-export function routeAfterAuthProfileLoad(previousRoute: AppRouteViewState): AppRoute {
+export function hasCompletedFirstUseTutorial(profile: TutorialCompletionProfile): boolean {
+  return Boolean(profile.tutorialCompletedAt);
+}
+
+export function routeAfterAuthProfileLoad(previousRoute: AppRouteViewState, profile: TutorialCompletionProfile = { tutorialCompletedAt: true }): AppRoute {
+  if (!hasCompletedFirstUseTutorial(profile)) return 'tutorial';
+
   const previousRouteName = routeName(previousRoute);
   return previousRouteName === 'login'
+    || previousRouteName === 'tutorial'
     || previousRouteName === 'onboarding'
     || previousRouteName.startsWith('onboarding_')
     || previousRouteName === 'splash'
@@ -122,6 +134,10 @@ export function routeAfterProfileReadDenied(): AppRoute {
 }
 
 export function routeAfterOnboardingComplete(): AppRoute {
+  return 'tutorial';
+}
+
+export function routeAfterTutorialComplete(): AppRoute {
   return DEFAULT_AUTHENTICATED_TAB;
 }
 

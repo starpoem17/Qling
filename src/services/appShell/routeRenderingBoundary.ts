@@ -63,6 +63,7 @@ export const ROUTE_RENDERING_BOUNDARY = {
   },
   'onboarding flow': {
     routes: [
+      'tutorial',
       'onboarding',
       'onboarding_basic',
       'onboarding_duplicate_check',

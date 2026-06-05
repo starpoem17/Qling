@@ -30,6 +30,7 @@ test('covers every Phase 3 required route rendering group', () => {
 });
 
 test('maps canonical route states to their Phase 3 route rendering boundaries', () => {
+  assert.equal(routeRenderingGroupForRoute('tutorial'), 'onboarding flow');
   assert.equal(routeRenderingGroupForRoute('onboarding'), 'onboarding flow');
   assert.equal(routeRenderingGroupForRoute('onboarding_duplicate_check'), 'onboarding flow');
   assert.equal(routeRenderingGroupForRoute('답변하기'), 'received worries');
@@ -105,6 +106,14 @@ test('identifies authenticated shell membership separately from route-specific g
   });
   assert.deepEqual(routeRenderingBoundaryForRoute('onboarding_interests'), {
     currentRoute: 'onboarding_interests',
+    routeGroup: 'onboarding flow',
+    authenticatedTab: null,
+    mountsAuthenticatedShell: false,
+    mountsBottomNavigation: false,
+    mainScrollMode: 'route',
+  });
+  assert.deepEqual(routeRenderingBoundaryForRoute('tutorial'), {
+    currentRoute: 'tutorial',
     routeGroup: 'onboarding flow',
     authenticatedTab: null,
     mountsAuthenticatedShell: false,

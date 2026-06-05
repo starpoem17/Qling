@@ -13,6 +13,7 @@ import {
   backRouteFromReceivedReplyDetail,
   backRouteFromWriteReply,
   backRouteFromWriteWorry,
+  hasCompletedFirstUseTutorial,
   resolveAppRouteState,
   routeAfterAccountDeletion,
   routeAfterAuthProfileLoad,
@@ -22,6 +23,7 @@ import {
   routeAfterProfileReadDenied,
   routeAfterReplyPublish,
   routeAfterReplySuccessConfirmation,
+  routeAfterTutorialComplete,
   routeAfterWorryPublish,
   routeAfterWorrySuccessConfirmation,
   routeName,
@@ -85,14 +87,23 @@ test('covers every Phase 2 canonical route/state in the service policy', () => {
   ]);
 });
 
-test('routes auth/profile load and onboarding completion to answer feed', () => {
+test('routes auth/profile load after completed first-use tutorial to answer feed', () => {
   assert.equal(routeAfterAuthProfileLoad('login'), '답변하기');
   assert.equal(routeAfterAuthProfileLoad('onboarding'), '답변하기');
   assert.equal(routeAfterAuthProfileLoad('onboarding_duplicate_check'), '답변하기');
   assert.equal(routeAfterAuthProfileLoad('splash'), '답변하기');
   assert.equal(routeAfterAuthProfileLoad('나의 고민'), '나의 고민');
-  assert.equal(routeAfterOnboardingComplete(), '답변하기');
+  assert.equal(routeAfterOnboardingComplete(), 'tutorial');
+  assert.equal(routeAfterTutorialComplete(), '답변하기');
   assert.equal(tabForRoute(DEFAULT_AUTHENTICATED_ROUTE), DEFAULT_AUTHENTICATED_TAB);
+});
+
+test('routes users without first-use tutorial completion to the tutorial route', () => {
+  assert.equal(hasCompletedFirstUseTutorial({ tutorialCompletedAt: new Date() }), true);
+  assert.equal(hasCompletedFirstUseTutorial({ tutorialCompletedAt: null }), false);
+  assert.equal(routeAfterAuthProfileLoad('login', {}), 'tutorial');
+  assert.equal(routeAfterAuthProfileLoad('답변하기', { tutorialCompletedAt: undefined }), 'tutorial');
+  assert.equal(routeAfterAuthProfileLoad('tutorial', { tutorialCompletedAt: new Date() }), '답변하기');
 });
 
 test('routes account deletion completion to login without using my-page back route', () => {
@@ -240,6 +251,7 @@ test('maps detail, write, policy, and confirmation routes to their owning PRD ta
   assert.equal(tabForRoute('logout_confirmation'), null);
   assert.equal(tabForRoute('account_deletion_confirmation'), null);
   assert.equal(tabForRoute('login'), null);
+  assert.equal(tabForRoute('tutorial'), null);
   assert.equal(tabForRoute('loading'), null);
   assert.equal(tabForRoute('onboarding_interests'), null);
 });

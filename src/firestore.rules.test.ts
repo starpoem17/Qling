@@ -270,6 +270,7 @@ describe('profile and token transition', () => {
       age: 21,
       lastActive: new Date(),
       lastTokenRefresh: new Date(),
+      tutorialCompletedAt: new Date(),
     }));
     await assertFails(dbFor('author').doc('users/author').update({ age: 13 }));
     await assertFails(dbFor('author').doc('users/author').update({ age: 100 }));
