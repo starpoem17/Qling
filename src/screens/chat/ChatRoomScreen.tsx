@@ -18,11 +18,13 @@ const chatTextareaMinHeight = 40;
 const chatTextareaMaxHeight = 60;
 
 type ChatRoomCanvasStyle = CSSProperties & {
+  readonly '--chat-keyboard-inset': string;
   readonly '--chat-input-height': string;
 };
 
 type ChatRoomViewportMetrics = {
   readonly canvasHeight: number;
+  readonly keyboardInset: number;
   readonly scale: number;
 };
 
@@ -68,7 +70,7 @@ export function ChatRoomScreen({
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState(chatTextareaMinHeight);
-  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, scale: 1 });
+  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, keyboardInset: 0, scale: 1 });
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const shouldStickToBottomRef = useRef(true);
@@ -78,16 +80,19 @@ export function ChatRoomScreen({
       const visualViewport = window.visualViewport;
       const visualWidth = visualViewport?.width ?? window.innerWidth;
       const scale = Math.max(Math.min(visualWidth, 480) / 393, 0.1);
+      const layoutHeight = window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const visibleHeight = visualViewport?.height ?? window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const offsetTop = visualViewport?.offsetTop ?? 0;
+      const keyboardInset = Math.max(0, layoutHeight - visibleHeight - offsetTop);
       const nextMetrics = {
-        canvasHeight: visibleHeight / scale,
+        canvasHeight: layoutHeight / scale,
+        keyboardInset: keyboardInset / scale,
         scale,
       };
-      void offsetTop;
 
       setViewportMetrics(previousMetrics => {
         return previousMetrics.canvasHeight === nextMetrics.canvasHeight
+          && previousMetrics.keyboardInset === nextMetrics.keyboardInset
           && previousMetrics.scale === nextMetrics.scale
           ? previousMetrics
           : nextMetrics;
@@ -138,6 +143,7 @@ export function ChatRoomScreen({
   }, []);
 
   const canvasStyle: ChatRoomCanvasStyle = {
+    '--chat-keyboard-inset': `${viewportMetrics.keyboardInset}px`,
     '--chat-input-height': `${chatInputBaseHeight + Math.max(0, textareaHeight - chatTextareaMinHeight)}px`,
     height: `${viewportMetrics.canvasHeight}px`,
     transform: `scale(${viewportMetrics.scale})`,
@@ -211,7 +217,7 @@ export function ChatRoomScreen({
   const unreadThresholdIndex = mineMessageIds.length - (opponentUnreadCount || 0);
   if (loading || error) {
     return (
-      <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1]">
+      <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]">
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
             <ChatRoomTopBar
@@ -229,7 +235,7 @@ export function ChatRoomScreen({
   }
 
   return (
-    <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1]">
+    <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]">
       <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
         <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
           <ChatRoomTopBar
@@ -380,7 +386,7 @@ function ChatRoomInputBar({
   return (
       <div
         data-chat-room-input-bar
-        className="relative h-[var(--chat-input-height)] w-[393px] shrink-0 touch-none overscroll-none border-t border-[#ede3d6] bg-white qling-figma-font"
+        className="relative mb-[var(--chat-keyboard-inset)] h-[var(--chat-input-height)] w-[393px] shrink-0 touch-none overscroll-none border-t border-[#ede3d6] bg-white qling-figma-font"
         onTouchMove={blockStaticScroll}
         onWheel={blockStaticScroll}
       >
