@@ -1,4 +1,4 @@
-import type { KeyboardEvent, MouseEvent, TouchEvent, WheelEvent } from 'react';
+import type { CSSProperties, KeyboardEvent, MouseEvent, TouchEvent, WheelEvent } from 'react';
 import { ErrorState, FigmaCanvasFrame, QlingCard } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import type { ReceivedWorriesScreenProps } from './contract';
@@ -8,18 +8,42 @@ const myPageIconUrl = new URL('../../../assets/reply/my_page_icon.svg', import.m
 const titleChatIconUrl = new URL('../../../assets/reply/title_chat_icon.svg', import.meta.url).href;
 const waitingCountIconUrl = new URL('../../../assets/reply/waiting_count_icon.svg', import.meta.url).href;
 const cardSummaryLimit = 50;
+const receivedWorryCardInnerStyle = {
+  padding: 'calc(11 / 361 * 100cqw) calc(18 / 361 * 100cqw) calc(28 / 361 * 100cqw)',
+} satisfies CSSProperties;
+const receivedWorryCardMetaRowStyle = {
+  gap: 'calc(12 / 361 * 100cqw)',
+} satisfies CSSProperties;
+const receivedWorryCardChipStyle = {
+  padding: 'calc(5 / 361 * 100cqw) calc(12 / 361 * 100cqw)',
+  fontSize: 'calc(11 / 361 * 100cqw)',
+} satisfies CSSProperties;
+const receivedWorryCardTimeStyle = {
+  fontSize: 'calc(12 / 361 * 100cqw)',
+  lineHeight: 'calc(24 / 361 * 100cqw)',
+} satisfies CSSProperties;
+const receivedWorryPassButtonStyle = {
+  width: 'calc(65 / 361 * 100cqw)',
+  height: 'calc(23 / 361 * 100cqw)',
+  fontSize: 'calc(11 / 361 * 100cqw)',
+} satisfies CSSProperties;
+const receivedWorryCardBodyStyle = {
+  marginTop: 'calc(21 / 361 * 100cqw)',
+  fontSize: 'calc(16 / 361 * 100cqw)',
+  lineHeight: 'calc(24 / 361 * 100cqw)',
+} satisfies CSSProperties;
 
 export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   const passingDeliveryIds = new Set(props.passingDeliveryIds);
   const tabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
   const contentViewportHeight = `min(752px, max(320px, calc((${tabViewportHeight}) - 74px)))`;
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d]';
-  const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
+  const canvasClassName = 'relative h-[852px] w-full max-w-[480px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
 
   if (props.state.status === 'loading') {
     return (
       <section className={screenClassName}>
-        <FigmaCanvasFrame>
+        <FigmaCanvasFrame className="max-w-[480px]">
           <div className={canvasClassName}>
             <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
             <CreamContentBackground height={contentViewportHeight} />
@@ -41,7 +65,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   if (props.state.status === 'error') {
     return (
       <section className={screenClassName}>
-        <FigmaCanvasFrame>
+        <FigmaCanvasFrame className="max-w-[480px]">
           <div className={canvasClassName}>
             <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
             <CreamContentBackground height={contentViewportHeight} />
@@ -60,7 +84,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   if (props.state.status === 'empty') {
     return (
       <section className={screenClassName}>
-        <FigmaCanvasFrame>
+        <FigmaCanvasFrame className="max-w-[480px]">
           <div className={canvasClassName}>
             <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
             <CreamContentBackground height={contentViewportHeight} />
@@ -81,7 +105,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
 
   return (
     <section className={screenClassName}>
-      <FigmaCanvasFrame>
+      <FigmaCanvasFrame className="max-w-[480px]">
         <div className={canvasClassName}>
           <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
           <CreamContentBackground height={contentViewportHeight} />
@@ -100,7 +124,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                 return (
                   <QlingCard
                     key={item.deliveryId}
-                    className="relative h-[135px] overflow-hidden rounded-[18px] border-0 bg-white p-0 shadow-[0_4px_4px_rgb(0_0_0/0.25)]"
+                    className="relative aspect-[361/135] overflow-hidden rounded-[18px] border-0 bg-white p-0 shadow-[0_4px_4px_rgb(0_0_0/0.25)] [container-type:inline-size]"
                   >
                     <div
                       role="button"
@@ -112,15 +136,17 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                         props.onOpen({ deliveryId: item.deliveryId, worryId: item.worryId });
                       }}
                       aria-label={`${item.category} 고민에 답변 작성하기`}
-                      className="block h-full w-full px-[18px] pb-7 pt-[11px] text-left focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset"
+                      className="block h-full w-full text-left focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset"
+                      style={receivedWorryCardInnerStyle}
                     >
                       <span className="flex items-start justify-between gap-3">
-                        <span className="flex min-w-0 items-center gap-3">
-                          <span className="inline-flex shrink-0 items-start overflow-hidden rounded-[var(--qling-radius-pill)] bg-[#ffe4cc] px-3 py-[5px] text-[11px] font-bold leading-normal text-[#ff8b3d]">
+                        <span className="flex min-w-0 items-center" style={receivedWorryCardMetaRowStyle}>
+                          <span className="inline-flex shrink-0 items-start overflow-hidden rounded-[var(--qling-radius-pill)] bg-[#ffe4cc] font-bold leading-normal text-[#ff8b3d]" style={receivedWorryCardChipStyle}>
                             {item.category}
                           </span>
                           <time
-                            className="text-[12px] font-bold leading-6 text-[#b8b8b8]"
+                            className="font-bold text-[#b8b8b8]"
+                            style={receivedWorryCardTimeStyle}
                             dateTime={item.receivedAt.isoValue}
                           >
                             {item.receivedAt.label}
@@ -135,14 +161,15 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
                             }}
                             disabled={isPassing}
                             aria-label={`${item.category} 고민 건너뛰기`}
-                            className="inline-flex h-[23px] w-[65px] shrink-0 items-center justify-center rounded-[var(--qling-radius-pill)] border border-[#ff8b3d] bg-[#ff8b3d] text-[11px] font-bold leading-normal text-white transition-colors hover:bg-[var(--qling-color-secondary-orange)] disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex shrink-0 items-center justify-center rounded-[var(--qling-radius-pill)] border border-[#ff8b3d] bg-[#ff8b3d] font-bold leading-normal text-white transition-colors hover:bg-[var(--qling-color-secondary-orange)] disabled:cursor-not-allowed disabled:opacity-60"
+                            style={receivedWorryPassButtonStyle}
                           >
                             {isPassing ? '처리 중' : '건너뛰기'}
                           </button>
                         </span>
                       </span>
                       {item.isUnread && <span className="sr-only">새 고민</span>}
-                      <span className="mt-[21px] block break-words text-[16px] font-extrabold leading-6 tracking-[-0.03em] text-[#2a2a2a]">
+                      <span className="block break-words font-extrabold tracking-[-0.03em] text-[#2a2a2a]" style={receivedWorryCardBodyStyle}>
                         {displayContent}
                       </span>
                     </div>
@@ -176,7 +203,7 @@ function ReplyStaticHeader({ onOpenMyPage }: { readonly onOpenMyPage: () => void
         type="button"
         aria-label="마이페이지 열기"
         onClick={onOpenMyPage}
-        className="absolute left-[327px] top-[21px] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+        className="absolute right-[17px] top-[21px] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
       >
         <img
           src={myPageIconUrl}
@@ -209,7 +236,7 @@ function CreamContentBackground({ height }: { readonly height: string }) {
 function ReplyFeedIntro({ waitingCount }: { readonly waitingCount: number }) {
   return (
     <>
-      <div className="flex items-center gap-2 overflow-hidden pt-0.5">
+      <div className="flex items-center justify-between overflow-hidden pt-0.5">
         <div className="min-w-0 flex-1">
           <h1 className="w-[187px] pl-2 text-[22px] font-extrabold leading-normal tracking-[-0.44px] text-[#f26c0f]">
             답변하기

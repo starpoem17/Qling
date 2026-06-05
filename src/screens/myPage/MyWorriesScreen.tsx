@@ -13,12 +13,41 @@ const titleHeartUrl = new URL('../../../assets/my_concerns/title_heart.svg', imp
 const replyHeartUrl = new URL('../../../assets/my_concerns/reply_heart.svg', import.meta.url).href;
 const writePlusUrl = new URL('../../../assets/my_concerns/write_plus.svg', import.meta.url).href;
 const cardSummaryLimit = 50;
+const myWorryCardTopStyle = {
+  padding: 'calc(11 / 361 * 100cqw) calc(18 / 361 * 100cqw) 0',
+} satisfies CSSProperties;
+const myWorryCardMetaRowStyle = {
+  gap: 'calc(12 / 361 * 100cqw)',
+} satisfies CSSProperties;
+const myWorryCardChipStyle = {
+  padding: 'calc(5 / 361 * 100cqw) calc(12 / 361 * 100cqw)',
+  fontSize: 'calc(11 / 361 * 100cqw)',
+} satisfies CSSProperties;
+const myWorryCardTimeStyle = {
+  fontSize: 'calc(12 / 361 * 100cqw)',
+  lineHeight: 'calc(23 / 361 * 100cqw)',
+} satisfies CSSProperties;
+const myWorryCardSummaryStyle = {
+  marginTop: 'calc(21 / 361 * 100cqw)',
+  fontSize: 'calc(16 / 361 * 100cqw)',
+  lineHeight: 'calc(24 / 361 * 100cqw)',
+} satisfies CSSProperties;
+const myWorryCardReplyMetaStyle = {
+  bottom: 'calc(23 / 361 * 100cqw)',
+  left: 'calc(18 / 361 * 100cqw)',
+  gap: 'calc(6 / 361 * 100cqw)',
+  fontSize: 'calc(12 / 361 * 100cqw)',
+} satisfies CSSProperties;
+const myWorryCardReplyIconStyle = {
+  width: 'calc(14 / 361 * 100cqw)',
+  height: 'calc(14 / 361 * 100cqw)',
+} satisfies CSSProperties;
 
 export function MyWorriesScreen(props: MyWorriesScreenProps) {
   const tabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
   const contentViewportHeight = `min(733px, max(320px, calc((${tabViewportHeight}) - 74px)))`;
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d]';
-  const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 overflow-hidden bg-[#ff8b3d]';
+  const canvasClassName = 'relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d]';
   const writeButtonStyle = {
     top: `min(710px, calc((${tabViewportHeight}) - 62px))`,
   } satisfies CSSProperties;
@@ -28,7 +57,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
       type="button"
       aria-label="고민 작성 화면으로 이동"
       onClick={props.onWriteWorry}
-      className="absolute left-[258px] z-40 flex items-center gap-[7px] overflow-hidden rounded-full bg-[#ff8b3d] py-[14px] pl-[18px] pr-5 text-white shadow-[0_5px_14px_rgb(255_139_61/0.45)] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-white"
+      className="absolute right-[18px] z-40 flex items-center gap-[7px] overflow-hidden rounded-full bg-[#ff8b3d] py-[14px] pl-[18px] pr-5 text-white shadow-[0_5px_14px_rgb(255_139_61/0.45)] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-white"
       style={writeButtonStyle}
     >
       <img src={writePlusUrl} alt="" className="h-[15.563px] w-[15.563px] shrink-0" aria-hidden="true" draggable={false} />
@@ -40,7 +69,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
 
   return (
     <section className={screenClassName}>
-      <FigmaCanvasFrame>
+      <FigmaCanvasFrame className="max-w-[480px]">
         <div className={canvasClassName}>
           <MyWorriesStaticHeader onOpenMyPage={props.onOpenMyPage} />
           <CreamContentBackground height={contentViewportHeight} />
@@ -88,22 +117,24 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
                     onClick={() => props.onSelectWorryForAnswers(worry)}
                     className="w-full rounded-[18px] text-left transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
                   >
-                    <QlingCard className="relative h-[168px] overflow-hidden rounded-[18px] border-0 bg-white px-[18px] pb-0 pt-[11px] shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <span className="inline-flex shrink-0 items-start overflow-hidden rounded-[var(--qling-radius-pill)] bg-[#ffe4cc] px-3 py-[5px] text-[11px] font-bold leading-normal text-[#ff8b3d]">
-                          {worry.categoryLabel}
-                        </span>
-                        {worry.createdAtLabel && (
-                          <time className="text-[12px] font-semibold leading-[23px] text-[#b8b8b8]">
-                            {worry.createdAtLabel}
-                          </time>
-                        )}
+                    <QlingCard className="relative aspect-[361/168] overflow-hidden rounded-[18px] border-0 bg-white p-0 shadow-[0_4px_4px_rgb(0_0_0/0.25)] [container-type:inline-size]">
+                      <div style={myWorryCardTopStyle}>
+                        <div className="flex min-w-0 items-center" style={myWorryCardMetaRowStyle}>
+                          <span className="inline-flex shrink-0 items-start overflow-hidden rounded-[var(--qling-radius-pill)] bg-[#ffe4cc] font-bold leading-normal text-[#ff8b3d]" style={myWorryCardChipStyle}>
+                            {worry.categoryLabel}
+                          </span>
+                          {worry.createdAtLabel && (
+                            <time className="font-semibold text-[#b8b8b8]" style={myWorryCardTimeStyle}>
+                              {worry.createdAtLabel}
+                            </time>
+                          )}
+                        </div>
+                        <p className="line-clamp-2 whitespace-pre-wrap break-words font-extrabold text-[#2a2a2a]" style={myWorryCardSummaryStyle}>
+                          {truncateDisplayText(worry.summaryText, cardSummaryLimit)}
+                        </p>
                       </div>
-                      <p className="mt-[21px] line-clamp-2 whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 text-[#2a2a2a]">
-                        {truncateDisplayText(worry.summaryText, cardSummaryLimit)}
-                      </p>
-                      <div className="absolute bottom-[23px] left-[18px] flex items-center gap-1.5 text-[12px] font-medium text-[#7a7a7a]">
-                        <img src={replyHeartUrl} alt="" className="h-3.5 w-3.5" aria-hidden="true" draggable={false} />
+                      <div className="absolute flex items-center font-medium text-[#7a7a7a]" style={myWorryCardReplyMetaStyle}>
+                        <img src={replyHeartUrl} alt="" className="shrink-0" style={myWorryCardReplyIconStyle} aria-hidden="true" draggable={false} />
                         <span>{worry.replyCountLabel}</span>
                       </div>
                     </QlingCard>
@@ -140,7 +171,7 @@ function MyWorriesStaticHeader({ onOpenMyPage }: { readonly onOpenMyPage: () => 
         type="button"
         aria-label="마이페이지 열기"
         onClick={onOpenMyPage}
-        className="absolute left-[327px] top-[21px] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+        className="absolute right-[17px] top-[21px] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
       >
         <img
           src={myPageIconUrl}
@@ -173,7 +204,7 @@ function CreamContentBackground({ height }: { readonly height: string }) {
 function MyWorriesIntro({ activitySummary }: { readonly activitySummary: MyWorriesScreenProps['activitySummary'] }) {
   return (
     <>
-      <div className="flex items-center gap-[13px] overflow-hidden pt-0.5">
+      <div className="flex items-center justify-between overflow-hidden pt-0.5">
         <div className="min-w-0 flex-1">
           <h1 className="w-[183px] pl-2 text-[22px] font-extrabold leading-normal tracking-[-0.44px] text-[#f26c0f]">
             나의 고민
