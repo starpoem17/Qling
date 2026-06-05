@@ -84,6 +84,7 @@ export function ChatRoomScreen({
   const [textareaHeight, setTextareaHeight] = useState(chatTextareaMinHeight);
   const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, scale: 1, viewportOffsetTop: 0 });
   const [isTopBarHiddenForKeyboard, setIsTopBarHiddenForKeyboard] = useState(false);
+  const [isMessageScrollerScrollable, setIsMessageScrollerScrollable] = useState(false);
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const shouldStickToBottomRef = useRef(true);
@@ -218,6 +219,7 @@ export function ChatRoomScreen({
         || previousInputs.isTopBarHiddenForKeyboard !== isTopBarHiddenForKeyboard
       );
     const canScrollMessages = canScrollMessageScroller(scroller);
+    setIsMessageScrollerScrollable(canScrollMessages);
 
     if (!canScrollMessages) {
       shouldStickToBottomRef.current = true;
@@ -407,8 +409,15 @@ export function ChatRoomScreen({
             <div
               ref={messagesScrollerRef}
               data-chat-room-message-scroller
-              className="min-h-0 flex-1 w-[393px] overflow-y-auto overscroll-contain bg-[#fff1d1] px-4 pb-[28px] pt-4 [-webkit-overflow-scrolling:touch]"
+              className={cn(
+                'min-h-0 flex-1 w-[393px] bg-[#fff1d1] px-4 pb-[28px] pt-4',
+                isMessageScrollerScrollable
+                  ? 'overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
+                  : 'touch-none overscroll-none overflow-hidden',
+              )}
               onScroll={handleMessagesScroll}
+              onTouchMove={isMessageScrollerScrollable ? undefined : blockStaticScroll}
+              onWheel={isMessageScrollerScrollable ? undefined : blockStaticScroll}
             >
             <div className="mb-[14px] flex w-full justify-center">
               <span className="rounded-full bg-[#ffe7d2] px-3 py-[4px] text-[11px] font-semibold leading-[16.5px] text-[#f26c0f]">

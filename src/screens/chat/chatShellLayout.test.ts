@@ -13,17 +13,21 @@ test('chat room autoscroll stays inside the message scroller', () => {
   assert.doesNotMatch(chatRoomScreenSource, /behavior:\s*'smooth'/);
   assert.match(chatRoomScreenSource, /const messagesScrollerRef = useRef<HTMLDivElement>\(null\)/);
   assert.match(chatRoomScreenSource, /const shouldStickToBottomRef = useRef\(true\)/);
+  assert.match(chatRoomScreenSource, /const \[isMessageScrollerScrollable, setIsMessageScrollerScrollable\] = useState\(false\)/);
   assert.match(chatRoomScreenSource, /const canAutoScrollAfterViewportChangeRef = useRef\(false\)/);
   assert.match(chatRoomScreenSource, /const previousAutoScrollInputsRef = useRef</);
   assert.match(chatRoomScreenSource, /function canScrollMessageScroller\(scroller: HTMLElement\)/);
   assert.match(chatRoomScreenSource, /return scroller\.scrollHeight > scroller\.clientHeight \+ 1/);
+  assert.match(chatRoomScreenSource, /const canScrollMessages = canScrollMessageScroller\(scroller\);\s*setIsMessageScrollerScrollable\(canScrollMessages\)/);
   assert.match(chatRoomScreenSource, /if \(!canScrollMessages\) \{\s*shouldStickToBottomRef\.current = true;\s*\}/);
   assert.match(chatRoomScreenSource, /!viewportOnlyChanged \|\| canAutoScrollAfterViewportChangeRef\.current/);
   assert.match(chatRoomScreenSource, /canAutoScrollAfterViewportChangeRef\.current = viewportOnlyChanged\s*\? canAutoScrollAfterViewportChangeRef\.current\s*: canScrollMessages/);
   assert.match(chatRoomScreenSource, /distanceFromBottom <= 72/);
   assert.match(chatRoomScreenSource, /scroller\.scrollTop = scroller\.scrollHeight/);
-  assert.match(chatRoomScreenSource, /ref=\{messagesScrollerRef\}[\s\S]*data-chat-room-message-scroller[\s\S]*className="min-h-0 flex-1 w-\[393px\] overflow-y-auto overscroll-contain/);
-  assert.match(chatRoomScreenSource, /overflow-y-auto overscroll-contain bg-\[#fff1d1\]/);
+  assert.match(chatRoomScreenSource, /ref=\{messagesScrollerRef\}[\s\S]*data-chat-room-message-scroller[\s\S]*isMessageScrollerScrollable[\s\S]*\? 'overflow-y-auto overscroll-contain/);
+  assert.match(chatRoomScreenSource, /\: 'touch-none overscroll-none overflow-hidden'/);
+  assert.match(chatRoomScreenSource, /onTouchMove=\{isMessageScrollerScrollable \? undefined : blockStaticScroll\}/);
+  assert.match(chatRoomScreenSource, /onWheel=\{isMessageScrollerScrollable \? undefined : blockStaticScroll\}/);
 });
 
 test('chat room top bar is fixed in its own scaled layer while canvas keeps a collapsible spacer', () => {
@@ -94,7 +98,9 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(chatScreenSource, /CreamContentBackground/);
   assert.match(chatScreenSource, /touch-none overscroll-none overflow-hidden rounded-t-\[30px\]/);
   assert.match(chatRoomScreenSource, /data-chat-room-canvas className="relative flex w-\[393px\] shrink-0 origin-top flex-col overflow-hidden bg-\[#fff1d1\] qling-figma-font"/);
-  assert.match(chatRoomScreenSource, /data-chat-room-message-scroller[\s\S]*className="min-h-0 flex-1 w-\[393px\] overflow-y-auto/);
+  assert.match(chatRoomScreenSource, /data-chat-room-message-scroller[\s\S]*'min-h-0 flex-1 w-\[393px\] bg-\[#fff1d1\]/);
+  assert.match(chatRoomScreenSource, /isMessageScrollerScrollable[\s\S]*\? 'overflow-y-auto overscroll-contain/);
+  assert.match(chatRoomScreenSource, /\: 'touch-none overscroll-none overflow-hidden'/);
   assert.match(reportUserScreenSource, /min-h-0 flex-1 overflow-y-auto/);
 
   assert.doesNotMatch(chatRoomScreenSource, /import \{ createPortal \} from 'react-dom'/);
@@ -206,7 +212,8 @@ test('chat room keyboard handling avoids document root fixed lock', () => {
   assert.doesNotMatch(chatRoomScreenSource, /applyChatRoomDocumentLockStyle/);
   assert.doesNotMatch(chatRoomScreenSource, /restoreChatRoomDocumentLockStyle/);
   assert.doesNotMatch(chatRoomScreenSource, /element\.style\.position = 'fixed'/);
-  assert.match(chatRoomScreenSource, /data-chat-room-message-scroller[\s\S]*overflow-y-auto/);
+  assert.match(chatRoomScreenSource, /isMessageScrollerScrollable[\s\S]*\? 'overflow-y-auto overscroll-contain/);
+  assert.match(chatRoomScreenSource, /\: 'touch-none overscroll-none overflow-hidden'/);
 });
 
 test('chat room keyboard diagnostics log repeated focus viewport state in dev or PWA opt-in mode', () => {
