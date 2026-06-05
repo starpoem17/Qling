@@ -342,6 +342,7 @@ export default function App() {
             currentRoute === '답변하기' || currentRoute === 'received_worries' || currentRoute === '나의 고민' || currentRoute === 'my_worries' || currentRoute === 'my_worry_detail' || currentRoute === 'answer_check' || currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page' || currentRoute === 'my_answers' || currentRoute === 'edit_interests' || currentRoute === '채팅' || currentRoute === 'chat' || currentRoute === 'chat_room' || currentRoute === 'report_user'
               ? 'overflow-hidden'
               : undefined,
+            currentRoute === 'chat_room' ? 'px-0 pb-0 pt-0 bg-[#fff1d1]' : undefined,
             currentRoute === 'edit_interests' ? 'pb-0' : undefined,
           ],
       )}

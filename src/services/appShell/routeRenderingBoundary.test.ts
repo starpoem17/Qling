@@ -141,6 +141,7 @@ test('chat room route wrapper avoids vertical motion during keyboard-sensitive l
 
   assert.match(chatRoomBranch, /key="chat_room" initial=\{\{ opacity: 0 \}\} animate=\{\{ opacity: 1 \}\} exit=\{\{ opacity: 0 \}\} className="h-full"/);
   assert.doesNotMatch(chatRoomBranch, /[,{]\s*y:\s*-?\d+/);
+  assert.match(source, /currentRoute === 'chat_room' \? 'px-0 pb-0 pt-0 bg-\[#fff1d1\]' : undefined/);
 });
 
 test('keeps answer check status bar background aligned with the cream route canvas', () => {

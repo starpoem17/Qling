@@ -6,6 +6,7 @@ import path from 'node:path';
 const chatScreenSource = readSource('src/screens/chat/ChatScreen.tsx');
 const chatRoomScreenSource = readSource('src/screens/chat/ChatRoomScreen.tsx');
 const reportUserScreenSource = readSource('src/screens/report/ReportUserScreen.tsx');
+const indexCssSource = readSource('src/index.css');
 
 test('chat room autoscroll stays inside the message scroller', () => {
   assert.doesNotMatch(chatRoomScreenSource, /scrollIntoView/);
@@ -28,7 +29,9 @@ test('chat room top bar stays inside the scaled canvas without portal recovery',
 });
 
 test('chat shell routes fill the app shell without extending under bottom navigation', () => {
-  assert.match(chatRoomScreenSource, /-mx-\[var\(--qling-space-shell-x\)\] -mb-12 -mt-6 h-dvh overflow-hidden/);
+  assert.match(chatRoomScreenSource, /<section className="h-full min-h-0 overflow-hidden bg-\[#fff1d1\]">/);
+  assert.doesNotMatch(chatRoomScreenSource, /-mx-\[var\(--qling-space-shell-x\)\]/);
+  assert.doesNotMatch(chatRoomScreenSource, /-mt-6 h-dvh/);
   assert.doesNotMatch(chatRoomScreenSource, /-mb-\[var\(--qling-space-scroll-bottom\)\]/);
   assert.match(reportUserScreenSource, /-mx-\[var\(--qling-space-shell-x\)\] -mt-6 h-\[calc\(100%\+1\.5rem\)\] overflow-hidden/);
   assert.doesNotMatch(reportUserScreenSource, /-mb-\[var\(--qling-space-scroll-bottom\)\]/);
@@ -49,7 +52,9 @@ test('chat screens keep 393px canvas width while chat room uses viewport height'
   assert.match(chatRoomScreenSource, /'--chat-input-height': `\$\{chatInputBaseHeight \+ Math\.max\(0, textareaHeight - chatTextareaMinHeight\)\}px`/);
   assert.match(chatRoomScreenSource, /const visibleHeight = visualViewport\?\.height \?\? window\.innerHeight \?\? document\.documentElement\.clientHeight \?\? 852/);
   assert.match(chatRoomScreenSource, /const offsetTop = visualViewport\?\.offsetTop \?\? 0/);
-  assert.match(chatRoomScreenSource, /canvasHeight: \(visibleHeight \+ offsetTop\) \/ scale/);
+  assert.match(chatRoomScreenSource, /canvasHeight: visibleHeight \/ scale/);
+  assert.match(chatRoomScreenSource, /void offsetTop/);
+  assert.doesNotMatch(chatRoomScreenSource, /canvasHeight: \(visibleHeight \+ offsetTop\) \/ scale/);
   assert.doesNotMatch(chatRoomScreenSource, /offsetTop: offsetTop \/ scale/);
   assert.doesNotMatch(chatRoomScreenSource, /marginTop/);
   assert.match(chatRoomScreenSource, /transform: `scale\(\$\{viewportMetrics\.scale\}\)`/);
@@ -75,6 +80,10 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(chatRoomScreenSource, /ref=\{inputRef\}[\s\S]*data-chat-room-message-input/);
   assert.match(chatRoomScreenSource, /onChange=\{onDraftChange\}/);
   assert.match(chatRoomScreenSource, /onKeyDown=\{onMessageKeyDown\}/);
+  assert.match(chatRoomScreenSource, /onTouchStart=\{onMessageInputIntent\}/);
+  assert.match(chatRoomScreenSource, /onPointerDown=\{onMessageInputIntent\}/);
+  assert.match(chatRoomScreenSource, /onFocus=\{onMessageInputIntent\}/);
+  assert.match(chatRoomScreenSource, /onBlur=\{onMessageInputBlur\}/);
   assert.doesNotMatch(chatRoomScreenSource, /contentEditable/);
   assert.doesNotMatch(chatRoomScreenSource, /safeInput/);
   assert.match(chatRoomScreenSource, /enterKeyHint="send"/);
@@ -127,6 +136,17 @@ test('chat room blocks static area scroll without document scroll recovery', () 
   assert.match(chatRoomScreenSource, /preventDefault\.call\(event\)/);
   assert.match(chatRoomScreenSource, /stopPropagation\.call\(event\)/);
   assert.match(chatRoomScreenSource, /messageInputRef\.current\?\.blur\(\)/);
+});
+
+test('chat room keyboard lock fixes the app roots without global touch-action', () => {
+  assert.match(chatRoomScreenSource, /const chatRoomKeyboardLockClass = 'qling-chat-room-keyboard-lock'/);
+  assert.match(chatRoomScreenSource, /function setChatRoomKeyboardLock\(locked: boolean\)/);
+  assert.match(chatRoomScreenSource, /document\.documentElement\.classList\.toggle\(chatRoomKeyboardLockClass, locked\)/);
+  assert.match(chatRoomScreenSource, /document\.body\.classList\.toggle\(chatRoomKeyboardLockClass, locked\)/);
+  assert.match(chatRoomScreenSource, /root\?\.classList\.toggle\(chatRoomKeyboardLockClass, locked\)/);
+  assert.match(chatRoomScreenSource, /return \(\) => \{\s*setChatRoomKeyboardLock\(false\);\s*\}/);
+  assert.match(indexCssSource, /html\.qling-chat-room-keyboard-lock,\s*body\.qling-chat-room-keyboard-lock,\s*#root\.qling-chat-room-keyboard-lock\s*\{[\s\S]*position: fixed;[\s\S]*inset: 0;[\s\S]*width: 100%;[\s\S]*height: 100%;[\s\S]*overflow: hidden;[\s\S]*overscroll-behavior: none;[\s\S]*\}/);
+  assert.doesNotMatch(indexCssSource, /qling-chat-room-keyboard-lock[\s\S]*touch-action/);
 });
 
 test('chat list header matches the Figma vertical positions', () => {

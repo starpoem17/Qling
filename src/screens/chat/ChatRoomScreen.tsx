@@ -10,6 +10,7 @@ const roomBlockIconUrl = new URL('../../../assets/chat/room_block.svg', import.m
 const roomReportIconUrl = new URL('../../../assets/chat/room_report.svg', import.meta.url).href;
 const dimThemeColor = '#8b7b62';
 const chatRoomDocumentBackground = '#ffffff';
+const chatRoomKeyboardLockClass = 'qling-chat-room-keyboard-lock';
 const chatInputBaseHeight = 67;
 const chatTextareaMinHeight = 40;
 const chatTextareaMaxHeight = 60;
@@ -78,9 +79,10 @@ export function ChatRoomScreen({
       const visibleHeight = visualViewport?.height ?? window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const offsetTop = visualViewport?.offsetTop ?? 0;
       const nextMetrics = {
-        canvasHeight: (visibleHeight + offsetTop) / scale,
+        canvasHeight: visibleHeight / scale,
         scale,
       };
+      void offsetTop;
 
       setViewportMetrics(previousMetrics => {
         return previousMetrics.canvasHeight === nextMetrics.canvasHeight
@@ -121,6 +123,12 @@ export function ChatRoomScreen({
       if (root && previousRootBackground !== null) root.style.backgroundColor = previousRootBackground;
     };
   }, [menuOpen]);
+
+  useEffect(() => {
+    return () => {
+      setChatRoomKeyboardLock(false);
+    };
+  }, []);
 
   const canvasStyle: ChatRoomCanvasStyle = {
     '--chat-input-height': `${chatInputBaseHeight + Math.max(0, textareaHeight - chatTextareaMinHeight)}px`,
@@ -182,11 +190,19 @@ export function ChatRoomScreen({
     setMenuOpen(true);
   };
 
+  const handleMessageInputIntent = () => {
+    setChatRoomKeyboardLock(true);
+  };
+
+  const handleMessageInputBlur = () => {
+    setChatRoomKeyboardLock(false);
+  };
+
   const mineMessageIds = messages.filter(m => m.isMine).map(m => m.messageId);
   const unreadThresholdIndex = mineMessageIds.length - (opponentUnreadCount || 0);
   if (loading || error) {
     return (
-      <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
+      <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1]">
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
             <ChatRoomTopBar
@@ -204,7 +220,7 @@ export function ChatRoomScreen({
   }
 
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mb-12 -mt-6 h-dvh overflow-hidden bg-[#fff1d1]">
+    <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1]">
       <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
         <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
           <ChatRoomTopBar
@@ -302,6 +318,8 @@ export function ChatRoomScreen({
               inputRef={messageInputRef}
               onDraftChange={handleDraftChange}
               onMessageKeyDown={handleMessageKeyDown}
+              onMessageInputIntent={handleMessageInputIntent}
+              onMessageInputBlur={handleMessageInputBlur}
               onSend={handleSend}
             />
           </div>
@@ -335,6 +353,8 @@ function ChatRoomInputBar({
   inputRef,
   onDraftChange,
   onMessageKeyDown,
+  onMessageInputIntent,
+  onMessageInputBlur,
   onSend,
 }: {
   readonly draft: string;
@@ -344,6 +364,8 @@ function ChatRoomInputBar({
   readonly inputRef: RefObject<HTMLTextAreaElement | null>;
   readonly onDraftChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   readonly onMessageKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
+  readonly onMessageInputIntent: () => void;
+  readonly onMessageInputBlur: () => void;
   readonly onSend: () => void;
 }) {
   return (
@@ -369,6 +391,10 @@ function ChatRoomInputBar({
           value={draft}
           onChange={onDraftChange}
           onKeyDown={onMessageKeyDown}
+          onTouchStart={onMessageInputIntent}
+          onPointerDown={onMessageInputIntent}
+          onFocus={onMessageInputIntent}
+          onBlur={onMessageInputBlur}
           aria-label="메시지 입력"
           rows={1}
           inputMode="text"
@@ -454,6 +480,13 @@ function blockStaticScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLEleme
   const { preventDefault, stopPropagation } = event;
   preventDefault.call(event);
   stopPropagation.call(event);
+}
+
+function setChatRoomKeyboardLock(locked: boolean) {
+  const root = document.getElementById('root');
+  document.documentElement.classList.toggle(chatRoomKeyboardLockClass, locked);
+  document.body.classList.toggle(chatRoomKeyboardLockClass, locked);
+  root?.classList.toggle(chatRoomKeyboardLockClass, locked);
 }
 
 function ChatRoomActionSheet({
