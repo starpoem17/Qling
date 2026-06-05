@@ -221,6 +221,16 @@ test('onboarding screen uses ranking-style responsive Figma canvas scaling', () 
   assert.match(screen, /w-\[393px\]/);
 });
 
+test('onboarding screen allows iOS Safari vertical scroll below the Figma canvas', () => {
+  const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
+
+  assert.match(screen, /overflow-y-auto/);
+  assert.match(screen, /overflow-x-hidden/);
+  assert.match(screen, /overscroll-contain/);
+  assert.match(screen, /-webkit-overflow-scrolling:touch/);
+  assert.match(screen, /pb-\[calc\(24px\+var\(--qling-space-safe-bottom\)\)\]/);
+});
+
 test('onboarding progress bars use the Figma anchored fill contract', () => {
   const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
 

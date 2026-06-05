@@ -44,7 +44,7 @@ export function OnboardingScreen(props: Props) {
 
   return (
     <section className="h-full w-full overflow-hidden bg-[#fff7e3] text-[#1a1a1a]">
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden bg-[#fff7e3]">
+      <div className="mx-auto box-border flex h-full w-full max-w-[480px] justify-center overflow-x-hidden overflow-y-auto overscroll-contain bg-[#fff7e3] pb-[calc(24px+var(--qling-space-safe-bottom))] [-webkit-overflow-scrolling:touch]">
         <div
           className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b0d]"
           style={{ transform: `scale(${onboardingCanvasScale})` }}
