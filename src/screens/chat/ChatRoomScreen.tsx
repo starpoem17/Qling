@@ -175,7 +175,7 @@ export function ChatRoomScreen({
     const scroller = messagesScrollerRef.current;
     if (!scroller) return;
     scroller.scrollTop = scroller.scrollHeight;
-  }, [messages, textareaHeight, viewportMetrics.canvasHeight]);
+  }, [messages, textareaHeight, viewportMetrics.canvasHeight, isTopBarHiddenForKeyboard]);
 
   const handleMessagesScroll = () => {
     const scroller = messagesScrollerRef.current;
@@ -242,7 +242,7 @@ export function ChatRoomScreen({
         <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]" style={rootStyle}>
           <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
             <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
-              <ChatRoomTopBarSpacer />
+              <ChatRoomTopBarSpacer isHidden={isTopBarHiddenForKeyboard} />
               <div className="flex min-h-0 flex-1 w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
                 {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
               </div>
@@ -265,7 +265,7 @@ export function ChatRoomScreen({
       <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]" style={rootStyle}>
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
           <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
-            <ChatRoomTopBarSpacer />
+            <ChatRoomTopBarSpacer isHidden={isTopBarHiddenForKeyboard} />
             <div
               ref={messagesScrollerRef}
               data-chat-room-message-scroller
@@ -412,8 +412,15 @@ function ChatRoomTopBarLayer({
   );
 }
 
-function ChatRoomTopBarSpacer() {
-  return <div data-chat-room-top-bar-spacer className="h-[74px] w-[393px] shrink-0 bg-[#ff8b3d]" aria-hidden="true" />;
+function ChatRoomTopBarSpacer({ isHidden }: { readonly isHidden: boolean }) {
+  return (
+    <div
+      data-chat-room-top-bar-spacer
+      className="w-[393px] shrink-0 bg-[#ff8b3d]"
+      style={{ height: isHidden ? 0 : chatRoomTopBarHeight }}
+      aria-hidden="true"
+    />
+  );
 }
 
 function ChatRoomInputBar({

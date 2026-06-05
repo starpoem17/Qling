@@ -19,15 +19,15 @@ test('chat room autoscroll stays inside the message scroller', () => {
   assert.match(chatRoomScreenSource, /overflow-y-auto overscroll-contain bg-\[#fff1d1\]/);
 });
 
-test('chat room top bar is fixed in its own scaled layer while canvas keeps a spacer', () => {
+test('chat room top bar is fixed in its own scaled layer while canvas keeps a collapsible spacer', () => {
   assert.doesNotMatch(chatRoomScreenSource, /createPortal/);
   assert.doesNotMatch(chatRoomScreenSource, /headerLayer/);
   assert.doesNotMatch(chatRoomScreenSource, /inputLayer/);
   assert.match(chatRoomScreenSource, /data-chat-room-top-bar-layer[\s\S]*className="fixed left-0 right-0 top-0 z-50 overflow-hidden bg-\[#ff8b3d\]"[\s\S]*style=\{topBarLayerStyle\}/);
   assert.match(chatRoomScreenSource, /className="h-\[74px\] w-\[393px\] shrink-0 origin-top" style=\{topBarCanvasStyle\}[\s\S]*<ChatRoomTopBar opponent=\{opponent\} onBack=\{onBack\} onOpenMenu=\{onOpenMenu\} \/>/);
-  assert.match(chatRoomScreenSource, /function ChatRoomTopBarSpacer\(\)/);
-  assert.match(chatRoomScreenSource, /data-chat-room-top-bar-spacer className="h-\[74px\] w-\[393px\] shrink-0 bg-\[#ff8b3d\]"/);
-  assert.match(chatRoomScreenSource, /data-chat-room-canvas[\s\S]*<ChatRoomTopBarSpacer \/>/);
+  assert.match(chatRoomScreenSource, /function ChatRoomTopBarSpacer\(\{ isHidden \}: \{ readonly isHidden: boolean \}\)/);
+  assert.match(chatRoomScreenSource, /data-chat-room-top-bar-spacer[\s\S]*className="w-\[393px\] shrink-0 bg-\[#ff8b3d\]"[\s\S]*style=\{\{ height: isHidden \? 0 : chatRoomTopBarHeight \}\}/);
+  assert.match(chatRoomScreenSource, /data-chat-room-canvas[\s\S]*<ChatRoomTopBarSpacer isHidden=\{isTopBarHiddenForKeyboard\} \/>/);
   assert.match(chatRoomScreenSource, /data-chat-room-top-bar[\s\S]*className="relative z-20 h-\[74px\] w-\[393px\] shrink-0 touch-none overscroll-none overflow-hidden bg-\[#ff8b3d\] qling-figma-font"[\s\S]*onTouchMove=\{blockStaticScroll\}[\s\S]*onWheel=\{blockStaticScroll\}/);
   assert.doesNotMatch(chatRoomScreenSource, /<header data-chat-room-top-bar className="fixed/);
 });
@@ -72,6 +72,7 @@ test('chat screens keep 393px canvas width while chat room uses viewport height'
   assert.match(chatRoomScreenSource, /const fullViewportHeightRef = useRef<number \| null>\(null\)/);
   assert.match(chatRoomScreenSource, /const topBarLayerStyle: CSSProperties = \{\s*height: `\$\{\(isTopBarHiddenForKeyboard \? 0 : viewportMetrics\.viewportOffsetTop\) \+ chatRoomTopBarHeight \* viewportMetrics\.scale\}px`,\s*paddingTop: `\$\{isTopBarHiddenForKeyboard \? 0 : viewportMetrics\.viewportOffsetTop\}px`,\s*transform: isTopBarHiddenForKeyboard \? `translateY\(\$\{-chatRoomTopBarHeight \* viewportMetrics\.scale\}px\)` : undefined,\s*\}/);
   assert.match(chatRoomScreenSource, /const topBarCanvasStyle: CSSProperties = \{\s*transform: `scale\(\$\{viewportMetrics\.scale\}\)`,\s*\}/);
+  assert.match(chatRoomScreenSource, /\}, \[messages, textareaHeight, viewportMetrics\.canvasHeight, isTopBarHiddenForKeyboard\]\)/);
   assert.match(chatRoomScreenSource, /<section className="fixed inset-0 z-40 overflow-hidden bg-\[#fff1d1\]" style=\{rootStyle\}>/);
   assert.match(chatRoomScreenSource, /transform: `scale\(\$\{viewportMetrics\.scale\}\)`/);
   assert.match(chatRoomScreenSource, /relative flex w-\[393px\] shrink-0 origin-top flex-col overflow-hidden/);
