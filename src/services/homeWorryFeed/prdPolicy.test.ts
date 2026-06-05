@@ -70,6 +70,46 @@ test('pass replacement delivery appears through joined worry without content sna
   assert.deepEqual(items[0].categories, ['진로', '인간관계']);
 });
 
+test('answer feed legacy summary fallback truncates at 50 characters only when needed', () => {
+  const shortItems = selectActivePrdAnswerFeedItems({
+    profileUid: 'recipient',
+    deliveries: [{
+      id: 'delivery-short',
+      worryId: 'worry-short',
+      authorUid: 'author',
+      recipientUid: 'recipient',
+      status: 'active',
+    }],
+    worriesById: new Map([[
+      'worry-short',
+      {
+        id: 'worry-short',
+        content: '짧은 고민 원문',
+      },
+    ]]),
+  });
+  const items = selectActivePrdAnswerFeedItems({
+    profileUid: 'recipient',
+    deliveries: [{
+      id: 'delivery1',
+      worryId: 'worry1',
+      authorUid: 'author',
+      recipientUid: 'recipient',
+      status: 'active',
+    }],
+    worriesById: new Map([[
+      'worry1',
+      {
+        id: 'worry1',
+        content: '012345678901234567890123456789012345678901234567890',
+      },
+    ]]),
+  });
+
+  assert.equal(shortItems[0].summaryText, '짧은 고민 원문');
+  assert.equal(items[0].summaryText, '01234567890123456789012345678901234567890123456789...');
+});
+
 test('replacement display categories fall back to joined worry validCategories', () => {
   const items = selectActivePrdAnswerFeedItems({
     profileUid: 'replacementRecipient',

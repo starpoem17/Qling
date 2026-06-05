@@ -43,7 +43,7 @@ export function ReportUserScreen({
               type="button"
               onClick={onBack}
               aria-label="뒤로가기"
-              className="flex h-[44px] w-[36px] items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white shrink-0"
+              className="flex h-[44px] w-[44px] items-center justify-center rounded-full transition-colors focus:outline-none focus:ring-2 hover:bg-white/20 focus:ring-white shrink-0"
             >
               <span aria-hidden="true" className="font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-none text-white pr-1">
                 ‹

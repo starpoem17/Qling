@@ -24,6 +24,8 @@ test('chat room top bar renders answer adoption rate from props without hardcode
   const html = renderChatRoom(75);
 
   assert.match(html, /답변 채택률 75%/);
+  assert.match(html, /aria-label="뒤로가기"/);
+  assert.match(html, /h-12 w-11/);
   assert.doesNotMatch(html, /답변 채택률 92%/);
 });
 

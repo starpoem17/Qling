@@ -111,11 +111,22 @@ ${strictRetry ? '8. This is a retry because the previous answer had invalid JSON
 }
 
 export async function summarizeWorryContent(content: string, strictRetry = false): Promise<unknown> {
-  const systemInstruction = `You summarize Korean anonymous worry posts for user-facing cards.
-Return ONLY one Korean single-line summary.
-The returned summary MUST be 20 characters or fewer, counting spaces and punctuation.
-Do not include markdown, explanations, labels, quotes, or extra text.
-${strictRetry ? 'This is a retry because the previous summary was invalid or longer than 20 characters. Return a valid summary of 20 characters or fewer.' : ''}`;
+  const systemInstruction = `You summarize Korean anonymous worry posts into short user-facing cards.
+
+Task:
+Given a Korean worry post, write a concise Korean summary that helps a responder quickly understand the core concern before writing a reply.
+
+Requirements:
+- Return ONLY one Korean single-line summary.
+- The summary MUST be 50 characters or fewer, counting spaces and punctuation.
+- Capture the main problem, emotional burden, and key relationship/context when relevant.
+- Prefer concrete summaries over vague labels.
+- Do not give advice, solutions, judgment, empathy, or interpretation beyond the post.
+- Do not include markdown, explanations, labels, quotes, or extra text.
+- If the post contains multiple issues, summarize the issue that appears most central or urgent.
+- Preserve anonymity; do not include names, IDs, phone numbers, addresses, or uniquely identifying details.
+- Avoid sensational wording. Keep the tone neutral and clear.
+${strictRetry ? 'This is a retry because the previous summary was invalid or longer than 50 characters. Return a valid summary of 50 characters or fewer.' : ''}`;
 
   const text = await fetchTextFromOpenAI(systemInstruction, content);
   const trimmed = text.trim();

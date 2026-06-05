@@ -11,14 +11,16 @@ const myPageIconUrl = new URL('../../../assets/my_concerns/my_page_icon.svg', im
 const titleHeartUrl = new URL('../../../assets/my_concerns/title_heart.svg', import.meta.url).href;
 const replyHeartUrl = new URL('../../../assets/my_concerns/reply_heart.svg', import.meta.url).href;
 const writePlusUrl = new URL('../../../assets/my_concerns/write_plus.svg', import.meta.url).href;
+const cardSummaryLimit = 50;
 
 export function MyWorriesScreen(props: MyWorriesScreenProps) {
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
-  const contentViewportHeight = `min(733px, max(360px, calc((var(--qling-visual-viewport-height) - var(--qling-space-nav-height)) / (${canvasScale}) - 74px)))`;
-  const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
+  const tabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
+  const contentViewportHeight = `min(733px, max(320px, calc((${tabViewportHeight}) / (${canvasScale}) - 74px)))`;
+  const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
   const writeButtonStyle = {
-    top: `min(710px, calc((var(--qling-visual-viewport-height) - var(--qling-space-nav-height)) / (${canvasScale}) - 62px))`,
+    top: `min(710px, calc((${tabViewportHeight}) / (${canvasScale}) - 62px))`,
   } satisfies CSSProperties;
 
   const writeButton = (
@@ -55,7 +57,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
             </section>
           ) : props.state.status === 'error' ? (
             <section
-              className="qling-received-worries-font absolute left-0 top-[74px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[180px] pt-4 [-webkit-overflow-scrolling:touch]"
+              className="qling-received-worries-font absolute left-0 top-[74px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[calc(180px+env(safe-area-inset-bottom,0px))] pt-4 [-webkit-overflow-scrolling:touch]"
               style={{ height: contentViewportHeight }}
             >
               <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
@@ -72,7 +74,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
             </section>
           ) : (
             <section
-              className="qling-received-worries-font absolute left-0 top-[74px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[180px] pt-4 [-webkit-overflow-scrolling:touch]"
+              className="qling-received-worries-font absolute left-0 top-[74px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[calc(180px+env(safe-area-inset-bottom,0px))] pt-4 [-webkit-overflow-scrolling:touch]"
               style={{ height: contentViewportHeight }}
               aria-label="나의 고민 목록"
             >
@@ -98,7 +100,7 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
                         )}
                       </div>
                       <p className="mt-[21px] line-clamp-2 whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 text-[#2a2a2a]">
-                        {worry.summaryText}
+                        {truncateDisplayText(worry.summaryText, cardSummaryLimit)}
                       </p>
                       <div className="absolute bottom-[23px] left-[18px] flex items-center gap-1.5 text-[12px] font-medium text-[#7a7a7a]">
                         <img src={replyHeartUrl} alt="" className="h-3.5 w-3.5" aria-hidden="true" draggable={false} />
@@ -150,6 +152,12 @@ function MyWorriesStaticHeader({ onOpenMyPage }: { readonly onOpenMyPage: () => 
       </button>
     </header>
   );
+}
+
+function truncateDisplayText(text: string, limit: number): string {
+  const normalized = text.replace(/\n/g, ' ');
+  const chars = Array.from(normalized);
+  return chars.length > limit ? `${chars.slice(0, limit).join('').trim()}...` : text;
 }
 
 function CreamContentBackground({ height }: { readonly height: string }) {

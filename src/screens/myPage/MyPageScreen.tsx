@@ -148,7 +148,7 @@ function MyPageHeader({
           type="button"
           aria-label="이전 화면으로 돌아가기"
           onClick={onBack}
-          className="absolute left-[16px] top-[45px] flex h-[45px] w-[24px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute left-[6px] top-[45px] flex h-[45px] w-[44px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
         >
           <span aria-hidden="true">‹</span>
         </button>
@@ -346,11 +346,14 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
       ? props.state.message
       : policyBody || (props.state.status === 'empty' ? props.state.message : '정책을 준비 중입니다.');
   const policyCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+  const policyTabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
+  const policyUsableCanvasHeight = `calc((${policyTabViewportHeight}) / (${policyCanvasScale}))`;
+  const policyCardBottom = `max(calc(108px + env(safe-area-inset-bottom,0px)), calc(876px - ${policyUsableCanvasHeight}))`;
 
   return (
     <section
       aria-label={props.title}
-      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b0d] text-[#1a1a1e] qling-figma-font"
+      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b0d] text-[#1a1a1e] qling-figma-font"
     >
       <div
         className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"
@@ -362,7 +365,10 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
           style={{ transform: `scale(${policyCanvasScale})` }}
         >
           <FigmaTopBar title="개인정보 처리방침" titleAriaLabel={props.title} onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
-          <article className="absolute left-4 top-[127px] bottom-[calc(108px+env(safe-area-inset-bottom,0px))] w-[361px] overflow-y-auto rounded-[18px] bg-white px-[18px] py-[31px] [-webkit-overflow-scrolling:touch]">
+          <article
+            className="absolute left-4 top-[127px] w-[361px] overflow-y-auto rounded-[18px] bg-white px-[18px] py-[31px] [-webkit-overflow-scrolling:touch]"
+            style={{ bottom: policyCardBottom }}
+          >
             <div
               className="whitespace-pre-wrap text-[13px] font-semibold leading-[150%] tracking-[-0.05em] text-[#1a1a1e]"
               role={props.state.status === 'error' ? 'alert' : undefined}

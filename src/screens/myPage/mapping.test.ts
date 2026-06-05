@@ -229,11 +229,12 @@ test('my worry mapping uses shared display date, first valid category, fallback 
 });
 
 test('my worry mapping falls back to 일상 and keeps answer writer private data out of output', () => {
+  const shortContent = '개인정보 없는 요약 테스트';
   const item = mapMyWorryToListItem({
     worry: {
       id: 'worry-privacy',
       authorUid: 'me',
-      content: '개인정보 없는 요약 테스트',
+      content: shortContent,
       categories: ['not-a-category'],
       createdAt: null,
       humanReplyCount: 1,
@@ -249,11 +250,46 @@ test('my worry mapping falls back to 일상 and keeps answer writer private data
   });
 
   assert.equal(item.categoryLabel, '일상');
+  assert.equal(item.summaryText, shortContent);
   assert.equal(item.replyCountLabel, '1명이 답변했어요');
   const serialized = JSON.stringify(item);
   for (const forbidden of ['답변자닉', '여성', '30', 'replier-1', '답변 본문 preview', 'profileMetadata']) {
     assert.equal(serialized.includes(forbidden), false);
   }
+});
+
+test('my-page fallback summaries truncate at 50 characters only when needed', () => {
+  const exactText = '01234567890123456789012345678901234567890123456789';
+  const replyItem = mapMyGivenReplyToListItem({
+    id: 'reply-fallback',
+    deliveryId: 'delivery-1',
+    worryId: 'worry-1',
+    content: 'raw',
+    createdAt: null,
+    source: 'prd_replies',
+    senderId: 'sender',
+    receiverId: 'receiver',
+    originalContent: `${exactText}x`,
+    refinedContent: 'refined',
+    isRead: false,
+    feedback: undefined,
+    categories: [],
+  } as never);
+  const worryItem = mapMyWorryToListItem({
+    worry: {
+      id: 'worry-fallback',
+      authorUid: 'user-1',
+      content: `${exactText}x`,
+      categories: [],
+      createdAt: null,
+      humanReplyCount: 0,
+      source: 'prd_worries',
+    },
+  });
+
+  assert.equal(replyItem.originalWorryPreview, `${exactText}...`);
+  assert.equal(worryItem.summaryText, `${exactText}...`);
+  assert.equal(`${exactText}...`.length, 53);
 });
 
 test('my worry reply count label follows PRD zero one and many cases', () => {

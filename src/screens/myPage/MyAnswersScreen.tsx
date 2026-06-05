@@ -112,7 +112,7 @@ function MyAnswersHeader({
           type="button"
           aria-label="마이페이지로 돌아가기"
           onClick={onBack}
-          className="absolute left-[16px] top-[45px] flex h-[45px] w-[24px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute left-[6px] top-[45px] flex h-[45px] w-[44px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
         >
           <span aria-hidden="true">‹</span>
         </button>

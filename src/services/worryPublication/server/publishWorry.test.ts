@@ -358,7 +358,7 @@ test('long approved worry stores generated LLM summary', async () => {
     db: createFakeDb() as never,
     messaging: null,
     author: { uid: 'author', gender: 'female', interests: ['취업'] },
-    content: '012345678901234567890123456789',
+    content: '012345678901234567890123456789012345678901234567890',
     moderationProvider: async () => ({ status: 'approved', categories: ['취업'] }),
     summaryProvider: async () => 'LLM 요약',
     concernAnalyzerProvider: defaultConcernAnalyzerProvider,
@@ -379,11 +379,11 @@ test('long approved worry retries overlong summary once', async () => {
     db: createFakeDb() as never,
     messaging: null,
     author: { uid: 'author', gender: 'female', interests: ['취업'] },
-    content: '012345678901234567890123456789',
+    content: '012345678901234567890123456789012345678901234567890',
     moderationProvider: async () => ({ status: 'approved', categories: ['취업'] }),
     summaryProvider: async (_content, strictRetry) => {
       calls.push(Boolean(strictRetry));
-      return strictRetry ? { summaryText: '재요약' } : '012345678901234567890';
+      return strictRetry ? { summaryText: '재요약' } : '012345678901234567890123456789012345678901234567890';
     },
     concernAnalyzerProvider: defaultConcernAnalyzerProvider,
     repository: repo,
@@ -401,24 +401,24 @@ test('summary failure stores fallback summary and debug log without blocking pub
     db: createFakeDb() as never,
     messaging: null,
     author: { uid: 'author', gender: 'female', interests: ['취업'] },
-    content: '012345678901234567890123456789',
+    content: '012345678901234567890123456789012345678901234567890',
     moderationProvider: async () => ({ status: 'approved', categories: ['취업'] }),
     summaryProvider: async (_content, strictRetry) => strictRetry
-      ? { summaryText: '012345678901234567890' }
-      : '012345678901234567890',
+      ? { summaryText: '012345678901234567890123456789012345678901234567890' }
+      : '012345678901234567890123456789012345678901234567890',
     concernAnalyzerProvider: defaultConcernAnalyzerProvider,
     repository: repo,
   });
 
   assert.equal(result.status, 'published');
-  assert.equal(repo.lastCommit?.worry.summaryText, '01234567890123456789...');
+  assert.equal(repo.lastCommit?.worry.summaryText, '01234567890123456789012345678901234567890123456789...');
   assert.equal(repo.lastCommit?.worry.summaryStatus, 'fallback_truncated');
   assert.equal(repo.lastCommit?.worry.summaryGeneratedBy, 'none');
   assert.equal(repo.lastCommit?.summaryFailureLog?.worryId, 'worry1');
   assert.equal(repo.lastCommit?.summaryFailureLog?.attemptCount, 2);
   assert.equal(repo.lastCommit?.summaryFailureLog?.failureReason, 'summary_too_long_or_invalid');
-  assert.equal(repo.lastCommit?.summaryFailureLog?.firstResponseText, '012345678901234567890');
-  assert.equal(repo.lastCommit?.summaryFailureLog?.retryResponseText, '{"summaryText":"012345678901234567890"}');
+  assert.equal(repo.lastCommit?.summaryFailureLog?.firstResponseText, '012345678901234567890123456789012345678901234567890');
+  assert.equal(repo.lastCommit?.summaryFailureLog?.retryResponseText, '{"summaryText":"012345678901234567890123456789012345678901234567890"}');
 });
 
 test('published canonical shape appears in my worries and active answer feed read models', async () => {

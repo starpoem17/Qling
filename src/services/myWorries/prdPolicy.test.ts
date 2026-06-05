@@ -81,6 +81,28 @@ test('my worries selection does not expose unread reply state', () => {
   assert.equal(replies.length, 3);
 });
 
+test('my worries legacy summary fallback truncates at 50 characters only when needed', () => {
+  const shortSelected = selectMyWorries({
+    userUid: 'me',
+    worries: [{
+      id: 'short',
+      authorUid: 'me',
+      content: '짧은 고민 원문',
+    }],
+  });
+  const selected = selectMyWorries({
+    userUid: 'me',
+    worries: [{
+      id: 'w1',
+      authorUid: 'me',
+      content: '012345678901234567890123456789012345678901234567890',
+    }],
+  });
+
+  assert.equal(shortSelected[0].summaryText, '짧은 고민 원문');
+  assert.equal(selected[0].summaryText, '01234567890123456789012345678901234567890123456789...');
+});
+
 test('my worry activity summary adds visible worry count and human reply counts', () => {
   const summary = summarizeMyWorryActivity({
     worries: [

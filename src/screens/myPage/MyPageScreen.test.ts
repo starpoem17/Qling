@@ -379,11 +379,11 @@ test('privacy policy screen renders document body in the Figma card layout', () 
   }));
 
   assert.match(html, /bg-\[#ff8b0d\]/);
-  assert.match(html, /h-dvh/);
+  assert.match(html, /h-\[calc\(var\(--qling-visual-viewport-height\)-var\(--qling-space-nav-height\)\)\]/);
   assert.match(html, /data-measure="policy-responsive-canvas"/);
   assert.match(html, /data-measure="policy-screen"/);
   assert.match(html, /top-\[127px\]/);
-  assert.match(html, /bottom-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
+  assert.match(html, /bottom:max\(calc\(108px \+ env\(safe-area-inset-bottom,0px\)\), calc\(876px - calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\)\)\)/);
   assert.match(html, /w-\[361px\]/);
   assert.match(html, /rounded-\[18px\]/);
   assert.match(html, /\[-webkit-overflow-scrolling:touch\]/);

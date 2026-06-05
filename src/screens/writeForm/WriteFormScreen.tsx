@@ -5,6 +5,7 @@ import type { WriteFormScreenProps } from './contract';
 const writeCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 const sendButtonTop = `min(684px, calc((100dvh - var(--qling-space-nav-height)) / (${writeCanvasScale}) - 88px))`;
 const inputAreaHeight = `min(434px, max(240px, calc(${sendButtonTop} - 250px)))`;
+const topBoxSummaryLimit = 25;
 
 export function WriteFormScreen(props: WriteFormScreenProps) {
   const isDisabled = Boolean(props.draft.submitDisabledReason);
@@ -40,7 +41,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           className="group absolute inset-0 text-left focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
         >
           <span className="absolute left-[19px] right-8 top-[44px] truncate text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
-            {props.originalWorry.summaryText.length > 45 ? props.originalWorry.summaryText.replace(/\n/g, ' ').slice(0, 45).trim() + '...' : props.originalWorry.summaryText}
+            {truncateDisplayText(props.originalWorry.summaryText, topBoxSummaryLimit)}
           </span>
           <ChevronDown className="absolute right-[17px] top-[17px] h-6 w-6 text-[#2a2a2a] transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
         </button>
@@ -152,4 +153,10 @@ function ReplyCategoryChip({ label }: { readonly label: string }) {
       {label}
     </span>
   );
+}
+
+function truncateDisplayText(text: string, limit: number): string {
+  const normalized = text.replace(/\n/g, ' ');
+  const chars = Array.from(normalized);
+  return chars.length > limit ? `${chars.slice(0, limit).join('').trim()}...` : text;
 }

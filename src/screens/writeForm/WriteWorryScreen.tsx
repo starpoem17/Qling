@@ -27,7 +27,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
           className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1]"
           style={{ transform: `scale(${writeWorryCanvasScale})` }}
         >
-      {FigmaTopBar({ title: '질문 작성', onBack: props.onBack, backLabel: '나의 고민으로 돌아가기' })}
+      {FigmaTopBar({ title: '고민 작성', onBack: props.onBack, backLabel: '나의 고민으로 돌아가기' })}
 
       <section
         className="absolute left-5 top-[120px] w-[353px] rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
@@ -43,7 +43,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
             aria-describedby="write-worry-counter"
             onChange={event => props.onDraftChange(event.currentTarget.value)}
             className={cn(
-              'box-border h-full w-full resize-none rounded-[18px] border-0 bg-transparent pb-12 pl-[16.5px] pr-[11.5px] pt-[17.5px] text-[12px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a] outline-none disabled:cursor-not-allowed disabled:opacity-60',
+              'box-border h-full w-full resize-none rounded-[18px] border-0 bg-transparent pb-12 pl-[16.5px] pr-[11.5px] pt-[17.5px] text-[16px] font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a] outline-none disabled:cursor-not-allowed disabled:opacity-60',
               validationMessage && 'ring-2 ring-[var(--qling-color-danger)]',
             )}
           />

@@ -8,7 +8,7 @@ import type {
   WorrySummaryProvider,
 } from './types';
 
-const SUMMARY_MAX_LENGTH = 20;
+const SUMMARY_MAX_LENGTH = 50;
 const LOG_RESPONSE_MAX_LENGTH = 1000;
 
 export type WorrySummaryResult =

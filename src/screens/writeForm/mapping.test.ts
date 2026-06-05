@@ -67,10 +67,13 @@ test('reply summary uses shared local display date formatter', () => {
   }, { now })?.receivedAt?.label, '2026.05.17');
 });
 
-test('legacy reply summary fallback uses original first 20 characters plus ellipsis', () => {
-  assert.equal(buildLegacySummary('01234567890123456789extra'), '01234567890123456789...');
-  assert.equal(buildLegacySummary('짧은 원문'), '짧은 원문...');
-  assert.equal(buildLegacySummary(''), '...');
+test('legacy reply summary fallback truncates at 50 characters only when needed', () => {
+  const exactText = '01234567890123456789012345678901234567890123456789';
+
+  assert.equal(buildLegacySummary(exactText), exactText);
+  assert.equal(buildLegacySummary(`${exactText}x`), `${exactText}...`);
+  assert.equal(buildLegacySummary('짧은 원문'), '짧은 원문');
+  assert.equal(buildLegacySummary(''), '');
 });
 
 test('reply summary uses saved LLM summary instead of original truncation', () => {
@@ -98,7 +101,7 @@ test('reply summary mapping falls back only when saved summary is missing', () =
     createdAt: null,
   } as SelectedReceivedWorry);
 
-  assert.equal(summary?.summaryText, '원문 전체에는 화면 기본 카드에 노출...');
+  assert.equal(summary?.summaryText, '원문 전체에는 화면 기본 카드에 노출되면 안 되는 긴 고민 내용이 들어 있습니다.');
   assert.equal(summary?.originalBodyText, '원문 전체에는 화면 기본 카드에 노출되면 안 되는 긴 고민 내용이 들어 있습니다.');
 });
 

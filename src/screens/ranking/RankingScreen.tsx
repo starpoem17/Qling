@@ -13,12 +13,12 @@ import type {
 } from './contract';
 
 const rankingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
-const rankingCanvasMinHeight = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) * 852 / 393)';
-const rankingUsableCanvasHeight = `calc((var(--qling-visual-viewport-height) - var(--qling-space-nav-height)) / (${rankingCanvasScale}))`;
+const rankingTabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
+const rankingUsableCanvasHeight = `calc((${rankingTabViewportHeight}) / (${rankingCanvasScale}))`;
 const viewerRankCardTop = `min(773px, calc(${rankingUsableCanvasHeight} - 79px))`;
 const rankingSheetReadyHeight = `min(452px, max(372px, calc(${rankingUsableCanvasHeight} - 400px)))`;
 const rankingSheetReadyHeightWithViewer = `min(452px, max(72px, calc(${viewerRankCardTop} - 400px - 12px)))`;
-const rankingSheetEmptyTopWithViewer = `min(156px, max(24px, calc(${rankingSheetReadyHeightWithViewer} / 2 - 8px)))`;
+const rankingSheetEmptyTopWithViewer = `min(156px, max(8px, calc(${rankingSheetReadyHeightWithViewer} / 2 - 8px)), max(8px, calc(${viewerRankCardTop} - 400px - 28px)))`;
 const qlingNotoSansKrStyle = { fontFamily: '"Qling Noto Sans KR"' } as const;
 
 const rankingAssetUrlByName = {
@@ -52,7 +52,7 @@ export function RankingScreen(props: RankingScreenProps) {
 
   if (props.state.status === 'error') {
     return (
-      <div className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ffd3a8] px-4 pt-[calc(62px+env(safe-area-inset-top,0px))]">
+      <div className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ffd3a8] px-4 pt-[calc(62px+env(safe-area-inset-top,0px))]">
         <ErrorState title="순위를 불러오지 못했어요" message={props.state.message} />
       </div>
     );
@@ -83,12 +83,12 @@ function RankingFrame({ children }: { readonly children: ReactNode }) {
     <section
       aria-label="순위"
       className="-mx-[var(--qling-space-shell-x)] -mt-6 h-full min-h-0 overflow-hidden bg-[#ff8b3d] font-['Qling_Noto_Sans_KR']"
-      style={{ minHeight: rankingCanvasMinHeight }}
+      style={{ height: rankingTabViewportHeight }}
     >
       <div
         className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"
         data-measure="ranking-responsive-canvas"
-        style={{ minHeight: rankingCanvasMinHeight }}
+        style={{ height: rankingTabViewportHeight }}
       >
         <div
           className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]"

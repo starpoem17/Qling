@@ -50,12 +50,13 @@ test('write worry screen uses Figma canvas positions while keeping the send butt
   assert.match(html, /w-\[393px\]/);
   assert.match(html, /h-\[852px\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
-  assert.match(html, /질문 작성/);
+  assert.match(html, /고민 작성/);
+  assert.doesNotMatch(html, /질문 작성/);
   assert.match(html, /left-5 top-\[120px\] w-\[353px\]/);
   assert.match(html, /height:min\(541px, max\(240px, calc\(min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 88px\)\) - 143px\)\)\)/);
   assert.match(html, /top:min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 88px\)\)/);
   assert.match(html, /pl-\[16\.5px\]/);
-  assert.match(html, /text-\[12px\] font-bold leading-6 tracking-\[-0\.36px\]/);
+  assert.match(html, /text-\[16px\] font-bold leading-6 tracking-\[-0\.36px\]/);
   assert.match(html, /left-\[22\.5px\] top-\[20\.5px\]/);
   assert.match(html, /text-\[16px\] font-bold leading-6 tracking-\[-0\.64px\]/);
   assert.doesNotMatch(html, /100dvh-var\(--qling-space-scroll-bottom\)/);

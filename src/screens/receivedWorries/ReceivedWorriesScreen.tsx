@@ -7,12 +7,14 @@ const headerEyeUrl = new URL('../../../assets/reply/profile_icon.svg', import.me
 const myPageIconUrl = new URL('../../../assets/reply/my_page_icon.svg', import.meta.url).href;
 const titleChatIconUrl = new URL('../../../assets/reply/title_chat_icon.svg', import.meta.url).href;
 const waitingCountIconUrl = new URL('../../../assets/reply/waiting_count_icon.svg', import.meta.url).href;
+const cardSummaryLimit = 50;
 
 export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   const passingDeliveryIds = new Set(props.passingDeliveryIds);
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
-  const contentViewportHeight = `min(752px, max(360px, calc((var(--qling-visual-viewport-height) - var(--qling-space-nav-height)) / (${canvasScale}) - 74px)))`;
-  const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
+  const tabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
+  const contentViewportHeight = `min(752px, max(320px, calc((${tabViewportHeight}) / (${canvasScale}) - 74px)))`;
+  const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
 
   if (props.state.status === 'loading') {
@@ -45,7 +47,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
             <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
             <CreamContentBackground height={contentViewportHeight} />
             <section
-              className="qling-received-worries-font absolute left-0 top-[74px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[108px] pt-4 [-webkit-overflow-scrolling:touch]"
+              className="qling-received-worries-font absolute left-0 top-[74px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[calc(132px+env(safe-area-inset-bottom,0px))] pt-4 [-webkit-overflow-scrolling:touch]"
               style={{ height: contentViewportHeight }}
             >
               <ErrorState title="답변 피드를 불러오지 못했어요" message={props.state.message} />
@@ -85,7 +87,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
           <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
           <CreamContentBackground height={contentViewportHeight} />
           <section
-            className="qling-received-worries-font absolute left-0 top-[74px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[108px] pt-4 [-webkit-overflow-scrolling:touch]"
+            className="qling-received-worries-font absolute left-0 top-[74px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[calc(132px+env(safe-area-inset-bottom,0px))] pt-4 [-webkit-overflow-scrolling:touch]"
             style={{ height: contentViewportHeight }}
             aria-label="받은 고민 목록"
           >
@@ -94,7 +96,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
               {props.items.map(item => {
                 const isPassing = passingDeliveryIds.has(item.deliveryId);
                 const content = item.bodyText ?? item.previewText;
-                const displayContent = content.length > 45 ? content.replace(/\n/g, ' ').slice(0, 45).trim() + '...' : content;
+                const displayContent = truncateDisplayText(content, cardSummaryLimit);
 
                 return (
                   <QlingCard
@@ -187,6 +189,12 @@ function ReplyStaticHeader({ onOpenMyPage }: { readonly onOpenMyPage: () => void
       </button>
     </header>
   );
+}
+
+function truncateDisplayText(text: string, limit: number): string {
+  const normalized = text.replace(/\n/g, ' ');
+  const chars = Array.from(normalized);
+  return chars.length > limit ? `${chars.slice(0, limit).join('').trim()}...` : text;
 }
 
 function CreamContentBackground({ height }: { readonly height: string }) {

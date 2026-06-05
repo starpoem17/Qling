@@ -57,7 +57,7 @@ test('ranking screen scales the Figma canvas by width only like the other tab sc
   assert.match(html, /data-measure="ranking-responsive-canvas"/);
   assert.match(html, /data-measure="ranking-screen"/);
   assert.match(html, /font-\[&#x27;Qling_Noto_Sans_KR&#x27;\]/);
-  assert.match(html, /min-height:calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \* 852 \/ 393\)/);
+  assert.match(html, /style="height:calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)"/);
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
   assert.doesNotMatch(html, /transform:scale\(min\(/);
@@ -236,6 +236,8 @@ test('ranking sheet is empty when there are fewer than four ranked entries', () 
   })));
 
   assert.match(html, /아직 순위가 없어요/);
+  assert.match(html, /style="top:min\(156px, max\(8px, calc\(min\(452px, max\(72px/);
+  assert.match(html, /max\(8px, calc\(min\(773px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\)/);
   assert.doesNotMatch(html, />User 4</);
 });
 
@@ -254,7 +256,7 @@ test('viewer rank card stays above the shell bottom navigation on shorter iPhone
   assert.match(html, /aria-label="내 순위 24위"/);
   assert.doesNotMatch(html, /chevron-right\.svg/);
   assert.doesNotMatch(html, /top-\[693px\]/);
-  assert.match(html, /top:min\(773px, calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 79px\)\)/);
+  assert.match(html, /top:min\(773px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 79px\)\)/);
 });
 
 test('ready ranking sheet stops above the viewer card when my rank is visible', () => {
@@ -263,7 +265,7 @@ test('ready ranking sheet stops above the viewer card when my rank is visible', 
   assert.match(html, /전체 랭킹/);
   assert.doesNotMatch(html, /top-\[400px\] h-\[372px\]/);
   assert.match(html, /overflow-hidden rounded-t-\[26px\]/);
-  assert.match(html, /style="height:min\(452px, max\(72px, calc\(min\(773px, calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 79px\)\) - 400px - 12px\)\)\)"/);
+  assert.match(html, /style="height:min\(452px, max\(72px, calc\(min\(773px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 79px\)\) - 400px - 12px\)\)\)"/);
 });
 
 test('ready ranking sheet can still stretch when no viewer card is visible', () => {
@@ -281,7 +283,7 @@ test('ready ranking sheet can still stretch when no viewer card is visible', () 
   })));
 
   assert.match(html, /전체 랭킹/);
-  assert.match(html, /style="height:min\(452px, max\(372px, calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 400px\)\)\)"/);
+  assert.match(html, /style="height:min\(452px, max\(372px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 400px\)\)\)"/);
 });
 
 test('ranking loading state uses the same width-only canvas scale', () => {

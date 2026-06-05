@@ -85,6 +85,7 @@ test('answer check loading state matches the Figma loading shell', () => {
   assert.match(html, /figma-progress-active\.svg/);
   assert.match(html, /figma-progress-track\.svg/);
   assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#fff1d1\]/);
+  assert.match(html, /left-\[14px\] top-\[49px\] z-20 h-\[44px\] w-\[44px\]/);
   assert.match(html, /left-\[177px\] top-\[406px\] h-10 w-10/);
   assert.doesNotMatch(html, /flex min-h-48 flex-col items-center justify-center rounded-\[var\(--qling-radius-card\)\]/);
 });

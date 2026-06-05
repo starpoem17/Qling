@@ -50,6 +50,37 @@ test('write reply screen shows summary on the base card and keeps original body 
   assert.match(openHtml, /role="dialog"/);
 });
 
+test('write reply top box truncates summary at 25 characters only when needed', () => {
+  const exactSummary = '1234567890123456789012345';
+  const longSummary = `${exactSummary}6`;
+  const exactHtml = renderToStaticMarkup(WriteFormScreen(baseProps({
+    originalWorry: {
+      ...baseProps().originalWorry,
+      summaryText: exactSummary,
+    },
+  })));
+  const closedLongHtml = renderToStaticMarkup(WriteFormScreen(baseProps({
+    originalWorry: {
+      ...baseProps().originalWorry,
+      summaryText: longSummary,
+    },
+  })));
+  const openLongHtml = renderToStaticMarkup(WriteFormScreen(baseProps({
+    isOriginalOverlayOpen: true,
+    originalWorry: {
+      ...baseProps().originalWorry,
+      summaryText: longSummary,
+    },
+  })));
+
+  assert.match(exactHtml, new RegExp(`>${exactSummary}<`));
+  assert.doesNotMatch(exactHtml, new RegExp(`${exactSummary}\\.\\.\\.`));
+  assert.match(closedLongHtml, new RegExp(`>${exactSummary}\\.\\.\\.<`));
+  assert.doesNotMatch(closedLongHtml, new RegExp(longSummary));
+  assert.match(openLongHtml, new RegExp(`>${longSummary}<`));
+  assert.match(openLongHtml, /font-extrabold/);
+});
+
 test('write reply original overlay keeps only the original body scrollable', () => {
   const html = renderToStaticMarkup(WriteFormScreen(baseProps({ isOriginalOverlayOpen: true })));
 

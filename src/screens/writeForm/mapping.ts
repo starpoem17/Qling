@@ -51,7 +51,8 @@ export function mapSelectedWorryToOriginalWorrySummary(
 }
 
 export function buildLegacySummary(originalBodyText: string): string {
-  return `${Array.from(originalBodyText).slice(0, 20).join('')}...`;
+  const chars = Array.from(originalBodyText);
+  return chars.length > 50 ? `${chars.slice(0, 50).join('')}...` : originalBodyText;
 }
 
 function displayDateFromTimestamp(createdAt: HomeWorryFeedTimestamp | null | undefined, options?: DisplayDateOptions): DisplayDate {

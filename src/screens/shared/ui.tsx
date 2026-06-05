@@ -295,7 +295,7 @@ export function FigmaTopBar({
         onClick={onBack}
         aria-label={backLabel}
         className={cn(
-          'absolute left-[14px] top-[49px] h-[44px] w-[28px] rounded-full transition-colors focus:outline-none focus:ring-2',
+          'absolute left-[14px] top-[49px] h-[44px] w-[44px] rounded-full transition-colors focus:outline-none focus:ring-2',
           hoverClassName,
         )}
       >

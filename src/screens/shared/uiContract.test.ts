@@ -119,10 +119,24 @@ test('figma top bar keeps the shared Figma back and title coordinates', () => {
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
 
   assert.match(source, /data-measure="figma-top-bar"/);
-  assert.match(source, /left-\[14px\] top-\[49px\] h-\[44px\] w-\[28px\]/);
+  assert.match(source, /left-\[14px\] top-\[49px\] h-\[44px\] w-\[44px\]/);
   assert.match(source, /text-\[32px\] font-semibold leading-\[38px\]/);
   assert.match(source, /top-\[60px\] w-full whitespace-nowrap text-center text-\[17px\]/);
   assert.match(source, /tracking-\[-0\.34px\]/);
+});
+
+test('standalone back buttons keep at least a 44px touch target', () => {
+  const chatRoomSource = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'chat', 'ChatRoomScreen.tsx'), 'utf8');
+  const reportSource = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'report', 'ReportUserScreen.tsx'), 'utf8');
+  const myPageSource = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'myPage', 'MyPageScreen.tsx'), 'utf8');
+  const myAnswersSource = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'myPage', 'MyAnswersScreen.tsx'), 'utf8');
+  const replyDetailSource = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'replyDetail', 'ReplyDetailScreen.tsx'), 'utf8');
+
+  assert.match(chatRoomSource, /left-\[7px\] top-\[18px\] flex h-12 w-11/);
+  assert.match(reportSource, /aria-label="뒤로가기"[\s\S]*h-\[44px\] w-\[44px\]/);
+  assert.match(myPageSource, /left-\[6px\] top-\[45px\] flex h-\[45px\] w-\[44px\]/);
+  assert.match(myAnswersSource, /left-\[6px\] top-\[45px\] flex h-\[45px\] w-\[44px\]/);
+  assert.match(replyDetailSource, /aria-label="목록으로 돌아가기"[\s\S]*h-11 w-11/);
 });
 
 test('profile motif remains visual-only without avatar data requirements', () => {

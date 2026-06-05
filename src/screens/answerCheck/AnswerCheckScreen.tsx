@@ -92,7 +92,7 @@ function AnswerCheckLoadingScreen({ label, onBack }: { readonly label: string; r
             type="button"
             onClick={onBack}
             aria-label="나의 고민으로 돌아가기"
-            className="absolute left-[14px] top-[49px] z-20 h-[44px] w-[28px] rounded-full transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-[#2a2a2a]"
+            className="absolute left-[14px] top-[49px] z-20 h-[44px] w-[44px] rounded-full transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-[#2a2a2a]"
           >
             <span
               aria-hidden="true"

@@ -68,7 +68,7 @@ function DetailFrame({
             type="button"
             onClick={onBack}
             aria-label="목록으로 돌아가기"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--qling-color-text)] transition-colors hover:bg-[var(--qling-color-cream-soft)] focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)]"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-[var(--qling-color-text)] transition-colors hover:bg-[var(--qling-color-cream-soft)] focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)]"
           >
             <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           </button>

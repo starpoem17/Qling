@@ -118,5 +118,6 @@ function firstUserFacingCategory(categories: readonly string[]): WorryCategory {
 }
 
 function fallbackSummary(content: string): string {
-  return `${Array.from(content).slice(0, 20).join('')}...`;
+  const chars = Array.from(content);
+  return chars.length > 50 ? `${chars.slice(0, 50).join('')}...` : content;
 }

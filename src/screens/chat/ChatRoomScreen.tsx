@@ -668,7 +668,7 @@ function ChatRoomTopBar({
           type="button"
           onClick={onBack}
           aria-label="뒤로가기"
-          className="absolute left-[11px] top-[18px] flex h-12 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute left-[7px] top-[18px] flex h-12 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
         >
           <span aria-hidden="true" className="font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-none">
             ‹
