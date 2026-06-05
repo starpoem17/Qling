@@ -3,6 +3,18 @@ import assert from 'node:assert/strict';
 import { createExamplesForUser } from './createExamplesForUser';
 import type { ExampleWorriesRepository, SelectedExampleSeed } from './types';
 
+function seed(id: string, content: string, categories: string[]) {
+  return {
+    id,
+    content,
+    summaryText: content,
+    summaryStatus: 'original' as const,
+    summaryGeneratedBy: 'none' as const,
+    categories,
+    status: 'active' as const,
+  };
+}
+
 function createRepo(options: {
   stateExists?: boolean;
   interests?: string[];
@@ -18,13 +30,13 @@ function createRepo(options: {
       exampleDeliveryIds: options.stateExists ? ['delivery1'] : undefined,
     }),
     listSelectableSeeds: async () => [
-      { id: 'seed1', content: 'one', categories: ['career'], status: 'active' },
-      { id: 'seed2', content: 'two', categories: ['career'], status: 'active' },
-      { id: 'seed3', content: 'three', categories: ['career'], status: 'active' },
-      { id: 'seed4', content: 'four', categories: ['career'], status: 'active' },
-      { id: 'seed5', content: 'five', categories: ['career'], status: 'active' },
-      { id: 'seed6', content: 'six', categories: ['career'], status: 'active' },
-      { id: 'inactive', content: 'off', categories: ['career'], status: 'inactive' },
+      seed('seed1', 'one', ['career']),
+      seed('seed2', 'two', ['career']),
+      seed('seed3', 'three', ['career']),
+      seed('seed4', 'four', ['career']),
+      seed('seed5', 'five', ['career']),
+      seed('seed6', 'six', ['career']),
+      { ...seed('inactive', 'off', ['career']), status: 'inactive' },
     ],
     createExamplesOnce: async params => {
       commits.push({ uid: params.uid, seeds: params.seeds });

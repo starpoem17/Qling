@@ -5,6 +5,9 @@ export type ServerTimestampValue = unknown;
 export interface ExampleWorrySeed {
   id: string;
   content: string;
+  summaryText: string;
+  summaryStatus: 'original' | 'llm_generated';
+  summaryGeneratedBy: 'none' | 'llm';
   categories: string[];
   status: 'active' | 'inactive';
   createdAt?: unknown;
@@ -20,6 +23,10 @@ export interface ExampleWorryWriteModel {
   authorUid: 'example_author';
   content: string;
   refinedContent: string;
+  summaryText: string;
+  summaryStatus: 'original' | 'llm_generated';
+  summaryGeneratedBy: 'none' | 'llm';
+  summaryUpdatedAt: ServerTimestampValue;
   categories: string[];
   rawCategories: string[];
   validCategories: string[];

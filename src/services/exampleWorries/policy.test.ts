@@ -5,10 +5,19 @@ import {
   createExampleFeedbackRunAfter,
   selectExampleSeeds,
 } from './policy';
+import { exampleWorrySeedFixtures } from './exampleSeedFixtures';
 import type { ExampleWorrySeed } from './types';
 
 function seed(id: string, categories: string[], status: 'active' | 'inactive' = 'active'): ExampleWorrySeed {
-  return { id, content: id, categories, status };
+  return {
+    id,
+    content: id,
+    summaryText: id,
+    summaryStatus: 'original',
+    summaryGeneratedBy: 'none',
+    categories,
+    status,
+  };
 }
 
 test('selects active seeds whose categories intersect interests', () => {
@@ -68,4 +77,22 @@ test('feedback delay stays between five and fifteen minutes and auto comment is 
   assert.equal(max.getTime() - submittedAt.getTime(), 15 * 60 * 1000);
   assert.equal(clamped.getTime() - submittedAt.getTime(), 5 * 60 * 1000);
   assert.equal(buildExampleAutoLikeComment(), null);
+});
+
+test('example seed fixtures include valid 50 character summary metadata', () => {
+  assert.equal(exampleWorrySeedFixtures.length, 47);
+
+  for (const seed of exampleWorrySeedFixtures) {
+    assert.ok(seed.summaryText.trim(), `${seed.id} summaryText is required`);
+    assert.ok(Array.from(seed.summaryText).length <= 50, `${seed.id} summaryText is over 50 characters`);
+
+    if (Array.from(seed.content).length <= 50) {
+      assert.equal(seed.summaryText, seed.content, `${seed.id} should use original content as summary`);
+      assert.equal(seed.summaryStatus, 'original', `${seed.id} should be original`);
+      assert.equal(seed.summaryGeneratedBy, 'none', `${seed.id} should not be LLM generated`);
+    } else {
+      assert.equal(seed.summaryStatus, 'llm_generated', `${seed.id} should be LLM generated`);
+      assert.equal(seed.summaryGeneratedBy, 'llm', `${seed.id} should store LLM generatedBy`);
+    }
+  }
 });

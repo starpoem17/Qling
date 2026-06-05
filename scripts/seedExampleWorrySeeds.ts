@@ -26,6 +26,9 @@ const db = getFirestore(firestoreDatabaseId);
 for (const seed of exampleWorrySeedFixtures) {
   await db.collection('exampleWorrySeeds').doc(seed.id).set({
     content: seed.content,
+    summaryText: seed.summaryText,
+    summaryStatus: seed.summaryStatus,
+    summaryGeneratedBy: seed.summaryGeneratedBy,
     categories: seed.categories,
     status: seed.status,
     createdAt: FieldValue.serverTimestamp(),

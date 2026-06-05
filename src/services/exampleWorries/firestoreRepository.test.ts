@@ -85,6 +85,40 @@ test('builds deterministic scheduled job with no comment surface', () => {
   assert.ok(job.runAfter instanceof Date);
 });
 
+test('createExamplesOnce stores seed summary metadata on example worries', async () => {
+  const db = createFakeFirestore({
+    'users/user1': {
+      interests: ['취업'],
+      gender: 'female',
+      helpedCount: 3,
+    },
+  });
+  const repo = createExampleWorriesFirestoreRepository({ db: db as never });
+
+  const result = await repo.createExamplesOnce({
+    uid: 'user1',
+    now: new Date('2026-05-13T00:00:00.000Z'),
+    seeds: [{
+      id: 'seed1',
+      content: '긴 예제 고민 원문',
+      summaryText: '예제 고민 요약',
+      summaryStatus: 'llm_generated',
+      summaryGeneratedBy: 'llm',
+      categories: ['취업'],
+      status: 'active',
+      selectionIndex: 0,
+    }],
+  });
+
+  const worry = db.store.get('worries/example_user1_seed1');
+  assert.equal(result.status, 'created');
+  assert.equal(worry?.summaryText, '예제 고민 요약');
+  assert.equal(worry?.summaryStatus, 'llm_generated');
+  assert.equal(worry?.summaryGeneratedBy, 'llm');
+  assert.equal(worry?.summaryUpdatedAt, worry?.createdAt);
+  assert.equal(worry?.summaryUpdatedAt, worry?.updatedAt);
+});
+
 test('feedback job creates exactly one like, no comment, and increments helpedCount once', async () => {
   const now = new Date('2026-05-13T00:20:00.000Z');
   const db = createFakeFirestore({
