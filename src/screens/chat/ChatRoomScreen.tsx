@@ -14,6 +14,7 @@ const chatRoomKeyboardDebugStorageKey = 'qling.chatRoomKeyboardDebug';
 const chatRoomKeyboardDebugQueryParam = 'chatRoomKeyboardDebug';
 const chatInputBaseHeight = 67;
 const chatRoomTopBarHeight = 74;
+const chatRoomKeyboardOpenThreshold = 120;
 const chatTextareaMinHeight = 40;
 const chatTextareaMaxHeight = 60;
 
@@ -75,6 +76,14 @@ export function ChatRoomScreen({
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const shouldStickToBottomRef = useRef(true);
   const fullViewportHeightRef = useRef<number | null>(null);
+  const keyboardInputIntentRef = useRef(false);
+  const canAutoScrollAfterViewportChangeRef = useRef(false);
+  const previousAutoScrollInputsRef = useRef<{
+    readonly messages: readonly ChatMessage[];
+    readonly textareaHeight: number;
+    readonly canvasHeight: number;
+    readonly isTopBarHiddenForKeyboard: boolean;
+  } | null>(null);
 
   useEffect(() => {
     const updateViewportMetrics = (source: string = 'viewport.measure') => {
@@ -87,9 +96,15 @@ export function ChatRoomScreen({
       const viewportHeight = visualViewport ? visibleHeight : layoutHeight;
       const nextFullViewportHeight = Math.max(layoutHeight, visibleHeight);
       const fullViewportHeight = fullViewportHeightRef.current ?? nextFullViewportHeight;
-      if (!isTopBarHiddenForKeyboard) {
-        fullViewportHeightRef.current = nextFullViewportHeight;
-      } else if (visualViewport && offsetTop === 0) {
+      const viewportHeightShrink = Math.max(0, fullViewportHeight - visibleHeight);
+      const isKeyboardHeightVisible = viewportHeightShrink >= chatRoomKeyboardOpenThreshold;
+      if (!visualViewport || !isTopBarHiddenForKeyboard) {
+        fullViewportHeightRef.current = Math.max(fullViewportHeight, nextFullViewportHeight);
+      }
+      if (visualViewport && keyboardInputIntentRef.current && isKeyboardHeightVisible) {
+        setIsTopBarHiddenForKeyboard(true);
+      } else if (visualViewport && isTopBarHiddenForKeyboard && !isKeyboardHeightVisible) {
+        keyboardInputIntentRef.current = false;
         setIsTopBarHiddenForKeyboard(false);
       }
       const nextMetrics = {
@@ -171,15 +186,48 @@ export function ChatRoomScreen({
   }, [draft]);
 
   useEffect(() => {
-    if (!shouldStickToBottomRef.current) return;
     const scroller = messagesScrollerRef.current;
     if (!scroller) return;
-    scroller.scrollTop = scroller.scrollHeight;
+    const previousInputs = previousAutoScrollInputsRef.current;
+    const currentInputs = {
+      messages,
+      textareaHeight,
+      canvasHeight: viewportMetrics.canvasHeight,
+      isTopBarHiddenForKeyboard,
+    };
+    const messagesChanged = previousInputs === null || previousInputs.messages !== messages;
+    const textareaHeightChanged = previousInputs === null || previousInputs.textareaHeight !== textareaHeight;
+    const viewportOnlyChanged = previousInputs !== null
+      && !messagesChanged
+      && !textareaHeightChanged
+      && (
+        previousInputs.canvasHeight !== viewportMetrics.canvasHeight
+        || previousInputs.isTopBarHiddenForKeyboard !== isTopBarHiddenForKeyboard
+      );
+    const canScrollMessages = canScrollMessageScroller(scroller);
+
+    if (!canScrollMessages) {
+      shouldStickToBottomRef.current = true;
+    } else if (
+      shouldStickToBottomRef.current
+      && (!viewportOnlyChanged || canAutoScrollAfterViewportChangeRef.current)
+    ) {
+      scroller.scrollTop = scroller.scrollHeight;
+    }
+
+    previousAutoScrollInputsRef.current = currentInputs;
+    canAutoScrollAfterViewportChangeRef.current = viewportOnlyChanged
+      ? canAutoScrollAfterViewportChangeRef.current
+      : canScrollMessages;
   }, [messages, textareaHeight, viewportMetrics.canvasHeight, isTopBarHiddenForKeyboard]);
 
   const handleMessagesScroll = () => {
     const scroller = messagesScrollerRef.current;
     if (!scroller) return;
+    if (!canScrollMessageScroller(scroller)) {
+      shouldStickToBottomRef.current = true;
+      return;
+    }
     const distanceFromBottom = scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
     shouldStickToBottomRef.current = distanceFromBottom <= 72;
   };
@@ -216,13 +264,14 @@ export function ChatRoomScreen({
   };
 
   const handleMessageInputIntent = (source: string, pointerType?: string) => {
-    if (source === 'textarea.touchstart' || pointerType === 'touch') {
-      setIsTopBarHiddenForKeyboard(true);
+    if (source === 'textarea.touchstart' || source === 'textarea.focus' || pointerType === 'touch') {
+      keyboardInputIntentRef.current = true;
     }
     logChatRoomKeyboardMetric(source);
   };
 
   const handleMessageInputBlur = () => {
+    keyboardInputIntentRef.current = false;
     if (!window.visualViewport) {
       setIsTopBarHiddenForKeyboard(false);
     }
@@ -579,6 +628,10 @@ function blockStaticScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLEleme
   const { preventDefault, stopPropagation } = event;
   preventDefault.call(event);
   stopPropagation.call(event);
+}
+
+function canScrollMessageScroller(scroller: HTMLElement) {
+  return scroller.scrollHeight > scroller.clientHeight + 1;
 }
 
 function logChatRoomKeyboardMetric(source: string) {

@@ -13,6 +13,13 @@ test('chat room autoscroll stays inside the message scroller', () => {
   assert.doesNotMatch(chatRoomScreenSource, /behavior:\s*'smooth'/);
   assert.match(chatRoomScreenSource, /const messagesScrollerRef = useRef<HTMLDivElement>\(null\)/);
   assert.match(chatRoomScreenSource, /const shouldStickToBottomRef = useRef\(true\)/);
+  assert.match(chatRoomScreenSource, /const canAutoScrollAfterViewportChangeRef = useRef\(false\)/);
+  assert.match(chatRoomScreenSource, /const previousAutoScrollInputsRef = useRef</);
+  assert.match(chatRoomScreenSource, /function canScrollMessageScroller\(scroller: HTMLElement\)/);
+  assert.match(chatRoomScreenSource, /return scroller\.scrollHeight > scroller\.clientHeight \+ 1/);
+  assert.match(chatRoomScreenSource, /if \(!canScrollMessages\) \{\s*shouldStickToBottomRef\.current = true;\s*\}/);
+  assert.match(chatRoomScreenSource, /!viewportOnlyChanged \|\| canAutoScrollAfterViewportChangeRef\.current/);
+  assert.match(chatRoomScreenSource, /canAutoScrollAfterViewportChangeRef\.current = viewportOnlyChanged\s*\? canAutoScrollAfterViewportChangeRef\.current\s*: canScrollMessages/);
   assert.match(chatRoomScreenSource, /distanceFromBottom <= 72/);
   assert.match(chatRoomScreenSource, /scroller\.scrollTop = scroller\.scrollHeight/);
   assert.match(chatRoomScreenSource, /ref=\{messagesScrollerRef\}[\s\S]*data-chat-room-message-scroller[\s\S]*className="min-h-0 flex-1 w-\[393px\] overflow-y-auto overscroll-contain/);
@@ -51,6 +58,7 @@ test('chat screens keep 393px canvas width while chat room uses viewport height'
   assert.doesNotMatch(chatRoomScreenSource, /chatInputYOffset/);
   assert.match(chatRoomScreenSource, /const chatInputBaseHeight = 67/);
   assert.match(chatRoomScreenSource, /const chatTextareaMaxHeight = 60/);
+  assert.match(chatRoomScreenSource, /const chatRoomKeyboardOpenThreshold = 120/);
   assert.doesNotMatch(chatRoomScreenSource, /--chat-keyboard-inset/);
   assert.doesNotMatch(chatRoomScreenSource, /--chat-keyboard-offset/);
   assert.doesNotMatch(chatRoomScreenSource, /--chat-input-y-offset/);
@@ -70,6 +78,7 @@ test('chat screens keep 393px canvas width while chat room uses viewport height'
   assert.match(chatRoomScreenSource, /const rootStyle: CSSProperties = \{\s*transform: `translateY\(\$\{viewportMetrics\.viewportOffsetTop\}px\)`,\s*\}/);
   assert.match(chatRoomScreenSource, /const \[isTopBarHiddenForKeyboard, setIsTopBarHiddenForKeyboard\] = useState\(false\)/);
   assert.match(chatRoomScreenSource, /const fullViewportHeightRef = useRef<number \| null>\(null\)/);
+  assert.match(chatRoomScreenSource, /const keyboardInputIntentRef = useRef\(false\)/);
   assert.match(chatRoomScreenSource, /const topBarLayerStyle: CSSProperties = \{\s*height: `\$\{\(isTopBarHiddenForKeyboard \? 0 : viewportMetrics\.viewportOffsetTop\) \+ chatRoomTopBarHeight \* viewportMetrics\.scale\}px`,\s*paddingTop: `\$\{isTopBarHiddenForKeyboard \? 0 : viewportMetrics\.viewportOffsetTop\}px`,\s*transform: isTopBarHiddenForKeyboard \? `translateY\(\$\{-chatRoomTopBarHeight \* viewportMetrics\.scale\}px\)` : undefined,\s*\}/);
   assert.match(chatRoomScreenSource, /const topBarCanvasStyle: CSSProperties = \{\s*transform: `scale\(\$\{viewportMetrics\.scale\}\)`,\s*\}/);
   assert.match(chatRoomScreenSource, /\}, \[messages, textareaHeight, viewportMetrics\.canvasHeight, isTopBarHiddenForKeyboard\]\)/);
@@ -138,7 +147,12 @@ test('chat room accounts for visual viewport and document background without rec
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('scroll', handleViewportScroll\)/);
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('scroll', handleViewportScroll\)/);
   assert.match(chatRoomScreenSource, /setViewportMetrics\(previousMetrics =>/);
-  assert.match(chatRoomScreenSource, /if \(!isTopBarHiddenForKeyboard\) \{\s*fullViewportHeightRef\.current = nextFullViewportHeight;\s*\} else if \(visualViewport && offsetTop === 0\) \{\s*setIsTopBarHiddenForKeyboard\(false\);\s*\}/);
+  assert.match(chatRoomScreenSource, /const viewportHeightShrink = Math\.max\(0, fullViewportHeight - visibleHeight\)/);
+  assert.match(chatRoomScreenSource, /const isKeyboardHeightVisible = viewportHeightShrink >= chatRoomKeyboardOpenThreshold/);
+  assert.match(chatRoomScreenSource, /fullViewportHeightRef\.current = Math\.max\(fullViewportHeight, nextFullViewportHeight\)/);
+  assert.match(chatRoomScreenSource, /visualViewport && keyboardInputIntentRef\.current && isKeyboardHeightVisible/);
+  assert.match(chatRoomScreenSource, /visualViewport && isTopBarHiddenForKeyboard && !isKeyboardHeightVisible/);
+  assert.doesNotMatch(chatRoomScreenSource, /offsetTop === 0/);
   assert.match(chatRoomScreenSource, /const chatRoomDocumentBackground = '#ffffff'/);
   assert.match(chatRoomScreenSource, /const backgroundColor = menuOpen \? dimThemeColor : chatRoomDocumentBackground/);
   assert.match(chatRoomScreenSource, /document\.documentElement\.style\.backgroundColor = backgroundColor/);
@@ -187,7 +201,8 @@ test('chat room keyboard diagnostics log repeated focus viewport state in dev or
   assert.match(chatRoomScreenSource, /function logChatRoomKeyboardMetric\(source: string\)/);
   assert.match(chatRoomScreenSource, /if \(!isChatRoomKeyboardDebugEnabled\(\)\) return/);
   assert.match(chatRoomScreenSource, /console\.info\('\[chat-room-keyboard\]'/);
-  assert.match(chatRoomScreenSource, /if \(source === 'textarea\.touchstart' \|\| pointerType === 'touch'\) \{\s*setIsTopBarHiddenForKeyboard\(true\);\s*\}/);
+  assert.match(chatRoomScreenSource, /if \(source === 'textarea\.touchstart' \|\| source === 'textarea\.focus' \|\| pointerType === 'touch'\) \{\s*keyboardInputIntentRef\.current = true;\s*\}/);
+  assert.doesNotMatch(chatRoomScreenSource, /setIsTopBarHiddenForKeyboard\(true\);\s*\}\s*logChatRoomKeyboardMetric\(source\)/);
   assert.match(chatRoomScreenSource, /if \(!window\.visualViewport\) \{\s*setIsTopBarHiddenForKeyboard\(false\);\s*\}\s*logChatRoomKeyboardMetric\('textarea\.blur'\)/);
   assert.doesNotMatch(chatRoomScreenSource, /bodyLocked/);
   assert.doesNotMatch(chatRoomScreenSource, /rootLocked/);
