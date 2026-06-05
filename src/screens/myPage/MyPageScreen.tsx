@@ -188,7 +188,7 @@ function AnswerPreviewCard({ item, top }: { readonly item: MyPageScreenProps['an
         )}
         {item.dateLabel && <span className="min-w-0 truncate font-['Qling_Figma_Inter'] text-[12px] font-bold leading-[15px] text-[#9a9aa0]">{item.dateLabel}</span>}
       </div>
-      <p className="absolute left-[18px] top-[49px] line-clamp-2 h-9 w-[305px] break-words text-[13px] font-semibold leading-[1.45] tracking-[-0.52px] text-[#1a1a1e]">
+      <p className="absolute left-[18px] top-[49px] h-[19px] w-[305px] truncate text-[13px] font-semibold leading-[1.45] tracking-[-0.52px] text-[#1a1a1e]">
         "{item.previewText}"
       </p>
     </article>

@@ -130,6 +130,8 @@ test('my-page renders one real answer preview without the preview heart icon', (
   assert.match(html, /누구나 그런 시기가 있는 것 같아요/);
   assert.match(html, /2026\.05\.02/);
   assert.match(html, /text-\[#c45614\]/);
+  assert.match(html, /h-\[19px\] w-\[305px\] truncate/);
+  assert.doesNotMatch(html, /line-clamp-2 h-9/);
   assert.doesNotMatch(html, /h-4 w-4 shrink-0 fill-\[#ea4335\]/);
 });
 
