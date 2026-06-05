@@ -72,7 +72,7 @@ export function ChatRoomScreen({
   const shouldStickToBottomRef = useRef(true);
 
   useEffect(() => {
-    const updateViewportMetrics = () => {
+    const updateViewportMetrics = (source: string = 'viewport.measure') => {
       const visualViewport = window.visualViewport;
       const visualWidth = visualViewport?.width ?? window.innerWidth;
       const scale = Math.max(Math.min(visualWidth, 480) / 393, 0.1);
@@ -90,19 +90,24 @@ export function ChatRoomScreen({
           ? previousMetrics
           : nextMetrics;
       });
+      logChatRoomKeyboardMetric(source);
     };
+    const handleViewportResize = () => updateViewportMetrics('visualViewport.resize');
+    const handleViewportScroll = () => updateViewportMetrics('visualViewport.scroll');
+    const handleWindowResize = () => updateViewportMetrics('window.resize');
+    const handleOrientationChange = () => updateViewportMetrics('window.orientationchange');
 
     updateViewportMetrics();
-    window.addEventListener('resize', updateViewportMetrics);
-    window.addEventListener('orientationchange', updateViewportMetrics);
-    window.visualViewport?.addEventListener('resize', updateViewportMetrics);
-    window.visualViewport?.addEventListener('scroll', updateViewportMetrics);
+    window.addEventListener('resize', handleWindowResize);
+    window.addEventListener('orientationchange', handleOrientationChange);
+    window.visualViewport?.addEventListener('resize', handleViewportResize);
+    window.visualViewport?.addEventListener('scroll', handleViewportScroll);
 
     return () => {
-      window.removeEventListener('resize', updateViewportMetrics);
-      window.removeEventListener('orientationchange', updateViewportMetrics);
-      window.visualViewport?.removeEventListener('resize', updateViewportMetrics);
-      window.visualViewport?.removeEventListener('scroll', updateViewportMetrics);
+      window.removeEventListener('resize', handleWindowResize);
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      window.visualViewport?.removeEventListener('resize', handleViewportResize);
+      window.visualViewport?.removeEventListener('scroll', handleViewportScroll);
     };
   }, []);
 
@@ -190,11 +195,13 @@ export function ChatRoomScreen({
     setMenuOpen(true);
   };
 
-  const handleMessageInputIntent = () => {
+  const handleMessageInputIntent = (source: string) => {
+    logChatRoomKeyboardMetric(source);
     setChatRoomKeyboardLock(true);
   };
 
   const handleMessageInputBlur = () => {
+    logChatRoomKeyboardMetric('textarea.blur');
     setChatRoomKeyboardLock(false);
   };
 
@@ -364,7 +371,7 @@ function ChatRoomInputBar({
   readonly inputRef: RefObject<HTMLTextAreaElement | null>;
   readonly onDraftChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   readonly onMessageKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
-  readonly onMessageInputIntent: () => void;
+  readonly onMessageInputIntent: (source: string) => void;
   readonly onMessageInputBlur: () => void;
   readonly onSend: () => void;
 }) {
@@ -391,9 +398,9 @@ function ChatRoomInputBar({
           value={draft}
           onChange={onDraftChange}
           onKeyDown={onMessageKeyDown}
-          onTouchStart={onMessageInputIntent}
-          onPointerDown={onMessageInputIntent}
-          onFocus={onMessageInputIntent}
+          onTouchStart={() => onMessageInputIntent('textarea.touchstart')}
+          onPointerDown={() => onMessageInputIntent('textarea.pointerdown')}
+          onFocus={() => onMessageInputIntent('textarea.focus')}
           onBlur={onMessageInputBlur}
           aria-label="메시지 입력"
           rows={1}
@@ -487,6 +494,22 @@ function setChatRoomKeyboardLock(locked: boolean) {
   document.documentElement.classList.toggle(chatRoomKeyboardLockClass, locked);
   document.body.classList.toggle(chatRoomKeyboardLockClass, locked);
   root?.classList.toggle(chatRoomKeyboardLockClass, locked);
+}
+
+function logChatRoomKeyboardMetric(source: string) {
+  if (!import.meta.env.DEV) return;
+  const visualViewport = window.visualViewport;
+  const root = document.getElementById('root');
+  console.info('[chat-room-keyboard]', {
+    source,
+    locked: document.documentElement.classList.contains(chatRoomKeyboardLockClass),
+    bodyLocked: document.body.classList.contains(chatRoomKeyboardLockClass),
+    rootLocked: root?.classList.contains(chatRoomKeyboardLockClass) ?? false,
+    scrollY: window.scrollY,
+    documentScrollTop: document.documentElement.scrollTop,
+    visualViewportHeight: visualViewport?.height ?? null,
+    visualViewportOffsetTop: visualViewport?.offsetTop ?? null,
+  });
 }
 
 function ChatRoomActionSheet({

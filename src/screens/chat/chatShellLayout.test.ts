@@ -80,9 +80,9 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(chatRoomScreenSource, /ref=\{inputRef\}[\s\S]*data-chat-room-message-input/);
   assert.match(chatRoomScreenSource, /onChange=\{onDraftChange\}/);
   assert.match(chatRoomScreenSource, /onKeyDown=\{onMessageKeyDown\}/);
-  assert.match(chatRoomScreenSource, /onTouchStart=\{onMessageInputIntent\}/);
-  assert.match(chatRoomScreenSource, /onPointerDown=\{onMessageInputIntent\}/);
-  assert.match(chatRoomScreenSource, /onFocus=\{onMessageInputIntent\}/);
+  assert.match(chatRoomScreenSource, /onTouchStart=\{\(\) => onMessageInputIntent\('textarea\.touchstart'\)\}/);
+  assert.match(chatRoomScreenSource, /onPointerDown=\{\(\) => onMessageInputIntent\('textarea\.pointerdown'\)\}/);
+  assert.match(chatRoomScreenSource, /onFocus=\{\(\) => onMessageInputIntent\('textarea\.focus'\)\}/);
   assert.match(chatRoomScreenSource, /onBlur=\{onMessageInputBlur\}/);
   assert.doesNotMatch(chatRoomScreenSource, /contentEditable/);
   assert.doesNotMatch(chatRoomScreenSource, /safeInput/);
@@ -110,10 +110,10 @@ test('chat room more menu is fixed to the visible viewport bottom', () => {
 test('chat room accounts for visual viewport and document background without recovery logic', () => {
   assert.match(chatRoomScreenSource, /visualViewport\?\.height/);
   assert.match(chatRoomScreenSource, /visualViewport\?\.offsetTop/);
-  assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('resize', updateViewportMetrics\)/);
-  assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('resize', updateViewportMetrics\)/);
-  assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('scroll', updateViewportMetrics\)/);
-  assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('scroll', updateViewportMetrics\)/);
+  assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('resize', handleViewportResize\)/);
+  assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('resize', handleViewportResize\)/);
+  assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('scroll', handleViewportScroll\)/);
+  assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('scroll', handleViewportScroll\)/);
   assert.match(chatRoomScreenSource, /setViewportMetrics\(previousMetrics =>/);
   assert.match(chatRoomScreenSource, /const chatRoomDocumentBackground = '#ffffff'/);
   assert.match(chatRoomScreenSource, /const backgroundColor = menuOpen \? dimThemeColor : chatRoomDocumentBackground/);
@@ -147,6 +147,23 @@ test('chat room keyboard lock fixes the app roots without global touch-action', 
   assert.match(chatRoomScreenSource, /return \(\) => \{\s*setChatRoomKeyboardLock\(false\);\s*\}/);
   assert.match(indexCssSource, /html\.qling-chat-room-keyboard-lock,\s*body\.qling-chat-room-keyboard-lock,\s*#root\.qling-chat-room-keyboard-lock\s*\{[\s\S]*position: fixed;[\s\S]*inset: 0;[\s\S]*width: 100%;[\s\S]*height: 100%;[\s\S]*overflow: hidden;[\s\S]*overscroll-behavior: none;[\s\S]*\}/);
   assert.doesNotMatch(indexCssSource, /qling-chat-room-keyboard-lock[\s\S]*touch-action/);
+});
+
+test('chat room keyboard diagnostics log repeated focus viewport state in dev only', () => {
+  assert.match(chatRoomScreenSource, /function logChatRoomKeyboardMetric\(source: string\)/);
+  assert.match(chatRoomScreenSource, /if \(!import\.meta\.env\.DEV\) return/);
+  assert.match(chatRoomScreenSource, /console\.info\('\[chat-room-keyboard\]'/);
+  assert.match(chatRoomScreenSource, /locked: document\.documentElement\.classList\.contains\(chatRoomKeyboardLockClass\)/);
+  assert.match(chatRoomScreenSource, /bodyLocked: document\.body\.classList\.contains\(chatRoomKeyboardLockClass\)/);
+  assert.match(chatRoomScreenSource, /rootLocked: root\?\.classList\.contains\(chatRoomKeyboardLockClass\) \?\? false/);
+  assert.match(chatRoomScreenSource, /scrollY: window\.scrollY/);
+  assert.match(chatRoomScreenSource, /documentScrollTop: document\.documentElement\.scrollTop/);
+  assert.match(chatRoomScreenSource, /visualViewportHeight: visualViewport\?\.height \?\? null/);
+  assert.match(chatRoomScreenSource, /visualViewportOffsetTop: visualViewport\?\.offsetTop \?\? null/);
+  assert.match(chatRoomScreenSource, /logChatRoomKeyboardMetric\('textarea\.blur'\)/);
+  assert.match(chatRoomScreenSource, /logChatRoomKeyboardMetric\(source\)/);
+  assert.match(chatRoomScreenSource, /const handleViewportResize = \(\) => updateViewportMetrics\('visualViewport\.resize'\)/);
+  assert.match(chatRoomScreenSource, /const handleViewportScroll = \(\) => updateViewportMetrics\('visualViewport\.scroll'\)/);
 });
 
 test('chat list header matches the Figma vertical positions', () => {
