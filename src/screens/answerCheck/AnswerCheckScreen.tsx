@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '../../lib/utils';
+import { ChatStartConfirmationPopup } from '../shared/ChatStartConfirmationPopup';
 import { ErrorState, FigmaTopBar } from '../shared/ui';
 import type { AnswerCheckReplyProps, AnswerCheckScreenProps } from './contract';
 
@@ -24,7 +25,16 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
   }
 
   return (
-    <AnswerCheckFrame onBack={props.onBack}>
+    <AnswerCheckFrame
+      onBack={props.onBack}
+      overlay={props.chatStartConfirmationOpen ? (
+        <ChatStartConfirmationPopup
+          idPrefix="answer-check-chat-start-confirmation"
+          onCancel={props.onCancelChatStartConfirmation}
+          onConfirm={props.onConfirmChatStartConfirmation}
+        />
+      ) : null}
+    >
       {props.worry && (
         <WorryCard
           categoryLabel={props.worry.categoryLabel}
@@ -48,7 +58,7 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
               onCommentChange={props.onCommentChange}
               onCommentSubmit={props.onCommentSubmit}
               onCommentClose={props.onCommentClose}
-              onStartChat={props.onStartChat}
+              onOpenChatStartConfirmation={props.onOpenChatStartConfirmation}
             />
           ))
         ) : (
@@ -118,7 +128,15 @@ function AnswerCheckLoadingScreen({ label, onBack }: { readonly label: string; r
   );
 }
 
-function AnswerCheckFrame({ onBack, children }: { readonly onBack: () => void; readonly children: ReactNode }) {
+function AnswerCheckFrame({
+  onBack,
+  children,
+  overlay = null,
+}: {
+  readonly onBack: () => void;
+  readonly children: ReactNode;
+  readonly overlay?: ReactNode;
+}) {
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 
   return (
@@ -137,6 +155,7 @@ function AnswerCheckFrame({ onBack, children }: { readonly onBack: () => void; r
               {children}
             </div>
           </div>
+          {overlay}
         </div>
       </div>
     </section>
@@ -185,7 +204,7 @@ function AnswerCard({
   onCommentChange,
   onCommentSubmit,
   onCommentClose,
-  onStartChat,
+  onOpenChatStartConfirmation,
 }: {
   readonly reply: AnswerCheckReplyProps;
   readonly commentDialog: AnswerCheckScreenProps['commentDialog'];
@@ -196,7 +215,7 @@ function AnswerCard({
   readonly onCommentChange: (value: string) => void;
   readonly onCommentSubmit: () => void;
   readonly onCommentClose: () => void;
-  readonly onStartChat: (replyId: string) => void;
+  readonly onOpenChatStartConfirmation: (replyId: string) => void;
 }) {
   const liked = reply.feedbackState === 'liked';
   const disliked = reply.feedbackState === 'disliked';
@@ -255,7 +274,7 @@ function AnswerCard({
                 onOpenLikeRequiredPopup();
                 return;
               }
-              onStartChat(reply.replyId);
+              onOpenChatStartConfirmation(reply.replyId);
             }}
             className="flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#ff8b3d]"
           >

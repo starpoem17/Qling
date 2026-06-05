@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { Children, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { AnswerCheckScreen } from './AnswerCheckScreen';
 import type { AnswerCheckScreenProps } from './contract';
@@ -43,16 +44,19 @@ function baseProps(overrides: Partial<AnswerCheckScreenProps> = {}): AnswerCheck
     ],
     commentDialog: null,
     likeRequiredPopupOpen: false,
+    chatStartConfirmationOpen: false,
     onBack: () => undefined,
     onLike: () => undefined,
     onDislike: () => undefined,
     onOpenLikeRequiredPopup: () => undefined,
+    onOpenChatStartConfirmation: () => undefined,
     onOpenOneLineReply: () => undefined,
     onCommentChange: () => undefined,
     onCommentSubmit: () => undefined,
     onCommentClose: () => undefined,
     onCloseLikeRequiredPopup: () => undefined,
-    onStartChat: () => undefined,
+    onCancelChatStartConfirmation: () => undefined,
+    onConfirmChatStartConfirmation: () => undefined,
     ...overrides,
   };
 }
@@ -188,6 +192,29 @@ test('liked answer without a comment shows chat and one-line reply actions', () 
   assert.doesNotMatch(html, /absolute left-\[15px\] top-\[230px\]/);
 });
 
+test('liked answer chat start opens the confirmation popup contract', () => {
+  const events: string[] = [];
+  const tree = AnswerCheckScreen(baseProps({
+    replies: [{
+      replyId: 'reply-liked',
+      bodyText: '좋아요 답변 본문',
+      createdAtLabel: '1분 전',
+      feedbackState: 'liked',
+      canLike: true,
+      canDislike: false,
+      canOneLineReply: true,
+      canChat: true,
+      isFeedbackProcessing: false,
+      isCommentProcessing: false,
+    }],
+    onOpenChatStartConfirmation: replyId => events.push(`open:${replyId}`),
+  }));
+
+  click(findElement(tree, element => element.type === 'button' && element.props.children === '채팅 시작'));
+
+  assert.deepEqual(events, ['open:reply-liked']);
+});
+
 test('unliked answers show disabled-looking chat and one-line reply actions', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
     replies: [{
@@ -294,6 +321,26 @@ test('like-required popup matches the Figma warning modal copy and chrome', () =
   assert.doesNotMatch(html, /아무것도 안하기/);
 });
 
+test('chat start confirmation popup matches the Figma modal chrome', () => {
+  const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
+    chatStartConfirmationOpen: true,
+  })));
+
+  assert.match(html, /role="dialog"/);
+  assert.match(html, /aria-modal="true"/);
+  assert.match(html, /aria-labelledby="answer-check-chat-start-confirmation-title"/);
+  assert.match(html, /aria-describedby="answer-check-chat-start-confirmation-description"/);
+  assert.match(html, /left-\[-1px\] top-0 z-40 h-\[852px\] w-\[394px\] bg-\[rgba\(40,30,20,0\.42\)\]/);
+  assert.match(html, /left-\[42px\] top-\[251px\] z-50 h-\[288px\] w-\[310px\] rounded-\[24px\] bg-white/);
+  assert.match(html, /shadow-\[0_12px_20px_rgba\(0,0,0,0\.18\)\]/);
+  assert.match(html, /chat_start_dot\.svg/);
+  assert.match(html, /채팅을 시작할까요\?/);
+  assert.match(html, /채팅을 시작하면 서로의 닉네임을 볼 수 있고/);
+  assert.match(html, /상대방에게 채팅 시작 알림이 전송됩니다\./);
+  assert.match(html, />취소<\/button>/);
+  assert.match(html, />확인<\/button>/);
+});
+
 test('one-line reply editor supports submit and cancel callbacks', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
     commentDialog: {
@@ -337,3 +384,38 @@ test('one-line reply editor copy appears only while entry is open', () => {
   assert.equal(closedHtml.includes('코멘트 남기기'), false);
   assert.equal(openHtml.includes('코멘트 남기기'), false);
 });
+
+type TestElement = ReactElement<Record<string, unknown>>;
+
+function findElement(tree: ReactNode, predicate: (element: TestElement) => boolean): TestElement {
+  const found = findOptionalElement(tree, predicate);
+  assert.ok(found, 'element not found');
+  return found;
+}
+
+function findOptionalElement(tree: ReactNode, predicate: (element: TestElement) => boolean): TestElement | null {
+  if (!isValidElement(tree)) return null;
+
+  const element = tree as TestElement;
+  if (predicate(element)) return element;
+
+  if (typeof element.type === 'function') {
+    const rendered = (element.type as (props: Record<string, unknown>) => ReactNode)(element.props);
+    const foundInRendered = findOptionalElement(rendered, predicate);
+    if (foundInRendered) return foundInRendered;
+  }
+
+  let found: TestElement | null = null;
+  Children.forEach(element.props.children as ReactNode, child => {
+    if (found) return;
+    found = findOptionalElement(child, predicate);
+  });
+
+  return found;
+}
+
+function click(element: TestElement) {
+  const onClick = element.props.onClick;
+  assert.equal(typeof onClick, 'function');
+  (onClick as () => void)();
+}

@@ -39,6 +39,7 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
   const [localCommentByReplyId, setLocalCommentByReplyId] = useState(new Map<string, string>());
   const [commentDialog, setCommentDialog] = useState<CommentDialogState | null>(null);
   const [likeRequiredPopupOpen, setLikeRequiredPopupOpen] = useState(false);
+  const [chatStartTargetReplyId, setChatStartTargetReplyId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!shouldMarkRepliesForWorryRead({ hasUser: Boolean(props.user), worryId })) return;
@@ -112,6 +113,31 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
     setCommentDialog(null);
   };
 
+  const startChat = async (replyId: string) => {
+    props.setFilterAlert('채팅방을 생성하고 있습니다...');
+    try {
+      const token = await props.user?.getIdToken();
+      const res = await fetch('/api/chats/create', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ worryId, replyId }),
+      });
+      const data = await res.json();
+      if (res.ok && data.chatId) {
+        props.setFilterAlert('');
+        props.setView({ route: 'chat_room', chatId: data.chatId });
+        return;
+      }
+      props.setFilterAlert(data.error?.message || '채팅방 생성에 실패했습니다.');
+    } catch (err) {
+      console.error(err);
+      props.setFilterAlert('네트워크 오류가 발생했습니다.');
+    }
+  };
+
   const validation = commentDialog
     ? validateDraftContent(commentDialog.draft, 'feedback_comment')
     : null;
@@ -134,6 +160,7 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
         moderationMessage: commentDialog.moderationMessage,
       } : null}
       likeRequiredPopupOpen={likeRequiredPopupOpen}
+      chatStartConfirmationOpen={Boolean(chatStartTargetReplyId)}
       onBack={() => props.setView(backRouteForRoute({ route: 'answer_check', worryId: worryId ?? '' }))}
       onLike={async replyId => {
         await submitFeedback(replyId, 'helpful');
@@ -145,6 +172,7 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
         }
       }}
       onOpenLikeRequiredPopup={() => setLikeRequiredPopupOpen(true)}
+      onOpenChatStartConfirmation={replyId => setChatStartTargetReplyId(replyId)}
       onOpenOneLineReply={openOneLineReply}
       onCommentChange={value => setCommentDialog(prev => prev ? { ...prev, draft: value, moderationMessage: undefined } : prev)}
       onCommentSubmit={async () => {
@@ -158,29 +186,12 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
       }}
       onCommentClose={closeComment}
       onCloseLikeRequiredPopup={() => setLikeRequiredPopupOpen(false)}
-      onStartChat={async (replyId) => {
-        props.setFilterAlert('채팅방을 생성하고 있습니다...');
-        try {
-          const token = await props.user?.getIdToken();
-          const res = await fetch('/api/chats/create', {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ worryId, replyId }),
-          });
-          const data = await res.json();
-          if (res.ok && data.chatId) {
-            props.setFilterAlert('');
-            props.setView({ route: 'chat_room', chatId: data.chatId });
-          } else {
-            props.setFilterAlert(data.error?.message || '채팅방 생성에 실패했습니다.');
-          }
-        } catch (err) {
-          console.error(err);
-          props.setFilterAlert('네트워크 오류가 발생했습니다.');
-        }
+      onCancelChatStartConfirmation={() => setChatStartTargetReplyId(null)}
+      onConfirmChatStartConfirmation={() => {
+        if (!chatStartTargetReplyId) return;
+        const replyId = chatStartTargetReplyId;
+        setChatStartTargetReplyId(null);
+        void startChat(replyId);
       }}
     />
   );

@@ -42,14 +42,17 @@ export type AnswerCheckScreenProps = {
   readonly replies: readonly AnswerCheckReplyProps[];
   readonly commentDialog: AnswerCheckCommentDialogProps | null;
   readonly likeRequiredPopupOpen: boolean;
+  readonly chatStartConfirmationOpen: boolean;
   readonly onBack: () => void;
   readonly onLike: (replyId: string) => void;
   readonly onDislike: (replyId: string) => void;
   readonly onOpenLikeRequiredPopup: () => void;
+  readonly onOpenChatStartConfirmation: (replyId: string) => void;
   readonly onOpenOneLineReply: (replyId: string) => void;
   readonly onCommentChange: (value: string) => void;
   readonly onCommentSubmit: () => void;
   readonly onCommentClose: () => void;
   readonly onCloseLikeRequiredPopup: () => void;
-  readonly onStartChat: (replyId: string) => void;
+  readonly onCancelChatStartConfirmation: () => void;
+  readonly onConfirmChatStartConfirmation: () => void;
 };
