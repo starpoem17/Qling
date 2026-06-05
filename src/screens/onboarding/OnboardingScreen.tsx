@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, CheckCircle2 } from 'lucide-react';
 import type { WorryCategory } from '@midnight-radio/domain';
 import { cn } from '../../lib/utils';
@@ -21,6 +21,22 @@ const genderOptions = [
 
 type VisualStep = 'basic' | 'interests' | 'profileColor';
 
+const ONBOARDING_CANVAS_WIDTH_PX = 393;
+const ONBOARDING_CANVAS_MAX_WIDTH_PX = 480;
+const ONBOARDING_CREAM_PANEL_TOP_PX = 196;
+const ONBOARDING_CREAM_PANEL_HEIGHT_PX = 656;
+
+function getVisibleOnboardingCanvasHeight(): number {
+  if (typeof window === 'undefined') return 852;
+
+  const viewport = window.visualViewport;
+  const viewportHeight = viewport?.height ?? window.innerHeight;
+  const viewportWidth = viewport?.width ?? window.innerWidth;
+  const canvasScale = Math.min(viewportWidth, ONBOARDING_CANVAS_MAX_WIDTH_PX) / ONBOARDING_CANVAS_WIDTH_PX;
+
+  return viewportHeight / canvasScale;
+}
+
 export function OnboardingScreen(props: Props) {
   const [visualStep, setVisualStep] = useState<VisualStep>('basic');
   const nicknameError = props.validationMessages.nickname;
@@ -36,75 +52,117 @@ export function OnboardingScreen(props: Props) {
     && props.duplicateCheck.state === 'available';
   const orderedCategoryOptions = orderOnboardingInterestCategories(props.categoryOptions);
   const onboardingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+  const [visibleCanvasHeight, setVisibleCanvasHeight] = useState(getVisibleOnboardingCanvasHeight);
+  const creamPanelVisibleHeight = Math.max(
+    0,
+    Math.min(ONBOARDING_CREAM_PANEL_HEIGHT_PX, visibleCanvasHeight - ONBOARDING_CREAM_PANEL_TOP_PX),
+  );
 
   const handleBasicNext = () => {
     if (!basicStepComplete || props.isProcessing) return;
     setVisualStep('interests');
   };
 
+  useEffect(() => {
+    const updateVisibleCanvasHeight = () => setVisibleCanvasHeight(getVisibleOnboardingCanvasHeight());
+    const viewport = window.visualViewport;
+
+    updateVisibleCanvasHeight();
+    window.addEventListener('resize', updateVisibleCanvasHeight);
+    viewport?.addEventListener('resize', updateVisibleCanvasHeight);
+    viewport?.addEventListener('scroll', updateVisibleCanvasHeight);
+
+    return () => {
+      window.removeEventListener('resize', updateVisibleCanvasHeight);
+      viewport?.removeEventListener('resize', updateVisibleCanvasHeight);
+      viewport?.removeEventListener('scroll', updateVisibleCanvasHeight);
+    };
+  }, []);
+
   return (
     <section className="h-full w-full overflow-hidden bg-[#fff7e3] text-[#1a1a1a]">
-      <div className="mx-auto box-border flex h-full w-full max-w-[480px] justify-center overflow-x-hidden overflow-y-auto overscroll-contain bg-[#fff7e3] pb-[calc(24px+var(--qling-space-safe-bottom))] [-webkit-overflow-scrolling:touch]">
+      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden bg-[#fff7e3]">
         <div
           className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b0d]"
           style={{ transform: `scale(${onboardingCanvasScale})` }}
         >
-          <div className="absolute left-[-1px] top-[196px] h-[656px] w-[394px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3] shadow-[4px_4px_4px_0px_rgba(0,0,0,0.25)]" />
           <p className="absolute top-[70px] text-[17px] font-extrabold leading-none tracking-[-0.34px] text-white" style={{ left: visualStep === 'interests' ? 171 : 165 }}>
             회원가입
           </p>
+          <OrangeStepHeader visualStep={visualStep} />
 
-          {visualStep === 'basic' ? (
-            <BasicStep
-              props={props}
-              nicknameError={nicknameError}
-              duplicateMessage={duplicateMessage}
-              duplicateIsPositive={duplicateIsPositive}
-              duplicateButtonDisabled={duplicateButtonDisabled}
-              basicStepComplete={basicStepComplete}
-              onNext={handleBasicNext}
-            />
-          ) : visualStep === 'interests' ? (
-            <InterestsStep
-              props={props}
-              orderedCategoryOptions={orderedCategoryOptions}
-              onPrevious={() => setVisualStep('basic')}
-              onNext={() => setVisualStep('profileColor')}
-            />
-          ) : (
-            <ProfileColorStep
-              props={props}
-              onPrevious={() => setVisualStep('interests')}
-            />
-          )}
+          <div
+            className="absolute left-[-1px] top-[196px] w-[394px] overflow-x-hidden overflow-y-auto overscroll-contain rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3] shadow-[4px_4px_4px_0px_rgba(0,0,0,0.25)] [-webkit-overflow-scrolling:touch]"
+            style={{ height: `${creamPanelVisibleHeight}px` }}
+          >
+            <div className="relative ml-px h-[calc(656px+24px+var(--qling-space-safe-bottom))] w-[393px]">
+              {visualStep === 'basic' ? (
+                <BasicStep
+                  props={props}
+                  nicknameError={nicknameError}
+                  duplicateMessage={duplicateMessage}
+                  duplicateIsPositive={duplicateIsPositive}
+                  duplicateButtonDisabled={duplicateButtonDisabled}
+                  basicStepComplete={basicStepComplete}
+                  onNext={handleBasicNext}
+                />
+              ) : visualStep === 'interests' ? (
+                <InterestsStep
+                  props={props}
+                  orderedCategoryOptions={orderedCategoryOptions}
+                  onPrevious={() => setVisualStep('basic')}
+                  onNext={() => setVisualStep('profileColor')}
+                />
+              ) : (
+                <ProfileColorStep
+                  props={props}
+                  onPrevious={() => setVisualStep('interests')}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
+function OrangeStepHeader({ visualStep }: { readonly visualStep: VisualStep }) {
+  if (visualStep === 'profileColor') {
+    return (
+      <>
+        <p className="absolute left-[30px] top-[127px] text-[10px] font-black leading-[19.5px] tracking-[3px] text-[#fff1d1]">CUSTOMIZING</p>
+        <h1 className="absolute left-[28px] top-[147px] text-[26px] font-extrabold leading-[34px] tracking-normal text-white">프로필 설정을 해주세요</h1>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <p className="absolute left-[30px] top-[127px] text-[10px] font-black leading-[19.5px] tracking-[3px] text-[#fff1d1]">{visualStep === 'basic' ? 'QUESTION 1' : 'QUESTION 2'}</p>
+      <h1 className="absolute left-[28px] top-[147px] text-[26px] font-extrabold leading-[31px] tracking-[-1.3px] text-white">
+        {visualStep === 'basic' ? '기본 정보를 알려주세요' : '공감할 수 있는 주제를 골라주세요'}
+      </h1>
+    </>
+  );
+}
+
 function ProgressHeader({
-  question,
-  title,
   subtitle,
   secondSubtitle,
   progressWidthClassName,
 }: {
-  readonly question: string;
-  readonly title: string;
   readonly subtitle: string;
   readonly secondSubtitle?: string;
   readonly progressWidthClassName: string;
 }) {
   return (
     <>
-      <p className="absolute left-[30px] top-[127px] text-[10px] font-black leading-[19.5px] tracking-[3px] text-[#fff1d1]">{question}</p>
-      <h1 className="absolute left-[28px] top-[147px] text-[26px] font-extrabold leading-[31px] tracking-[-1.3px] text-white">{title}</h1>
-      <div className="absolute left-[24px] top-[235px] h-[6px] w-[345px] rounded-[3px] bg-[#f2e5d3]" />
-      <div className={cn('absolute left-[24px] top-[235px] h-[6px] rounded-[3px] bg-[#ff8b3d]', progressWidthClassName)} />
-      <p className="absolute left-[24px] top-[258px] text-[13px] font-bold leading-[17px] tracking-[-0.13px] text-[#8e9095]">{subtitle}</p>
+      <div className="absolute left-[24px] top-[39px] h-[6px] w-[345px] rounded-[3px] bg-[#f2e5d3]" />
+      <div className={cn('absolute left-[24px] top-[39px] h-[6px] rounded-[3px] bg-[#ff8b3d]', progressWidthClassName)} />
+      <p className="absolute left-[24px] top-[62px] text-[13px] font-bold leading-[17px] tracking-[-0.13px] text-[#8e9095]">{subtitle}</p>
       {secondSubtitle && (
-        <p className="absolute left-[24px] top-[277px] text-[13px] font-bold leading-[17px] tracking-[-0.13px] text-[#8e9095]">{secondSubtitle}</p>
+        <p className="absolute left-[24px] top-[81px] text-[13px] font-bold leading-[17px] tracking-[-0.13px] text-[#8e9095]">{secondSubtitle}</p>
       )}
     </>
   );
@@ -133,15 +191,13 @@ function BasicStep({
   return (
     <>
       <ProgressHeader
-        question="QUESTION 1"
-        title="기본 정보를 알려주세요"
         subtitle="본인에 대해 소개해주세요! 외부에는 공개되지 않아요."
         progressWidthClassName="w-[115px]"
       />
 
-      <label className="absolute left-[22px] top-[307px] text-[14px] font-extrabold leading-none tracking-normal" htmlFor="onboarding-nickname">닉네임</label>
+      <label className="absolute left-[22px] top-[111px] text-[14px] font-extrabold leading-none tracking-normal" htmlFor="onboarding-nickname">닉네임</label>
       {!hasNicknameMessage && (
-        <p id="onboarding-nickname-message" className="absolute left-[89px] top-[308px] text-[12px] font-bold leading-[17px] tracking-normal text-[#d4be91]">
+        <p id="onboarding-nickname-message" className="absolute left-[89px] top-[112px] text-[12px] font-bold leading-[17px] tracking-normal text-[#d4be91]">
           2~10자 · 한글, 영문, 숫자 사용 가능
         </p>
       )}
@@ -149,7 +205,7 @@ function BasicStep({
         <p
           id="onboarding-nickname-message"
           className={cn(
-            'absolute left-[89px] top-[308px] text-[13px] font-bold leading-none tracking-normal',
+            'absolute left-[89px] top-[112px] text-[13px] font-bold leading-none tracking-normal',
             duplicateIsPositive ? 'text-[#4f9f68]' : 'text-[#ea4335]',
           )}
           role={duplicateIsPositive ? 'status' : 'alert'}
@@ -160,7 +216,7 @@ function BasicStep({
       )}
       <div
         className={cn(
-          'absolute left-[22px] top-[339px] h-[60px] w-[345px] overflow-hidden rounded-[14px] border-[1.5px] bg-transparent',
+          'absolute left-[22px] top-[143px] h-[60px] w-[345px] overflow-hidden rounded-[14px] border-[1.5px] bg-transparent',
           nicknameHasError ? 'border-[#ea4335]' : duplicateIsPositive ? 'border-[#4f9f68]' : 'border-[#d4be91]',
         )}
       >
@@ -190,8 +246,8 @@ function BasicStep({
         </button>
       </div>
 
-      <p className="absolute left-[22px] top-[420px] text-[14px] font-extrabold leading-none tracking-normal">성별</p>
-      <div className="absolute left-[22px] top-[452px] grid h-[60px] w-[345px] grid-cols-2 gap-[7px]">
+      <p className="absolute left-[22px] top-[224px] text-[14px] font-extrabold leading-none tracking-normal">성별</p>
+      <div className="absolute left-[22px] top-[256px] grid h-[60px] w-[345px] grid-cols-2 gap-[7px]">
         {genderOptions.map(option => {
           const selected = props.values.gender === option.value;
           return (
@@ -214,15 +270,15 @@ function BasicStep({
         })}
       </div>
       {props.validationMessages.gender && (
-        <p className="absolute left-[22px] top-[520px] text-[13px] font-bold text-[#ea4335]" role="alert">
+        <p className="absolute left-[22px] top-[324px] text-[13px] font-bold text-[#ea4335]" role="alert">
           {props.validationMessages.gender}
         </p>
       )}
 
-      <label className="absolute left-[22px] top-[548px] text-[14px] font-extrabold leading-none tracking-normal" htmlFor="onboarding-age">나이</label>
+      <label className="absolute left-[22px] top-[352px] text-[14px] font-extrabold leading-none tracking-normal" htmlFor="onboarding-age">나이</label>
       <div
         className={cn(
-          'absolute left-[22px] top-[580px] h-[60px] w-[345px] overflow-hidden rounded-[14px] border-[1.5px] bg-transparent',
+          'absolute left-[22px] top-[384px] h-[60px] w-[345px] overflow-hidden rounded-[14px] border-[1.5px] bg-transparent',
           props.validationMessages.age ? 'border-[#ea4335]' : 'border-[#d4be91]',
         )}
       >
@@ -240,7 +296,7 @@ function BasicStep({
         <span className="pointer-events-none absolute left-[308.5px] top-[19px] text-[16px] font-bold leading-none tracking-normal text-[#d4be91]">세</span>
       </div>
       {props.validationMessages.age && (
-        <p id="onboarding-age-message" className="absolute left-[22px] top-[648px] text-[13px] font-bold text-[#ea4335]" role="alert">
+        <p id="onboarding-age-message" className="absolute left-[22px] top-[452px] text-[13px] font-bold text-[#ea4335]" role="alert">
           {props.validationMessages.age}
         </p>
       )}
@@ -250,7 +306,7 @@ function BasicStep({
         onClick={onNext}
         disabled={!basicStepComplete || props.isProcessing}
         aria-label={basicStepComplete ? '관심사 선택으로 이동' : '필수 기본 정보와 닉네임 중복 확인 완료 후 이동 가능'}
-        className="absolute left-[24px] top-[752px] h-[56px] w-[345px] rounded-[28px] bg-[#ff8b3d] text-[17px] font-extrabold leading-none tracking-normal text-white disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-[24px] top-[556px] h-[56px] w-[345px] rounded-[28px] bg-[#ff8b3d] text-[17px] font-extrabold leading-none tracking-normal text-white disabled:cursor-not-allowed disabled:opacity-55"
       >
         다음
       </button>
@@ -274,15 +330,13 @@ function InterestsStep({
   return (
     <>
       <ProgressHeader
-        question="QUESTION 2"
-        title="공감할 수 있는 주제를 골라주세요"
         subtitle="선택한 주제에 맞는 고민들을 전달받을 수 있어요"
         secondSubtitle="언제든 수정할 수 있어요. 최소 1개 선택, 복수 선택 가능"
         progressWidthClassName="w-[230px]"
       />
 
       <div
-        className="absolute left-[35px] top-[318px] grid w-[323px] grid-cols-2 justify-center gap-x-[13px] gap-y-[9px]"
+        className="absolute left-[35px] top-[122px] grid w-[323px] grid-cols-2 justify-center gap-x-[13px] gap-y-[9px]"
         aria-label="관심 분야 선택"
         data-columns={ONBOARDING_INTEREST_GRID.columns}
         data-rows={ONBOARDING_INTEREST_GRID.rows}
@@ -312,7 +366,7 @@ function InterestsStep({
         type="button"
         onClick={onPrevious}
         disabled={props.isProcessing}
-        className="absolute left-[24px] top-[752px] h-[56px] w-[96px] rounded-[28px] border-2 border-[#d4be91] text-[17px] font-extrabold leading-none tracking-normal text-[#121316] disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-[24px] top-[556px] h-[56px] w-[96px] rounded-[28px] border-2 border-[#d4be91] text-[17px] font-extrabold leading-none tracking-normal text-[#121316] disabled:cursor-not-allowed disabled:opacity-55"
       >
         이전
       </button>
@@ -321,7 +375,7 @@ function InterestsStep({
         onClick={onNext}
         disabled={!canContinue || props.isProcessing}
         aria-label={canContinue ? '프로필 색상 선택으로 이동' : '관심 분야를 선택해야 이동 가능'}
-        className="absolute left-[130px] top-[752px] h-[56px] w-[239px] rounded-[28px] bg-[#ff8b3d] text-[17px] font-extrabold leading-none tracking-normal text-white disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-[130px] top-[556px] h-[56px] w-[239px] rounded-[28px] bg-[#ff8b3d] text-[17px] font-extrabold leading-none tracking-normal text-white disabled:cursor-not-allowed disabled:opacity-55"
       >
         다음
       </button>
@@ -338,23 +392,21 @@ function ProfileColorStep({
 }) {
   return (
     <>
-      <p className="absolute left-[30px] top-[127px] text-[10px] font-black leading-[19.5px] tracking-[3px] text-[#fff1d1]">CUSTOMIZING</p>
-      <h1 className="absolute left-[28px] top-[147px] text-[26px] font-extrabold leading-[34px] tracking-normal text-white">프로필 설정을 해주세요</h1>
-      <div className="absolute left-[24px] top-[235px] h-[6px] w-[345px] rounded-[3px] bg-[#f2e5d3]" />
-      <div className="absolute left-[24px] top-[235px] h-[6px] w-[345px] rounded-[3px] bg-[#ff8b3d]" />
+      <div className="absolute left-[24px] top-[39px] h-[6px] w-[345px] rounded-[3px] bg-[#f2e5d3]" />
+      <div className="absolute left-[24px] top-[39px] h-[6px] w-[345px] rounded-[3px] bg-[#ff8b3d]" />
 
-      <h2 className="absolute left-[24px] top-[253px] text-[20px] font-black leading-7 tracking-normal text-[#545454]">프로필 색상을 골라주세요</h2>
-      <p className="absolute left-[24px] top-[289px] w-[345px] text-[13px] font-normal leading-[18px] tracking-normal text-[#8b847a]">
+      <h2 className="absolute left-[24px] top-[57px] text-[20px] font-black leading-7 tracking-normal text-[#545454]">프로필 색상을 골라주세요</h2>
+      <p className="absolute left-[24px] top-[93px] w-[345px] text-[13px] font-normal leading-[18px] tracking-normal text-[#8b847a]">
         나를 표현할 색을 골라보세요. 익명이지만, 나만의 색이 생겨요.
       </p>
 
-      <div className="absolute left-[112px] top-[343px] h-[168px] w-[168px] rounded-full bg-[rgb(255_255_255/0.7)]" />
-      <div className="absolute left-[138px] top-[371px] h-[116px] w-[116px] drop-shadow-[6px_8px_0_rgba(128,87,33,0.18)]">
+      <div className="absolute left-[112px] top-[147px] h-[168px] w-[168px] rounded-full bg-[rgb(255_255_255/0.7)]" />
+      <div className="absolute left-[138px] top-[175px] h-[116px] w-[116px] drop-shadow-[6px_8px_0_rgba(128,87,33,0.18)]">
         <ProfileAvatarPreview color={props.values.selectedProfileColor} />
       </div>
 
       <div
-        className="absolute left-[54px] top-[549px] grid w-[286px] grid-cols-5 gap-x-[14px] gap-y-[20px]"
+        className="absolute left-[54px] top-[353px] grid w-[286px] grid-cols-5 gap-x-[14px] gap-y-[20px]"
         aria-label="프로필 색상 선택"
         data-columns={ONBOARDING_PROFILE_COLOR_GRID.columns}
       >
@@ -369,7 +421,7 @@ function ProfileColorStep({
         ))}
       </div>
       {props.validationMessages.profileColor && (
-        <p className="absolute left-[54px] top-[683px] text-[13px] font-bold text-[#ea4335]" role="alert">
+        <p className="absolute left-[54px] top-[487px] text-[13px] font-bold text-[#ea4335]" role="alert">
           {props.validationMessages.profileColor}
         </p>
       )}
@@ -378,7 +430,7 @@ function ProfileColorStep({
         type="button"
         onClick={onPrevious}
         disabled={props.isProcessing}
-        className="absolute left-[24px] top-[752px] h-[56px] w-[100px] rounded-[28px] border-[1.4px] border-[#efe2d0] bg-white text-[16px] font-bold leading-none tracking-normal text-[#8b847a] disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-[24px] top-[556px] h-[56px] w-[100px] rounded-[28px] border-[1.4px] border-[#efe2d0] bg-white text-[16px] font-bold leading-none tracking-normal text-[#8b847a] disabled:cursor-not-allowed disabled:opacity-55"
       >
         이전
       </button>
@@ -388,7 +440,7 @@ function ProfileColorStep({
         disabled={props.disabled || props.isProcessing}
         aria-label={props.disabled ? '필수 정보를 완료해야 온보딩 완료 가능' : '온보딩 완료'}
         aria-busy={props.isProcessing || undefined}
-        className="absolute left-[130px] top-[752px] h-[56px] w-[239px] rounded-[28px] bg-[#ff8b3d] text-[17px] font-extrabold leading-none tracking-normal text-white disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-[130px] top-[556px] h-[56px] w-[239px] rounded-[28px] bg-[#ff8b3d] text-[17px] font-extrabold leading-none tracking-normal text-white disabled:cursor-not-allowed disabled:opacity-55"
       >
         {props.isProcessing ? '처리 중' : '완료'}
       </button>

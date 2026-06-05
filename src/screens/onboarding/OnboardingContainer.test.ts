@@ -221,25 +221,42 @@ test('onboarding screen uses ranking-style responsive Figma canvas scaling', () 
   assert.match(screen, /w-\[393px\]/);
 });
 
-test('onboarding screen allows iOS Safari vertical scroll below the Figma canvas', () => {
+test('onboarding keeps the orange canvas fixed while only the cream panel scrolls', () => {
   const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
 
+  assert.match(screen, /mx-auto flex h-full w-full max-w-\[480px\] justify-center overflow-hidden bg-\[#fff7e3\]/);
+  assert.match(screen, /window\.visualViewport/);
+  assert.match(screen, /visibleCanvasHeight - ONBOARDING_CREAM_PANEL_TOP_PX/);
+  assert.match(screen, /style=\{\{ height: `\$\{creamPanelVisibleHeight\}px` \}\}/);
+  assert.match(screen, /absolute left-\[-1px\] top-\[196px\]/);
   assert.match(screen, /overflow-y-auto/);
   assert.match(screen, /overflow-x-hidden/);
   assert.match(screen, /overscroll-contain/);
   assert.match(screen, /-webkit-overflow-scrolling:touch/);
-  assert.match(screen, /pb-\[calc\(24px\+var\(--qling-space-safe-bottom\)\)\]/);
+  assert.match(screen, /h-\[calc\(656px\+24px\+var\(--qling-space-safe-bottom\)\)\]/);
+  assert.match(screen, /function OrangeStepHeader/);
+  assert.match(screen, /<OrangeStepHeader visualStep=\{visualStep\} \/>/);
 });
 
 test('onboarding progress bars use the Figma anchored fill contract', () => {
   const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
 
-  assert.match(screen, /left-\[24px\] top-\[235px\] h-\[6px\] w-\[345px\] rounded-\[3px\] bg-\[#f2e5d3\]/);
-  assert.match(screen, /left-\[24px\] top-\[235px\] h-\[6px\] rounded-\[3px\] bg-\[#ff8b3d\]/);
+  assert.match(screen, /left-\[24px\] top-\[39px\] h-\[6px\] w-\[345px\] rounded-\[3px\] bg-\[#f2e5d3\]/);
+  assert.match(screen, /left-\[24px\] top-\[39px\] h-\[6px\] rounded-\[3px\] bg-\[#ff8b3d\]/);
   assert.match(screen, /progressWidthClassName="w-\[115px\]"/);
   assert.match(screen, /progressWidthClassName="w-\[230px\]"/);
   assert.doesNotMatch(screen, /bg-\[#2a2c30\]/);
   assert.doesNotMatch(screen, /progressClassName="left-\[180px\]"/);
+});
+
+test('onboarding cream content coordinates are rebased from the fixed panel top', () => {
+  const screen = fs.readFileSync('src/screens/onboarding/OnboardingScreen.tsx', 'utf8');
+
+  assert.match(screen, /top-\[556px\] h-\[56px\] w-\[345px\]/);
+  assert.match(screen, /top-\[556px\] h-\[56px\] w-\[239px\]/);
+  assert.match(screen, /left-\[35px\] top-\[122px\] grid w-\[323px\]/);
+  assert.match(screen, /left-\[54px\] top-\[353px\] grid w-\[286px\]/);
+  assert.doesNotMatch(screen, /top-\[752px\]/);
 });
 
 test('onboarding basic screen keeps the Figma helper until validation or duplicate feedback replaces it', () => {
