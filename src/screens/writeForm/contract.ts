@@ -22,6 +22,7 @@ export type WriteWorryScreenProps = {
   readonly onBack: () => void;
   readonly onDraftChange: (value: string) => void;
   readonly onPublish: () => void;
+  readonly onDismissPopup: () => void;
 };
 
 export type WriteWorryFormProps = WriteWorryScreenProps & {

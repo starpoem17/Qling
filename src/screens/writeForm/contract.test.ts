@@ -34,6 +34,7 @@ test('write-worry form contract represents draft, category, validation, and publ
     onDraftChange: () => undefined,
     onCategoryChange: () => undefined,
     onPublish: () => undefined,
+    onDismissPopup: () => undefined,
   } satisfies WriteWorryFormProps;
 
   assert.equal(props.kind, 'write-worry');
@@ -55,6 +56,7 @@ test('write-worry screen contract separates back, draft, and publish intents fro
     onBack: () => undefined,
     onDraftChange: () => undefined,
     onPublish: () => undefined,
+    onDismissPopup: () => undefined,
   } satisfies WriteWorryScreenProps;
 
   assert.equal(typeof props.onBack, 'function');
@@ -177,6 +179,7 @@ test('write form contract covers empty, too-long, valid, processing, rejected, a
       onBack: () => undefined,
       onDraftChange: () => undefined,
       onPublish: () => undefined,
+      onDismissPopup: () => undefined,
     } satisfies WriteWorryFormProps;
 
     assert.equal(props.draft.validation.status, state.validation.status);

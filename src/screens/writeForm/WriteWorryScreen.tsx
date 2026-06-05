@@ -101,9 +101,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
             <button
               type="button"
               aria-label="고민 작성 알림 확인"
-              onClick={(event) => {
-                event.currentTarget.closest('[data-testid="write-worry-popup"]')?.setAttribute('hidden', '');
-              }}
+              onClick={props.onDismissPopup}
               className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#ff8b3d] text-sm font-extrabold text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
             >
               확인

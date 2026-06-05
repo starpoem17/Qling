@@ -390,13 +390,16 @@ test('privacy policy screen renders document body in the Figma card layout', () 
   assert.match(html, /\[-webkit-overflow-scrolling:touch\]/);
   assert.match(html, /개인정보 처리방침/);
   assert.match(html, /aria-label="개인정보처리방침"/);
-  assert.match(html, /갈피 UIUX 디자인 파일/);
+  assert.match(html, /건의사항 남기기/);
+  assert.match(html, /bg-\[#ff8b3d\]/);
+  assert.match(html, /rounded-\[12px\]/);
+  assert.doesNotMatch(html, /갈피 UIUX 디자인 파일/);
   assert.match(html, /href="https:\/\/docs\.google\.com\/forms\/d\/e\/1FAIpQLSe88_R7B_cP_pIa7aIe-Fcb1gRYeDfBETNpehOODMrEY0skVQ\/viewform\?usp=publish-editor"/);
   assert.match(html, /target="_blank"/);
   assert.match(html, /rel="noopener noreferrer"/);
   assert.match(html, /수집 데이터:/);
   assert.match(html, /탈퇴 시 삭제 기준/);
-  assert.ok(html.indexOf('갈피 UIUX 디자인 파일') < html.indexOf('수집 데이터:'));
+  assert.ok(html.indexOf('건의사항 남기기') < html.indexOf('수집 데이터:'));
   assert.doesNotMatch(html, /정책을 준비 중입니다\./);
 });
 

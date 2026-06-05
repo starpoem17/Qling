@@ -469,7 +469,6 @@ export default function App() {
                 profile={profile}
                 setView={setView}
                 clearSelectedMyWorry={() => setSelectedMyWorry(null)}
-                setFilterAlert={setFilterAlert}
               />
             </motion.div>
           )}

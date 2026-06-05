@@ -369,23 +369,26 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
         >
           <FigmaTopBar title="개인정보 처리방침" titleAriaLabel={props.title} onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
           <article
-            className="absolute left-4 top-[127px] w-[361px] overflow-y-auto rounded-[18px] bg-white px-[18px] py-[31px] [-webkit-overflow-scrolling:touch]"
+            className="absolute left-4 top-[127px] w-[361px] overflow-y-auto rounded-[18px] bg-white px-[18px] py-[17px] [-webkit-overflow-scrolling:touch]"
             style={{ bottom: policyCardBottom }}
           >
-            <div
-              className="whitespace-pre-wrap text-[13px] font-semibold leading-[150%] tracking-[-0.05em] text-[#1a1a1e]"
-              role={props.state.status === 'error' ? 'alert' : undefined}
-            >
-              {shouldShowFeedbackLink && (
+            {shouldShowFeedbackLink && (
+              <>
                 <a
                   href={PRIVACY_POLICY_FEEDBACK_FORM_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mb-4 block underline underline-offset-2"
+                  className="mb-[25px] flex h-[43px] w-full items-center justify-center rounded-[12px] bg-[#ff8b3d] px-4 text-[15px] font-bold leading-none text-white"
                 >
-                  갈피 UIUX 디자인 파일
+                  건의사항 남기기
                 </a>
-              )}
+                <div className="mb-[20px] h-px w-full bg-[rgba(0,0,0,0.08)]" aria-hidden="true" />
+              </>
+            )}
+            <div
+              className="whitespace-pre-wrap text-[13px] font-semibold leading-[150%] tracking-[-0.05em] text-[#1a1a1e]"
+              role={props.state.status === 'error' ? 'alert' : undefined}
+            >
               {cardContent}
             </div>
           </article>

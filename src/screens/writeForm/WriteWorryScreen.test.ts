@@ -21,6 +21,7 @@ function baseProps(overrides: Partial<WriteWorryScreenProps> = {}): WriteWorrySc
     onBack: () => undefined,
     onDraftChange: () => undefined,
     onPublish: () => undefined,
+    onDismissPopup: () => undefined,
     ...overrides,
   };
 }
@@ -139,8 +140,8 @@ test('write worry screen reflects validation disabled state and moderation copy'
   assert.doesNotMatch(checkingHtml, /role="alertdialog"/);
 });
 
-test('write worry popup confirm hides only the popup element', () => {
-  let hidden = false;
+test('write worry popup confirm dismisses the backing popup state', () => {
+  let dismissed = false;
   const tree = WriteWorryScreen(baseProps({
     draft: {
       ...validDraft,
@@ -148,20 +149,32 @@ test('write worry popup confirm hides only the popup element', () => {
       characterCount: 2,
       validation: { status: 'invalid', message: '조금 더 자세히 적어주세요.' },
     },
+    onDismissPopup: () => {
+      dismissed = true;
+    },
   }));
   const confirmButton = findButtonByAriaLabel(tree, /고민 작성 알림 확인/);
 
-  click(confirmButton, {
-    currentTarget: {
-      closest: () => ({
-        setAttribute: (name: string, value: string) => {
-          if (name === 'hidden' && value === '') hidden = true;
-        },
-      }),
-    },
-  });
+  click(confirmButton);
 
-  assert.equal(hidden, true);
+  assert.equal(dismissed, true);
+});
+
+test('write worry popup renders one message when validation and moderation both exist', () => {
+  const html = renderToStaticMarkup(WriteWorryScreen(baseProps({
+    draft: {
+      ...validDraft,
+      value: '짧음',
+      characterCount: 2,
+      validation: { status: 'invalid', message: '조금 더 자세히 적어주세요.' },
+      moderation: { status: 'rejected', reason: '개인정보가 포함되어 있어요.', helpMessage: '연락처는 지워주세요.' },
+      submitDisabledReason: undefined,
+    },
+  })));
+
+  assert.equal((html.match(/role="alertdialog"/g) ?? []).length, 1);
+  assert.match(html, /조금 더 자세히 적어주세요\./);
+  assert.doesNotMatch(html, /개인정보가 포함되어 있어요\./);
 });
 
 type TestElement = ReactElement<Record<string, unknown>>;

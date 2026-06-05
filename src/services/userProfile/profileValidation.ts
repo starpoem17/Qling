@@ -17,7 +17,7 @@ export const NICKNAME_VALIDATION_MESSAGES = {
 export const AGE_VALIDATION_MESSAGES = {
   required: '나이를 입력해주세요.',
   numeric: '나이는 숫자로 입력해주세요.',
-  range: '나이는 만 14세부터 99세까지 입력할 수 있어요.',
+  range: '나이는 14세부터 99세까지 입력할 수 있어요.',
 } as const;
 
 export type NicknameValidationError = keyof typeof NICKNAME_VALIDATION_MESSAGES;

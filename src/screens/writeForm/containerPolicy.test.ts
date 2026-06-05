@@ -16,13 +16,21 @@ test('worry publication policy preserves rejected drafts and exposes moderation 
 
   assert.deepEqual(result, {
     moderation: { status: 'rejected', reason: 'blocked', helpMessage: 'help' },
-    alertMessage: 'blocked\n\nhelp',
     clearDraft: false,
   });
 });
 
-test('worry publication policy preserves failed drafts and routes successful publication', () => {
+test('worry publication policy keeps rejected and failed copy in the write screen popup only', () => {
   const failed = resolveWorryPublicationResult({ status: 'failed', reason: 'network down' });
+
+  assert.deepEqual(failed, {
+    moderation: { status: 'failed', message: '전송 실패: network down' },
+    clearDraft: false,
+  });
+  assert.equal(Object.hasOwn(failed, 'alertMessage'), false);
+});
+
+test('worry publication policy routes successful publication', () => {
   const published = resolveWorryPublicationResult({
     status: 'published',
     worryId: 'worry-created',
@@ -31,11 +39,6 @@ test('worry publication policy preserves failed drafts and routes successful pub
     warnings: [],
   });
 
-  assert.deepEqual(failed, {
-    moderation: { status: 'failed', message: '전송 실패: network down' },
-    alertMessage: '전송 실패: network down',
-    clearDraft: false,
-  });
   assert.deepEqual(published, {
     moderation: { status: 'approved' },
     clearDraft: true,
@@ -56,8 +59,10 @@ test('reply publication policy preserves rejected or failed drafts', () => {
 
   assert.equal(rejected.clearDraft, false);
   assert.deepEqual(rejected.moderation, { status: 'rejected', reason: 'blocked', helpMessage: 'help' });
+  assert.equal(rejected.alertMessage, 'blocked\n\nhelp');
   assert.equal(failed.clearDraft, false);
   assert.deepEqual(failed.moderation, { status: 'failed', message: '답장 전송 실패' });
+  assert.equal(failed.alertMessage, '답장 전송 실패');
 });
 
 test('reply publication policy clears only after success and requests my-answer route with created ids', () => {

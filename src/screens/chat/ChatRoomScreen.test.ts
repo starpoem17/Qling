@@ -35,3 +35,12 @@ test('chat room top bar hides answer adoption rate while metrics are loading', (
   assert.doesNotMatch(html, /답변 채택률/);
   assert.doesNotMatch(html, /92%/);
 });
+
+test('chat room input matches the attachment-free Figma layout', () => {
+  const html = renderChatRoom(null);
+
+  assert.doesNotMatch(html, /첨부 추가/);
+  assert.doesNotMatch(html, /room_plus/);
+  assert.match(html, /left-\[19px\] top-\[10\.2px\] w-\[310px\]/);
+  assert.match(html, /aria-label="메시지 보내기"/);
+});

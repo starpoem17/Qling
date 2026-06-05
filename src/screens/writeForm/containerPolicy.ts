@@ -21,7 +21,6 @@ export function resolveWorryPublicationResult(
     const message = result.userMessage ?? result.reason ?? '오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
     return {
       moderation: { status: 'rejected', reason: message, helpMessage: result.helpMessage },
-      alertMessage: result.helpMessage ? `${message}\n\n${result.helpMessage}` : message,
       clearDraft: false,
     };
   }
@@ -30,7 +29,6 @@ export function resolveWorryPublicationResult(
     const message = `전송 실패: ${result.reason || '알 수 없는 오류'}`;
     return {
       moderation: { status: 'failed', message },
-      alertMessage: message,
       clearDraft: false,
     };
   }

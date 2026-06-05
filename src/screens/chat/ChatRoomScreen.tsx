@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, type CSSProperties, type ChangeEvent, type
 import { cn } from '../../lib/utils';
 import { ErrorState, profileImageUrlForColor } from '../shared/ui';
 
-const roomPlusIconUrl = new URL('../../../assets/chat/room_plus.svg', import.meta.url).href;
 const roomSendIconUrl = new URL('../../../assets/chat/room_send.svg', import.meta.url).href;
 const roomMoreIconUrl = new URL('../../../assets/chat/room_more.svg', import.meta.url).href;
 const roomNotificationOffIconUrl = new URL('../../../assets/chat/room_notification_off.svg', import.meta.url).href;
@@ -605,11 +604,6 @@ function ChatRoomInputBar({
             {sendError}
           </div>
         )}
-        <div className="absolute left-[14px] top-[12.2px] flex h-[38px] w-[38px] items-center justify-center rounded-full bg-[#fff0e2]">
-          <button type="button" aria-label="첨부 추가" className="flex h-full w-full items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]">
-            <img src={roomPlusIconUrl} alt="" aria-hidden="true" className="h-[18px] w-[18px]" draggable={false} />
-          </button>
-        </div>
         <textarea
           ref={inputRef}
           data-chat-room-message-input
@@ -630,7 +624,7 @@ function ChatRoomInputBar({
           data-lpignore="true"
           data-1p-ignore="true"
           placeholder="메시지를 입력해 주세요"
-          className="absolute left-[60px] top-[10.2px] w-[269px] resize-none rounded-[21px] border border-[#ede3d6] bg-[#fff4e8] px-[16.8px] py-[9px] text-[14px] font-normal leading-5 text-[#2b2620] outline-none placeholder:text-[#a39e96] focus:ring-2 focus:ring-[#ff8b3d]"
+          className="absolute left-[19px] top-[10.2px] w-[310px] resize-none rounded-[21px] border border-[#ede3d6] bg-[#fff4e8] px-[16.8px] py-[9px] text-[14px] font-normal leading-5 text-[#2b2620] outline-none placeholder:text-[#a39e96] focus:ring-2 focus:ring-[#ff8b3d]"
           style={{ height: textareaHeight, overflow: 'hidden' }}
         />
         <button

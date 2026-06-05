@@ -23,7 +23,6 @@ export type WriteWorryContainerProps = {
   readonly profile: { readonly uid: string } | null;
   readonly setView: Dispatch<SetStateAction<AppRouteViewState>>;
   readonly clearSelectedMyWorry: () => void;
-  readonly setFilterAlert: (message: string) => void;
 };
 
 export function WriteWorryContainer(props: WriteWorryContainerProps) {
@@ -40,7 +39,6 @@ export function WriteWorryContainer(props: WriteWorryContainerProps) {
       return;
     }
     if (!props.user || !props.profile) {
-      props.setFilterAlert('로그인 정보가 없습니다.');
       setModeration({ status: 'failed', message: '로그인 정보가 없습니다.' });
       return;
     }
@@ -55,7 +53,6 @@ export function WriteWorryContainer(props: WriteWorryContainerProps) {
       const policy = resolveWorryPublicationResult(result);
 
       setModeration(policy.moderation);
-      if (policy.alertMessage) props.setFilterAlert(policy.alertMessage);
       if (!policy.clearDraft || !policy.route) {
         return;
       }
@@ -73,7 +70,6 @@ export function WriteWorryContainer(props: WriteWorryContainerProps) {
       const message = `전송 실패: ${e instanceof Error ? e.message : '알 수 없는 오류'}`;
       console.error('Publication Error:', e);
       setModeration({ status: 'failed', message });
-      props.setFilterAlert(message);
     } finally {
       setIsProcessing(false);
     }
@@ -95,6 +91,7 @@ export function WriteWorryContainer(props: WriteWorryContainerProps) {
         setModeration({ status: 'idle' });
       }}
       onPublish={publish}
+      onDismissPopup={() => setModeration({ status: 'idle' })}
     />
   );
 }
