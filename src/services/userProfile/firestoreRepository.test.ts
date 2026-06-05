@@ -176,7 +176,7 @@ test('real repository rejects same uid changing normalized nickname without corr
   assert.deepEqual(result, {
     status: 'conflict',
     code: 'normalized_name_conflict',
-    message: '이미 다른 닉네임 예약이 있어요. 다시 시도해주세요.',
+    message: '이미 사용 중인 닉네임이에요.',
   });
   assert.equal(db.operations.some(op => op.type === 'set'), false);
   assert.equal(db.committed.has('nicknameReservations/라미'), false);
@@ -232,7 +232,7 @@ test('real repository completeOnboarding requires matching reservation', async (
   assert.deepEqual(await wrongRepository.completeOnboarding(profile), {
     status: 'reservation_conflict',
     code: 'nickname_reservation_conflict',
-    message: '닉네임 예약 정보가 일치하지 않아요. 다시 확인해주세요.',
+    message: '이미 사용 중인 닉네임이에요.',
   });
   assert.equal(wrongDb.operations.some(op => op.type === 'set' && op.path === 'users/user-1'), false);
 });

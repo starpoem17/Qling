@@ -61,7 +61,7 @@ export function createUserProfileFirestoreRepository(params: {
           return {
             status: 'conflict' as const,
             code: 'normalized_name_conflict',
-            message: '이미 다른 닉네임 예약이 있어요. 다시 시도해주세요.',
+            message: '이미 사용 중인 닉네임이에요.',
           };
         }
 
@@ -108,7 +108,7 @@ export function createUserProfileFirestoreRepository(params: {
           return {
             status: 'reservation_conflict' as const,
             code: 'nickname_reservation_conflict',
-            message: '닉네임 예약 정보가 일치하지 않아요. 다시 확인해주세요.',
+            message: '이미 사용 중인 닉네임이에요.',
           };
         }
 
