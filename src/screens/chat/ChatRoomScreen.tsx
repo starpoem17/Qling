@@ -11,6 +11,8 @@ const roomReportIconUrl = new URL('../../../assets/chat/room_report.svg', import
 const dimThemeColor = '#8b7b62';
 const chatRoomDocumentBackground = '#ffffff';
 const chatRoomKeyboardLockClass = 'qling-chat-room-keyboard-lock';
+const chatRoomKeyboardDebugStorageKey = 'qling.chatRoomKeyboardDebug';
+const chatRoomKeyboardDebugQueryParam = 'chatRoomKeyboardDebug';
 const chatInputBaseHeight = 67;
 const chatTextareaMinHeight = 40;
 const chatTextareaMaxHeight = 60;
@@ -497,7 +499,7 @@ function setChatRoomKeyboardLock(locked: boolean) {
 }
 
 function logChatRoomKeyboardMetric(source: string) {
-  if (!import.meta.env.DEV) return;
+  if (!isChatRoomKeyboardDebugEnabled()) return;
   const visualViewport = window.visualViewport;
   const root = document.getElementById('root');
   console.info('[chat-room-keyboard]', {
@@ -510,6 +512,16 @@ function logChatRoomKeyboardMetric(source: string) {
     visualViewportHeight: visualViewport?.height ?? null,
     visualViewportOffsetTop: visualViewport?.offsetTop ?? null,
   });
+}
+
+function isChatRoomKeyboardDebugEnabled() {
+  if (import.meta.env.DEV) return true;
+  try {
+    if (window.localStorage.getItem(chatRoomKeyboardDebugStorageKey) === '1') return true;
+    return new URLSearchParams(window.location.search).get(chatRoomKeyboardDebugQueryParam) === '1';
+  } catch {
+    return false;
+  }
 }
 
 function ChatRoomActionSheet({

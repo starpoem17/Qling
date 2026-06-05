@@ -149,9 +149,16 @@ test('chat room keyboard lock fixes the app roots without global touch-action', 
   assert.doesNotMatch(indexCssSource, /qling-chat-room-keyboard-lock[\s\S]*touch-action/);
 });
 
-test('chat room keyboard diagnostics log repeated focus viewport state in dev only', () => {
+test('chat room keyboard diagnostics log repeated focus viewport state in dev or PWA opt-in mode', () => {
+  assert.match(chatRoomScreenSource, /const chatRoomKeyboardDebugStorageKey = 'qling\.chatRoomKeyboardDebug'/);
+  assert.match(chatRoomScreenSource, /const chatRoomKeyboardDebugQueryParam = 'chatRoomKeyboardDebug'/);
+  assert.match(chatRoomScreenSource, /function isChatRoomKeyboardDebugEnabled\(\)/);
+  assert.match(chatRoomScreenSource, /if \(import\.meta\.env\.DEV\) return true/);
+  assert.match(chatRoomScreenSource, /window\.localStorage\.getItem\(chatRoomKeyboardDebugStorageKey\) === '1'/);
+  assert.match(chatRoomScreenSource, /new URLSearchParams\(window\.location\.search\)\.get\(chatRoomKeyboardDebugQueryParam\) === '1'/);
+  assert.match(chatRoomScreenSource, /catch \{\s*return false;\s*\}/);
   assert.match(chatRoomScreenSource, /function logChatRoomKeyboardMetric\(source: string\)/);
-  assert.match(chatRoomScreenSource, /if \(!import\.meta\.env\.DEV\) return/);
+  assert.match(chatRoomScreenSource, /if \(!isChatRoomKeyboardDebugEnabled\(\)\) return/);
   assert.match(chatRoomScreenSource, /console\.info\('\[chat-room-keyboard\]'/);
   assert.match(chatRoomScreenSource, /locked: document\.documentElement\.classList\.contains\(chatRoomKeyboardLockClass\)/);
   assert.match(chatRoomScreenSource, /bodyLocked: document\.body\.classList\.contains\(chatRoomKeyboardLockClass\)/);
