@@ -502,7 +502,7 @@ export default function App() {
           )}
 
           {currentRoute === 'chat_room' && typeof view === 'object' && view.route === 'chat_room' && (
-            <motion.div key="chat_room" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="h-full">
+            <motion.div key="chat_room" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
               <ChatRoomContainer
                 user={user}
                 chatId={view.chatId}

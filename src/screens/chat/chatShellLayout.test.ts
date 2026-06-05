@@ -40,7 +40,7 @@ test('chat screens keep 393px canvas width while chat room uses viewport height'
   assert.match(chatScreenSource, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden/);
   assert.match(chatScreenSource, /style=\{\{ transform: `scale\(\$\{canvasScale\}\)` \}\}/);
 
-  assert.match(chatRoomScreenSource, /const \[viewportMetrics, setViewportMetrics\] = useState<ChatRoomViewportMetrics>\(\{ canvasHeight: 852, offsetTop: 0, scale: 1 \}\)/);
+  assert.match(chatRoomScreenSource, /const \[viewportMetrics, setViewportMetrics\] = useState<ChatRoomViewportMetrics>\(\{ canvasHeight: 852, scale: 1 \}\)/);
   assert.doesNotMatch(chatRoomScreenSource, /chatInputYOffset/);
   assert.match(chatRoomScreenSource, /const chatInputBaseHeight = 67/);
   assert.match(chatRoomScreenSource, /const chatTextareaMaxHeight = 60/);
@@ -49,9 +49,9 @@ test('chat screens keep 393px canvas width while chat room uses viewport height'
   assert.match(chatRoomScreenSource, /'--chat-input-height': `\$\{chatInputBaseHeight \+ Math\.max\(0, textareaHeight - chatTextareaMinHeight\)\}px`/);
   assert.match(chatRoomScreenSource, /const visibleHeight = visualViewport\?\.height \?\? window\.innerHeight \?\? document\.documentElement\.clientHeight \?\? 852/);
   assert.match(chatRoomScreenSource, /const offsetTop = visualViewport\?\.offsetTop \?\? 0/);
-  assert.match(chatRoomScreenSource, /canvasHeight: visibleHeight \/ scale/);
-  assert.match(chatRoomScreenSource, /offsetTop: offsetTop \/ scale/);
-  assert.match(chatRoomScreenSource, /marginTop: `\$\{viewportMetrics\.offsetTop\}px`/);
+  assert.match(chatRoomScreenSource, /canvasHeight: \(visibleHeight \+ offsetTop\) \/ scale/);
+  assert.doesNotMatch(chatRoomScreenSource, /offsetTop: offsetTop \/ scale/);
+  assert.doesNotMatch(chatRoomScreenSource, /marginTop/);
   assert.match(chatRoomScreenSource, /transform: `scale\(\$\{viewportMetrics\.scale\}\)`/);
   assert.match(chatRoomScreenSource, /relative flex w-\[393px\] shrink-0 origin-top flex-col overflow-hidden/);
   assert.doesNotMatch(chatRoomScreenSource, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden/);

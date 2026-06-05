@@ -134,6 +134,15 @@ test('locks App main scrolling for fixed-canvas routes', () => {
   );
 });
 
+test('chat room route wrapper avoids vertical motion during keyboard-sensitive layout', () => {
+  const source = fs.readFileSync('src/App.tsx', 'utf8');
+  const chatRoomStart = source.indexOf('key="chat_room"');
+  const chatRoomBranch = source.slice(chatRoomStart, source.indexOf("currentRoute === 'report_user'", chatRoomStart));
+
+  assert.match(chatRoomBranch, /key="chat_room" initial=\{\{ opacity: 0 \}\} animate=\{\{ opacity: 1 \}\} exit=\{\{ opacity: 0 \}\} className="h-full"/);
+  assert.doesNotMatch(chatRoomBranch, /[,{]\s*y:\s*-?\d+/);
+});
+
 test('keeps answer check status bar background aligned with the cream route canvas', () => {
   const source = fs.readFileSync('src/App.tsx', 'utf8');
 

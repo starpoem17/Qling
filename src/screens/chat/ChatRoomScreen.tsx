@@ -20,7 +20,6 @@ type ChatRoomCanvasStyle = CSSProperties & {
 
 type ChatRoomViewportMetrics = {
   readonly canvasHeight: number;
-  readonly offsetTop: number;
   readonly scale: number;
 };
 
@@ -66,7 +65,7 @@ export function ChatRoomScreen({
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState(chatTextareaMinHeight);
-  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, offsetTop: 0, scale: 1 });
+  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, scale: 1 });
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const shouldStickToBottomRef = useRef(true);
@@ -79,14 +78,12 @@ export function ChatRoomScreen({
       const visibleHeight = visualViewport?.height ?? window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const offsetTop = visualViewport?.offsetTop ?? 0;
       const nextMetrics = {
-        canvasHeight: visibleHeight / scale,
-        offsetTop: offsetTop / scale,
+        canvasHeight: (visibleHeight + offsetTop) / scale,
         scale,
       };
 
       setViewportMetrics(previousMetrics => {
         return previousMetrics.canvasHeight === nextMetrics.canvasHeight
-          && previousMetrics.offsetTop === nextMetrics.offsetTop
           && previousMetrics.scale === nextMetrics.scale
           ? previousMetrics
           : nextMetrics;
@@ -128,7 +125,6 @@ export function ChatRoomScreen({
   const canvasStyle: ChatRoomCanvasStyle = {
     '--chat-input-height': `${chatInputBaseHeight + Math.max(0, textareaHeight - chatTextareaMinHeight)}px`,
     height: `${viewportMetrics.canvasHeight}px`,
-    marginTop: `${viewportMetrics.offsetTop}px`,
     transform: `scale(${viewportMetrics.scale})`,
   };
 
