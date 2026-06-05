@@ -89,7 +89,7 @@ export function ChatRoomScreen({
       const fullViewportHeight = fullViewportHeightRef.current ?? nextFullViewportHeight;
       if (!isTopBarHiddenForKeyboard) {
         fullViewportHeightRef.current = nextFullViewportHeight;
-      } else if (visualViewport && visibleHeight >= fullViewportHeight - 1) {
+      } else if (visualViewport && offsetTop === 0) {
         setIsTopBarHiddenForKeyboard(false);
       }
       const nextMetrics = {
@@ -223,7 +223,9 @@ export function ChatRoomScreen({
   };
 
   const handleMessageInputBlur = () => {
-    setIsTopBarHiddenForKeyboard(false);
+    if (!window.visualViewport) {
+      setIsTopBarHiddenForKeyboard(false);
+    }
     logChatRoomKeyboardMetric('textarea.blur');
   };
 

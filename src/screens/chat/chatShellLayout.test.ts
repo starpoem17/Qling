@@ -138,7 +138,7 @@ test('chat room accounts for visual viewport and document background without rec
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.addEventListener\('scroll', handleViewportScroll\)/);
   assert.match(chatRoomScreenSource, /window\.visualViewport\?\.removeEventListener\('scroll', handleViewportScroll\)/);
   assert.match(chatRoomScreenSource, /setViewportMetrics\(previousMetrics =>/);
-  assert.match(chatRoomScreenSource, /if \(!isTopBarHiddenForKeyboard\) \{\s*fullViewportHeightRef\.current = nextFullViewportHeight;\s*\} else if \(visualViewport && visibleHeight >= fullViewportHeight - 1\) \{\s*setIsTopBarHiddenForKeyboard\(false\);\s*\}/);
+  assert.match(chatRoomScreenSource, /if \(!isTopBarHiddenForKeyboard\) \{\s*fullViewportHeightRef\.current = nextFullViewportHeight;\s*\} else if \(visualViewport && offsetTop === 0\) \{\s*setIsTopBarHiddenForKeyboard\(false\);\s*\}/);
   assert.match(chatRoomScreenSource, /const chatRoomDocumentBackground = '#ffffff'/);
   assert.match(chatRoomScreenSource, /const backgroundColor = menuOpen \? dimThemeColor : chatRoomDocumentBackground/);
   assert.match(chatRoomScreenSource, /document\.documentElement\.style\.backgroundColor = backgroundColor/);
@@ -188,7 +188,7 @@ test('chat room keyboard diagnostics log repeated focus viewport state in dev or
   assert.match(chatRoomScreenSource, /if \(!isChatRoomKeyboardDebugEnabled\(\)\) return/);
   assert.match(chatRoomScreenSource, /console\.info\('\[chat-room-keyboard\]'/);
   assert.match(chatRoomScreenSource, /if \(source === 'textarea\.touchstart' \|\| pointerType === 'touch'\) \{\s*setIsTopBarHiddenForKeyboard\(true\);\s*\}/);
-  assert.match(chatRoomScreenSource, /setIsTopBarHiddenForKeyboard\(false\);\s*logChatRoomKeyboardMetric\('textarea\.blur'\)/);
+  assert.match(chatRoomScreenSource, /if \(!window\.visualViewport\) \{\s*setIsTopBarHiddenForKeyboard\(false\);\s*\}\s*logChatRoomKeyboardMetric\('textarea\.blur'\)/);
   assert.doesNotMatch(chatRoomScreenSource, /bodyLocked/);
   assert.doesNotMatch(chatRoomScreenSource, /rootLocked/);
   assert.match(chatRoomScreenSource, /scrollY: window\.scrollY/);
