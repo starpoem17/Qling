@@ -31,7 +31,7 @@ test('chat room top bar is fixed in its own scaled layer while canvas keeps a co
   assert.doesNotMatch(chatRoomScreenSource, /headerLayer/);
   assert.doesNotMatch(chatRoomScreenSource, /inputLayer/);
   assert.match(chatRoomScreenSource, /data-chat-room-top-bar-layer[\s\S]*className="fixed left-0 right-0 top-0 z-50 overflow-hidden bg-\[#ff8b3d\]"[\s\S]*style=\{topBarLayerStyle\}/);
-  assert.match(chatRoomScreenSource, /className="h-\[74px\] w-\[393px\] shrink-0 origin-top" style=\{topBarCanvasStyle\}[\s\S]*<ChatRoomTopBar opponent=\{opponent\} onBack=\{onBack\} onOpenMenu=\{onOpenMenu\} \/>/);
+  assert.match(chatRoomScreenSource, /className="h-\[74px\] w-\[393px\] shrink-0 origin-top" style=\{topBarCanvasStyle\}[\s\S]*<ChatRoomTopBar[\s\S]*opponent=\{opponent\}[\s\S]*answerAdoptionRatePercent=\{answerAdoptionRatePercent\}[\s\S]*onBack=\{onBack\}[\s\S]*onOpenMenu=\{onOpenMenu\}/);
   assert.match(chatRoomScreenSource, /function ChatRoomTopBarSpacer\(\{ isHidden \}: \{ readonly isHidden: boolean \}\)/);
   assert.match(chatRoomScreenSource, /data-chat-room-top-bar-spacer[\s\S]*className="w-\[393px\] shrink-0 bg-\[#ff8b3d\]"[\s\S]*style=\{\{ height: isHidden \? 0 : chatRoomTopBarHeight \}\}/);
   assert.match(chatRoomScreenSource, /data-chat-room-canvas[\s\S]*<ChatRoomTopBarSpacer isHidden=\{isTopBarHiddenForKeyboard\} \/>/);

@@ -14,8 +14,11 @@ import type {
 
 const rankingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 const rankingCanvasMinHeight = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) * 852 / 393)';
-const rankingSheetReadyHeight = `min(452px, max(372px, calc((100dvh - var(--qling-space-nav-height)) / (${rankingCanvasScale}) - 400px)))`;
-const viewerRankCardTop = `min(773px, calc((100dvh - var(--qling-space-nav-height) - 79px) / (${rankingCanvasScale})))`;
+const rankingUsableCanvasHeight = `calc((var(--qling-visual-viewport-height) - var(--qling-space-nav-height)) / (${rankingCanvasScale}))`;
+const viewerRankCardTop = `min(773px, calc(${rankingUsableCanvasHeight} - 79px))`;
+const rankingSheetReadyHeight = `min(452px, max(372px, calc(${rankingUsableCanvasHeight} - 400px)))`;
+const rankingSheetReadyHeightWithViewer = `min(452px, max(72px, calc(${viewerRankCardTop} - 400px - 12px)))`;
+const rankingSheetEmptyTopWithViewer = `min(156px, max(24px, calc(${rankingSheetReadyHeightWithViewer} / 2 - 8px)))`;
 const qlingNotoSansKrStyle = { fontFamily: '"Qling Noto Sans KR"' } as const;
 
 const rankingAssetUrlByName = {
@@ -281,13 +284,15 @@ function RankingSheet({
   readonly loading?: boolean;
 }) {
   const rows = period?.entries.slice(3, 10) ?? [];
+  const hasViewerCard = Boolean(period?.viewer);
+  const readyHeight = hasViewerCard ? rankingSheetReadyHeightWithViewer : rankingSheetReadyHeight;
   return (
     <section
       className={cn(
-        'absolute left-0 w-full rounded-t-[26px] bg-white shadow-[0_-5px_8px_rgb(128_87_33/0.1)]',
+        'absolute left-0 w-full overflow-hidden rounded-t-[26px] bg-white shadow-[0_-5px_8px_rgb(128_87_33/0.1)]',
         loading ? 'top-[400px] h-[452px]' : 'top-[400px]',
       )}
-      style={loading ? undefined : { height: rankingSheetReadyHeight }}
+      style={loading ? undefined : { height: readyHeight }}
     >
       {loading ? (
         <FigmaTabLoading label="순위를 불러오는 중" className="left-[177px] top-[73px] translate-x-0" />
@@ -304,7 +309,10 @@ function RankingSheet({
               {rows.map(entry => <RankingRow key={entry.uid} entry={entry} />)}
             </ol>
           ) : (
-            <div className="absolute left-0 top-[156px] w-full text-center text-[14px] font-medium text-[#8b95a1]">
+            <div
+              className="absolute left-0 w-full text-center text-[14px] font-medium text-[#8b95a1]"
+              style={{ top: hasViewerCard ? rankingSheetEmptyTopWithViewer : '156px' }}
+            >
               아직 순위가 없어요.
             </div>
           )}

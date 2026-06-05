@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from 'react';
+import { useEffect, useId, type ReactNode } from 'react';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import { normalizeProfileColor } from '../../lib/profileColor';
 import {
@@ -35,6 +35,28 @@ export function MobileAppShell({
   hasBottomNavigation = Boolean(bottomNavigation),
   mainClassName,
 }: MobileAppShellProps) {
+  useEffect(() => {
+    const visualViewport = window.visualViewport;
+    if (!visualViewport) return;
+
+    const root = document.documentElement;
+    const updateVisualViewportHeight = () => {
+      root.style.setProperty('--qling-visual-viewport-height', `${visualViewport.height}px`);
+    };
+
+    updateVisualViewportHeight();
+    visualViewport.addEventListener('resize', updateVisualViewportHeight);
+    visualViewport.addEventListener('scroll', updateVisualViewportHeight);
+    window.addEventListener('orientationchange', updateVisualViewportHeight);
+
+    return () => {
+      visualViewport.removeEventListener('resize', updateVisualViewportHeight);
+      visualViewport.removeEventListener('scroll', updateVisualViewportHeight);
+      window.removeEventListener('orientationchange', updateVisualViewportHeight);
+      root.style.removeProperty('--qling-visual-viewport-height');
+    };
+  }, []);
+
   return (
     <div className="qling-production-root h-dvh overflow-hidden text-[var(--qling-color-text)] font-sans selection:bg-[var(--qling-color-cream-soft)]">
       <div className="qling-production-frame">

@@ -18,10 +18,45 @@ export function ChatRoomContainer({
   const [opponent, setOpponent] = useState<{ nickname: string; profileColor: string; uid: string } | null>(null);
   const [worryInfo, setWorryInfo] = useState<{ category: string; title: string; createdAtStr: string } | null>(null);
   const [opponentUnreadCount, setOpponentUnreadCount] = useState(0);
+  const [answerAdoptionRatePercent, setAnswerAdoptionRatePercent] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const worryFetchedRef = useRef(false);
+
+  useEffect(() => {
+    setAnswerAdoptionRatePercent(null);
+    if (!user || !chatId) return;
+
+    let isActive = true;
+    user.getIdToken().then(token => {
+      return fetch(`/api/chats/${chatId}/answer-adoption`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    }).then(async res => {
+      if (!isActive) return;
+      if (!res.ok) {
+        setAnswerAdoptionRatePercent(0);
+        return;
+      }
+      const data = await res.json();
+      if (!isActive) return;
+      setAnswerAdoptionRatePercent(
+        typeof data.adoptionRatePercent === 'number' && Number.isFinite(data.adoptionRatePercent)
+          ? Math.max(0, Math.round(data.adoptionRatePercent))
+          : 0
+      );
+    }).catch(err => {
+      console.error('Failed to load answer adoption metrics:', err);
+      if (isActive) setAnswerAdoptionRatePercent(0);
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [user, chatId]);
 
   useEffect(() => {
     if (!user || !chatId) return;
@@ -192,6 +227,7 @@ export function ChatRoomContainer({
       error={error}
       messages={messages}
       opponent={opponent}
+      answerAdoptionRatePercent={answerAdoptionRatePercent}
       opponentUnreadCount={opponentUnreadCount}
       worryInfo={worryInfo}
       onBack={() => setView({ route: 'chat' })}

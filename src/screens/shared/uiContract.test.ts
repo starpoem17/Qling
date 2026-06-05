@@ -101,6 +101,20 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.doesNotMatch(source, /fixed bottom-0 left-0 right-0/);
 });
 
+test('mobile app shell exposes visual viewport height for iOS Safari tab screens', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
+  const cssSource = fs.readFileSync(path.join(process.cwd(), 'src', 'index.css'), 'utf8');
+
+  assert.match(cssSource, /--qling-visual-viewport-height: 100dvh;/);
+  assert.match(source, /window\.visualViewport/);
+  assert.match(source, /--qling-visual-viewport-height/);
+  assert.match(source, /visualViewport\.height/);
+  assert.match(source, /visualViewport\.addEventListener\('resize'/);
+  assert.match(source, /visualViewport\.addEventListener\('scroll'/);
+  assert.match(source, /window\.addEventListener\('orientationchange'/);
+  assert.match(source, /root\.style\.removeProperty\('--qling-visual-viewport-height'\)/);
+});
+
 test('figma top bar keeps the shared Figma back and title coordinates', () => {
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
 

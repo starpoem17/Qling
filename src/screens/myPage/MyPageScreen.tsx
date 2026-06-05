@@ -3,9 +3,7 @@ import {
   QlingDialog,
   profileImageUrlForColor,
 } from '../shared/ui';
-import type { CSSProperties, TouchEvent, WheelEvent } from 'react';
-import { PeekHeaderScrollArea } from '../shared/PeekHeaderScrollArea';
-import { useScrollPeekHeader } from '../shared/scrollPeekHeader';
+import type { TouchEvent, WheelEvent } from 'react';
 import type {
   ConfirmationProps,
   EditInterestsProps,
@@ -51,15 +49,6 @@ export function MyPageScreen(props: MyPageScreenProps) {
   const contentBottom = settingsCardTop + 192;
   const myPageCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
   const myPageContentHeight = `min(836px, max(520px, calc((100dvh - var(--qling-space-nav-height)) / (${myPageCanvasScale}) - 100px)))`;
-  const scrollPeekHeader = useScrollPeekHeader();
-  const headerStyle = {
-    '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
-  } as CSSProperties;
-  const contentStyle = {
-    '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
-    height: myPageContentHeight,
-    transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))',
-  } as CSSProperties;
 
   return (
     <section
@@ -75,13 +64,12 @@ export function MyPageScreen(props: MyPageScreenProps) {
           data-measure="my-page-screen"
           style={{ transform: `scale(${myPageCanvasScale})` }}
         >
-          <MyPageHeader onBack={props.onBack} style={headerStyle} />
+          <MyPageHeader onBack={props.onBack} />
 
-          <PeekHeaderScrollArea
-            className="relative pb-[calc(108px+env(safe-area-inset-bottom,0px))] transform-gpu"
-            style={contentStyle}
-            ariaLabel="마이페이지 본문"
-            resetKey={hasMultiplePreviewItems ? 'my-page-multiple-preview' : 'my-page-short-preview'}
+          <section
+            className="relative overflow-y-auto overscroll-contain pb-[calc(108px+env(safe-area-inset-bottom,0px))] [-webkit-overflow-scrolling:touch]"
+            style={{ height: myPageContentHeight }}
+            aria-label="마이페이지 본문"
           >
             <div className="relative" style={{ height: contentBottom }}>
               <section className="absolute left-5 top-[32px] h-[93px] w-[353px] overflow-hidden rounded-[24px] bg-white" data-measure="my-page-profile-card">
@@ -133,7 +121,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
                 onSettingSelect={props.onSettingSelect}
               />
             </div>
-          </PeekHeaderScrollArea>
+          </section>
         </div>
       </div>
       <ConfirmationDialog title="로그아웃할까요?" description="이 기기에서 Qling 계정 연결을 해제합니다." confirmLabel="로그아웃" confirmation={props.logoutConfirmation} />
@@ -144,22 +132,17 @@ export function MyPageScreen(props: MyPageScreenProps) {
 
 function MyPageHeader({
   onBack,
-  style,
 }: {
   readonly onBack: () => void;
-  readonly style: CSSProperties;
 }) {
   return (
     <header
       className="h-[100px] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
-      style={style}
       onTouchMove={blockLockedScroll}
       onWheel={blockLockedScroll}
     >
       <div
-        className="relative mx-auto h-[100px] w-full max-w-[393px] transform-gpu"
-        data-qling-peek-header-content="true"
-        style={{ transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))' }}
+        className="relative mx-auto h-[100px] w-full max-w-[393px]"
       >
         <button
           type="button"

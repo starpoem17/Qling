@@ -6,6 +6,12 @@ import { createRequireActiveFirebaseAuth, type ActiveAuthenticatedRequest } from
 
 export type ChatModerationProvider = (content: string) => Promise<{ status: 'approved' } | { status: 'rejected'; reason: string }>;
 
+export type ChatAnswerAdoptionMetrics = {
+  readonly adoptionRatePercent: number;
+  readonly replyCount: number;
+  readonly adoptedCount: number;
+};
+
 export function registerChatRoutes(app: express.Express, deps: {
   db: Firestore | null;
   messaging: Messaging | null;
@@ -15,6 +21,7 @@ export function registerChatRoutes(app: express.Express, deps: {
   if (!deps.db) {
     app.post('/api/chats/create', (_req, res) => res.status(500).json({ error: 'firebase_unavailable' }));
     app.post('/api/chats/:chatId/messages', (_req, res) => res.status(500).json({ error: 'firebase_unavailable' }));
+    app.get('/api/chats/:chatId/answer-adoption', (_req, res) => res.status(500).json({ error: 'firebase_unavailable' }));
     return;
   }
 
@@ -125,6 +132,45 @@ export function registerChatRoutes(app: express.Express, deps: {
       } catch (error) {
         console.error('Failed to create chat:', error);
         res.status(500).json({ error: { code: 'internal_error', message: 'Failed to create chat.' } });
+      }
+    }
+  );
+
+  app.get(
+    '/api/chats/:chatId/answer-adoption',
+    createRequireActiveFirebaseAuth({ auth: deps.auth, db: deps.db }),
+    async (req, res) => {
+      try {
+        const authReq = req as ActiveAuthenticatedRequest;
+        const uid = authReq.auth.uid;
+        const { chatId } = req.params;
+        const db = deps.db as Firestore;
+        const chatDoc = await db.collection('chats').doc(chatId).get();
+
+        if (!chatDoc.exists) {
+          res.status(404).json({ error: { code: 'not_found', message: 'Chat not found' } });
+          return;
+        }
+
+        const chatData = chatDoc.data() ?? {};
+        const participants = Array.isArray(chatData.participants)
+          ? chatData.participants.filter((participant): participant is string => typeof participant === 'string')
+          : [];
+        if (!participants.includes(uid)) {
+          res.status(403).json({ error: { code: 'forbidden', message: 'Not authorized for this chat.' } });
+          return;
+        }
+
+        const opponentUid = participants.find(participant => participant !== uid);
+        if (!opponentUid) {
+          res.status(200).json({ adoptionRatePercent: 0, replyCount: 0, adoptedCount: 0 });
+          return;
+        }
+
+        res.status(200).json(await getChatAnswerAdoptionMetrics({ db, opponentUid }));
+      } catch (error) {
+        console.error('Failed to load chat answer adoption metrics:', error);
+        res.status(500).json({ error: { code: 'answer_adoption_failed', message: '답변 채택률을 불러오지 못했습니다.' } });
       }
     }
   );
@@ -310,4 +356,41 @@ export function registerChatRoutes(app: express.Express, deps: {
       }
     }
   );
+}
+
+async function getChatAnswerAdoptionMetrics(params: {
+  readonly db: Firestore;
+  readonly opponentUid: string;
+}): Promise<ChatAnswerAdoptionMetrics> {
+  const [repliesSnap, feedbacksSnap] = await Promise.all([
+    params.db.collection('replies').where('replierUid', '==', params.opponentUid).get(),
+    params.db.collection('feedbacks').where('replierUid', '==', params.opponentUid).where('type', '==', 'like').get(),
+  ]);
+
+  const activeHumanReplyIds = new Set<string>();
+  for (const doc of repliesSnap.docs) {
+    if (isActiveHumanReply(doc.data())) activeHumanReplyIds.add(doc.id);
+  }
+
+  let adoptedCount = 0;
+  for (const doc of feedbacksSnap.docs) {
+    const feedback = doc.data();
+    const replyId = typeof feedback.replyId === 'string' ? feedback.replyId : doc.id;
+    if (feedback.helpedCountApplied === true && activeHumanReplyIds.has(replyId)) {
+      adoptedCount += 1;
+    }
+  }
+
+  const replyCount = activeHumanReplyIds.size;
+  return {
+    adoptionRatePercent: replyCount === 0 ? 0 : Math.round((adoptedCount / replyCount) * 100),
+    replyCount,
+    adoptedCount,
+  };
+}
+
+function isActiveHumanReply(reply: FirebaseFirestore.DocumentData): boolean {
+  return reply.status === 'active'
+    && !reply.hiddenAt
+    && reply.isAiGenerated !== true;
 }

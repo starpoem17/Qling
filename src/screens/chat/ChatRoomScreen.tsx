@@ -47,6 +47,7 @@ export function ChatRoomScreen({
   error,
   messages,
   opponent,
+  answerAdoptionRatePercent,
   worryInfo,
   opponentUnreadCount,
   onBack,
@@ -58,6 +59,7 @@ export function ChatRoomScreen({
   readonly error: string | null;
   readonly messages: ChatMessage[];
   readonly opponent: { nickname: string; profileColor: string } | null;
+  readonly answerAdoptionRatePercent: number | null;
   readonly worryInfo?: WorryInfo | null;
   readonly opponentUnreadCount?: number;
   readonly onBack: () => void;
@@ -285,6 +287,7 @@ export function ChatRoomScreen({
       <>
         <ChatRoomTopBarLayer
           opponent={opponent}
+          answerAdoptionRatePercent={answerAdoptionRatePercent}
           topBarLayerStyle={topBarLayerStyle}
           topBarCanvasStyle={topBarCanvasStyle}
           onBack={onBack}
@@ -326,6 +329,7 @@ export function ChatRoomScreen({
     <>
       <ChatRoomTopBarLayer
         opponent={opponent}
+        answerAdoptionRatePercent={answerAdoptionRatePercent}
         topBarLayerStyle={topBarLayerStyle}
         topBarCanvasStyle={topBarCanvasStyle}
         onBack={onBack}
@@ -456,12 +460,14 @@ export function ChatRoomScreen({
 
 function ChatRoomTopBarLayer({
   opponent,
+  answerAdoptionRatePercent,
   topBarLayerStyle,
   topBarCanvasStyle,
   onBack,
   onOpenMenu,
 }: {
   readonly opponent: { nickname: string; profileColor: string } | null;
+  readonly answerAdoptionRatePercent: number | null;
   readonly topBarLayerStyle: CSSProperties;
   readonly topBarCanvasStyle: CSSProperties;
   readonly onBack: () => void;
@@ -475,7 +481,12 @@ function ChatRoomTopBarLayer({
     >
       <div className="mx-auto flex w-full max-w-[480px] justify-center">
         <div className="h-[74px] w-[393px] shrink-0 origin-top" style={topBarCanvasStyle}>
-          <ChatRoomTopBar opponent={opponent} onBack={onBack} onOpenMenu={onOpenMenu} />
+          <ChatRoomTopBar
+            opponent={opponent}
+            answerAdoptionRatePercent={answerAdoptionRatePercent}
+            onBack={onBack}
+            onOpenMenu={onOpenMenu}
+          />
         </div>
       </div>
     </div>
@@ -571,10 +582,12 @@ function ChatRoomInputBar({
 
 function ChatRoomTopBar({
   opponent,
+  answerAdoptionRatePercent,
   onBack,
   onOpenMenu,
 }: {
   readonly opponent: { nickname: string; profileColor: string } | null;
+  readonly answerAdoptionRatePercent: number | null;
   readonly onBack: () => void;
   readonly onOpenMenu: () => void;
 }) {
@@ -608,9 +621,11 @@ function ChatRoomTopBar({
           <span className="max-w-[130px] truncate text-[16px] font-extrabold leading-5 tracking-[-0.4px] text-white">
             {opponent?.nickname || '대화방'}
           </span>
-          <span className="whitespace-nowrap text-[11.5px] font-medium leading-[17.25px] text-white/80">
-            답변 채택률 92%
-          </span>
+          {answerAdoptionRatePercent !== null && (
+            <span className="whitespace-nowrap text-[11.5px] font-medium leading-[17.25px] text-white/80">
+              답변 채택률 {answerAdoptionRatePercent}%
+            </span>
+          )}
         </div>
         <button
           type="button"

@@ -93,20 +93,21 @@ test('my-page renders colored profile svg at the existing profile image size', (
   assert.doesNotMatch(html, /aria-label="프로필 모티프" role="img"/);
 });
 
-test('my-page root uses a fixed scaled Figma canvas with peek-header body scrolling', () => {
+test('my-page root uses a fixed scaled Figma canvas with fixed header and body scrolling', () => {
   const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps()));
 
   assert.match(html, /data-measure="my-page-responsive-canvas"/);
   assert.match(html, /data-measure="my-page-screen"/);
   assert.match(html, /h-\[852px\] w-\[393px\]/);
   assert.match(html, /aria-label="마이페이지 본문"/);
-  assert.match(html, /data-qling-peek-header-content="true"/);
   assert.match(html, /<header[^>]*h-\[100px\][\s\S]*<section[^>]*aria-label="마이페이지 본문"/);
-  assert.match(html, /relative pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\][^"]*transform-gpu/);
+  assert.match(html, /relative overflow-y-auto overscroll-contain pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
   assert.match(html, /height:min\(836px, max\(520px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 100px\)\)\)/);
   assert.match(html, /pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
   assert.match(html, /scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
-  assert.match(html, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
+  assert.doesNotMatch(html, /data-qling-peek-header-content/);
+  assert.doesNotMatch(html, /qling-peek-progress/);
+  assert.doesNotMatch(html, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
   assert.doesNotMatch(html, /figma-top-bar/);
   assert.doesNotMatch(html, /home-indicator/);
 });

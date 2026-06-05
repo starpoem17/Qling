@@ -1,29 +1,19 @@
 import { Heart, MessageSquare } from 'lucide-react';
-import type { CSSProperties, ReactNode, TouchEvent, WheelEvent } from 'react';
+import type { ReactNode, TouchEvent, WheelEvent } from 'react';
 import { EmptyState, ErrorState, SuccessBadge } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
-import { PeekHeaderScrollArea } from '../shared/PeekHeaderScrollArea';
-import { useScrollPeekHeader } from '../shared/scrollPeekHeader';
 import type { MyAnswersScreenProps } from './contract';
 
 export function MyAnswersScreen(props: MyAnswersScreenProps) {
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font text-[#1a1a1e]';
-  const scrollPeekHeader = useScrollPeekHeader();
-  const headerStyle = {
-    '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
-  } as CSSProperties;
-  const contentStyle = {
-    '--qling-peek-progress': scrollPeekHeader.isHeaderCollapsed ? '1' : '0',
-    transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))',
-  } as CSSProperties;
 
   return (
     <section className={screenClassName}>
       <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
         <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
-          <MyAnswersHeader onBack={props.onBack} style={headerStyle} />
+          <MyAnswersHeader onBack={props.onBack} />
 
           {props.state.status === 'loading' ? (
             <section
@@ -54,16 +44,14 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
               </MyAnswersStateCard>
             </section>
           ) : (
-            <PeekHeaderScrollArea
-              className="relative h-[836px] px-4 pb-[calc(108px+env(safe-area-inset-bottom,0px))] pt-[27px] transform-gpu"
-              style={contentStyle}
-              ariaLabel="내가 쓴 답변 목록"
-              resetKey="my-answers-ready"
+            <section
+              className="relative h-[752px] overflow-y-auto overscroll-contain px-4 pb-[calc(108px+env(safe-area-inset-bottom,0px))] pt-[27px] [-webkit-overflow-scrolling:touch]"
+              aria-label="내가 쓴 답변 목록"
             >
               <div className="grid gap-[19px]">
                 {props.items.map(reply => <MyAnswerCard key={reply.replyId} reply={reply} />)}
               </div>
-            </PeekHeaderScrollArea>
+            </section>
           )}
         </div>
       </div>
@@ -73,22 +61,17 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
 
 function MyAnswersHeader({
   onBack,
-  style,
 }: {
   readonly onBack: () => void;
-  readonly style: CSSProperties;
 }) {
   return (
     <header
       className="h-[100px] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
-      style={style}
       onTouchMove={blockLockedScroll}
       onWheel={blockLockedScroll}
     >
       <div
-        className="relative mx-auto h-[100px] w-full max-w-[393px] transform-gpu"
-        data-qling-peek-header-content="true"
-        style={{ transform: 'translateY(calc(var(--qling-peek-progress, 0) * -88px))' }}
+        className="relative mx-auto h-[100px] w-full max-w-[393px]"
       >
         <button
           type="button"

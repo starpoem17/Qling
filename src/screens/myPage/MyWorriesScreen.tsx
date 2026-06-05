@@ -14,10 +14,11 @@ const writePlusUrl = new URL('../../../assets/my_concerns/write_plus.svg', impor
 
 export function MyWorriesScreen(props: MyWorriesScreenProps) {
   const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
+  const contentViewportHeight = `min(733px, max(360px, calc((var(--qling-visual-viewport-height) - var(--qling-space-nav-height)) / (${canvasScale}) - 74px)))`;
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
   const writeButtonStyle = {
-    top: `min(710px, calc((100dvh - var(--qling-space-nav-height)) / (${canvasScale}) - 62px))`,
+    top: `min(710px, calc((var(--qling-visual-viewport-height) - var(--qling-space-nav-height)) / (${canvasScale}) - 62px))`,
   } satisfies CSSProperties;
 
   const writeButton = (
@@ -40,11 +41,12 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
       <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
         <div className={canvasClassName} style={{ transform: `scale(${canvasScale})` }}>
           <MyWorriesStaticHeader onOpenMyPage={props.onOpenMyPage} />
-          <CreamContentBackground />
+          <CreamContentBackground height={contentViewportHeight} />
 
           {props.state.status === 'loading' ? (
             <section
-              className="qling-received-worries-font absolute left-0 top-[74px] h-[733px] w-full touch-none overscroll-none overflow-hidden rounded-t-[32px]"
+              className="qling-received-worries-font absolute left-0 top-[74px] w-full touch-none overscroll-none overflow-hidden rounded-t-[32px]"
+              style={{ height: contentViewportHeight }}
               aria-label="나의 고민 로딩 상태"
               onWheel={blockLoadingScroll}
               onTouchMove={blockLoadingScroll}
@@ -52,12 +54,16 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
               <FigmaTabLoading label={props.state.label} className="top-[332px]" />
             </section>
           ) : props.state.status === 'error' ? (
-            <section className="qling-received-worries-font absolute left-0 top-[74px] h-[733px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[180px] pt-4 [-webkit-overflow-scrolling:touch]">
+            <section
+              className="qling-received-worries-font absolute left-0 top-[74px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[180px] pt-4 [-webkit-overflow-scrolling:touch]"
+              style={{ height: contentViewportHeight }}
+            >
               <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
             </section>
           ) : props.state.status === 'empty' ? (
             <section
-              className="qling-received-worries-font absolute left-0 top-[74px] h-[733px] w-full touch-none overscroll-none overflow-hidden rounded-t-[32px] px-4 pt-4"
+              className="qling-received-worries-font absolute left-0 top-[74px] w-full touch-none overscroll-none overflow-hidden rounded-t-[32px] px-4 pt-4"
+              style={{ height: contentViewportHeight }}
               aria-label="나의 고민 빈 상태"
               onWheel={blockLoadingScroll}
               onTouchMove={blockLoadingScroll}
@@ -66,7 +72,8 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
             </section>
           ) : (
             <section
-              className="qling-received-worries-font absolute left-0 top-[74px] h-[733px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[180px] pt-4 [-webkit-overflow-scrolling:touch]"
+              className="qling-received-worries-font absolute left-0 top-[74px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[180px] pt-4 [-webkit-overflow-scrolling:touch]"
+              style={{ height: contentViewportHeight }}
               aria-label="나의 고민 목록"
             >
               <div className="grid gap-[14px]">
@@ -145,11 +152,12 @@ function MyWorriesStaticHeader({ onOpenMyPage }: { readonly onOpenMyPage: () => 
   );
 }
 
-function CreamContentBackground() {
+function CreamContentBackground({ height }: { readonly height: string }) {
   return (
     <div
       aria-hidden="true"
-      className="absolute left-0 top-[74px] h-[733px] w-full overflow-hidden rounded-t-[32px] bg-[#fff1d1]"
+      className="absolute left-0 top-[74px] w-full overflow-hidden rounded-t-[32px] bg-[#fff1d1]"
+      style={{ height }}
     />
   );
 }

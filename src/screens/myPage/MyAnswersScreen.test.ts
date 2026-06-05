@@ -40,16 +40,18 @@ test('my answers screen renders same card format with heart and one small commen
   assert.doesNotMatch(html, /내가 보낸 답변과 받은 반응을 확인합니다\./);
 });
 
-test('my answers screen uses the fixed 393px Figma canvas and ready-only peek scroll area', () => {
+test('my answers screen uses the fixed 393px Figma canvas and ready-only body scroll area', () => {
   const html = renderToStaticMarkup(MyAnswersScreen(baseProps()));
 
   assert.match(html, /h-\[852px\] w-\[393px\]/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
   assert.match(html, /aria-label="내가 쓴 답변 목록"/);
-  assert.match(html, /data-qling-peek-header-content="true"/);
-  assert.match(html, /transform:translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
   assert.match(html, /<header[^>]*h-\[100px\][\s\S]*<section[^>]*aria-label="내가 쓴 답변 목록"/);
-  assert.match(html, /relative h-\[836px\][^"]*transform-gpu/);
+  assert.match(html, /relative h-\[752px\] overflow-y-auto overscroll-contain/);
+  assert.match(html, /pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
+  assert.doesNotMatch(html, /data-qling-peek-header-content/);
+  assert.doesNotMatch(html, /qling-peek-progress/);
+  assert.doesNotMatch(html, /transform:translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
   assert.doesNotMatch(html, /absolute left-0 top-\[100px\]/);
 });
 
