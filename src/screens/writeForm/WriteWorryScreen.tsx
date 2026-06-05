@@ -1,6 +1,6 @@
 import { Pencil } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { FigmaTopBar } from '../shared/ui';
+import { FigmaTopBar, QlingAlertDialog } from '../shared/ui';
 import type { WriteWorryScreenProps } from './contract';
 
 const writeWorryCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
@@ -79,36 +79,13 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
         고민 전송
       </button>
 
-      {popupMessage && (
-        <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 px-4"
-          role="presentation"
-          data-testid="write-worry-popup"
-        >
-          <section
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="write-worry-popup-title"
-            aria-describedby="write-worry-popup-message"
-            className="w-full max-w-[320px] rounded-2xl bg-white px-5 pb-5 pt-6 text-center shadow-2xl"
-          >
-            <h2 id="write-worry-popup-title" className="text-base font-extrabold text-[#2a2a2a]">
-              확인이 필요해요
-            </h2>
-            <p id="write-worry-popup-message" className="mt-4 whitespace-pre-wrap text-sm font-semibold leading-6 text-[#2a2a2a]">
-              {popupMessage}
-            </p>
-            <button
-              type="button"
-              aria-label="고민 작성 알림 확인"
-              onClick={props.onDismissPopup}
-              className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#ff8b3d] text-sm font-extrabold text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
-            >
-              확인
-            </button>
-          </section>
-        </div>
-      )}
+      <QlingAlertDialog
+        isOpen={Boolean(popupMessage)}
+        title="확인이 필요해요"
+        description={popupMessage ?? ''}
+        accessibilityLabel="고민 작성 알림 확인"
+        onConfirm={props.onDismissPopup}
+      />
         </div>
       </div>
     </section>

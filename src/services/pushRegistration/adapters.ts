@@ -116,7 +116,7 @@ export const createProductionPushRegistrationAdapters = (): PushRegistrationAdap
     });
   },
   now: () => Date.now(),
-  alert: message => alert(message),
+  alert: message => window.dispatchEvent(new CustomEvent('qling:app-alert', { detail: { message } })),
   log: (message, payload) => console.log(message, payload),
   warn: (message, payload, error) => console.warn(message, payload, error),
   error: (message, payload, error) => console.error(message, payload, error),

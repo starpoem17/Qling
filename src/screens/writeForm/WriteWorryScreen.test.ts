@@ -4,6 +4,7 @@ import { Children, isValidElement, type ReactElement, type ReactNode } from 'rea
 import { renderToStaticMarkup } from 'react-dom/server';
 import { WriteWorryScreen } from './WriteWorryScreen';
 import type { WriteWorryScreenProps } from './contract';
+import { QlingAlertDialog } from '../shared/ui';
 
 const validDraft = {
   value: '',
@@ -130,14 +131,16 @@ test('write worry screen reflects validation disabled state and moderation copy'
   const disabledCta = findButtonByAriaLabel(WriteWorryScreen(baseProps()), /고민 전송/);
 
   assert.equal(propsOf(disabledCta).disabled, true);
-  assert.match(invalidHtml, /role="alertdialog"/);
+  assert.match(invalidHtml, /role="dialog"/);
+  assert.match(invalidHtml, /aria-modal="true"/);
+  assert.match(invalidHtml, /확인이 필요해요/);
   assert.match(invalidHtml, /조금 더 자세히 적어주세요\./);
   assert.match(invalidHtml, /확인/);
   assert.match(rejectedHtml, /개인정보가 포함되어 있어요\./);
   assert.match(rejectedHtml, /연락처는 지워주세요\./);
   assert.match(failedHtml, /전송 실패: network down/);
   assert.doesNotMatch(checkingHtml, /AI 안심 필터가 내용을 확인하고 있습니다\./);
-  assert.doesNotMatch(checkingHtml, /role="alertdialog"/);
+  assert.doesNotMatch(checkingHtml, /role="dialog"/);
 });
 
 test('write worry popup confirm dismisses the backing popup state', () => {
@@ -153,9 +156,11 @@ test('write worry popup confirm dismisses the backing popup state', () => {
       dismissed = true;
     },
   }));
-  const confirmButton = findButtonByAriaLabel(tree, /고민 작성 알림 확인/);
+  const dialog = findElement(tree, element => element.type === QlingAlertDialog);
 
-  click(confirmButton);
+  const onConfirm = propsOf(dialog).onConfirm as unknown;
+  assert.equal(typeof onConfirm, 'function');
+  (onConfirm as () => void)();
 
   assert.equal(dismissed, true);
 });
@@ -172,7 +177,7 @@ test('write worry popup renders one message when validation and moderation both 
     },
   })));
 
-  assert.equal((html.match(/role="alertdialog"/g) ?? []).length, 1);
+  assert.equal((html.match(/role="dialog"/g) ?? []).length, 1);
   assert.match(html, /조금 더 자세히 적어주세요\./);
   assert.doesNotMatch(html, /개인정보가 포함되어 있어요\./);
 });

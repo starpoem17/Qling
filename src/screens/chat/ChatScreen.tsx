@@ -27,6 +27,7 @@ export function ChatScreen({
   chats,
   onChatClick,
   onProfileClick,
+  onNotificationOff,
   onLeaveChat,
   onReportUser,
 }: {
@@ -34,6 +35,7 @@ export function ChatScreen({
   readonly chats?: ChatListItem[];
   readonly onChatClick?: (chatId: string) => void;
   readonly onProfileClick?: () => void;
+  readonly onNotificationOff?: () => void;
   readonly onLeaveChat?: (chatId: string) => void;
   readonly onReportUser?: (chatId: string, opponentUid: string, opponentNickname: string) => void;
 }) {
@@ -43,6 +45,7 @@ export function ChatScreen({
   const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font';
   const visibleChats = filterChatsByOpponentName(chats ?? [], searchQuery);
+  const selectedMenuChat = visibleChats.find(chat => chat.chatId === openMenuId) ?? null;
 
   return (
     <section className={screenClassName} onClick={() => setOpenMenuId(null)}>
@@ -74,12 +77,8 @@ export function ChatScreen({
                   <ChatListCard
                     key={chat.chatId}
                     chat={chat}
-                    menuOpen={openMenuId === chat.chatId}
                     onChatClick={onChatClick}
                     onToggleMenu={() => setOpenMenuId(openMenuId === chat.chatId ? null : chat.chatId)}
-                    onCloseMenu={() => setOpenMenuId(null)}
-                    onLeaveChat={onLeaveChat}
-                    onReportUser={onReportUser}
                   />
                 ))}
               </div>
@@ -93,6 +92,24 @@ export function ChatScreen({
             >
               <ChatEmptyState />
             </section>
+          )}
+          {selectedMenuChat && (
+            <ChatListActionSheet
+              chat={selectedMenuChat}
+              onClose={() => setOpenMenuId(null)}
+              onNotificationOff={() => {
+                setOpenMenuId(null);
+                onNotificationOff?.();
+              }}
+              onLeaveChat={() => {
+                setOpenMenuId(null);
+                onLeaveChat?.(selectedMenuChat.chatId);
+              }}
+              onReportUser={() => {
+                setOpenMenuId(null);
+                onReportUser?.(selectedMenuChat.chatId, selectedMenuChat.opponentUid, selectedMenuChat.opponentName);
+              }}
+            />
           )}
         </div>
       </div>
@@ -152,20 +169,12 @@ function CreamContentBackground() {
 
 function ChatListCard({
   chat,
-  menuOpen,
   onChatClick,
   onToggleMenu,
-  onCloseMenu,
-  onLeaveChat,
-  onReportUser,
 }: {
   readonly chat: ChatListItem;
-  readonly menuOpen: boolean;
   readonly onChatClick?: (chatId: string) => void;
   readonly onToggleMenu: () => void;
-  readonly onCloseMenu: () => void;
-  readonly onLeaveChat?: (chatId: string) => void;
-  readonly onReportUser?: (chatId: string, opponentUid: string, opponentNickname: string) => void;
 }) {
   return (
     <article
@@ -198,13 +207,6 @@ function ChatListCard({
           >
             <img src={moreVerticalUrl} alt="" aria-hidden="true" className="h-full w-full" draggable={false} />
           </button>
-          {menuOpen && (
-            <div className="absolute right-0 top-full z-30 mt-1 w-[150px] overflow-hidden rounded-[12px] bg-white shadow-[0_4px_10px_rgb(0_0_0/0.15)]">
-              <button type="button" className="w-full border-b border-gray-100 px-4 py-3 text-left text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50" onClick={(event) => { event.stopPropagation(); onCloseMenu(); alert('알림이 꺼졌습니다.'); }}>알림 끄기</button>
-              <button type="button" className="w-full border-b border-gray-100 px-4 py-3 text-left text-[14px] font-bold text-[#2a2a2a] hover:bg-gray-50" onClick={(event) => { event.stopPropagation(); onCloseMenu(); onLeaveChat?.(chat.chatId); }}>채팅방 나가기</button>
-              <button type="button" className="w-full px-4 py-3 text-left text-[14px] font-bold text-[#ff8b3d] hover:bg-gray-50" onClick={(event) => { event.stopPropagation(); onCloseMenu(); onReportUser?.(chat.chatId, chat.opponentUid, chat.opponentName); }}>신고하기</button>
-            </div>
-          )}
         </div>
       </div>
 
@@ -240,6 +242,69 @@ function ChatListCard({
         </div>
       </div>
     </article>
+  );
+}
+
+function ChatListActionSheet({
+  chat,
+  onClose,
+  onNotificationOff,
+  onLeaveChat,
+  onReportUser,
+}: {
+  readonly chat: ChatListItem;
+  readonly onClose: () => void;
+  readonly onNotificationOff: () => void;
+  readonly onLeaveChat: () => void;
+  readonly onReportUser: () => void;
+}) {
+  return (
+    <div className="absolute inset-0 z-40 bg-[rgba(40,30,20,0.42)]" role="presentation" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${chat.opponentName} 채팅 메뉴`}
+        className="absolute bottom-0 left-0 flex h-[284px] w-full flex-col items-start overflow-hidden rounded-tl-[22px] rounded-tr-[22px] bg-white pb-[26px] pt-[10px]"
+        onClick={event => event.stopPropagation()}
+      >
+        <div className="flex w-full justify-center overflow-hidden pb-2">
+          <span className="h-1 w-10 rounded-[2px] bg-[#e6dccf]" aria-hidden="true" />
+        </div>
+        <ChatListActionSheetButton label="알림 끄기" onClick={onNotificationOff} />
+        <ChatListActionSheetButton label="채팅방 나가기" danger onClick={onLeaveChat} />
+        <ChatListActionSheetButton label="신고하기" danger onClick={onReportUser} />
+        <div className="h-2 w-full shrink-0 bg-[#f4efe7]" />
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex h-[72px] w-full shrink-0 items-start justify-center py-[15px] font-['Qling_Noto_Sans_KR'] text-[15px] font-bold leading-[22px] text-[#8a857c] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset"
+        >
+          취소
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ChatListActionSheetButton({
+  label,
+  danger = false,
+  onClick,
+}: {
+  readonly label: string;
+  readonly danger?: boolean;
+  readonly onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full shrink-0 items-center px-5 py-[15px] text-left focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-inset"
+    >
+      <span className={danger ? 'text-[15px] font-medium leading-[22px] text-[#e5484d]' : 'text-[15px] font-medium leading-[22px] text-[#2b2620]'}>
+        {label}
+      </span>
+    </button>
   );
 }
 

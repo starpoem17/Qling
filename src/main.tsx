@@ -7,9 +7,11 @@ import { registerSW } from 'virtual:pwa-register';
 // Register service worker and log status
 const updateSW = registerSW({
   onNeedRefresh() {
-    if (confirm('새로운 버전의 앱이 있습니다. 업데이트하시겠습니까?')) {
-      updateSW(true);
-    }
+    window.dispatchEvent(new CustomEvent('qling:app-update-available', {
+      detail: {
+        update: () => updateSW(true),
+      },
+    }));
   },
   onOfflineReady() {
     console.log('PWA: 앱이 오프라인에서 사용할 준비가 되었습니다.');

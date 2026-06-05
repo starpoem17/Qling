@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 
 export type SharedPrimitiveId =
   | 'appShellMobileFrame'
@@ -92,6 +92,15 @@ export type QlingSuccessDialogProps = {
   readonly description: string;
   readonly accessibilityLabel: string;
   readonly onConfirm: () => void;
+};
+
+export type QlingAlertDialogProps = {
+  readonly isOpen: boolean;
+  readonly title: string;
+  readonly description: string;
+  readonly confirmLabel?: string;
+  readonly accessibilityLabel?: string;
+  readonly onConfirm: (event: MouseEvent<HTMLButtonElement>) => void;
 };
 
 export type StatusStateProps = {

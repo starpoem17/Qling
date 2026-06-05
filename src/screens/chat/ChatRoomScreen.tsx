@@ -62,6 +62,7 @@ export function ChatRoomScreen({
   opponentUnreadCount,
   onBack,
   onSendMessage,
+  onNotificationOff,
   onLeaveChat,
   onReportUser,
 }: {
@@ -74,6 +75,7 @@ export function ChatRoomScreen({
   readonly opponentUnreadCount?: number;
   readonly onBack: () => void;
   readonly onSendMessage: (content: string) => Promise<{ success: boolean; error?: string }>;
+  readonly onNotificationOff: () => void;
   readonly onLeaveChat: () => void;
   readonly onReportUser: () => void;
 }) {
@@ -369,7 +371,7 @@ export function ChatRoomScreen({
             onClose={() => setMenuOpen(false)}
             onNotificationOff={() => {
               setMenuOpen(false);
-              alert('알림이 꺼졌습니다.');
+              onNotificationOff();
             }}
             onBlock={() => {
               setMenuOpen(false);
@@ -516,7 +518,7 @@ export function ChatRoomScreen({
           onClose={() => setMenuOpen(false)}
           onNotificationOff={() => {
             setMenuOpen(false);
-            alert('알림이 꺼졌습니다.');
+            onNotificationOff();
           }}
           onBlock={() => {
             setMenuOpen(false);

@@ -8,9 +8,11 @@ import type { AppRouteViewState } from '../../services/appShell/prdNavigationPol
 export function ChatListContainer({
   user,
   setView,
+  setFilterAlert,
 }: {
   readonly user: FirebaseUser | null;
   readonly setView: (view: AppRouteViewState) => void;
+  readonly setFilterAlert: (message: string) => void;
 }) {
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,10 +116,10 @@ export function ChatListContainer({
           Authorization: `Bearer ${token}`
         }
       });
-      alert('채팅방을 나갔습니다.');
+      setFilterAlert('채팅방을 나갔습니다.');
     } catch (err) {
       console.error('Failed to leave chat:', err);
-      alert('오류가 발생했습니다.');
+      setFilterAlert('오류가 발생했습니다.');
     }
   };
 
@@ -127,6 +129,7 @@ export function ChatListContainer({
       chats={chats}
       onChatClick={(chatId) => setView({ route: 'chat_room', chatId })}
       onProfileClick={() => setView('마이페이지')}
+      onNotificationOff={() => setFilterAlert('알림이 꺼졌습니다.')}
       onLeaveChat={handleLeaveChat}
       onReportUser={(chatId, targetUid, targetNickname) => setView({ route: 'report_user', targetUid, targetNickname, chatId, fromRoute: 'chat' })}
     />

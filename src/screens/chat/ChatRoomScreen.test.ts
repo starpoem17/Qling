@@ -15,6 +15,7 @@ function renderChatRoom(answerAdoptionRatePercent: number | null) {
     opponentUnreadCount: 0,
     onBack: () => undefined,
     onSendMessage: async () => ({ success: true }),
+    onNotificationOff: () => undefined,
     onLeaveChat: () => undefined,
     onReportUser: () => undefined,
   }));

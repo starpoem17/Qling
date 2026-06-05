@@ -16,9 +16,6 @@ import {
 import { onMessage } from 'firebase/messaging';
 import { auth, db, firebaseRuntimeConfig, googleProvider, isDevRuntime, messaging } from './firebase';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  XCircle,
-} from 'lucide-react';
 import { cn } from './lib/utils';
 import { usePushRegistration } from './services/pushRegistration';
 import {
@@ -54,6 +51,8 @@ import { TutorialContainer } from './screens/tutorial/TutorialContainer';
 import {
   BottomNavigation,
   MobileAppShell,
+  QlingAlertDialog,
+  QlingDialog,
 } from './screens/shared/ui';
 import { LoadingShellScreen } from './screens/loadingShell/LoadingShellScreen';
 import { ReportUserContainer } from './screens/report/ReportUserContainer';
@@ -81,6 +80,16 @@ interface UserProfile {
   exampleWorrySeedIds?: string[];
   exampleDeliveryIds?: string[];
 }
+
+type AppUpdateHandler = () => void;
+
+type AppUpdateEvent = CustomEvent<{
+  readonly update: AppUpdateHandler;
+}>;
+
+type AppAlertEvent = CustomEvent<{
+  readonly message: string;
+}>;
 
 async function createExampleWorriesForCurrentUser(user: FirebaseUser) {
   const token = await user.getIdToken();
@@ -114,6 +123,7 @@ export default function App() {
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [pendingAppUpdate, setPendingAppUpdate] = useState<AppUpdateHandler | null>(null);
 
   const totalChatUnreadCount = useTotalUnreadCount(user);
 
@@ -125,6 +135,24 @@ export default function App() {
     disablePushRegistrationForCurrentDevice,
     resetPushRegistrationOnSignOut,
   } = usePushRegistration({ user, loading });
+
+  useEffect(() => {
+    const handleAppAlert = (event: Event) => {
+      const message = (event as AppAlertEvent).detail?.message;
+      if (message) setFilterAlert(message);
+    };
+    const handleAppUpdateAvailable = (event: Event) => {
+      const update = (event as AppUpdateEvent).detail?.update;
+      if (typeof update === 'function') setPendingAppUpdate(() => update);
+    };
+
+    window.addEventListener('qling:app-alert', handleAppAlert);
+    window.addEventListener('qling:app-update-available', handleAppUpdateAvailable);
+    return () => {
+      window.removeEventListener('qling:app-alert', handleAppAlert);
+      window.removeEventListener('qling:app-update-available', handleAppUpdateAvailable);
+    };
+  }, []);
 
   // Auth & Profile Listener
   useEffect(() => {
@@ -353,30 +381,26 @@ export default function App() {
           ],
       )}
     >
-      <AnimatePresence>
-        {shouldRenderFilterAlert(filterAlert) && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
-              className="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full text-center space-y-6"
-            >
-              <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto text-red-500">
-                <XCircle className="w-6 h-6" />
-              </div>
-              <p className="font-bold text-lg text-gray-800">{filterAlert}</p>
-              <button 
-                onClick={() => setFilterAlert(null)}
-                className="w-full py-3 bg-[#5A5A40] text-white rounded-xl font-bold transition-all hover:bg-[#4A4A30]"
-              >
-                확인
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <QlingAlertDialog
+        isOpen={shouldRenderFilterAlert(filterAlert)}
+        title="확인이 필요해요"
+        description={filterAlert ?? ''}
+        accessibilityLabel="앱 알림 확인"
+        onConfirm={() => setFilterAlert(null)}
+      />
+      <QlingDialog
+        isOpen={Boolean(pendingAppUpdate)}
+        title="새 버전이 있어요"
+        description="지금 업데이트하면 최신 화면으로 다시 시작합니다."
+        cancelLabel="나중에"
+        confirmLabel="업데이트"
+        onCancel={() => setPendingAppUpdate(null)}
+        onConfirm={() => {
+          const update = pendingAppUpdate;
+          setPendingAppUpdate(null);
+          update?.();
+        }}
+      />
       <AnimatePresence mode="wait">
           
           {/* 1. Onboarding View */}
@@ -518,7 +542,7 @@ export default function App() {
 
           {(currentRoute === '채팅' || currentRoute === 'chat') && (
             <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-              <ChatListContainer user={user} setView={setView} />
+              <ChatListContainer user={user} setView={setView} setFilterAlert={setFilterAlert} />
             </motion.div>
           )}
 
@@ -528,6 +552,7 @@ export default function App() {
                 user={user}
                 chatId={view.chatId}
                 setView={setView}
+                setFilterAlert={setFilterAlert}
               />
             </motion.div>
           )}

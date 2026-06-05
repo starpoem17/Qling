@@ -1,4 +1,4 @@
-import { useEffect, useId, type ReactNode } from 'react';
+import { useEffect, useId, type MouseEvent, type ReactNode } from 'react';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import { normalizeProfileColor } from '../../lib/profileColor';
 import {
@@ -18,6 +18,7 @@ import type {
   MobileAppShellProps,
   PolicyTextContainerProps,
   ProfileMotifProps,
+  QlingAlertDialogProps,
   QlingDialogProps,
   QlingSuccessDialogProps,
   QlingTextAreaProps,
@@ -410,7 +411,7 @@ function FigmaModalButton({
   variant = 'primary',
 }: {
   readonly children: ReactNode;
-  readonly onClick?: () => void;
+  readonly onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
   readonly disabled?: boolean;
   readonly processing?: boolean;
   readonly accessibilityLabel?: string;
@@ -457,6 +458,34 @@ export function QlingSuccessDialog({
       <div className="mt-[43px]">
         <FigmaModalButton accessibilityLabel={accessibilityLabel} onClick={onConfirm}>
           확인
+        </FigmaModalButton>
+      </div>
+    </FigmaModalFrame>
+  );
+}
+
+export function QlingAlertDialog({
+  isOpen,
+  title,
+  description,
+  confirmLabel = '확인',
+  accessibilityLabel,
+  onConfirm,
+}: QlingAlertDialogProps) {
+  const titleId = useId();
+  const descriptionId = useId();
+
+  if (!isOpen) return null;
+
+  return (
+    <FigmaModalFrame labelledBy={titleId} describedBy={descriptionId}>
+      <h2 id={titleId} className="text-[19px] font-bold leading-6 text-[#1a1a1e]">{title}</h2>
+      <p id={descriptionId} className="mt-[19px] whitespace-pre-wrap text-sm font-bold leading-[21px] text-[#6e7076]">
+        {description}
+      </p>
+      <div className="mt-[43px]">
+        <FigmaModalButton accessibilityLabel={accessibilityLabel} onClick={onConfirm}>
+          {confirmLabel}
         </FigmaModalButton>
       </div>
     </FigmaModalFrame>

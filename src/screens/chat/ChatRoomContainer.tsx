@@ -9,10 +9,12 @@ export function ChatRoomContainer({
   user,
   chatId,
   setView,
+  setFilterAlert,
 }: {
   readonly user: FirebaseUser | null;
   readonly chatId: string;
   readonly setView: (view: AppRouteViewState) => void;
+  readonly setFilterAlert: (message: string) => void;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [opponent, setOpponent] = useState<{ nickname: string; profileColor: string; uid: string } | null>(null);
@@ -213,11 +215,11 @@ export function ChatRoomContainer({
           Authorization: `Bearer ${token}`
         }
       });
-      alert('채팅방을 나갔습니다.');
+      setFilterAlert('채팅방을 나갔습니다.');
       setView({ route: 'chat' });
     } catch (err) {
       console.error('Failed to leave chat:', err);
-      alert('오류가 발생했습니다.');
+      setFilterAlert('오류가 발생했습니다.');
     }
   };
 
@@ -232,6 +234,7 @@ export function ChatRoomContainer({
       worryInfo={worryInfo}
       onBack={() => setView({ route: 'chat' })}
       onSendMessage={handleSendMessage}
+      onNotificationOff={() => setFilterAlert('알림이 꺼졌습니다.')}
       onLeaveChat={handleLeaveChat}
       onReportUser={() => {
         const targetUid = opponent?.uid || 'unknown';
