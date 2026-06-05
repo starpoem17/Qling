@@ -221,6 +221,37 @@ test('ranking sheet renders partial rows and keeps viewer card when the viewer i
   assert.doesNotMatch(html, /아직 순위가 없어요/);
 });
 
+test('viewer rank card displays dash rank and percentile when viewer has no hearts', () => {
+  const rankings = period();
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps({
+    state: {
+      status: 'ready',
+      monthly: {
+        ...rankings,
+        viewer: {
+          ...entry(24),
+          uid: 'viewer',
+          nickname: '나',
+          heartCount: 0,
+          percentile: 100,
+        },
+      },
+      total: rankings,
+      season: {
+        monthLabel: '5월 시즌',
+        daysUntilMonthEnd: 1,
+      },
+    },
+  })));
+
+  assert.match(html, /aria-label="내 순위 -"/);
+  assert.match(html, />내 순위</);
+  assert.match(html, />-</);
+  assert.match(html, />상위 -% · 이번 달</);
+  assert.doesNotMatch(html, /상위 100% · 이번 달/);
+  assert.match(html, /<span>0<\/span>/);
+});
+
 test('ranking sheet is empty when there are fewer than four ranked entries', () => {
   const rankings = period();
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps({

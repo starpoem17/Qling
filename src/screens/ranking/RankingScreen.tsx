@@ -348,21 +348,25 @@ function ViewerRankCard({
   readonly viewer: ViewerRankingDisplayEntry;
   readonly mode: RankingMode;
 }) {
+  const hasNoHearts = viewer.heartCount === 0;
+  const rankLabel = hasNoHearts ? '-' : String(viewer.rank);
+  const percentileLabel = hasNoHearts ? '-' : String(viewer.percentile);
+
   return (
     <div
       className="absolute left-4 flex h-[70px] w-[361px] items-center gap-[18px] overflow-hidden rounded-[18px] bg-[#ffe3cb] py-[11px] pl-[14px] pr-4 text-left shadow-[0_8px_22px_rgb(128_87_33/0.16)]"
       style={{ top: viewerRankCardTop }}
-      aria-label={`내 순위 ${viewer.rank}위`}
+      aria-label={hasNoHearts ? '내 순위 -' : `내 순위 ${viewer.rank}위`}
     >
       <span className="flex h-[46px] w-[46px] shrink-0 flex-col items-center justify-center rounded-[13px] bg-[#34c759] text-white shadow-[2px_3px_4px_rgb(0_0_0/0.25)]">
         <span className="text-[8.5px] font-medium leading-[11px] font-['Qling_Noto_Sans_KR']">내 순위</span>
-        <span className="text-[19px] font-black leading-[25px] font-['Qling_Noto_Sans_KR_Black']">{viewer.rank}</span>
+        <span className="text-[19px] font-black leading-[25px] font-['Qling_Noto_Sans_KR_Black']">{rankLabel}</span>
       </span>
       <img src={profileImageUrlForColor(viewer.profileColor)} alt="" className="h-[38px] w-[38px] shrink-0 rounded-full" />
       <span className="min-w-0 flex-1 overflow-hidden">
         <span className="block truncate text-[15px] font-bold leading-5 text-[#191f28] font-['Qling_Noto_Sans_KR']">나</span>
         <span className="mt-0.5 block truncate text-[11.5px] font-normal leading-[15px] text-[#8b95a1] font-['Qling_Noto_Sans_KR']">
-          상위 {viewer.percentile}% · {mode === 'monthly' ? '이번 달' : '누적'}
+          상위 {percentileLabel}% · {mode === 'monthly' ? '이번 달' : '누적'}
         </span>
       </span>
       <HeartCount className="shrink-0 text-[#191f28]" heartCount={viewer.heartCount} />
