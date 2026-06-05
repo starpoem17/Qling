@@ -32,6 +32,7 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
           idPrefix="answer-check-chat-start-confirmation"
           onCancel={props.onCancelChatStartConfirmation}
           onConfirm={props.onConfirmChatStartConfirmation}
+          isProcessing={Boolean(props.chatCreationReplyId)}
         />
       ) : null}
     >
@@ -51,6 +52,7 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
               key={reply.replyId}
               reply={reply}
               commentDialog={props.commentDialog?.replyId === reply.replyId ? props.commentDialog : null}
+              chatCreationReplyId={props.chatCreationReplyId}
               onLike={props.onLike}
               onDislike={props.onDislike}
               onOpenLikeRequiredPopup={props.onOpenLikeRequiredPopup}
@@ -197,6 +199,7 @@ function WorryCard({
 function AnswerCard({
   reply,
   commentDialog,
+  chatCreationReplyId,
   onLike,
   onDislike,
   onOpenLikeRequiredPopup,
@@ -208,6 +211,7 @@ function AnswerCard({
 }: {
   readonly reply: AnswerCheckReplyProps;
   readonly commentDialog: AnswerCheckScreenProps['commentDialog'];
+  readonly chatCreationReplyId?: string | null;
   readonly onLike: (replyId: string) => void;
   readonly onDislike: (replyId: string) => void;
   readonly onOpenLikeRequiredPopup: () => void;
@@ -224,6 +228,8 @@ function AnswerCard({
   const showReplyActions = (liked || awaitingLike) && !hasComment && !commentDialog;
   const replyActionsEnabled = liked;
   const showDivider = showReplyActions || hasComment || commentDialog;
+  const isChatCreationInProgress = Boolean(chatCreationReplyId);
+  const isChatStarting = chatCreationReplyId === reply.replyId;
 
   return (
     <section className={cn(
@@ -269,6 +275,8 @@ function AnswerCard({
           <button
             type="button"
             aria-disabled={!replyActionsEnabled}
+            aria-busy={isChatStarting || undefined}
+            disabled={isChatCreationInProgress}
             onClick={() => {
               if (!replyActionsEnabled) {
                 onOpenLikeRequiredPopup();

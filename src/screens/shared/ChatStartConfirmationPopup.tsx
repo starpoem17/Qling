@@ -3,10 +3,12 @@ const chatStartDotUrl = new URL('../../../assets/chat/chat_start_dot.svg', impor
 export function ChatStartConfirmationPopup({
   onCancel,
   onConfirm,
+  isProcessing = false,
   idPrefix = 'my-answers-chat-start-confirmation',
 }: {
   readonly onCancel: () => void;
   readonly onConfirm: () => void;
+  readonly isProcessing?: boolean;
   readonly idPrefix?: string;
 }) {
   const titleId = `${idPrefix}-title`;
@@ -51,7 +53,9 @@ export function ChatStartConfirmationPopup({
         <button
           type="button"
           onClick={onConfirm}
-          className="absolute left-[160px] top-[201px] h-[52px] w-[120px] rounded-[12px] bg-[#ff8b3d] text-[15px] font-bold leading-normal tracking-[-0.15px] text-white focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
+          aria-busy={isProcessing || undefined}
+          disabled={isProcessing}
+          className="absolute left-[160px] top-[201px] h-[52px] w-[120px] rounded-[12px] bg-[#ff8b3d] text-[15px] font-bold leading-normal tracking-[-0.15px] text-white focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
         >
           확인
         </button>

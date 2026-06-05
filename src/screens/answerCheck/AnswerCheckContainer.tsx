@@ -40,6 +40,7 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
   const [commentDialog, setCommentDialog] = useState<CommentDialogState | null>(null);
   const [likeRequiredPopupOpen, setLikeRequiredPopupOpen] = useState(false);
   const [chatStartTargetReplyId, setChatStartTargetReplyId] = useState<string | null>(null);
+  const [chatCreationReplyId, setChatCreationReplyId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!shouldMarkRepliesForWorryRead({ hasUser: Boolean(props.user), worryId })) return;
@@ -114,7 +115,9 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
   };
 
   const startChat = async (replyId: string) => {
-    props.setFilterAlert('채팅방을 생성하고 있습니다...');
+    if (chatCreationReplyId) return;
+
+    setChatCreationReplyId(replyId);
     try {
       const token = await props.user?.getIdToken();
       const res = await fetch('/api/chats/create', {
@@ -135,6 +138,8 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
     } catch (err) {
       console.error(err);
       props.setFilterAlert('네트워크 오류가 발생했습니다.');
+    } finally {
+      setChatCreationReplyId(null);
     }
   };
 
@@ -161,6 +166,7 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
       } : null}
       likeRequiredPopupOpen={likeRequiredPopupOpen}
       chatStartConfirmationOpen={Boolean(chatStartTargetReplyId)}
+      chatCreationReplyId={chatCreationReplyId}
       onBack={() => props.setView(backRouteForRoute({ route: 'answer_check', worryId: worryId ?? '' }))}
       onLike={async replyId => {
         await submitFeedback(replyId, 'helpful');
@@ -172,7 +178,10 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
         }
       }}
       onOpenLikeRequiredPopup={() => setLikeRequiredPopupOpen(true)}
-      onOpenChatStartConfirmation={replyId => setChatStartTargetReplyId(replyId)}
+      onOpenChatStartConfirmation={replyId => {
+        if (chatCreationReplyId) return;
+        setChatStartTargetReplyId(replyId);
+      }}
       onOpenOneLineReply={openOneLineReply}
       onCommentChange={value => setCommentDialog(prev => prev ? { ...prev, draft: value, moderationMessage: undefined } : prev)}
       onCommentSubmit={async () => {
@@ -188,7 +197,7 @@ export function AnswerCheckContainer(props: AnswerCheckContainerProps) {
       onCloseLikeRequiredPopup={() => setLikeRequiredPopupOpen(false)}
       onCancelChatStartConfirmation={() => setChatStartTargetReplyId(null)}
       onConfirmChatStartConfirmation={() => {
-        if (!chatStartTargetReplyId) return;
+        if (!chatStartTargetReplyId || chatCreationReplyId) return;
         const replyId = chatStartTargetReplyId;
         setChatStartTargetReplyId(null);
         void startChat(replyId);

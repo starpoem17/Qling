@@ -15,7 +15,7 @@ export function MyAnswersScreen(props: MyAnswersScreenProps) {
       onOpenChatStartConfirmation={setChatStartTarget}
       onCancelChatStartConfirmation={() => setChatStartTarget(null)}
       onConfirmChatStartConfirmation={() => {
-        if (!chatStartTarget) return;
+        if (!chatStartTarget || props.chatCreationReplyId) return;
         const target = chatStartTarget;
         setChatStartTarget(null);
         props.onStartChat(target);
@@ -74,6 +74,7 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
                   <MyAnswerCard
                     key={reply.replyId}
                     reply={reply}
+                    chatCreationReplyId={props.chatCreationReplyId}
                     onStartChatConfirm={props.onOpenChatStartConfirmation}
                   />
                 ))}
@@ -84,6 +85,7 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
             <ChatStartConfirmationPopup
               onCancel={props.onCancelChatStartConfirmation}
               onConfirm={props.onConfirmChatStartConfirmation}
+              isProcessing={props.chatCreationReplyId === props.chatStartTarget.replyId}
             />
           )}
         </div>
@@ -132,12 +134,16 @@ function MyAnswersStateCard({ children }: { readonly children: ReactNode }) {
 
 function MyAnswerCard({
   reply,
+  chatCreationReplyId,
   onStartChatConfirm,
 }: {
   readonly reply: MyAnswersScreenProps['items'][number];
+  readonly chatCreationReplyId?: string | null;
   readonly onStartChatConfirm: (item: MyAnswersScreenProps['items'][number]) => void;
 }) {
   const hasComment = Boolean(reply.feedbackComment);
+  const isChatCreationInProgress = Boolean(chatCreationReplyId);
+  const isChatStarting = chatCreationReplyId === reply.replyId;
 
   return (
     <article
@@ -171,8 +177,10 @@ function MyAnswerCard({
         <button
           type="button"
           aria-label="익명 채팅 시작하기"
+          aria-busy={isChatStarting || undefined}
+          disabled={isChatCreationInProgress}
           onClick={() => onStartChatConfirm(reply)}
-          className="mt-[15px] flex h-[35px] w-full items-center justify-center gap-[9px] rounded-[12px] bg-[#34c759] text-[15px] font-bold leading-none tracking-[-0.01em] text-white transition-colors hover:bg-[#2fbd52] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#34c759]"
+          className="mt-[15px] flex h-[35px] w-full items-center justify-center gap-[9px] rounded-[12px] bg-[#34c759] text-[15px] font-bold leading-none tracking-[-0.01em] text-white transition-colors hover:bg-[#2fbd52] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#34c759] disabled:cursor-not-allowed disabled:opacity-55"
         >
           <MessageSquare className="h-5 w-5 fill-white text-white" aria-hidden="true" />
           <span>익명 채팅 시작하기</span>

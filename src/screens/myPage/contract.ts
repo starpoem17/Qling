@@ -100,6 +100,7 @@ export type MyAnswerListItemProps = {
 export type MyAnswersScreenProps = {
   readonly state: ScreenAsyncState;
   readonly items: readonly MyAnswerListItemProps[];
+  readonly chatCreationReplyId?: string | null;
   readonly onBack: () => void;
   readonly onStartChat: (item: MyAnswerListItemProps) => void;
 };

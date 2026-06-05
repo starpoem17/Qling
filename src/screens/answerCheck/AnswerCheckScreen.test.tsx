@@ -341,6 +341,33 @@ test('chat start confirmation popup matches the Figma modal chrome', () => {
   assert.match(html, />확인<\/button>/);
 });
 
+test('answer check disables chat start controls while chat creation is processing', () => {
+  const tree = AnswerCheckScreen(baseProps({
+    replies: [{
+      replyId: 'reply-busy',
+      bodyText: '좋아요 답변 본문',
+      createdAtLabel: '1분 전',
+      feedbackState: 'liked',
+      canLike: true,
+      canDislike: false,
+      canOneLineReply: true,
+      canChat: true,
+      isFeedbackProcessing: false,
+      isCommentProcessing: false,
+    }],
+    chatCreationReplyId: 'reply-busy',
+    chatStartConfirmationOpen: true,
+  }));
+
+  const chatButton = findElement(tree, element => element.type === 'button' && element.props.children === '채팅 시작');
+  const confirmButton = findElement(tree, element => element.type === 'button' && element.props.children === '확인');
+
+  assert.equal(chatButton.props.disabled, true);
+  assert.equal(chatButton.props['aria-busy'], true);
+  assert.equal(confirmButton.props.disabled, true);
+  assert.equal(confirmButton.props['aria-busy'], true);
+});
+
 test('one-line reply editor supports submit and cancel callbacks', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps({
     commentDialog: {

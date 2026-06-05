@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { User } from 'firebase/auth';
 import { useMyGivenReplies } from '../../services/myWorries';
 import {
@@ -15,6 +16,7 @@ export type MyAnswersContainerProps = {
 
 export function MyAnswersContainer(props: MyAnswersContainerProps) {
   const { myGivenReplies, isLoadingMyGivenReplies } = useMyGivenReplies({ user: props.user });
+  const [chatCreationReplyId, setChatCreationReplyId] = useState<string | null>(null);
   const items = myGivenReplies.map(reply => mapMyGivenReplyToListItem(reply));
 
   return (
@@ -25,11 +27,12 @@ export function MyAnswersContainer(props: MyAnswersContainerProps) {
           ? { status: 'empty', message: '' }
           : { status: 'ready' }}
       items={items}
+      chatCreationReplyId={chatCreationReplyId}
       onBack={() => props.setView(backRouteForRoute('my_answers'))}
       onStartChat={async item => {
-        if (!item.worryId) return;
+        if (!item.worryId || chatCreationReplyId) return;
 
-        props.setFilterAlert('채팅방을 생성하고 있습니다...');
+        setChatCreationReplyId(item.replyId);
         try {
           const token = await props.user?.getIdToken();
           const res = await fetch('/api/chats/create', {
@@ -50,6 +53,8 @@ export function MyAnswersContainer(props: MyAnswersContainerProps) {
         } catch (error) {
           console.error(error);
           props.setFilterAlert('네트워크 오류가 발생했습니다.');
+        } finally {
+          setChatCreationReplyId(null);
         }
       }}
     />

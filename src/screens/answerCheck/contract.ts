@@ -43,6 +43,7 @@ export type AnswerCheckScreenProps = {
   readonly commentDialog: AnswerCheckCommentDialogProps | null;
   readonly likeRequiredPopupOpen: boolean;
   readonly chatStartConfirmationOpen: boolean;
+  readonly chatCreationReplyId?: string | null;
   readonly onBack: () => void;
   readonly onLike: (replyId: string) => void;
   readonly onDislike: (replyId: string) => void;

@@ -174,6 +174,22 @@ test('my answers chat start confirmation confirm starts chat with selected reply
   assert.deepEqual(events, ['start:worry-1:reply-1']);
 });
 
+test('my answers disables chat start controls while chat creation is processing', () => {
+  const selectedReply = baseProps().items[0];
+  const tree = MyAnswersScreenView(viewProps({
+    chatCreationReplyId: selectedReply.replyId,
+    chatStartTarget: selectedReply,
+  }));
+
+  const startButton = findElement(tree, element => element.type === 'button' && element.props['aria-label'] === '익명 채팅 시작하기');
+  const confirmButton = findElement(tree, element => element.type === 'button' && element.props.children === '확인');
+
+  assert.equal(startButton.props.disabled, true);
+  assert.equal(startButton.props['aria-busy'], true);
+  assert.equal(confirmButton.props.disabled, true);
+  assert.equal(confirmButton.props['aria-busy'], true);
+});
+
 test('my answers screen does not make item cards navigate to detail routes', () => {
   const html = renderToStaticMarkup(createElement(MyAnswersScreen, baseProps()));
 
