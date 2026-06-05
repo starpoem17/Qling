@@ -13,6 +13,7 @@ const chatRoomDocumentBackground = '#ffffff';
 const chatRoomKeyboardDebugStorageKey = 'qling.chatRoomKeyboardDebug';
 const chatRoomKeyboardDebugQueryParam = 'chatRoomKeyboardDebug';
 const chatInputBaseHeight = 67;
+const chatRoomTopBarHeight = 74;
 const chatTextareaMinHeight = 40;
 const chatTextareaMaxHeight = 60;
 
@@ -142,6 +143,13 @@ export function ChatRoomScreen({
   const rootStyle: CSSProperties = {
     transform: `translateY(${viewportMetrics.viewportOffsetTop}px)`,
   };
+  const topBarLayerStyle: CSSProperties = {
+    height: `${viewportMetrics.viewportOffsetTop + chatRoomTopBarHeight * viewportMetrics.scale}px`,
+    paddingTop: `${viewportMetrics.viewportOffsetTop}px`,
+  };
+  const topBarCanvasStyle: CSSProperties = {
+    transform: `scale(${viewportMetrics.scale})`,
+  };
 
   useEffect(() => {
     const textarea = messageInputRef.current;
@@ -209,32 +217,41 @@ export function ChatRoomScreen({
   const unreadThresholdIndex = mineMessageIds.length - (opponentUnreadCount || 0);
   if (loading || error) {
     return (
-      <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]" style={rootStyle}>
-        <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-          <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
-            <ChatRoomTopBar
-              opponent={opponent}
-              onBack={onBack}
-              onOpenMenu={handleOpenMenu}
-            />
-            <div className="flex min-h-0 flex-1 w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
-              {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
+      <>
+        <ChatRoomTopBarLayer
+          opponent={opponent}
+          topBarLayerStyle={topBarLayerStyle}
+          topBarCanvasStyle={topBarCanvasStyle}
+          onBack={onBack}
+          onOpenMenu={handleOpenMenu}
+        />
+        <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]" style={rootStyle}>
+          <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+            <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+              <ChatRoomTopBarSpacer />
+              <div className="flex min-h-0 flex-1 w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
+                {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </>
     );
   }
 
   return (
-    <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]" style={rootStyle}>
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-        <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
-          <ChatRoomTopBar
-            opponent={opponent}
-            onBack={onBack}
-            onOpenMenu={handleOpenMenu}
-          />
+    <>
+      <ChatRoomTopBarLayer
+        opponent={opponent}
+        topBarLayerStyle={topBarLayerStyle}
+        topBarCanvasStyle={topBarCanvasStyle}
+        onBack={onBack}
+        onOpenMenu={handleOpenMenu}
+      />
+      <section className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]" style={rootStyle}>
+        <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
+          <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+            <ChatRoomTopBarSpacer />
             <div
               ref={messagesScrollerRef}
               data-chat-room-message-scroller
@@ -349,7 +366,40 @@ export function ChatRoomScreen({
           />
         )}
       </section>
+    </>
   );
+}
+
+function ChatRoomTopBarLayer({
+  opponent,
+  topBarLayerStyle,
+  topBarCanvasStyle,
+  onBack,
+  onOpenMenu,
+}: {
+  readonly opponent: { nickname: string; profileColor: string } | null;
+  readonly topBarLayerStyle: CSSProperties;
+  readonly topBarCanvasStyle: CSSProperties;
+  readonly onBack: () => void;
+  readonly onOpenMenu: () => void;
+}) {
+  return (
+    <div
+      data-chat-room-top-bar-layer
+      className="fixed left-0 right-0 top-0 z-50 overflow-hidden bg-[#ff8b3d]"
+      style={topBarLayerStyle}
+    >
+      <div className="mx-auto flex w-full max-w-[480px] justify-center">
+        <div className="h-[74px] w-[393px] shrink-0 origin-top" style={topBarCanvasStyle}>
+          <ChatRoomTopBar opponent={opponent} onBack={onBack} onOpenMenu={onOpenMenu} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChatRoomTopBarSpacer() {
+  return <div data-chat-room-top-bar-spacer className="h-[74px] w-[393px] shrink-0 bg-[#ff8b3d]" aria-hidden="true" />;
 }
 
 function ChatRoomInputBar({
@@ -523,7 +573,7 @@ function ChatRoomActionSheet({
   readonly onReport: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-30 bg-[rgba(40,30,20,0.42)]" role="presentation" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] bg-[rgba(40,30,20,0.42)]" role="presentation" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"

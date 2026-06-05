@@ -19,11 +19,15 @@ test('chat room autoscroll stays inside the message scroller', () => {
   assert.match(chatRoomScreenSource, /overflow-y-auto overscroll-contain bg-\[#fff1d1\]/);
 });
 
-test('chat room top bar stays inside the scaled canvas without portal recovery', () => {
+test('chat room top bar is fixed in its own scaled layer while canvas keeps a spacer', () => {
   assert.doesNotMatch(chatRoomScreenSource, /createPortal/);
   assert.doesNotMatch(chatRoomScreenSource, /headerLayer/);
   assert.doesNotMatch(chatRoomScreenSource, /inputLayer/);
-  assert.match(chatRoomScreenSource, /data-chat-room-canvas[\s\S]*<ChatRoomTopBar/);
+  assert.match(chatRoomScreenSource, /data-chat-room-top-bar-layer[\s\S]*className="fixed left-0 right-0 top-0 z-50 overflow-hidden bg-\[#ff8b3d\]"[\s\S]*style=\{topBarLayerStyle\}/);
+  assert.match(chatRoomScreenSource, /className="h-\[74px\] w-\[393px\] shrink-0 origin-top" style=\{topBarCanvasStyle\}[\s\S]*<ChatRoomTopBar opponent=\{opponent\} onBack=\{onBack\} onOpenMenu=\{onOpenMenu\} \/>/);
+  assert.match(chatRoomScreenSource, /function ChatRoomTopBarSpacer\(\)/);
+  assert.match(chatRoomScreenSource, /data-chat-room-top-bar-spacer className="h-\[74px\] w-\[393px\] shrink-0 bg-\[#ff8b3d\]"/);
+  assert.match(chatRoomScreenSource, /data-chat-room-canvas[\s\S]*<ChatRoomTopBarSpacer \/>/);
   assert.match(chatRoomScreenSource, /data-chat-room-top-bar[\s\S]*className="relative z-20 h-\[74px\] w-\[393px\] shrink-0 touch-none overscroll-none overflow-hidden bg-\[#ff8b3d\] qling-figma-font"[\s\S]*onTouchMove=\{blockStaticScroll\}[\s\S]*onWheel=\{blockStaticScroll\}/);
   assert.doesNotMatch(chatRoomScreenSource, /<header data-chat-room-top-bar className="fixed/);
 });
@@ -64,6 +68,8 @@ test('chat screens keep 393px canvas width while chat room uses viewport height'
   assert.doesNotMatch(chatRoomScreenSource, /offsetTop: offsetTop \/ scale/);
   assert.doesNotMatch(chatRoomScreenSource, /marginTop/);
   assert.match(chatRoomScreenSource, /const rootStyle: CSSProperties = \{\s*transform: `translateY\(\$\{viewportMetrics\.viewportOffsetTop\}px\)`,\s*\}/);
+  assert.match(chatRoomScreenSource, /const topBarLayerStyle: CSSProperties = \{\s*height: `\$\{viewportMetrics\.viewportOffsetTop \+ chatRoomTopBarHeight \* viewportMetrics\.scale\}px`,\s*paddingTop: `\$\{viewportMetrics\.viewportOffsetTop\}px`,\s*\}/);
+  assert.match(chatRoomScreenSource, /const topBarCanvasStyle: CSSProperties = \{\s*transform: `scale\(\$\{viewportMetrics\.scale\}\)`,\s*\}/);
   assert.match(chatRoomScreenSource, /<section className="fixed inset-0 z-40 overflow-hidden bg-\[#fff1d1\]" style=\{rootStyle\}>/);
   assert.match(chatRoomScreenSource, /transform: `scale\(\$\{viewportMetrics\.scale\}\)`/);
   assert.match(chatRoomScreenSource, /relative flex w-\[393px\] shrink-0 origin-top flex-col overflow-hidden/);
@@ -105,7 +111,7 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
 
 test('chat room more menu is fixed to the visible viewport bottom', () => {
   assert.match(chatRoomScreenSource, /bg-\[rgba\(40,30,20,0\.42\)\]/);
-  assert.match(chatRoomScreenSource, /className="fixed inset-0 z-30 bg-\[rgba\(40,30,20,0\.42\)\]"/);
+  assert.match(chatRoomScreenSource, /className="fixed inset-0 z-\[60\] bg-\[rgba\(40,30,20,0\.42\)\]"/);
   assert.match(chatRoomScreenSource, /bottom-0[\s\S]*h-\[284px\][\s\S]*rounded-tl-\[22px\] rounded-tr-\[22px\]/);
   assert.doesNotMatch(chatRoomScreenSource, /top-\[597px\]/);
   assert.match(chatRoomScreenSource, /label="알림 끄기"/);
