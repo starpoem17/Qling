@@ -18,7 +18,7 @@ export function ChatRoomContainer({
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [opponent, setOpponent] = useState<{ nickname: string; profileColor: string; uid: string } | null>(null);
-  const [worryInfo, setWorryInfo] = useState<{ category: string; title: string; createdAtStr: string } | null>(null);
+  const [worryInfo, setWorryInfo] = useState<{ category: string; content: string; createdAtStr: string } | null>(null);
   const [opponentUnreadCount, setOpponentUnreadCount] = useState(0);
   const [answerAdoptionRatePercent, setAnswerAdoptionRatePercent] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -114,7 +114,7 @@ export function ChatRoomContainer({
               const date = wd.createdAt ? wd.createdAt.toDate() : new Date();
               setWorryInfo({
                 category: (wd.validCategories && wd.validCategories[0]) || '기타',
-                title: wd.summaryText || '게시글 내용을 불러올 수 없습니다',
+                content: wd.content || wd.summaryText || '게시글 내용을 불러올 수 없습니다',
                 createdAtStr: `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()}`,
               });
             }

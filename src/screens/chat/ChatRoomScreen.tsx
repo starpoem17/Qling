@@ -49,7 +49,7 @@ export interface ChatMessage {
 
 export interface WorryInfo {
   category: string;
-  title: string;
+  content: string;
   createdAtStr: string;
 }
 
@@ -434,17 +434,14 @@ export function ChatRoomScreen({
                 </span>
               </div>
 
-              <div className="mb-[14px] h-[99.425px] w-full rounded-[14px] border-[0.8px] border-[#f1e7da] bg-white px-[14.8px] py-[12.8px] shadow-[0_2px_8px_rgb(120_90_60/0.07)]">
+              <div className="mb-[14px] w-full rounded-[14px] border-[0.8px] border-[#f1e7da] bg-white px-[14.8px] py-[12.8px] shadow-[0_2px_8px_rgb(120_90_60/0.07)]">
                 <div className="flex h-[30.2px] items-center">
                   <span className="rounded-full bg-[#ffe7d2] px-[7.2px] py-[2px] font-['Qling_Noto_Sans_KR_Black'] text-[10px] font-black leading-[15px] text-[#f26c0f]">
                     {worryInfo?.category || '고민'}
                   </span>
                 </div>
-                <h3 className="truncate text-[13px] font-semibold leading-[21.125px] tracking-[-0.325px] text-[#2b2620]">
-                  {worryInfo?.title || '게시글 정보 불러오는 중...'}
-                </h3>
-                <p className="pt-[6px] text-[11px] font-normal leading-[16.5px] text-[#a39e96]">
-                  이 고민의 답변에서 시작된 대화예요
+                <p className="whitespace-pre-wrap break-words text-[13px] font-semibold leading-[21.125px] tracking-[-0.325px] text-[#2b2620]">
+                  {worryInfo?.content || '게시글 정보 불러오는 중...'}
                 </p>
               </div>
 
