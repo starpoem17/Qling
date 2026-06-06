@@ -94,7 +94,6 @@ export function ChatRoomScreen({
   const fullViewportHeightRef = useRef<number | null>(null);
   const keyboardInputIntentRef = useRef(false);
   const pendingTopBarHideTimeoutRef = useRef<number | null>(null);
-  const canAutoScrollAfterViewportChangeRef = useRef(false);
   const backSwipeRef = useRef<ChatRoomBackSwipeState | null>(null);
   const previousAutoScrollInputsRef = useRef<{
     readonly messages: readonly ChatMessage[];
@@ -126,10 +125,11 @@ export function ChatRoomScreen({
       const fullViewportHeight = fullViewportHeightRef.current ?? nextFullViewportHeight;
       const viewportHeightShrink = Math.max(0, fullViewportHeight - visibleHeight);
       const viewportOffsetTop = visualViewport?.offsetTop ?? 0;
-      const keyboardInset = visualViewport
+      const rawKeyboardInset = visualViewport
         ? Math.max(0, fullViewportHeight - visibleHeight - viewportOffsetTop)
         : 0;
-      const isKeyboardHeightVisible = Math.max(keyboardInset, viewportHeightShrink) >= chatRoomKeyboardOpenThreshold;
+      const keyboardInset = isChatRoomIosSafariBrowser() ? 0 : rawKeyboardInset;
+      const isKeyboardHeightVisible = Math.max(rawKeyboardInset, viewportHeightShrink) >= chatRoomKeyboardOpenThreshold;
       if (!visualViewport || !isTopBarHiddenForKeyboard) {
         fullViewportHeightRef.current = Math.max(fullViewportHeight, nextFullViewportHeight);
       }
@@ -233,17 +233,11 @@ export function ChatRoomScreen({
 
     if (!canScrollMessages) {
       shouldStickToBottomRef.current = true;
-    } else if (
-      shouldStickToBottomRef.current
-      && (!viewportOnlyChanged || canAutoScrollAfterViewportChangeRef.current)
-    ) {
+    } else if (shouldStickToBottomRef.current && !viewportOnlyChanged) {
       scroller.scrollTop = scroller.scrollHeight;
     }
 
     previousAutoScrollInputsRef.current = currentInputs;
-    canAutoScrollAfterViewportChangeRef.current = viewportOnlyChanged
-      ? canAutoScrollAfterViewportChangeRef.current
-      : canScrollMessages;
   }, [messages, textareaHeight, viewportMetrics.keyboardInset, isTopBarHiddenForKeyboard]);
 
   const handleMessagesScroll = () => {
@@ -421,7 +415,7 @@ export function ChatRoomScreen({
                   ? 'overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
                   : 'touch-none overscroll-none overflow-hidden',
               )}
-              style={{ paddingBottom: 'calc(28px + var(--chat-input-height) + var(--chat-keyboard-inset))' }}
+              style={{ paddingBottom: 'calc(var(--chat-input-height) + var(--chat-keyboard-inset))' }}
               onScroll={handleMessagesScroll}
               onTouchStart={handleBackSwipeStart}
               onTouchMove={handleMessagesTouchMove}
@@ -739,6 +733,10 @@ function blockStaticScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLEleme
 
 function canScrollMessageScroller(scroller: HTMLElement) {
   return scroller.scrollHeight > scroller.clientHeight + 1;
+}
+
+function isChatRoomIosSafariBrowser() {
+  return document.documentElement.classList.contains('qling-ios-safari-browser');
 }
 
 function isChatRoomBackSwipeIgnoredTarget(target: EventTarget | null) {
