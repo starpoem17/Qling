@@ -1,4 +1,3 @@
-import { CircleUserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
@@ -15,6 +14,9 @@ import type {
 const rankingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 const rankingTabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
 const rankingUsableCanvasHeight = `calc((${rankingTabViewportHeight}) / (${rankingCanvasScale}))`;
+const rankingTopSafeOffset = 'min(var(--qling-space-safe-top), 14px)';
+const rankingHeroHeight = `calc(${rankingTopSafeOffset} + 406px)`;
+const rankingPodiumTop = `calc(${rankingTopSafeOffset} + 326px)`;
 const rankingSheetTop = 400;
 const viewerRankCardTop = `min(773px, calc(${rankingUsableCanvasHeight} - 79px))`;
 const rankingSheetReadyHeight = `min(452px, max(372px, calc(${rankingUsableCanvasHeight} - ${rankingSheetTop}px)))`;
@@ -32,6 +34,7 @@ const rankingAssetUrlByName = {
   heartLight: new URL('../../../assets/ranking/heart-white.svg', import.meta.url).href,
   rankUp: new URL('../../../assets/ranking/rank-up.svg', import.meta.url).href,
   rankDown: new URL('../../../assets/ranking/rank-down.svg', import.meta.url).href,
+  myPageIcon: new URL('../../../assets/reply/my_page_icon.svg', import.meta.url).href,
 } as const;
 
 export function RankingScreen(props: RankingScreenProps) {
@@ -115,22 +118,28 @@ function RankingHero({
   readonly onOpenMyPage: () => void;
 }) {
   return (
-    <div className="absolute left-0 top-0 h-[calc(var(--qling-space-safe-top)+406px)] w-full bg-[#ff8b3d] text-white">
-      <h1 className="absolute left-6 top-[calc(var(--qling-space-safe-top)+56px)] text-[24px] font-black leading-[31px] font-['Qling_Noto_Sans_KR_Black']">
+    <div className="absolute left-0 top-0 w-full bg-[#ff8b3d] text-white" style={{ height: rankingHeroHeight }}>
+      <h1 className="absolute left-6 top-[calc(min(var(--qling-space-safe-top),14px)+56px)] text-[24px] font-black leading-[31px] font-['Qling_Noto_Sans_KR_Black']">
         랭킹
       </h1>
       {seasonLabel && (
-        <p className="absolute left-6 top-[calc(var(--qling-space-safe-top)+90px)] text-[12px] font-medium leading-4 opacity-85 font-['Qling_Noto_Sans_KR']">
+        <p className="absolute left-6 top-[calc(min(var(--qling-space-safe-top),14px)+90px)] text-[12px] font-medium leading-4 opacity-85 font-['Qling_Noto_Sans_KR']">
           {seasonLabel}
         </p>
       )}
       <button
         type="button"
-        aria-label="마이페이지"
+        aria-label="마이페이지 열기"
         onClick={onOpenMyPage}
-        className="absolute right-[17px] top-[calc(var(--qling-space-safe-top)+21px)] flex h-[49px] w-[49px] items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+        className="absolute right-[17px] top-[calc(var(--qling-space-safe-top)+21px)] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
       >
-        <CircleUserRound className="h-[25px] w-[25px]" aria-hidden="true" />
+        <img
+          src={rankingAssetUrlByName.myPageIcon}
+          alt=""
+          aria-hidden="true"
+          className="absolute left-3 top-3 h-[25px] w-[25px]"
+          draggable={false}
+        />
       </button>
       <SegmentedControl mode={mode} onChange={onChange} />
     </div>
@@ -147,7 +156,7 @@ function SegmentedControl({
   readonly disabled?: boolean;
 }) {
   return (
-    <div className="absolute left-[79px] top-[calc(var(--qling-space-safe-top)+114px)] h-11 w-[236px] rounded-full bg-white/20" data-measure="ranking-segmented-outer">
+    <div className="absolute left-[79px] top-[calc(min(var(--qling-space-safe-top),14px)+114px)] h-11 w-[236px] rounded-full bg-white/20" data-measure="ranking-segmented-outer">
       <span
         className={cn(
           'absolute top-1 h-9 w-[114px] rounded-full bg-white shadow-[0_2px_7px_rgb(128_87_33/0.2)] transition-transform',
@@ -195,7 +204,7 @@ function TopRankings({ period }: { readonly period: RankingDisplayPeriod }) {
       <TopRank entry={topEntries[0] ?? null} place="first" />
       <TopRank entry={topEntries[1] ?? null} place="second" />
       <TopRank entry={topEntries[2] ?? null} place="third" />
-      <Podium topOffset="calc(var(--qling-space-safe-top) + 326px)" />
+      <Podium topOffset={rankingPodiumTop} />
     </>
   );
 }
@@ -209,37 +218,37 @@ function TopRank({
 }) {
   const layout = {
     first: {
-      avatar: 'left-[163px] top-[calc(var(--qling-space-safe-top)+200px)] h-[69px] w-[69px]',
-      crown: 'left-[177px] top-[calc(var(--qling-space-safe-top)+170px)] h-6 w-[42px]',
+      avatar: 'left-[163px] top-[calc(min(var(--qling-space-safe-top),14px)+200px)] h-[69px] w-[69px]',
+      crown: 'left-[177px] top-[calc(min(var(--qling-space-safe-top),14px)+170px)] h-6 w-[42px]',
       crownUrl: rankingAssetUrlByName.crownFirst,
-      name: 'left-[136px] top-[calc(var(--qling-space-safe-top)+274px)] w-[120px] text-[15px] leading-5',
-      hearts: 'left-[136px] top-[calc(var(--qling-space-safe-top)+296px)] w-[120px]',
-      ellipse: 'left-[171px] top-[calc(var(--qling-space-safe-top)+252px)] h-[23px] w-[53px]',
+      name: 'left-[136px] top-[calc(min(var(--qling-space-safe-top),14px)+274px)] w-[120px] text-[15px] leading-5',
+      hearts: 'left-[136px] top-[calc(min(var(--qling-space-safe-top),14px)+296px)] w-[120px]',
+      ellipse: 'left-[171px] top-[calc(min(var(--qling-space-safe-top),14px)+252px)] h-[23px] w-[53px]',
       ellipseUrl: rankingAssetUrlByName.bigEllipse,
     },
     second: {
-      avatar: 'left-[50px] top-[calc(var(--qling-space-safe-top)+230px)] h-[52px] w-[52px]',
-      crown: 'left-[61px] top-[calc(var(--qling-space-safe-top)+209px)] h-[17px] w-[30px]',
+      avatar: 'left-[50px] top-[calc(min(var(--qling-space-safe-top),14px)+230px)] h-[52px] w-[52px]',
+      crown: 'left-[61px] top-[calc(min(var(--qling-space-safe-top),14px)+209px)] h-[17px] w-[30px]',
       crownUrl: rankingAssetUrlByName.crownSecond,
-      name: 'left-[16px] top-[calc(var(--qling-space-safe-top)+290px)] w-[120px] text-[13px] leading-[17px]',
-      hearts: 'left-[16px] top-[calc(var(--qling-space-safe-top)+312px)] w-[120px]',
-      ellipse: 'left-[55px] top-[calc(var(--qling-space-safe-top)+269px)] h-[18px] w-[42px]',
+      name: 'left-[16px] top-[calc(min(var(--qling-space-safe-top),14px)+290px)] w-[120px] text-[13px] leading-[17px]',
+      hearts: 'left-[16px] top-[calc(min(var(--qling-space-safe-top),14px)+312px)] w-[120px]',
+      ellipse: 'left-[55px] top-[calc(min(var(--qling-space-safe-top),14px)+269px)] h-[18px] w-[42px]',
       ellipseUrl: rankingAssetUrlByName.smallEllipse,
     },
     third: {
-      avatar: 'left-[289px] top-[calc(var(--qling-space-safe-top)+245px)] h-[52px] w-[52px]',
-      crown: 'left-[301px] top-[calc(var(--qling-space-safe-top)+223px)] h-[17px] w-[30px]',
+      avatar: 'left-[289px] top-[calc(min(var(--qling-space-safe-top),14px)+245px)] h-[52px] w-[52px]',
+      crown: 'left-[301px] top-[calc(min(var(--qling-space-safe-top),14px)+223px)] h-[17px] w-[30px]',
       crownUrl: rankingAssetUrlByName.crownThird,
-      name: 'left-[255px] top-[calc(var(--qling-space-safe-top)+305px)] w-[120px] text-[13px] leading-[17px]',
-      hearts: 'left-[255px] top-[calc(var(--qling-space-safe-top)+327px)] w-[120px]',
-      ellipse: 'left-[294px] top-[calc(var(--qling-space-safe-top)+284px)] h-[18px] w-[42px]',
+      name: 'left-[255px] top-[calc(min(var(--qling-space-safe-top),14px)+305px)] w-[120px] text-[13px] leading-[17px]',
+      hearts: 'left-[255px] top-[calc(min(var(--qling-space-safe-top),14px)+327px)] w-[120px]',
+      ellipse: 'left-[294px] top-[calc(min(var(--qling-space-safe-top),14px)+284px)] h-[18px] w-[42px]',
       ellipseUrl: rankingAssetUrlByName.smallEllipse,
     },
   };
   const item = layout[place];
 
   return (
-    <div className="pointer-events-none absolute left-0 top-0 z-10 h-[calc(var(--qling-space-safe-top)+406px)] w-[393px] text-center text-white" data-measure={`ranking-top-${place}`}>
+    <div className="pointer-events-none absolute left-0 top-0 z-10 w-[393px] text-center text-white" style={{ height: rankingHeroHeight }} data-measure={`ranking-top-${place}`}>
       <img src={item.ellipseUrl} alt="" aria-hidden="true" className={cn('absolute block max-w-none', item.ellipse)} />
       <img src={item.crownUrl} alt="" className={cn('absolute block max-w-none', item.crown)} />
       {entry && (
@@ -259,7 +268,7 @@ function TopRank({
 function LoadingPodium() {
   return (
     <>
-      <Podium topOffset="calc(var(--qling-space-safe-top) + 326px)" />
+      <Podium topOffset={rankingPodiumTop} />
     </>
   );
 }

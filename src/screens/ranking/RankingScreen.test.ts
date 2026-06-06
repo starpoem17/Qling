@@ -96,8 +96,8 @@ test('ranking text preserves Figma font weights after class merging', () => {
     },
   })));
 
-  assert.match(html, /class="absolute truncate font-bold left-\[136px\] top-\[calc\(var\(--qling-space-safe-top\)\+274px\)\] w-\[120px\] text-\[15px\] leading-5" style="font-family:&quot;Qling Noto Sans KR&quot;">User 1/);
-  assert.match(html, /class="inline-flex items-center overflow-hidden font-bold gap-1 text-\[13px\] leading-\[17px\] absolute justify-center text-white left-\[136px\] top-\[calc\(var\(--qling-space-safe-top\)\+296px\)\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;/);
+  assert.match(html, /class="absolute truncate font-bold left-\[136px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+274px\)\] w-\[120px\] text-\[15px\] leading-5" style="font-family:&quot;Qling Noto Sans KR&quot;">User 1/);
+  assert.match(html, /class="inline-flex items-center overflow-hidden font-bold gap-1 text-\[13px\] leading-\[17px\] absolute justify-center text-white left-\[136px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+296px\)\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;/);
   assert.match(html, /class="block truncate text-\[15px\] font-medium leading-5 text-\[#191f28\]" style="font-family:&quot;Qling Noto Sans KR&quot;">User 4/);
   assert.match(html, /class="mt-0\.5 block truncate text-\[11\.5px\] font-medium leading-\[15px\] text-\[#8b95a1\]" style="font-family:&quot;Qling Noto Sans KR&quot;">답변 4 · 채택 0/);
   assert.match(html, /class="inline-flex items-center overflow-hidden font-bold gap-\[5px\] text-\[15px\] leading-5 shrink-0 text-\[#191f28\]" style="font-family:&quot;Qling Noto Sans KR&quot;/);
@@ -108,25 +108,36 @@ test('top ranking avatars and crowns are present in static markup', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
 
-  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[calc\(var\(--qling-space-safe-top\)\+406px\)\] w-\[393px\] text-center text-white" data-measure="ranking-top-first"/);
-  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[calc\(var\(--qling-space-safe-top\)\+406px\)\] w-\[393px\] text-center text-white" data-measure="ranking-top-second"/);
-  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[calc\(var\(--qling-space-safe-top\)\+406px\)\] w-\[393px\] text-center text-white" data-measure="ranking-top-third"/);
+  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 w-\[393px\] text-center text-white" style="height:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 406px\)" data-measure="ranking-top-first"/);
+  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 w-\[393px\] text-center text-white" style="height:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 406px\)" data-measure="ranking-top-second"/);
+  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 w-\[393px\] text-center text-white" style="height:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 406px\)" data-measure="ranking-top-third"/);
   assert.match(html, /data-measure="ranking-profile-first"/);
   assert.match(html, /data-measure="ranking-profile-second"/);
   assert.match(html, /data-measure="ranking-profile-third"/);
   assert.match(html, /big_ellipse\.svg/);
   assert.match(html, /small_ellipse\.svg/);
-  assert.match(html, /absolute block max-w-none left-\[171px\] top-\[calc\(var\(--qling-space-safe-top\)\+252px\)\] h-\[23px\] w-\[53px\]/);
-  assert.match(html, /absolute block max-w-none left-\[55px\] top-\[calc\(var\(--qling-space-safe-top\)\+269px\)\] h-\[18px\] w-\[42px\]/);
-  assert.match(html, /absolute block max-w-none left-\[294px\] top-\[calc\(var\(--qling-space-safe-top\)\+284px\)\] h-\[18px\] w-\[42px\]/);
-  assert.match(html, /absolute block max-w-none left-\[177px\] top-\[calc\(var\(--qling-space-safe-top\)\+170px\)\] h-6 w-\[42px\]/);
-  assert.match(html, /absolute max-w-none rounded-full left-\[163px\] top-\[calc\(var\(--qling-space-safe-top\)\+200px\)\] h-\[69px\] w-\[69px\]/);
+  assert.match(html, /absolute block max-w-none left-\[171px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+252px\)\] h-\[23px\] w-\[53px\]/);
+  assert.match(html, /absolute block max-w-none left-\[55px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+269px\)\] h-\[18px\] w-\[42px\]/);
+  assert.match(html, /absolute block max-w-none left-\[294px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+284px\)\] h-\[18px\] w-\[42px\]/);
+  assert.match(html, /absolute block max-w-none left-\[177px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+170px\)\] h-6 w-\[42px\]/);
+  assert.match(html, /absolute max-w-none rounded-full left-\[163px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+200px\)\] h-\[69px\] w-\[69px\]/);
   assert.match(html, /crown-first\.svg/);
   assert.match(html, /crown-second\.svg/);
   assert.match(html, /crown-third\.svg/);
   assert.doesNotMatch(html, /bg-\[#b35a1c\]\/35/);
   assert.match(source, /left-6 top-\[13px\] h-\[67px\] w-\[108px\] rounded-t-\[16px\] bg-white\/20/);
   assert.match(source, /left-\[261px\] top-7 h-\[52px\] w-\[108px\] rounded-t-\[16px\] bg-white\/20/);
+});
+
+test('ranking my page button uses the shared Figma asset icon', () => {
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
+
+  assert.match(html, /aria-label="마이페이지 열기"/);
+  assert.match(html, /my_page_icon\.svg/);
+  assert.match(html, /class="absolute left-3 top-3 h-\[25px\] w-\[25px\]"/);
+  assert.doesNotMatch(html, /lucide-circle-user-round/);
+  assert.doesNotMatch(source, /CircleUserRound/);
 });
 
 test('podium fills top three entry slots even when shared ranks skip a rank number', () => {
@@ -151,14 +162,25 @@ test('podium fills top three entry slots even when shared ranks skip a rank numb
   assert.match(html, /data-measure="ranking-profile-first"/);
   assert.match(html, /data-measure="ranking-profile-second"/);
   assert.match(html, /data-measure="ranking-profile-third"/);
-  assert.match(html, /absolute block max-w-none left-\[55px\] top-\[calc\(var\(--qling-space-safe-top\)\+269px\)\] h-\[18px\] w-\[42px\]/);
-  assert.match(html, /absolute block max-w-none left-\[294px\] top-\[calc\(var\(--qling-space-safe-top\)\+284px\)\] h-\[18px\] w-\[42px\]/);
+  assert.match(html, /absolute block max-w-none left-\[55px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+269px\)\] h-\[18px\] w-\[42px\]/);
+  assert.match(html, /absolute block max-w-none left-\[294px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+284px\)\] h-\[18px\] w-\[42px\]/);
   assert.match(html, /crown-second\.svg/);
   assert.match(html, /crown-third\.svg/);
-  assert.match(html, /left-\[16px\] top-\[calc\(var\(--qling-space-safe-top\)\+290px\)\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">Co First B/);
-  assert.match(html, /left-\[255px\] top-\[calc\(var\(--qling-space-safe-top\)\+305px\)\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">Shared Third/);
-  assert.match(html, /left-\[16px\] top-\[calc\(var\(--qling-space-safe-top\)\+312px\)\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>2/);
-  assert.match(html, /left-\[255px\] top-\[calc\(var\(--qling-space-safe-top\)\+327px\)\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>1/);
+  assert.match(html, /left-\[16px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+290px\)\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">Co First B/);
+  assert.match(html, /left-\[255px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+305px\)\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">Shared Third/);
+  assert.match(html, /left-\[16px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+312px\)\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>2/);
+  assert.match(html, /left-\[255px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+327px\)\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>1/);
+});
+
+test('ranking top cluster caps safe-area offset while the ranking sheet stays at 400px', () => {
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
+  const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
+
+  assert.match(source, /const rankingTopSafeOffset = 'min\(var\(--qling-space-safe-top\), 14px\)'/);
+  assert.match(source, /const rankingPodiumTop = `calc\(\$\{rankingTopSafeOffset\} \+ 326px\)`/);
+  assert.match(html, /style="top:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 326px\)"/);
+  assert.match(html, /top-\[400px\]/);
+  assert.doesNotMatch(source, /Podium topOffset="calc\(var\(--qling-space-safe-top\) \+ 326px\)"/);
 });
 
 test('ranking sheet renders entries by slot after the podium even when rank numbers are shared', () => {
@@ -326,6 +348,7 @@ test('ranking loading state uses the same width-only canvas scale', () => {
   assert.match(html, /data-measure="ranking-screen"/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
   assert.match(html, /top-\[400px\] h-\[452px\]/);
+  assert.match(html, /style="top:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 326px\)"/);
   assert.match(html, /data-testid="figma-tab-loading-indicator"/);
   assert.match(html, /left-\[177px\] top-\[73px\] translate-x-0/);
   assert.doesNotMatch(html, /랭킹을 불러오는 중/);
