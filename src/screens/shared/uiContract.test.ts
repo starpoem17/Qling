@@ -84,15 +84,18 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
   const cssSource = fs.readFileSync(path.join(process.cwd(), 'src', 'index.css'), 'utf8');
 
-  assert.match(cssSource, /\.qling-production-root[\s\S]*height: 100dvh;/);
+  assert.match(cssSource, /\.qling-production-root[\s\S]*height: var\(--qling-visual-viewport-height\);/);
+  assert.match(cssSource, /\.qling-production-root[\s\S]*min-height: var\(--qling-visual-viewport-height\);/);
   assert.match(cssSource, /\.qling-production-root[\s\S]*overflow: hidden;/);
   assert.match(cssSource, /\.qling-production-frame[\s\S]*display: flex;/);
   assert.match(cssSource, /\.qling-production-frame[\s\S]*flex-direction: column;/);
-  assert.match(cssSource, /\.qling-production-frame[\s\S]*height: 100dvh;/);
+  assert.match(cssSource, /\.qling-production-frame[\s\S]*height: var\(--qling-visual-viewport-height\);/);
+  assert.match(cssSource, /\.qling-production-frame[\s\S]*min-height: var\(--qling-visual-viewport-height\);/);
   assert.match(cssSource, /\.qling-production-frame[\s\S]*overflow: hidden;/);
   assert.match(cssSource, /--font-sans: "SUIT Variable", "Qling Noto Sans KR", "SUIT"/);
   assert.match(cssSource, /--qling-font-sans: "SUIT Variable", "Qling Noto Sans KR", "SUIT"/);
-  assert.match(source, /qling-production-root h-dvh overflow-hidden/);
+  assert.match(source, /qling-production-root overflow-hidden/);
+  assert.doesNotMatch(source, /qling-production-root h-dvh/);
   assert.match(source, /min-h-0 w-full flex-1/);
   assert.match(source, /overflow-y-auto overscroll-contain/);
   assert.match(source, /\[-webkit-overflow-scrolling:touch\]/);

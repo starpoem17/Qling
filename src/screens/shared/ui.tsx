@@ -59,7 +59,7 @@ export function MobileAppShell({
   }, []);
 
   return (
-    <div className="qling-production-root h-dvh overflow-hidden text-[var(--qling-color-text)] font-sans selection:bg-[var(--qling-color-cream-soft)]">
+    <div className="qling-production-root overflow-hidden text-[var(--qling-color-text)] font-sans selection:bg-[var(--qling-color-cream-soft)]">
       <div className="qling-production-frame">
         {header}
         <main

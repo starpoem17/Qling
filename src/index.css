@@ -127,8 +127,8 @@
 }
 
 .qling-production-root {
-  height: 100dvh;
-  min-height: 100dvh;
+  height: var(--qling-visual-viewport-height);
+  min-height: var(--qling-visual-viewport-height);
   display: flex;
   justify-content: center;
   overflow: hidden;
@@ -139,8 +139,8 @@
 .qling-production-frame {
   width: min(100vw, var(--qling-mobile-canvas-width));
   max-width: var(--qling-mobile-canvas-max-width);
-  height: 100dvh;
-  min-height: 100dvh;
+  height: var(--qling-visual-viewport-height);
+  min-height: var(--qling-visual-viewport-height);
   display: flex;
   flex-direction: column;
   position: relative;
