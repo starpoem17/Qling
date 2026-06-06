@@ -26,7 +26,9 @@ test('chat room top bar renders answer adoption rate from props without hardcode
 
   assert.match(html, /답변 채택률 75%/);
   assert.match(html, /aria-label="뒤로가기"/);
-  assert.match(html, /left-\[6px\] top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\] flex h-\[45px\] w-\[44px\]/);
+  assert.match(html, /grid-cols-\[44px_minmax\(0,1fr\)_44px\][\s\S]*pt-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
+  assert.match(html, /flex h-\[45px\] w-\[44px\] items-center justify-center/);
+  assert.match(html, /flex h-\[45px\] min-w-0 items-center justify-center/);
   assert.doesNotMatch(html, /답변 채택률 92%/);
 });
 

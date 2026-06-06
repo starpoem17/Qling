@@ -159,7 +159,8 @@ test('standalone back buttons keep at least a 44px touch target', () => {
   const replyDetailSource = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'replyDetail', 'ReplyDetailScreen.tsx'), 'utf8');
   const sharedUiSource = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
 
-  assert.match(chatRoomSource, /left-\[6px\] top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\] flex h-\[45px\] w-\[44px\]/);
+  assert.match(chatRoomSource, /grid-cols-\[44px_minmax\(0,1fr\)_44px\][\s\S]*px-\[6px\] pt-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
+  assert.match(chatRoomSource, /className="flex h-\[45px\] w-\[44px\] items-center justify-center/);
   assert.match(reportSource, /aria-label="뒤로가기"[\s\S]*h-\[44px\] w-\[44px\]/);
   assert.match(myPageSource, /<FigmaTopBar title="마이페이지"/);
   assert.match(myAnswersSource, /<FigmaTopBar title="내가 쓴 답변"/);
