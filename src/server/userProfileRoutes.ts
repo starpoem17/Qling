@@ -6,6 +6,8 @@ import { completeOnboarding, reserveNickname } from '../services/userProfile/onb
 import { updateMyInterests } from '../services/userProfile/profileInterests';
 import { validateAge, validateNickname, isValidGender, isValidProfileColor, normalizeInterests } from '../services/userProfile/profileValidation';
 import { createUserProfileFirestoreRepository } from '../services/userProfile/firestoreRepository';
+import { backfillInitialWorriesForNewUser, type InitialWorryBackfillRepository } from '../services/userProfile/initialWorryBackfill';
+import { createInitialWorryBackfillFirestoreRepository } from '../services/userProfile/initialWorryBackfillFirestoreRepository';
 import type { UserProfileRepository } from '../services/userProfile/types';
 
 function sendServiceResult(res: express.Response, result: { status: string; code?: string; message?: string }) {
@@ -46,6 +48,7 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
   readonly db: Firestore | null;
   readonly auth: Pick<Auth, 'verifyIdToken'>;
   readonly repository?: UserProfileRepository;
+  readonly initialWorryBackfillRepository?: InitialWorryBackfillRepository;
 }): void {
   if (!deps.db && !deps.repository) {
     app.post('/api/users/me/nickname-reservation', (_req, res) => {
@@ -67,6 +70,8 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
   });
 
   const repository = deps.repository ?? createUserProfileFirestoreRepository({ db: deps.db as Firestore });
+  const initialWorryBackfillRepository = deps.initialWorryBackfillRepository
+    ?? (deps.repository ? null : createInitialWorryBackfillFirestoreRepository({ db: deps.db as Firestore }));
 
   app.post('/api/users/me/nickname-reservation', requireVerifiedAuth, async (req, res) => {
     const nickname = typeof req.body?.nickname === 'string' ? req.body.nickname : '';
@@ -97,7 +102,7 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
     }
 
     const authReq = req as ActiveAuthenticatedRequest;
-    sendServiceResult(res, await completeOnboarding({
+    const result = await completeOnboarding({
       uid: authReq.auth.uid,
       draft: {
         nickname,
@@ -107,7 +112,38 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
         profileColor,
       },
       repository,
-    }));
+    });
+
+    if (result.status !== 'completed') {
+      sendServiceResult(res, result);
+      return;
+    }
+
+    if (!initialWorryBackfillRepository) {
+      res.status(200).json(result);
+      return;
+    }
+
+    try {
+      const backfill = await backfillInitialWorriesForNewUser({
+        uid: authReq.auth.uid,
+        gender,
+        interests,
+        repository: initialWorryBackfillRepository,
+      });
+      res.status(200).json({
+        ...result,
+        initialDeliveryCount: backfill.createdCount,
+        initialDeliveryIds: backfill.deliveryIds,
+      });
+    } catch (error) {
+      console.error('Initial worry backfill failed:', error);
+      res.status(200).json({
+        ...result,
+        initialDeliveryCount: 0,
+        initialDeliveryBackfillStatus: 'failed',
+      });
+    }
   });
 
   app.patch('/api/users/me/interests', requireActiveAuth, async (req, res) => {

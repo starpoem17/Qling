@@ -9,6 +9,7 @@ import {
   createReplyPublicationRepository,
   serverTimestamp,
 } from './firestoreRepository';
+import { refillWorryInboxForFirestoreUser } from '../../userProfile/initialWorryBackfillFirestoreRepository';
 import { sendNewReplyPushAfterCommit } from './pushLogs';
 import { validateReplyContent } from './validation';
 import type {
@@ -169,6 +170,12 @@ export async function publishReplyForDelivery(params: {
         db: params.db,
         messaging: params.messaging,
         reply: committed.reply,
+      });
+      await refillWorryInboxForFirestoreUser({
+        db: params.db,
+        uid: params.replierUid,
+      }).catch(error => {
+        console.error('Worry inbox refill after reply failed:', error);
       });
     }
 

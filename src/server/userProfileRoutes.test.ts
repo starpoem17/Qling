@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { registerUserProfileRoutes } from './userProfileRoutes';
 import type { UserProfileRepository } from '../services/userProfile/types';
+import type { InitialWorryBackfillRepository } from '../services/userProfile/initialWorryBackfill';
 
 function createRes() {
   return {
@@ -20,6 +21,7 @@ function createRes() {
 
 function captureRoutes(repository: UserProfileRepository, options: {
   readonly userDoc?: Record<string, unknown>;
+  readonly initialWorryBackfillRepository?: InitialWorryBackfillRepository;
 } = {}) {
   const routes = new Map<string, Array<(req: unknown, res: unknown, next?: () => void) => unknown>>();
   const app = {
@@ -44,6 +46,7 @@ function captureRoutes(repository: UserProfileRepository, options: {
     db: db as never,
     auth: { verifyIdToken: async () => ({ uid: 'verified-user' }) } as never,
     repository,
+    initialWorryBackfillRepository: options.initialWorryBackfillRepository,
   });
 
   async function call(path: string, body: unknown) {
@@ -177,6 +180,59 @@ test('onboarding profile route persists required age, gender, interests, and nic
   });
   assert.equal(res.statusCode, 200);
   assert.equal((res.body as { status: string }).status, 'completed');
+});
+
+test('onboarding profile route backfills initial worries after successful completion', async () => {
+  let backfillCalled = false;
+  const route = captureRoutes({
+    async reserveNickname() {
+      throw new Error('unused');
+    },
+    async completeOnboarding(params) {
+      return { status: 'completed', profile: params };
+    },
+    async updateInterests() {
+      throw new Error('unused');
+    },
+  }, {
+    initialWorryBackfillRepository: {
+      async fetchCandidateWorries(params) {
+        backfillCalled = true;
+        assert.deepEqual(params, {
+          uid: 'verified-user',
+          interests: ['직장'],
+          limit: 100,
+        });
+        return [{ id: 'worry1', authorUid: 'author', matchingCategories: ['직장'] }];
+      },
+      async commitInitialDeliveriesForNewUser(params) {
+        assert.equal(params.uid, 'verified-user');
+        assert.equal(params.gender, 'female');
+        assert.deepEqual(params.interests, ['직장']);
+        assert.deepEqual(params.candidates.map(candidate => candidate.id), ['worry1']);
+        return {
+          status: 'completed',
+          createdCount: 1,
+          deliveryIds: ['worry1_verified-user'],
+          worryIds: ['worry1'],
+        };
+      },
+    },
+  });
+
+  const res = await route.call('/api/users/me/onboarding-profile', {
+    nickname: '라미',
+    gender: 'female',
+    age: 99,
+    interests: ['직장'],
+    profileColor: '#4FB8C9',
+  });
+
+  assert.equal(backfillCalled, true);
+  assert.equal(res.statusCode, 200);
+  assert.equal((res.body as { status: string }).status, 'completed');
+  assert.equal((res.body as { initialDeliveryCount: number }).initialDeliveryCount, 1);
+  assert.deepEqual((res.body as { initialDeliveryIds: string[] }).initialDeliveryIds, ['worry1_verified-user']);
 });
 
 test('onboarding profile route rejects invalid required fields before persistence', async () => {

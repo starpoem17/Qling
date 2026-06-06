@@ -3,6 +3,7 @@ import type { Messaging } from 'firebase-admin/messaging';
 import { createDeliveryPassRepository } from './firestoreRepository';
 import { selectExperiencePassReplacementCandidates } from './recipientSelection';
 import { sendReplacementPushAfterCommit } from './pushLogs';
+import { refillWorryInboxForFirestoreUser } from '../userProfile/initialWorryBackfillFirestoreRepository';
 import type {
   DeliveryPassRepository,
   PassMatchingJudgeProvider,
@@ -108,6 +109,13 @@ export async function passDelivery(params: {
         }).catch(() => undefined);
       }
 
+      await refillWorryInboxForFirestoreUser({
+        db: params.db,
+        uid: params.uid,
+      }).catch(error => {
+        console.error('Worry inbox refill after pass failed:', error);
+      });
+
       return result;
     }
 
@@ -125,6 +133,12 @@ export async function passDelivery(params: {
         details: 'shortfall_candidate_unavailable',
       };
     }
+    await refillWorryInboxForFirestoreUser({
+      db: params.db,
+      uid: params.uid,
+    }).catch(error => {
+      console.error('Worry inbox refill after pass failed:', error);
+    });
     return shortfallResult;
   } catch (error) {
     return mapError(error);
