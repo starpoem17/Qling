@@ -117,7 +117,7 @@ function pwaRouteChromeForRoute(route: AppRoute): { readonly top: string; readon
     return { top: '#ff8b0d', bottom: '#fff5eb' };
   }
   if (route === 'edit_interests') {
-    return { top: '#ff8b3d', bottom: '#ff8b3d' };
+    return { top: '#ff8b3d', bottom: '#fff7e3' };
   }
   if (route === '마이페이지' || route === 'my_page' || route === 'my_answers') {
     return { top: '#ff8b3d', bottom: '#fff5eb' };
@@ -396,7 +396,7 @@ export default function App() {
               ? 'overflow-hidden'
               : undefined,
             currentRoute === 'chat_room' ? 'px-0 pb-0 pt-0 bg-[#fff1d1]' : undefined,
-            currentRoute === 'edit_interests' ? 'pb-0' : undefined,
+            currentRoute === 'edit_interests' ? 'pt-0 pb-0' : undefined,
           ],
       )}
     >
@@ -471,7 +471,13 @@ export default function App() {
             || currentRoute === 'logout_confirmation'
             || currentRoute === 'account_deletion_confirmation'
           ) && (
-            <motion.div key="my_page_account" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="min-h-full">
+            <motion.div
+              key="my_page_account"
+              initial={{ opacity: 0, y: currentRoute === 'edit_interests' ? 0 : 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: currentRoute === 'edit_interests' ? 0 : -20 }}
+              className="min-h-full"
+            >
               <MyPageContainer
                 route={view}
                 user={user}

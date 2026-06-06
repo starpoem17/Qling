@@ -23,6 +23,8 @@ const settingLabels: Record<MyPageSettingItem, string> = {
 const PRIVACY_POLICY_FEEDBACK_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe88_R7B_cP_pIa7aIe-Fcb1gRYeDfBETNpehOODMrEY0skVQ/viewform?usp=publish-editor';
 const pwaTopBarShift = 'var(--qling-pwa-topbar-shift, 0px)';
 const shiftedTopBarTop = (top: number) => `calc(${top}px + ${pwaTopBarShift})`;
+const editInterestsViewportHeight = 'var(--qling-visual-viewport-height)';
+const editInterestsSaveButtonTop = `min(${shiftedTopBarTop(752)}, calc(${editInterestsViewportHeight} - var(--qling-space-safe-bottom) - 76px))`;
 
 const editInterestsFigmaOrder = [
   '진로',
@@ -89,7 +91,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
                 <button
                   type="button"
                   onClick={props.onEditInterests}
-                  className="absolute left-[256px] top-[26px] whitespace-nowrap text-[12px] font-bold leading-[15px] tracking-[-0.36px] text-[#7a7a7e] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
+                  className="absolute right-5 top-[26px] whitespace-nowrap text-[12px] font-bold leading-[15px] tracking-[-0.36px] text-[#7a7a7e] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
                   aria-label="관심 분야 수정으로 이동"
                 >
                   관심분야 수정 &gt;
@@ -100,7 +102,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
               <button
                 type="button"
                 onClick={props.onOpenMyAnswers}
-                className="absolute left-[312px] top-[174px] whitespace-nowrap text-[13px] font-bold leading-4 text-white/90 focus:outline-none focus:ring-2 focus:ring-white"
+                className="absolute right-5 top-[174px] whitespace-nowrap text-[13px] font-bold leading-4 text-white/90 focus:outline-none focus:ring-2 focus:ring-white"
                 aria-label="내가 쓴 답변 전체보기"
               >
                 전체보기 ›
@@ -399,14 +401,16 @@ export function EditInterestsScreen(props: EditInterestsProps) {
   return (
     <section
       aria-label="관심분야 수정"
-      className="-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d] text-[#1a1a1a] qling-figma-font"
+      className="-mx-[var(--qling-space-shell-x)] overflow-hidden bg-[#ff8b3d] text-[#1a1a1a] qling-figma-font"
+      style={{ height: editInterestsViewportHeight }}
     >
       <FigmaCanvasFrame className="max-w-[480px]" data-measure="edit-interests-responsive-canvas">
         <div
-          className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d]"
+          className="relative w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d]"
+          style={{ height: editInterestsViewportHeight }}
           data-measure="edit-interests-screen"
         >
-          <div className="absolute left-0 right-0 h-[656px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" style={{ top: shiftedTopBarTop(196) }} />
+          <div className="absolute bottom-0 left-0 right-0 rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" style={{ top: shiftedTopBarTop(196) }} />
           <FigmaTopBar title="관심분야 수정" onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
           <p className="absolute left-[28px] right-[28px] text-[26px] font-extrabold leading-[normal] tracking-[-1.3px] text-white" style={{ top: shiftedTopBarTop(147) }}>
             공감할 수 있는 주제를 골라주세요
@@ -450,7 +454,7 @@ export function EditInterestsScreen(props: EditInterestsProps) {
             aria-label="관심 분야 저장"
             aria-busy={props.isProcessing || undefined}
             className="absolute left-[24px] right-[24px] h-[56px] rounded-[28px] bg-[#ff8b3d] text-[17px] font-bold leading-none tracking-[-0.17px] text-white disabled:cursor-not-allowed disabled:opacity-55"
-            style={{ top: shiftedTopBarTop(752) }}
+            style={{ top: editInterestsSaveButtonTop }}
           >
             {props.isProcessing ? '저장 중' : '저장하기'}
           </button>

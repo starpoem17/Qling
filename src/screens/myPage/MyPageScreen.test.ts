@@ -331,9 +331,12 @@ test('edit interests screen renders fixed two-column chip grid and exact zero-se
   })));
 
   assert.match(html, /max-w-\[480px\]/);
-  assert.match(html, /h-\[852px\]/);
+  assert.match(html, /style="height:var\(--qling-visual-viewport-height\)"/);
   assert.match(html, /w-full max-w-\[480px\]/);
+  assert.match(html, /bottom-0 left-0 right-0/);
   assert.doesNotMatch(html, /w-\[393px\]/);
+  assert.doesNotMatch(html, /h-\[var\(--qling-tab-viewport-height\)\]/);
+  assert.doesNotMatch(html, /h-\[852px\]/);
   assert.doesNotMatch(html, /origin-top/);
   assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /top:calc\(196px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
@@ -349,6 +352,7 @@ test('edit interests screen renders fixed two-column chip grid and exact zero-se
   assert.match(html, /font-extrabold/);
   assert.match(html, /최소 1개의 관심분야를 선택해주세요/);
   assert.match(html, /저장하기/);
+  assert.match(html, /top:min\(calc\(752px \+ var\(--qling-pwa-topbar-shift, 0px\)\), calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-safe-bottom\) - 76px\)\)/);
   assert.match(html, />직장</);
   assert.doesNotMatch(html, /워라밸|워라벨/);
   assert.doesNotMatch(html, /aria-pressed="true"/);

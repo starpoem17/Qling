@@ -72,7 +72,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
         aria-busy={props.draft.isProcessing || undefined}
         disabled={isDisabled || props.draft.isProcessing}
         onClick={props.onPublish}
-        className="absolute left-5 right-5 inline-flex h-12 items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-[16px] font-extrabold leading-normal text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-1/2 inline-flex h-12 w-[267px] -translate-x-1/2 items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-[16px] font-extrabold leading-normal text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
         style={{ top: sendButtonTop }}
       >
         고민 전송

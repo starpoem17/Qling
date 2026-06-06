@@ -136,7 +136,8 @@ test('locks App main scrolling for fixed-canvas routes', () => {
 
   assert.match(source, /routeBoundary\.mainScrollMode === 'document' && 'overflow-y-auto'/);
   assert.match(source, /currentRoute === 'answer_check' \|\| currentRoute === '순위' \|\| currentRoute === 'ranking' \|\| currentRoute === 'privacy_policy' \|\| currentRoute === '마이페이지' \|\| currentRoute === 'my_page' \|\| currentRoute === 'my_answers' \|\| currentRoute === 'edit_interests'[\s\S]*\? 'overflow-hidden'/);
-  assert.match(source, /currentRoute === 'edit_interests' \? 'pb-0' : undefined/);
+  assert.match(source, /currentRoute === 'edit_interests' \? 'pt-0 pb-0' : undefined/);
+  assert.match(source, /initial=\{\{ opacity: 0, y: currentRoute === 'edit_interests' \? 0 : 20 \}\}/);
   assert.ok(
     source.indexOf("routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto'")
       < source.indexOf("currentRoute === 'answer_check' || currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page' || currentRoute === 'my_answers' || currentRoute === 'edit_interests'"),
@@ -163,7 +164,7 @@ test('keeps standalone PWA route chrome split between top status bar and bottom 
   assert.match(source, /document\.body\.style\.backgroundColor = standalonePwaRouteChrome\.bottom/);
   assert.match(source, /route === 'write_worry' \|\| route === 'write_reply' \|\| route === 'answer_check'/);
   assert.match(source, /route === 'privacy_policy'/);
-  assert.match(source, /route === 'edit_interests'/);
+  assert.match(source, /route === 'edit_interests'[\s\S]*return \{ top: '#ff8b3d', bottom: '#fff7e3' \}/);
   assert.match(source, /route === '마이페이지' \|\| route === 'my_page' \|\| route === 'my_answers'/);
 });
 
