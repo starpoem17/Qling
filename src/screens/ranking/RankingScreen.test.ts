@@ -109,7 +109,7 @@ test('top ranking avatars and crowns are present in static markup', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
 
-  assert.match(html, /class="absolute left-1\/2 w-\[393px\] -translate-x-1\/2" style="top:12px" data-measure="ranking-top-layer"/);
+  assert.match(html, /class="absolute left-1\/2 w-\[393px\] -translate-x-1\/2" style="top:max\(12px, calc\(calc\(var\(--qling-space-safe-top\) \+ 88px\) \+ 44px \+ 24px - calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 170px\)\)\)" data-measure="ranking-top-layer"/);
   assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 w-\[393px\] text-center text-white" style="height:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 406px\)" data-measure="ranking-top-first"/);
   assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 w-\[393px\] text-center text-white" style="height:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 406px\)" data-measure="ranking-top-second"/);
   assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 w-\[393px\] text-center text-white" style="height:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 406px\)" data-measure="ranking-top-third"/);
@@ -180,12 +180,20 @@ test('ranking top cluster offsets below the segmented control while the ranking 
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
 
   assert.match(source, /const rankingTopSafeOffset = 'min\(var\(--qling-space-safe-top\), 14px\)'/);
-  assert.match(source, /const rankingTopGraphicOffset = 12/);
   assert.match(source, /const rankingPodiumTop = `calc\(\$\{rankingTopSafeOffset\} \+ 326px\)`/);
-  assert.match(source, /const rankingSheetTop = 430/);
-  assert.match(html, /class="absolute left-1\/2 w-\[393px\] -translate-x-1\/2" style="top:12px" data-measure="ranking-top-layer"/);
+  assert.match(source, /const rankingSegmentedControlHeight = 44/);
+  assert.match(source, /const rankingSegmentToCrownGap = 24/);
+  assert.match(source, /const rankingFirstCrownTop = `calc\(\$\{rankingTopSafeOffset\} \+ 170px\)`/);
+  assert.match(source, /const rankingTopGraphicMinimumOffset = 12/);
+  assert.match(source, /const rankingTopGraphicOffset = `max\(\$\{rankingTopGraphicMinimumOffset\}px, calc\(\$\{rankingSegmentedControlTop\} \+ \$\{rankingSegmentedControlHeight\}px \+ \$\{rankingSegmentToCrownGap\}px - \$\{rankingFirstCrownTop\}\)\)`/);
+  assert.match(source, /const rankingSheetMinimumTop = 430/);
+  assert.match(source, /const rankingThirdPodiumNumberBottom = 75/);
+  assert.match(source, /const rankingPodiumToSheetGap = 4/);
+  assert.match(source, /const rankingSheetTop = `max\(\$\{rankingSheetMinimumTop\}px, calc\(\$\{rankingTopGraphicOffset\} \+ \$\{rankingPodiumTop\} \+ \$\{rankingThirdPodiumNumberBottom\}px \+ \$\{rankingPodiumToSheetGap\}px\)\)`/);
+  assert.match(html, /class="absolute left-1\/2 w-\[393px\] -translate-x-1\/2" style="top:max\(12px, calc\(calc\(var\(--qling-space-safe-top\) \+ 88px\) \+ 44px \+ 24px - calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 170px\)\)\)" data-measure="ranking-top-layer"/);
   assert.match(html, /style="top:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 326px\)"/);
-  assert.match(html, /top-\[430px\]/);
+  assert.match(html, /style="top:max\(430px, calc\(max\(12px, calc\(calc\(var\(--qling-space-safe-top\) \+ 88px\) \+ 44px \+ 24px - calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 170px\)\)\) \+ calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 326px\) \+ 75px \+ 4px\)\)/);
+  assert.doesNotMatch(html, /top-\[430px\]/);
   assert.doesNotMatch(html, /top-\[400px\]/);
   assert.doesNotMatch(source, /Podium topOffset="calc\(var\(--qling-space-safe-top\) \+ 326px\)"/);
 });
@@ -298,7 +306,7 @@ test('ranking sheet is empty when there are fewer than four ranked entries', () 
 
   assert.match(html, /아직 순위가 없어요/);
   assert.match(html, /style="top:min\(156px, max\(8px, calc\(min\(452px, max\(72px/);
-  assert.match(html, /max\(8px, calc\(min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\) - 430px - 28px\)\)/);
+  assert.match(html, /max\(8px, calc\(min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\) - max\(430px, calc\(max\(12px,/);
   assert.doesNotMatch(html, />User 4</);
 });
 
@@ -326,9 +334,9 @@ test('ready ranking sheet stops above the viewer card when my rank is visible', 
 
   assert.match(html, /전체 랭킹/);
   assert.doesNotMatch(html, /top-\[400px\] h-\[372px\]/);
-  assert.match(html, /top-\[430px\]/);
+  assert.match(html, /style="top:max\(430px, calc\(max\(12px,/);
   assert.match(html, /overflow-hidden rounded-t-\[26px\]/);
-  assert.match(html, /style="height:min\(452px, max\(72px, calc\(min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\) - 430px - 12px\)\)\)"/);
+  assert.match(html, /height:min\(452px, max\(72px, calc\(min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\) - max\(430px, calc\(max\(12px,/);
 });
 
 test('ready ranking sheet can still stretch when no viewer card is visible', () => {
@@ -346,7 +354,7 @@ test('ready ranking sheet can still stretch when no viewer card is visible', () 
   })));
 
   assert.match(html, /전체 랭킹/);
-  assert.match(html, /style="height:min\(452px, max\(372px, calc\(var\(--qling-tab-viewport-height\) - 430px\)\)\)"/);
+  assert.match(html, /height:min\(452px, max\(372px, calc\(var\(--qling-tab-viewport-height\) - max\(430px, calc\(max\(12px,/);
 });
 
 test('ranking loading state uses the widened unscaled canvas', () => {
@@ -357,8 +365,8 @@ test('ranking loading state uses the widened unscaled canvas', () => {
 
   assert.match(html, /data-measure="ranking-screen"/);
   assert.doesNotMatch(html, /transform:scale/);
-  assert.match(html, /top-\[430px\] h-\[452px\]/);
-  assert.match(html, /class="absolute left-1\/2 w-\[393px\] -translate-x-1\/2" style="top:12px" data-measure="ranking-top-layer"/);
+  assert.match(html, /h-\[452px\]" style="top:max\(430px, calc\(max\(12px,/);
+  assert.match(html, /class="absolute left-1\/2 w-\[393px\] -translate-x-1\/2" style="top:max\(12px, calc\(calc\(var\(--qling-space-safe-top\) \+ 88px\) \+ 44px \+ 24px - calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 170px\)\)\)" data-measure="ranking-top-layer"/);
   assert.match(html, /style="top:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 326px\)"/);
   assert.match(html, /data-testid="figma-tab-loading-indicator"/);
   assert.match(html, /left-1\/2 h-10 w-10 -translate-x-1\/2 top-\[73px\]/);

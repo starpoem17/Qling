@@ -15,15 +15,22 @@ const rankingTabViewportHeight = 'var(--qling-tab-viewport-height)';
 const rankingTopSafeOffset = 'min(var(--qling-space-safe-top), 14px)';
 const rankingHeroHeight = `calc(${rankingTopSafeOffset} + 406px)`;
 const rankingPodiumTop = `calc(${rankingTopSafeOffset} + 326px)`;
-const rankingTopGraphicOffset = 12;
 const rankingTitleTop = 'calc(var(--qling-space-safe-top) + 30px)';
 const rankingSeasonLabelTop = 'calc(var(--qling-space-safe-top) + 64px)';
 const rankingSegmentedControlTop = 'calc(var(--qling-space-safe-top) + 88px)';
-const rankingSheetTop = 430;
+const rankingSegmentedControlHeight = 44;
+const rankingSegmentToCrownGap = 24;
+const rankingFirstCrownTop = `calc(${rankingTopSafeOffset} + 170px)`;
+const rankingTopGraphicMinimumOffset = 12;
+const rankingTopGraphicOffset = `max(${rankingTopGraphicMinimumOffset}px, calc(${rankingSegmentedControlTop} + ${rankingSegmentedControlHeight}px + ${rankingSegmentToCrownGap}px - ${rankingFirstCrownTop}))`;
+const rankingSheetMinimumTop = 430;
+const rankingThirdPodiumNumberBottom = 75;
+const rankingPodiumToSheetGap = 4;
+const rankingSheetTop = `max(${rankingSheetMinimumTop}px, calc(${rankingTopGraphicOffset} + ${rankingPodiumTop} + ${rankingThirdPodiumNumberBottom}px + ${rankingPodiumToSheetGap}px))`;
 const viewerRankCardTop = `min(773px, calc(${rankingTabViewportHeight} - 79px))`;
-const rankingSheetReadyHeight = `min(452px, max(372px, calc(${rankingTabViewportHeight} - ${rankingSheetTop}px)))`;
-const rankingSheetReadyHeightWithViewer = `min(452px, max(72px, calc(${viewerRankCardTop} - ${rankingSheetTop}px - 12px)))`;
-const rankingSheetEmptyTopWithViewer = `min(156px, max(8px, calc(${rankingSheetReadyHeightWithViewer} / 2 - 8px)), max(8px, calc(${viewerRankCardTop} - ${rankingSheetTop}px - 28px)))`;
+const rankingSheetReadyHeight = `min(452px, max(372px, calc(${rankingTabViewportHeight} - ${rankingSheetTop})))`;
+const rankingSheetReadyHeightWithViewer = `min(452px, max(72px, calc(${viewerRankCardTop} - ${rankingSheetTop} - 12px)))`;
+const rankingSheetEmptyTopWithViewer = `min(156px, max(8px, calc(${rankingSheetReadyHeightWithViewer} / 2 - 8px)), max(8px, calc(${viewerRankCardTop} - ${rankingSheetTop} - 28px)))`;
 const qlingNotoSansKrStyle = { fontFamily: '"Qling Noto Sans KR"' } as const;
 
 const rankingAssetUrlByName = {
@@ -196,7 +203,7 @@ function TopRankings({ period }: { readonly period: RankingDisplayPeriod }) {
   const topEntries = period.entries.slice(0, 3);
 
   return (
-    <div className="absolute left-1/2 w-[393px] -translate-x-1/2" style={{ top: `${rankingTopGraphicOffset}px` }} data-measure="ranking-top-layer">
+    <div className="absolute left-1/2 w-[393px] -translate-x-1/2" style={{ top: rankingTopGraphicOffset }} data-measure="ranking-top-layer">
       <TopRank entry={topEntries[0] ?? null} place="first" />
       <TopRank entry={topEntries[1] ?? null} place="second" />
       <TopRank entry={topEntries[2] ?? null} place="third" />
@@ -263,7 +270,7 @@ function TopRank({
 
 function LoadingPodium() {
   return (
-    <div className="absolute left-1/2 w-[393px] -translate-x-1/2" style={{ top: `${rankingTopGraphicOffset}px` }} data-measure="ranking-top-layer">
+    <div className="absolute left-1/2 w-[393px] -translate-x-1/2" style={{ top: rankingTopGraphicOffset }} data-measure="ranking-top-layer">
       <Podium topOffset={rankingPodiumTop} />
     </div>
   );
@@ -292,13 +299,14 @@ function RankingSheet({
   const rows = period?.entries.slice(3, 10) ?? [];
   const hasViewerCard = Boolean(period?.viewer);
   const readyHeight = hasViewerCard ? rankingSheetReadyHeightWithViewer : rankingSheetReadyHeight;
+  const sheetStyle = loading ? { top: rankingSheetTop } : { top: rankingSheetTop, height: readyHeight };
   return (
     <section
       className={cn(
         'absolute left-0 w-full overflow-hidden rounded-t-[26px] bg-white shadow-[0_-5px_8px_rgb(128_87_33/0.1)]',
-        loading ? 'top-[430px] h-[452px]' : 'top-[430px]',
+        loading && 'h-[452px]',
       )}
-      style={loading ? undefined : { height: readyHeight }}
+      style={sheetStyle}
     >
       {loading ? (
         <FigmaTabLoading label="순위를 불러오는 중" className="top-[73px]" />
