@@ -15,10 +15,11 @@ const rankingTabViewportHeight = 'var(--qling-tab-viewport-height)';
 const rankingTopSafeOffset = 'min(var(--qling-space-safe-top), 14px)';
 const rankingHeroHeight = `calc(${rankingTopSafeOffset} + 406px)`;
 const rankingPodiumTop = `calc(${rankingTopSafeOffset} + 326px)`;
+const rankingTopGraphicOffset = 12;
 const rankingTitleTop = 'calc(var(--qling-space-safe-top) + 30px)';
 const rankingSeasonLabelTop = 'calc(var(--qling-space-safe-top) + 64px)';
 const rankingSegmentedControlTop = 'calc(var(--qling-space-safe-top) + 88px)';
-const rankingSheetTop = 400;
+const rankingSheetTop = 430;
 const viewerRankCardTop = `min(773px, calc(${rankingTabViewportHeight} - 79px))`;
 const rankingSheetReadyHeight = `min(452px, max(372px, calc(${rankingTabViewportHeight} - ${rankingSheetTop}px)))`;
 const rankingSheetReadyHeightWithViewer = `min(452px, max(72px, calc(${viewerRankCardTop} - ${rankingSheetTop}px - 12px)))`;
@@ -195,7 +196,7 @@ function TopRankings({ period }: { readonly period: RankingDisplayPeriod }) {
   const topEntries = period.entries.slice(0, 3);
 
   return (
-    <div className="absolute left-1/2 top-0 w-[393px] -translate-x-1/2" data-measure="ranking-top-layer">
+    <div className="absolute left-1/2 w-[393px] -translate-x-1/2" style={{ top: `${rankingTopGraphicOffset}px` }} data-measure="ranking-top-layer">
       <TopRank entry={topEntries[0] ?? null} place="first" />
       <TopRank entry={topEntries[1] ?? null} place="second" />
       <TopRank entry={topEntries[2] ?? null} place="third" />
@@ -262,7 +263,7 @@ function TopRank({
 
 function LoadingPodium() {
   return (
-    <div className="absolute left-1/2 top-0 w-[393px] -translate-x-1/2" data-measure="ranking-top-layer">
+    <div className="absolute left-1/2 w-[393px] -translate-x-1/2" style={{ top: `${rankingTopGraphicOffset}px` }} data-measure="ranking-top-layer">
       <Podium topOffset={rankingPodiumTop} />
     </div>
   );
@@ -295,7 +296,7 @@ function RankingSheet({
     <section
       className={cn(
         'absolute left-0 w-full overflow-hidden rounded-t-[26px] bg-white shadow-[0_-5px_8px_rgb(128_87_33/0.1)]',
-        loading ? 'top-[400px] h-[452px]' : 'top-[400px]',
+        loading ? 'top-[430px] h-[452px]' : 'top-[430px]',
       )}
       style={loading ? undefined : { height: readyHeight }}
     >
@@ -310,7 +311,7 @@ function RankingSheet({
             받은 ♥ 기준
           </div>
           {rows.length > 0 ? (
-            <ol className="absolute left-0 top-12 flex w-full flex-col overflow-hidden px-5">
+            <ol className="absolute bottom-0 left-0 top-12 flex w-full flex-col overflow-y-auto px-5 [-webkit-overflow-scrolling:touch]">
               {rows.map(entry => <RankingRow key={entry.uid} entry={entry} />)}
             </ol>
           ) : (

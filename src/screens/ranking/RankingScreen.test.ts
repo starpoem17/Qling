@@ -109,7 +109,7 @@ test('top ranking avatars and crowns are present in static markup', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
 
-  assert.match(html, /class="absolute left-1\/2 top-0 w-\[393px\] -translate-x-1\/2" data-measure="ranking-top-layer"/);
+  assert.match(html, /class="absolute left-1\/2 w-\[393px\] -translate-x-1\/2" style="top:12px" data-measure="ranking-top-layer"/);
   assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 w-\[393px\] text-center text-white" style="height:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 406px\)" data-measure="ranking-top-first"/);
   assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 w-\[393px\] text-center text-white" style="height:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 406px\)" data-measure="ranking-top-second"/);
   assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 w-\[393px\] text-center text-white" style="height:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 406px\)" data-measure="ranking-top-third"/);
@@ -175,14 +175,18 @@ test('podium fills top three entry slots even when shared ranks skip a rank numb
   assert.match(html, /left-\[255px\] top-\[calc\(min\(var\(--qling-space-safe-top\),14px\)\+327px\)\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>1/);
 });
 
-test('ranking top cluster caps safe-area offset while the ranking sheet stays at 400px', () => {
+test('ranking top cluster offsets below the segmented control while the ranking sheet reveals the podium', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
 
   assert.match(source, /const rankingTopSafeOffset = 'min\(var\(--qling-space-safe-top\), 14px\)'/);
+  assert.match(source, /const rankingTopGraphicOffset = 12/);
   assert.match(source, /const rankingPodiumTop = `calc\(\$\{rankingTopSafeOffset\} \+ 326px\)`/);
+  assert.match(source, /const rankingSheetTop = 430/);
+  assert.match(html, /class="absolute left-1\/2 w-\[393px\] -translate-x-1\/2" style="top:12px" data-measure="ranking-top-layer"/);
   assert.match(html, /style="top:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 326px\)"/);
-  assert.match(html, /top-\[400px\]/);
+  assert.match(html, /top-\[430px\]/);
+  assert.doesNotMatch(html, /top-\[400px\]/);
   assert.doesNotMatch(source, /Podium topOffset="calc\(var\(--qling-space-safe-top\) \+ 326px\)"/);
 });
 
@@ -209,6 +213,7 @@ test('ranking sheet renders entries by slot after the podium even when rank numb
 
   assert.match(html, />Co First D</);
   assert.match(html, />Fifth Slot</);
+  assert.match(html, /absolute bottom-0 left-0 top-12 flex w-full flex-col overflow-y-auto px-5/);
   assert.doesNotMatch(html, /아직 순위가 없어요/);
 });
 
@@ -293,7 +298,7 @@ test('ranking sheet is empty when there are fewer than four ranked entries', () 
 
   assert.match(html, /아직 순위가 없어요/);
   assert.match(html, /style="top:min\(156px, max\(8px, calc\(min\(452px, max\(72px/);
-  assert.match(html, /max\(8px, calc\(min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\) - 400px - 28px\)\)/);
+  assert.match(html, /max\(8px, calc\(min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\) - 430px - 28px\)\)/);
   assert.doesNotMatch(html, />User 4</);
 });
 
@@ -321,8 +326,9 @@ test('ready ranking sheet stops above the viewer card when my rank is visible', 
 
   assert.match(html, /전체 랭킹/);
   assert.doesNotMatch(html, /top-\[400px\] h-\[372px\]/);
+  assert.match(html, /top-\[430px\]/);
   assert.match(html, /overflow-hidden rounded-t-\[26px\]/);
-  assert.match(html, /style="height:min\(452px, max\(72px, calc\(min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\) - 400px - 12px\)\)\)"/);
+  assert.match(html, /style="height:min\(452px, max\(72px, calc\(min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\) - 430px - 12px\)\)\)"/);
 });
 
 test('ready ranking sheet can still stretch when no viewer card is visible', () => {
@@ -340,7 +346,7 @@ test('ready ranking sheet can still stretch when no viewer card is visible', () 
   })));
 
   assert.match(html, /전체 랭킹/);
-  assert.match(html, /style="height:min\(452px, max\(372px, calc\(var\(--qling-tab-viewport-height\) - 400px\)\)\)"/);
+  assert.match(html, /style="height:min\(452px, max\(372px, calc\(var\(--qling-tab-viewport-height\) - 430px\)\)\)"/);
 });
 
 test('ranking loading state uses the widened unscaled canvas', () => {
@@ -351,7 +357,8 @@ test('ranking loading state uses the widened unscaled canvas', () => {
 
   assert.match(html, /data-measure="ranking-screen"/);
   assert.doesNotMatch(html, /transform:scale/);
-  assert.match(html, /top-\[400px\] h-\[452px\]/);
+  assert.match(html, /top-\[430px\] h-\[452px\]/);
+  assert.match(html, /class="absolute left-1\/2 w-\[393px\] -translate-x-1\/2" style="top:12px" data-measure="ranking-top-layer"/);
   assert.match(html, /style="top:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 326px\)"/);
   assert.match(html, /data-testid="figma-tab-loading-indicator"/);
   assert.match(html, /left-1\/2 h-10 w-10 -translate-x-1\/2 top-\[73px\]/);
