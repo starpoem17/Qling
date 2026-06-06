@@ -95,7 +95,7 @@ export function TutorialScreen(props: TutorialScreenProps) {
                       <button
                         type="button"
                         className={cn(
-                          'absolute left-[54px] top-[471px] z-20 flex h-[49px] w-[285px] items-center justify-center rounded-[18px]',
+                          'absolute left-[54px] top-[678px] z-20 flex h-[49px] w-[285px] items-center justify-center rounded-[18px]',
                           'bg-[#ff8b3d] text-[18px] font-extrabold leading-none tracking-normal text-white',
                           'shadow-[0_4px_10px_rgba(255,139,61,0.28)] transition-transform active:scale-[0.98]',
                           'focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#ff8b3d]',
