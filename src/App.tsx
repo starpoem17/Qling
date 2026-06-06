@@ -5,6 +5,7 @@ import {
 import {
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   User as FirebaseUser,
 } from 'firebase/auth';
 import {
@@ -106,6 +107,14 @@ async function createExampleWorriesForCurrentUser(user: FirebaseUser) {
     throw new Error(body?.error?.message ?? 'Example worry creation failed.');
   }
   return response.json();
+}
+
+function shouldFallbackToRedirectLogin(error: unknown): boolean {
+  const code = typeof error === 'object' && error !== null && 'code' in error
+    ? String((error as { code?: unknown }).code)
+    : '';
+  return code !== 'auth/popup-closed-by-user'
+    && code !== 'auth/cancelled-popup-request';
 }
 
 // --- App Component ---
@@ -264,7 +273,15 @@ export default function App() {
       await signInWithPopup(auth, googleProvider);
     } catch (err: any) {
       console.error("Login Error", err);
-      setLoginError("구글 로그인에 실패했습니다.");
+      if (shouldFallbackToRedirectLogin(err)) {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectError) {
+          console.error("Redirect Login Error", redirectError);
+        }
+      }
+      setLoginError("구글 로그인에 실패했습니다. 브라우저에서 팝업 또는 리디렉션 로그인을 허용해 주세요.");
     } finally {
       setIsProcessing(false);
     }
