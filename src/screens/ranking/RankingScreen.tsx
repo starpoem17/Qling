@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
-import { ErrorState, profileImageUrlForColor } from '../shared/ui';
+import { ErrorState, FigmaCanvasFrame, profileImageUrlForColor } from '../shared/ui';
 import type {
   RankingDisplayEntry,
   RankingDisplayPeriod,
@@ -11,15 +11,16 @@ import type {
   ViewerRankingDisplayEntry,
 } from './contract';
 
-const rankingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
-const rankingTabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
-const rankingUsableCanvasHeight = `calc((${rankingTabViewportHeight}) / (${rankingCanvasScale}))`;
+const rankingTabViewportHeight = 'var(--qling-tab-viewport-height)';
 const rankingTopSafeOffset = 'min(var(--qling-space-safe-top), 14px)';
 const rankingHeroHeight = `calc(${rankingTopSafeOffset} + 406px)`;
 const rankingPodiumTop = `calc(${rankingTopSafeOffset} + 326px)`;
+const rankingTitleTop = 'calc(var(--qling-space-safe-top) + 30px)';
+const rankingSeasonLabelTop = 'calc(var(--qling-space-safe-top) + 64px)';
+const rankingSegmentedControlTop = 'calc(var(--qling-space-safe-top) + 88px)';
 const rankingSheetTop = 400;
-const viewerRankCardTop = `min(773px, calc(${rankingUsableCanvasHeight} - 79px))`;
-const rankingSheetReadyHeight = `min(452px, max(372px, calc(${rankingUsableCanvasHeight} - ${rankingSheetTop}px)))`;
+const viewerRankCardTop = `min(773px, calc(${rankingTabViewportHeight} - 79px))`;
+const rankingSheetReadyHeight = `min(452px, max(372px, calc(${rankingTabViewportHeight} - ${rankingSheetTop}px)))`;
 const rankingSheetReadyHeightWithViewer = `min(452px, max(72px, calc(${viewerRankCardTop} - ${rankingSheetTop}px - 12px)))`;
 const rankingSheetEmptyTopWithViewer = `min(156px, max(8px, calc(${rankingSheetReadyHeightWithViewer} / 2 - 8px)), max(8px, calc(${viewerRankCardTop} - ${rankingSheetTop}px - 28px)))`;
 const qlingNotoSansKrStyle = { fontFamily: '"Qling Noto Sans KR"' } as const;
@@ -86,22 +87,16 @@ function RankingFrame({ children }: { readonly children: ReactNode }) {
   return (
     <section
       aria-label="순위"
-      className="-mx-[var(--qling-space-shell-x)] h-full min-h-0 overflow-hidden bg-[#ff8b3d] font-['Qling_Noto_Sans_KR']"
-      style={{ height: rankingTabViewportHeight }}
+      className="-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d] font-['Qling_Noto_Sans_KR']"
     >
-      <div
-        className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"
-        data-measure="ranking-responsive-canvas"
-        style={{ height: rankingTabViewportHeight }}
-      >
+      <FigmaCanvasFrame className="max-w-[480px]" data-measure="ranking-responsive-canvas">
         <div
-          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]"
+          className="relative h-full min-h-0 w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d]"
           data-measure="ranking-screen"
-          style={{ transform: `scale(${rankingCanvasScale})` }}
         >
           {children}
         </div>
-      </div>
+      </FigmaCanvasFrame>
     </section>
   );
 }
@@ -119,11 +114,11 @@ function RankingHero({
 }) {
   return (
     <div className="absolute left-0 top-0 w-full bg-[#ff8b3d] text-white" style={{ height: rankingHeroHeight }}>
-      <h1 className="absolute left-6 top-[calc(min(var(--qling-space-safe-top),14px)+56px)] text-[24px] font-black leading-[31px] font-['Qling_Noto_Sans_KR_Black']">
+      <h1 className="absolute left-6 text-[24px] font-black leading-[31px] font-['Qling_Noto_Sans_KR_Black']" style={{ top: rankingTitleTop }}>
         랭킹
       </h1>
       {seasonLabel && (
-        <p className="absolute left-6 top-[calc(min(var(--qling-space-safe-top),14px)+90px)] text-[12px] font-medium leading-4 opacity-85 font-['Qling_Noto_Sans_KR']">
+        <p className="absolute left-6 text-[12px] font-medium leading-4 opacity-85 font-['Qling_Noto_Sans_KR']" style={{ top: rankingSeasonLabelTop }}>
           {seasonLabel}
         </p>
       )}
@@ -156,7 +151,7 @@ function SegmentedControl({
   readonly disabled?: boolean;
 }) {
   return (
-    <div className="absolute left-[79px] top-[calc(min(var(--qling-space-safe-top),14px)+114px)] h-11 w-[236px] rounded-full bg-white/20" data-measure="ranking-segmented-outer">
+    <div className="absolute left-1/2 h-11 w-[236px] -translate-x-1/2 rounded-full bg-white/20" style={{ top: rankingSegmentedControlTop }} data-measure="ranking-segmented-outer">
       <span
         className={cn(
           'absolute top-1 h-9 w-[114px] rounded-full bg-white shadow-[0_2px_7px_rgb(128_87_33/0.2)] transition-transform',
@@ -200,12 +195,12 @@ function TopRankings({ period }: { readonly period: RankingDisplayPeriod }) {
   const topEntries = period.entries.slice(0, 3);
 
   return (
-    <>
+    <div className="absolute left-1/2 top-0 w-[393px] -translate-x-1/2" data-measure="ranking-top-layer">
       <TopRank entry={topEntries[0] ?? null} place="first" />
       <TopRank entry={topEntries[1] ?? null} place="second" />
       <TopRank entry={topEntries[2] ?? null} place="third" />
       <Podium topOffset={rankingPodiumTop} />
-    </>
+    </div>
   );
 }
 
@@ -267,9 +262,9 @@ function TopRank({
 
 function LoadingPodium() {
   return (
-    <>
+    <div className="absolute left-1/2 top-0 w-[393px] -translate-x-1/2" data-measure="ranking-top-layer">
       <Podium topOffset={rankingPodiumTop} />
-    </>
+    </div>
   );
 }
 
@@ -305,13 +300,13 @@ function RankingSheet({
       style={loading ? undefined : { height: readyHeight }}
     >
       {loading ? (
-        <FigmaTabLoading label="순위를 불러오는 중" className="left-[177px] top-[73px] translate-x-0" />
+        <FigmaTabLoading label="순위를 불러오는 중" className="top-[73px]" />
       ) : (
         <>
           <h2 className="absolute left-5 top-5 text-[14px] font-bold leading-[18px] text-[#191f28] font-['Qling_Noto_Sans_KR']">
             전체 랭킹
           </h2>
-          <div className="absolute left-[373px] top-[22px] w-[120px] -translate-x-full text-right text-[12px] font-medium leading-4 text-[#8b95a1] font-['Qling_Noto_Sans_KR']">
+          <div className="absolute right-5 top-[22px] w-[120px] text-right text-[12px] font-medium leading-4 text-[#8b95a1] font-['Qling_Noto_Sans_KR']">
             받은 ♥ 기준
           </div>
           {rows.length > 0 ? (
@@ -364,7 +359,7 @@ function ViewerRankCard({
 
   return (
     <div
-      className="absolute left-4 flex h-[70px] w-[361px] items-center gap-[18px] overflow-hidden rounded-[18px] bg-[#ffe3cb] py-[11px] pl-[14px] pr-4 text-left shadow-[0_8px_22px_rgb(128_87_33/0.16)]"
+      className="absolute left-4 right-4 flex h-[70px] items-center gap-[18px] overflow-hidden rounded-[18px] bg-[#ffe3cb] py-[11px] pl-[14px] pr-4 text-left shadow-[0_8px_22px_rgb(128_87_33/0.16)]"
       style={{ top: viewerRankCardTop }}
       aria-label={hasNoHearts ? '내 순위 -' : `내 순위 ${viewer.rank}위`}
     >

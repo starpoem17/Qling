@@ -51,16 +51,17 @@ function baseProps(overrides: Partial<RankingScreenProps> = {}): RankingScreenPr
   };
 }
 
-test('ranking screen scales the Figma canvas by width only like the other tab screens', () => {
+test('ranking screen uses the widened unscaled tab canvas like the other list screens', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
 
   assert.match(html, /data-measure="ranking-responsive-canvas"/);
   assert.match(html, /data-measure="ranking-screen"/);
   assert.match(html, /font-\[&#x27;Qling_Noto_Sans_KR&#x27;\]/);
-  assert.match(html, /style="height:calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)"/);
-  assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#ff8b3d\]/);
-  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
-  assert.doesNotMatch(html, /transform:scale\(min\(/);
+  assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] h-\[var\(--qling-tab-viewport-height\)\] overflow-hidden bg-\[#ff8b3d\]/);
+  assert.match(html, /mx-auto flex h-full w-full justify-center overflow-hidden max-w-\[480px\]/);
+  assert.match(html, /relative h-full min-h-0 w-full max-w-\[480px\] shrink-0 overflow-hidden bg-\[#ff8b3d\]/);
+  assert.doesNotMatch(html, /transform:scale/);
+  assert.doesNotMatch(html, /h-\[852px\] w-\[393px\]/);
   assert.doesNotMatch(html, /var\(--qling-space-safe-bottom\)\) \/ 772px/);
 });
 
@@ -108,6 +109,7 @@ test('top ranking avatars and crowns are present in static markup', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
 
+  assert.match(html, /class="absolute left-1\/2 top-0 w-\[393px\] -translate-x-1\/2" data-measure="ranking-top-layer"/);
   assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 w-\[393px\] text-center text-white" style="height:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 406px\)" data-measure="ranking-top-first"/);
   assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 w-\[393px\] text-center text-white" style="height:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 406px\)" data-measure="ranking-top-second"/);
   assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 w-\[393px\] text-center text-white" style="height:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 406px\)" data-measure="ranking-top-third"/);
@@ -135,6 +137,7 @@ test('ranking my page button uses the shared Figma asset icon', () => {
 
   assert.match(html, /aria-label="마이페이지 열기"/);
   assert.match(html, /my_page_icon\.svg/);
+  assert.match(html, /right-\[17px\] top-\[calc\(var\(--qling-space-safe-top\)\+21px\)\] h-\[49px\] w-\[49px\]/);
   assert.match(html, /class="absolute left-3 top-3 h-\[25px\] w-\[25px\]"/);
   assert.doesNotMatch(html, /lucide-circle-user-round/);
   assert.doesNotMatch(source, /CircleUserRound/);
@@ -290,7 +293,7 @@ test('ranking sheet is empty when there are fewer than four ranked entries', () 
 
   assert.match(html, /아직 순위가 없어요/);
   assert.match(html, /style="top:min\(156px, max\(8px, calc\(min\(452px, max\(72px/);
-  assert.match(html, /max\(8px, calc\(min\(773px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\)/);
+  assert.match(html, /max\(8px, calc\(min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\) - 400px - 28px\)\)/);
   assert.doesNotMatch(html, />User 4</);
 });
 
@@ -309,7 +312,8 @@ test('viewer rank card stays above the shell bottom navigation on shorter iPhone
   assert.match(html, /aria-label="내 순위 24위"/);
   assert.doesNotMatch(html, /chevron-right\.svg/);
   assert.doesNotMatch(html, /top-\[693px\]/);
-  assert.match(html, /top:min\(773px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 79px\)\)/);
+  assert.match(html, /class="absolute left-4 right-4 flex h-\[70px\]/);
+  assert.match(html, /top:min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\)/);
 });
 
 test('ready ranking sheet stops above the viewer card when my rank is visible', () => {
@@ -318,7 +322,7 @@ test('ready ranking sheet stops above the viewer card when my rank is visible', 
   assert.match(html, /전체 랭킹/);
   assert.doesNotMatch(html, /top-\[400px\] h-\[372px\]/);
   assert.match(html, /overflow-hidden rounded-t-\[26px\]/);
-  assert.match(html, /style="height:min\(452px, max\(72px, calc\(min\(773px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 79px\)\) - 400px - 12px\)\)\)"/);
+  assert.match(html, /style="height:min\(452px, max\(72px, calc\(min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\) - 400px - 12px\)\)\)"/);
 });
 
 test('ready ranking sheet can still stretch when no viewer card is visible', () => {
@@ -336,21 +340,21 @@ test('ready ranking sheet can still stretch when no viewer card is visible', () 
   })));
 
   assert.match(html, /전체 랭킹/);
-  assert.match(html, /style="height:min\(452px, max\(372px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 400px\)\)\)"/);
+  assert.match(html, /style="height:min\(452px, max\(372px, calc\(var\(--qling-tab-viewport-height\) - 400px\)\)\)"/);
 });
 
-test('ranking loading state uses the same width-only canvas scale', () => {
+test('ranking loading state uses the widened unscaled canvas', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps({
     state: { status: 'loading' },
   })));
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
 
   assert.match(html, /data-measure="ranking-screen"/);
-  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /top-\[400px\] h-\[452px\]/);
   assert.match(html, /style="top:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 326px\)"/);
   assert.match(html, /data-testid="figma-tab-loading-indicator"/);
-  assert.match(html, /left-\[177px\] top-\[73px\] translate-x-0/);
+  assert.match(html, /left-1\/2 h-10 w-10 -translate-x-1\/2 top-\[73px\]/);
   assert.doesNotMatch(html, /랭킹을 불러오는 중/);
   assert.doesNotMatch(html, /5월 시즌|마감|누적 시즌/);
   assert.doesNotMatch(html, /전체 랭킹|받은 ♥ 기준/);
