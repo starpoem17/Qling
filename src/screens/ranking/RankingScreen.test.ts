@@ -96,8 +96,8 @@ test('ranking text preserves Figma font weights after class merging', () => {
     },
   })));
 
-  assert.match(html, /class="absolute truncate font-bold left-\[136px\] top-\[308px\] w-\[120px\] text-\[15px\] leading-5" style="font-family:&quot;Qling Noto Sans KR&quot;">User 1/);
-  assert.match(html, /class="inline-flex items-center overflow-hidden font-bold gap-1 text-\[13px\] leading-\[17px\] absolute justify-center text-white left-\[136px\] top-\[330px\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;/);
+  assert.match(html, /class="absolute truncate font-bold left-\[136px\] top-\[calc\(var\(--qling-space-safe-top\)\+274px\)\] w-\[120px\] text-\[15px\] leading-5" style="font-family:&quot;Qling Noto Sans KR&quot;">User 1/);
+  assert.match(html, /class="inline-flex items-center overflow-hidden font-bold gap-1 text-\[13px\] leading-\[17px\] absolute justify-center text-white left-\[136px\] top-\[calc\(var\(--qling-space-safe-top\)\+296px\)\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;/);
   assert.match(html, /class="block truncate text-\[15px\] font-medium leading-5 text-\[#191f28\]" style="font-family:&quot;Qling Noto Sans KR&quot;">User 4/);
   assert.match(html, /class="mt-0\.5 block truncate text-\[11\.5px\] font-medium leading-\[15px\] text-\[#8b95a1\]" style="font-family:&quot;Qling Noto Sans KR&quot;">답변 4 · 채택 0/);
   assert.match(html, /class="inline-flex items-center overflow-hidden font-bold gap-\[5px\] text-\[15px\] leading-5 shrink-0 text-\[#191f28\]" style="font-family:&quot;Qling Noto Sans KR&quot;/);
@@ -108,19 +108,19 @@ test('top ranking avatars and crowns are present in static markup', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'ranking', 'RankingScreen.tsx'), 'utf8');
 
-  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[440px\] w-\[393px\] text-center text-white" data-measure="ranking-top-first"/);
-  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[440px\] w-\[393px\] text-center text-white" data-measure="ranking-top-second"/);
-  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[440px\] w-\[393px\] text-center text-white" data-measure="ranking-top-third"/);
+  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[calc\(var\(--qling-space-safe-top\)\+406px\)\] w-\[393px\] text-center text-white" data-measure="ranking-top-first"/);
+  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[calc\(var\(--qling-space-safe-top\)\+406px\)\] w-\[393px\] text-center text-white" data-measure="ranking-top-second"/);
+  assert.match(html, /class="pointer-events-none absolute left-0 top-0 z-10 h-\[calc\(var\(--qling-space-safe-top\)\+406px\)\] w-\[393px\] text-center text-white" data-measure="ranking-top-third"/);
   assert.match(html, /data-measure="ranking-profile-first"/);
   assert.match(html, /data-measure="ranking-profile-second"/);
   assert.match(html, /data-measure="ranking-profile-third"/);
   assert.match(html, /big_ellipse\.svg/);
   assert.match(html, /small_ellipse\.svg/);
-  assert.match(html, /absolute block max-w-none left-\[171px\] top-\[286px\] h-\[23px\] w-\[53px\]/);
-  assert.match(html, /absolute block max-w-none left-\[55px\] top-\[303px\] h-\[18px\] w-\[42px\]/);
-  assert.match(html, /absolute block max-w-none left-\[294px\] top-\[318px\] h-\[18px\] w-\[42px\]/);
-  assert.match(html, /absolute block max-w-none left-\[177px\] top-\[204px\] h-6 w-\[42px\]/);
-  assert.match(html, /absolute max-w-none rounded-full left-\[163px\] top-\[234px\] h-\[69px\] w-\[69px\]/);
+  assert.match(html, /absolute block max-w-none left-\[171px\] top-\[calc\(var\(--qling-space-safe-top\)\+252px\)\] h-\[23px\] w-\[53px\]/);
+  assert.match(html, /absolute block max-w-none left-\[55px\] top-\[calc\(var\(--qling-space-safe-top\)\+269px\)\] h-\[18px\] w-\[42px\]/);
+  assert.match(html, /absolute block max-w-none left-\[294px\] top-\[calc\(var\(--qling-space-safe-top\)\+284px\)\] h-\[18px\] w-\[42px\]/);
+  assert.match(html, /absolute block max-w-none left-\[177px\] top-\[calc\(var\(--qling-space-safe-top\)\+170px\)\] h-6 w-\[42px\]/);
+  assert.match(html, /absolute max-w-none rounded-full left-\[163px\] top-\[calc\(var\(--qling-space-safe-top\)\+200px\)\] h-\[69px\] w-\[69px\]/);
   assert.match(html, /crown-first\.svg/);
   assert.match(html, /crown-second\.svg/);
   assert.match(html, /crown-third\.svg/);
@@ -151,14 +151,14 @@ test('podium fills top three entry slots even when shared ranks skip a rank numb
   assert.match(html, /data-measure="ranking-profile-first"/);
   assert.match(html, /data-measure="ranking-profile-second"/);
   assert.match(html, /data-measure="ranking-profile-third"/);
-  assert.match(html, /absolute block max-w-none left-\[55px\] top-\[303px\] h-\[18px\] w-\[42px\]/);
-  assert.match(html, /absolute block max-w-none left-\[294px\] top-\[318px\] h-\[18px\] w-\[42px\]/);
+  assert.match(html, /absolute block max-w-none left-\[55px\] top-\[calc\(var\(--qling-space-safe-top\)\+269px\)\] h-\[18px\] w-\[42px\]/);
+  assert.match(html, /absolute block max-w-none left-\[294px\] top-\[calc\(var\(--qling-space-safe-top\)\+284px\)\] h-\[18px\] w-\[42px\]/);
   assert.match(html, /crown-second\.svg/);
   assert.match(html, /crown-third\.svg/);
-  assert.match(html, /left-\[16px\] top-\[324px\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">Co First B/);
-  assert.match(html, /left-\[255px\] top-\[339px\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">Shared Third/);
-  assert.match(html, /left-\[16px\] top-\[346px\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>2/);
-  assert.match(html, /left-\[255px\] top-\[361px\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>1/);
+  assert.match(html, /left-\[16px\] top-\[calc\(var\(--qling-space-safe-top\)\+290px\)\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">Co First B/);
+  assert.match(html, /left-\[255px\] top-\[calc\(var\(--qling-space-safe-top\)\+305px\)\] w-\[120px\] text-\[13px\] leading-\[17px\]" style="font-family:&quot;Qling Noto Sans KR&quot;">Shared Third/);
+  assert.match(html, /left-\[16px\] top-\[calc\(var\(--qling-space-safe-top\)\+312px\)\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>2/);
+  assert.match(html, /left-\[255px\] top-\[calc\(var\(--qling-space-safe-top\)\+327px\)\] w-\[120px\]" style="font-family:&quot;Qling Noto Sans KR&quot;[\s\S]*<span>1/);
 });
 
 test('ranking sheet renders entries by slot after the podium even when rank numbers are shared', () => {
@@ -267,7 +267,7 @@ test('ranking sheet is empty when there are fewer than four ranked entries', () 
   })));
 
   assert.match(html, /아직 순위가 없어요/);
-  assert.match(html, /style="top:min\(156px, max\(8px, calc\(min\(418px, max\(72px/);
+  assert.match(html, /style="top:min\(156px, max\(8px, calc\(min\(452px, max\(72px/);
   assert.match(html, /max\(8px, calc\(min\(773px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\)/);
   assert.doesNotMatch(html, />User 4</);
 });
@@ -294,9 +294,9 @@ test('ready ranking sheet stops above the viewer card when my rank is visible', 
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
 
   assert.match(html, /전체 랭킹/);
-  assert.doesNotMatch(html, /top-\[434px\] h-\[338px\]/);
+  assert.doesNotMatch(html, /top-\[400px\] h-\[372px\]/);
   assert.match(html, /overflow-hidden rounded-t-\[26px\]/);
-  assert.match(html, /style="height:min\(418px, max\(72px, calc\(min\(773px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 79px\)\) - 434px - 12px\)\)\)"/);
+  assert.match(html, /style="height:min\(452px, max\(72px, calc\(min\(773px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 79px\)\) - 400px - 12px\)\)\)"/);
 });
 
 test('ready ranking sheet can still stretch when no viewer card is visible', () => {
@@ -314,7 +314,7 @@ test('ready ranking sheet can still stretch when no viewer card is visible', () 
   })));
 
   assert.match(html, /전체 랭킹/);
-  assert.match(html, /style="height:min\(418px, max\(338px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 434px\)\)\)"/);
+  assert.match(html, /style="height:min\(452px, max\(372px, calc\(calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\) - 400px\)\)\)"/);
 });
 
 test('ranking loading state uses the same width-only canvas scale', () => {
@@ -325,7 +325,7 @@ test('ranking loading state uses the same width-only canvas scale', () => {
 
   assert.match(html, /data-measure="ranking-screen"/);
   assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
-  assert.match(html, /top-\[434px\] h-\[418px\]/);
+  assert.match(html, /top-\[400px\] h-\[452px\]/);
   assert.match(html, /data-testid="figma-tab-loading-indicator"/);
   assert.match(html, /left-\[177px\] top-\[73px\] translate-x-0/);
   assert.doesNotMatch(html, /랭킹을 불러오는 중/);

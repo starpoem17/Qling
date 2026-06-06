@@ -97,7 +97,7 @@ test('chat list uses the 480px tab frame while chat room keeps its scaled 393px 
 });
 
 test('chat shell routes keep scrolling in route-owned content areas', () => {
-  assert.match(chatScreenSource, /absolute left-0 top-\[170px\] h-\[682px\] w-full overflow-y-auto/);
+  assert.match(chatScreenSource, /absolute left-0 top-\[calc\(var\(--qling-space-safe-top\)\+136px\)\] h-\[calc\(716px-var\(--qling-space-safe-top\)\)\] w-full overflow-y-auto/);
   assert.match(chatScreenSource, /CreamContentBackground/);
   assert.match(chatScreenSource, /touch-none overscroll-none overflow-hidden rounded-t-\[30px\]/);
   assert.match(chatRoomScreenSource, /data-chat-room-canvas className="relative flex w-\[393px\] shrink-0 origin-top flex-col overflow-hidden bg-\[#fff1d1\] qling-figma-font"/);
@@ -254,11 +254,11 @@ test('chat room keyboard diagnostics log repeated focus viewport state in dev or
 });
 
 test('chat list header matches the Figma vertical positions', () => {
-  assert.match(chatScreenSource, /top-\[68px\] w-full text-center text-\[17px\]/);
-  assert.match(chatScreenSource, /right-\[17px\] top-\[54px\] h-\[49px\] w-\[49px\]/);
-  assert.match(chatScreenSource, /absolute left-4 right-4 top-\[109px\] flex h-10/);
+  assert.match(chatScreenSource, /top-\[calc\(var\(--qling-space-safe-top\)\+34px\)\] w-full text-center text-\[17px\]/);
+  assert.match(chatScreenSource, /right-\[17px\] top-\[calc\(var\(--qling-space-safe-top\)\+21px\)\] h-\[49px\] w-\[49px\]/);
+  assert.match(chatScreenSource, /absolute left-4 right-4 top-\[calc\(var\(--qling-space-safe-top\)\+75px\)\] flex h-10/);
   assert.doesNotMatch(chatScreenSource, /absolute left-4 top-\[75px\] flex h-10 w-\[361px\]/);
-  assert.match(chatScreenSource, /absolute left-0 top-\[170px\] h-\[682px\] w-full overflow-hidden rounded-t-\[30px\] bg-\[#fff1d1\]/);
+  assert.match(chatScreenSource, /absolute left-0 top-\[calc\(var\(--qling-space-safe-top\)\+136px\)\] h-\[calc\(716px-var\(--qling-space-safe-top\)\)\] w-full overflow-hidden rounded-t-\[30px\] bg-\[#fff1d1\]/);
 });
 
 test('chat list cards and empty state scale from their container width', () => {

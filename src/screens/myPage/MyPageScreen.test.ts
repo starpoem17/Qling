@@ -100,9 +100,9 @@ test('my-page root uses a widened unscaled Figma canvas with fixed header and bo
   assert.match(html, /data-measure="my-page-screen"/);
   assert.match(html, /h-\[852px\] w-full max-w-\[480px\]/);
   assert.match(html, /aria-label="마이페이지 본문"/);
-  assert.match(html, /<header[^>]*h-\[134px\][\s\S]*<section[^>]*aria-label="마이페이지 본문"/);
+  assert.match(html, /<header[^>]*h-\[100px\][\s\S]*<section[^>]*aria-label="마이페이지 본문"/);
   assert.match(html, /relative overflow-y-auto overscroll-contain pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
-  assert.match(html, /height:min\(718px, max\(520px, calc\(var\(--qling-tab-viewport-height\) - 134px\)\)\)/);
+  assert.match(html, /height:min\(752px, max\(520px, calc\(var\(--qling-tab-viewport-height\) - 100px\)\)\)/);
   assert.match(html, /pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
   assert.doesNotMatch(html, /scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
   assert.match(html, /left-5 right-5 top-\[32px\] h-\[93px\]/);
