@@ -12,7 +12,7 @@ const chatRoomDocumentBackground = '#ffffff';
 const chatRoomKeyboardDebugStorageKey = 'qling.chatRoomKeyboardDebug';
 const chatRoomKeyboardDebugQueryParam = 'chatRoomKeyboardDebug';
 const chatInputBaseHeight = 67;
-const chatRoomTopBarHeight = 74;
+const chatRoomTopBarHeight = 100;
 const chatRoomKeyboardOpenThreshold = 120;
 const chatTextareaMinHeight = 40;
 const chatTextareaMaxHeight = 60;
@@ -27,7 +27,6 @@ type ChatRoomCanvasStyle = CSSProperties & {
 
 type ChatRoomViewportMetrics = {
   readonly canvasHeight: number;
-  readonly scale: number;
   readonly viewportOffsetTop: number;
 };
 
@@ -84,7 +83,7 @@ export function ChatRoomScreen({
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState(chatTextareaMinHeight);
-  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, scale: 1, viewportOffsetTop: 0 });
+  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852, viewportOffsetTop: 0 });
   const [isTopBarHiddenForKeyboard, setIsTopBarHiddenForKeyboard] = useState(false);
   const [isMessageScrollerScrollable, setIsMessageScrollerScrollable] = useState(false);
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
@@ -104,8 +103,6 @@ export function ChatRoomScreen({
   useEffect(() => {
     const updateViewportMetrics = (source: string = 'viewport.measure') => {
       const visualViewport = window.visualViewport;
-      const visualWidth = visualViewport?.width ?? window.innerWidth;
-      const scale = Math.max(Math.min(visualWidth, 480) / 393, 0.1);
       const layoutHeight = window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const visibleHeight = visualViewport?.height ?? window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const offsetTop = visualViewport?.offsetTop ?? 0;
@@ -124,14 +121,12 @@ export function ChatRoomScreen({
         setIsTopBarHiddenForKeyboard(false);
       }
       const nextMetrics = {
-        canvasHeight: viewportHeight / scale,
-        scale,
+        canvasHeight: viewportHeight,
         viewportOffsetTop: offsetTop,
       };
 
       setViewportMetrics(previousMetrics => {
         return previousMetrics.canvasHeight === nextMetrics.canvasHeight
-          && previousMetrics.scale === nextMetrics.scale
           && previousMetrics.viewportOffsetTop === nextMetrics.viewportOffsetTop
           ? previousMetrics
           : nextMetrics;
@@ -178,18 +173,14 @@ export function ChatRoomScreen({
   const canvasStyle: ChatRoomCanvasStyle = {
     '--chat-input-height': `${chatInputBaseHeight + Math.max(0, textareaHeight - chatTextareaMinHeight)}px`,
     height: `${viewportMetrics.canvasHeight}px`,
-    transform: `scale(${viewportMetrics.scale})`,
   };
   const rootStyle: CSSProperties = {
     transform: `translateY(${viewportMetrics.viewportOffsetTop}px)`,
   };
   const topBarLayerStyle: CSSProperties = {
-    height: `${(isTopBarHiddenForKeyboard ? 0 : viewportMetrics.viewportOffsetTop) + chatRoomTopBarHeight * viewportMetrics.scale}px`,
+    height: `${(isTopBarHiddenForKeyboard ? 0 : viewportMetrics.viewportOffsetTop) + chatRoomTopBarHeight}px`,
     paddingTop: `${isTopBarHiddenForKeyboard ? 0 : viewportMetrics.viewportOffsetTop}px`,
-    transform: isTopBarHiddenForKeyboard ? `translateY(${-chatRoomTopBarHeight * viewportMetrics.scale}px)` : undefined,
-  };
-  const topBarCanvasStyle: CSSProperties = {
-    transform: `scale(${viewportMetrics.scale})`,
+    transform: isTopBarHiddenForKeyboard ? `translateY(${-chatRoomTopBarHeight}px)` : undefined,
   };
 
   useEffect(() => {
@@ -344,7 +335,6 @@ export function ChatRoomScreen({
           opponent={opponent}
           answerAdoptionRatePercent={answerAdoptionRatePercent}
           topBarLayerStyle={topBarLayerStyle}
-          topBarCanvasStyle={topBarCanvasStyle}
           onBack={onBack}
           onOpenMenu={handleOpenMenu}
         />
@@ -357,9 +347,9 @@ export function ChatRoomScreen({
           onTouchCancel={resetBackSwipe}
         >
           <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-            <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+            <div data-chat-room-canvas className="relative flex h-full w-full max-w-[480px] shrink-0 flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
               <ChatRoomTopBarSpacer isHidden={isTopBarHiddenForKeyboard} />
-              <div className="flex min-h-0 flex-1 w-[393px] items-start justify-center bg-[#fff1d1] px-6 pt-10">
+              <div className="flex min-h-0 w-full flex-1 items-start justify-center bg-[#fff1d1] px-6 pt-10">
                 {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
               </div>
             </div>
@@ -367,7 +357,6 @@ export function ChatRoomScreen({
         </section>
         {menuOpen && (
           <ChatRoomActionSheet
-            scale={viewportMetrics.scale}
             onClose={() => setMenuOpen(false)}
             onNotificationOff={() => {
               setMenuOpen(false);
@@ -393,7 +382,6 @@ export function ChatRoomScreen({
         opponent={opponent}
         answerAdoptionRatePercent={answerAdoptionRatePercent}
         topBarLayerStyle={topBarLayerStyle}
-        topBarCanvasStyle={topBarCanvasStyle}
         onBack={onBack}
         onOpenMenu={handleOpenMenu}
       />
@@ -406,13 +394,13 @@ export function ChatRoomScreen({
         onTouchCancel={resetBackSwipe}
       >
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-          <div data-chat-room-canvas className="relative flex w-[393px] shrink-0 origin-top flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+          <div data-chat-room-canvas className="relative flex h-full w-full max-w-[480px] shrink-0 flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
             <ChatRoomTopBarSpacer isHidden={isTopBarHiddenForKeyboard} />
             <div
               ref={messagesScrollerRef}
               data-chat-room-message-scroller
               className={cn(
-                'min-h-0 flex-1 w-[393px] bg-[#fff1d1] px-4 pb-[28px] pt-4',
+                'min-h-0 w-full flex-1 bg-[#fff1d1] px-4 pb-[28px] pt-4',
                 isMessageScrollerScrollable
                   ? 'overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
                   : 'touch-none overscroll-none overflow-hidden',
@@ -470,7 +458,7 @@ export function ChatRoomScreen({
                              )}
                           </div>
                           
-                        <div className="w-fit max-w-[199px] rounded-bl-[18px] rounded-br-[18px] rounded-tl-[7px] rounded-tr-[18px] border-[0.8px] border-[#f1e7da] bg-white px-[14px] py-[10.4px] text-[14px] font-normal leading-[22.75px] tracking-[-0.35px] text-[#2b2620] shadow-[0_2px_4px_rgb(120_90_60/0.07)]">
+                        <div className="w-fit max-w-[min(260px,calc(100vw_-_174px))] rounded-bl-[18px] rounded-br-[18px] rounded-tl-[7px] rounded-tr-[18px] border-[0.8px] border-[#f1e7da] bg-white px-[14px] py-[10.4px] text-[14px] font-normal leading-[22.75px] tracking-[-0.35px] text-[#2b2620] shadow-[0_2px_4px_rgb(120_90_60/0.07)]">
                                 {msg.content}
                              </div>
                           
@@ -481,13 +469,13 @@ export function ChatRoomScreen({
                     )}
                     
                     {msg.isMine && (
-                      <div className="flex max-w-[317px] items-end justify-end gap-2">
+                      <div className="flex max-w-[calc(100%_-_40px)] items-end justify-end gap-2">
                         <div className="flex shrink-0 flex-col items-end justify-end gap-[2px] pb-[2px]">
                           {readStatusText && <span className="whitespace-nowrap text-[10.5px] font-semibold leading-[15.75px] text-[#f26c0f]">{readStatusText}</span>}
                           <span className="whitespace-nowrap text-[10.5px] font-normal leading-[15.75px] text-[#a39e96]">{msg.createdAtStr}</span>
                           </div>
 
-                        <div className="w-fit max-w-[236px] rounded-bl-[18px] rounded-br-[18px] rounded-tl-[18px] rounded-tr-[7px] bg-[#ff8a2e] px-[14px] py-[10.4px] text-[14px] font-normal leading-[22.75px] tracking-[-0.35px] text-white shadow-[0_4px_6px_rgb(255_122_26/0.32)]">
+                        <div className="w-fit max-w-[min(300px,calc(100vw_-_132px))] rounded-bl-[18px] rounded-br-[18px] rounded-tl-[18px] rounded-tr-[7px] bg-[#ff8a2e] px-[14px] py-[10.4px] text-[14px] font-normal leading-[22.75px] tracking-[-0.35px] text-white shadow-[0_4px_6px_rgb(255_122_26/0.32)]">
                              {msg.content}
                           </div>
                        </div>
@@ -514,7 +502,6 @@ export function ChatRoomScreen({
       </section>
       {menuOpen && (
         <ChatRoomActionSheet
-          scale={viewportMetrics.scale}
           onClose={() => setMenuOpen(false)}
           onNotificationOff={() => {
             setMenuOpen(false);
@@ -538,14 +525,12 @@ function ChatRoomTopBarLayer({
   opponent,
   answerAdoptionRatePercent,
   topBarLayerStyle,
-  topBarCanvasStyle,
   onBack,
   onOpenMenu,
 }: {
   readonly opponent: { nickname: string; profileColor: string } | null;
   readonly answerAdoptionRatePercent: number | null;
   readonly topBarLayerStyle: CSSProperties;
-  readonly topBarCanvasStyle: CSSProperties;
   readonly onBack: () => void;
   readonly onOpenMenu: () => void;
 }) {
@@ -556,7 +541,7 @@ function ChatRoomTopBarLayer({
       style={topBarLayerStyle}
     >
       <div className="mx-auto flex w-full max-w-[480px] justify-center">
-        <div className="h-[74px] w-[393px] shrink-0 origin-top" style={topBarCanvasStyle}>
+        <div className="h-[100px] w-full max-w-[480px] shrink-0">
           <ChatRoomTopBar
             opponent={opponent}
             answerAdoptionRatePercent={answerAdoptionRatePercent}
@@ -573,7 +558,7 @@ function ChatRoomTopBarSpacer({ isHidden }: { readonly isHidden: boolean }) {
   return (
     <div
       data-chat-room-top-bar-spacer
-      className="w-[393px] shrink-0 bg-[#ff8b3d]"
+      className="w-full shrink-0 bg-[#ff8b3d]"
       style={{ height: isHidden ? 0 : chatRoomTopBarHeight }}
       aria-hidden="true"
     />
@@ -606,7 +591,7 @@ function ChatRoomInputBar({
   return (
       <div
         data-chat-room-input-bar
-        className="relative h-[var(--chat-input-height)] w-[393px] shrink-0 touch-none overscroll-none border-t border-[#ede3d6] bg-white qling-figma-font"
+        className="relative h-[var(--chat-input-height)] w-full shrink-0 touch-none overscroll-none border-t border-[#ede3d6] bg-white qling-figma-font"
         onTouchMove={blockStaticScroll}
         onWheel={blockStaticScroll}
       >
@@ -635,7 +620,7 @@ function ChatRoomInputBar({
           data-lpignore="true"
           data-1p-ignore="true"
           placeholder="메시지를 입력해 주세요"
-          className="absolute left-[19px] top-[10.2px] w-[310px] resize-none rounded-[21px] border border-[#ede3d6] bg-[#fff4e8] px-[16.8px] py-[9px] text-[14px] font-normal leading-5 text-[#2b2620] outline-none placeholder:text-[#a39e96] focus:ring-2 focus:ring-[#ff8b3d]"
+          className="absolute left-[19px] right-[64px] top-[10.2px] resize-none rounded-[21px] border border-[#ede3d6] bg-[#fff4e8] px-[16.8px] py-[9px] text-[14px] font-normal leading-5 text-[#2b2620] outline-none placeholder:text-[#a39e96] focus:ring-2 focus:ring-[#ff8b3d]"
           style={{ height: textareaHeight, overflow: 'hidden' }}
         />
         <button
@@ -643,7 +628,7 @@ function ChatRoomInputBar({
           onClick={() => void onSend()}
           disabled={!draft.trim() || isSending}
           aria-label="메시지 보내기"
-          className="absolute left-[337px] top-[8.2px] flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#ff8b3d] shadow-[0_4px_6px_rgb(255_122_26/0.4)] transition-transform active:scale-95 disabled:opacity-45 focus:outline-none focus:ring-2 focus:ring-[#f26c0f]"
+          className="absolute right-[14px] top-[8.2px] flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#ff8b3d] shadow-[0_4px_6px_rgb(255_122_26/0.4)] transition-transform active:scale-95 disabled:opacity-45 focus:outline-none focus:ring-2 focus:ring-[#f26c0f]"
         >
           <img src={roomSendIconUrl} alt="" aria-hidden="true" className="h-5 w-5" draggable={false} />
         </button>
@@ -665,7 +650,7 @@ function ChatRoomTopBar({
   return (
     <header
       data-chat-room-top-bar
-      className="relative z-20 h-[74px] w-[393px] shrink-0 touch-none overscroll-none overflow-hidden bg-[#ff8b3d] qling-figma-font"
+      className="relative z-20 h-[100px] w-full shrink-0 touch-none overscroll-none overflow-hidden bg-[#ff8b3d] qling-figma-font"
       onTouchMove={blockStaticScroll}
       onWheel={blockStaticScroll}
     >
@@ -673,36 +658,38 @@ function ChatRoomTopBar({
           type="button"
           onClick={onBack}
           aria-label="뒤로가기"
-          className="absolute left-[7px] top-[18px] flex h-12 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute left-[6px] top-[calc(45px+var(--qling-pwa-direct-topbar-shift))] flex h-[45px] w-[44px] items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
         >
           <span aria-hidden="true" className="font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-none">
             ‹
           </span>
         </button>
-        <div className="absolute left-[126px] top-[28px] h-[30px] w-[30px]">
-          <img
-            src={profileImageUrlForColor(opponent?.profileColor || '#FF8B3D')}
-            alt="프로필"
-            className="h-[30px] w-[30px] rounded-full object-cover"
-            draggable={false}
-          />
-          <span className="absolute left-[21px] top-5 h-[11px] w-[11px] rounded-full border-[1.6px] border-[#fff4e8] bg-[#3fc36b]" aria-hidden="true" />
-        </div>
-        <div className="absolute left-[170px] top-[25px] flex w-[83px] flex-col items-start">
-          <span className="max-w-[130px] truncate text-[16px] font-extrabold leading-5 tracking-[-0.4px] text-white">
-            {opponent?.nickname || '대화방'}
-          </span>
-          {answerAdoptionRatePercent !== null && (
-            <span className="whitespace-nowrap text-[11.5px] font-medium leading-[17.25px] text-white/80">
-              답변 채택률 {answerAdoptionRatePercent}%
+        <div className="absolute left-1/2 top-[43px] flex -translate-x-1/2 items-center gap-[14px]">
+          <div className="relative h-[30px] w-[30px] shrink-0">
+            <img
+              src={profileImageUrlForColor(opponent?.profileColor || '#FF8B3D')}
+              alt="프로필"
+              className="h-[30px] w-[30px] rounded-full object-cover"
+              draggable={false}
+            />
+            <span className="absolute left-[21px] top-5 h-[11px] w-[11px] rounded-full border-[1.6px] border-[#fff4e8] bg-[#3fc36b]" aria-hidden="true" />
+          </div>
+          <div className="flex min-w-0 max-w-[170px] flex-col items-start">
+            <span className="max-w-full truncate text-[16px] font-extrabold leading-5 tracking-[-0.4px] text-white">
+              {opponent?.nickname || '대화방'}
             </span>
-          )}
+            {answerAdoptionRatePercent !== null && (
+              <span className="whitespace-nowrap text-[11.5px] font-medium leading-[17.25px] text-white/80">
+                답변 채택률 {answerAdoptionRatePercent}%
+              </span>
+            )}
+          </div>
         </div>
         <button
           type="button"
           aria-label="채팅방 메뉴 열기"
           onClick={onOpenMenu}
-          className="absolute left-[339px] top-[27px] flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute right-[14px] top-[49px] flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
         >
           <img src={roomMoreIconUrl} alt="" aria-hidden="true" className="h-[22px] w-[22px]" draggable={false} />
         </button>
@@ -765,13 +752,11 @@ function isChatRoomKeyboardDebugEnabled() {
 }
 
 function ChatRoomActionSheet({
-  scale,
   onClose,
   onNotificationOff,
   onBlock,
   onReport,
 }: {
-  readonly scale: number;
   readonly onClose: () => void;
   readonly onNotificationOff: () => void;
   readonly onBlock: () => void;
@@ -780,19 +765,13 @@ function ChatRoomActionSheet({
   return (
     <div className="fixed inset-0 z-[60] bg-[rgba(40,30,20,0.42)]" role="presentation" onClick={onClose}>
       <div
-        className="absolute bottom-0 left-1/2 overflow-visible"
-        style={{
-          width: `${393 * scale}px`,
-          height: `${284 * scale}px`,
-          transform: 'translateX(-50%)',
-        }}
+        className="absolute bottom-0 left-1/2 h-[284px] w-full max-w-[480px] -translate-x-1/2 overflow-visible"
       >
         <div
           role="dialog"
           aria-modal="true"
           aria-label="채팅방 메뉴"
-          className="absolute bottom-0 left-0 flex h-[284px] w-[393px] origin-bottom-left flex-col items-start overflow-hidden rounded-tl-[22px] rounded-tr-[22px] bg-white pb-[26px] pt-[10px]"
-          style={{ transform: `scale(${scale})` }}
+          className="absolute bottom-0 left-0 flex h-[284px] w-full flex-col items-start overflow-hidden rounded-tl-[22px] rounded-tr-[22px] bg-white pb-[26px] pt-[10px]"
           onClick={event => event.stopPropagation()}
         >
           <div className="flex w-full justify-center overflow-hidden pb-2">

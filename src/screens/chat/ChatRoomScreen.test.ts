@@ -26,7 +26,7 @@ test('chat room top bar renders answer adoption rate from props without hardcode
 
   assert.match(html, /답변 채택률 75%/);
   assert.match(html, /aria-label="뒤로가기"/);
-  assert.match(html, /h-12 w-11/);
+  assert.match(html, /left-\[6px\] top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\] flex h-\[45px\] w-\[44px\]/);
   assert.doesNotMatch(html, /답변 채택률 92%/);
 });
 
@@ -42,6 +42,6 @@ test('chat room input matches the attachment-free Figma layout', () => {
 
   assert.doesNotMatch(html, /첨부 추가/);
   assert.doesNotMatch(html, /room_plus/);
-  assert.match(html, /left-\[19px\] top-\[10\.2px\] w-\[310px\]/);
+  assert.match(html, /left-\[19px\] right-\[64px\] top-\[10\.2px\]/);
   assert.match(html, /aria-label="메시지 보내기"/);
 });
