@@ -18,6 +18,7 @@ function seed(id: string, content: string, categories: string[]) {
 function createRepo(options: {
   stateExists?: boolean;
   interests?: string[];
+  activeDeliveryCount?: number;
   throwOnCommit?: boolean;
 } = {}) {
   const commits: Array<{ uid: string; seeds: SelectedExampleSeed[] }> = [];
@@ -25,6 +26,7 @@ function createRepo(options: {
     readUserProfile: async uid => ({
       uid,
       interests: options.interests ?? ['career'],
+      activeDeliveryCount: options.activeDeliveryCount,
       exampleWorriesCreatedAt: options.stateExists ? new Date() : undefined,
       exampleWorrySeedIds: options.stateExists ? ['seed1'] : undefined,
       exampleDeliveryIds: options.stateExists ? ['delivery1'] : undefined,
@@ -72,6 +74,16 @@ test('repeated call and interest edits after creation are idempotent', async () 
   assert.equal(result.status, 'idempotent');
   assert.deepEqual(result.status === 'idempotent' ? result.seedIds : [], ['seed1']);
   assert.equal(commits.length, 0);
+});
+
+test('real active deliveries suppress example creation and mark examples completed empty', async () => {
+  const { repo, commits } = createRepo({ activeDeliveryCount: 2 });
+  const result = await createExamplesForUser({ uid: 'user1', repository: repo });
+
+  assert.equal(result.status, 'created');
+  assert.deepEqual(result.status === 'created' ? result.seedIds : ['not-created'], []);
+  assert.equal(commits.length, 1);
+  assert.equal(commits[0].seeds.length, 0);
 });
 
 test('empty matching seeds writes completed empty state through repository', async () => {

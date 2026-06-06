@@ -95,6 +95,33 @@ test('onboarding side effects complete profile then examples then route completi
   assert.deepEqual(calls, ['completeOnboarding', 'createExamples', 'onComplete']);
 });
 
+test('onboarding skips example worries when real worries were assigned', async () => {
+  const calls: string[] = [];
+  const result = await submitAvailableOnboarding({
+    user: { uid: 'user-1' } as never,
+    disabled: false,
+    profile: { nickname: '라미', gender: 'female', age: 20, interests: ['직장'], profileColor: '#FF8B3D' },
+    deps: {
+      async completeOnboarding() {
+        calls.push('completeOnboarding');
+        return { status: 'completed', profile: completedProfile, initialDeliveryCount: 2 };
+      },
+      async createExamples() {
+        calls.push('createExamples');
+      },
+      onComplete() {
+        calls.push('onComplete');
+      },
+      onError(message) {
+        calls.push(`onError:${message}`);
+      },
+    },
+  });
+
+  assert.equal(result, 'completed');
+  assert.deepEqual(calls, ['completeOnboarding', 'onComplete']);
+});
+
 test('profile completion failure does not create examples or route transition', async () => {
   const calls: string[] = [];
   const result = await submitAvailableOnboarding({

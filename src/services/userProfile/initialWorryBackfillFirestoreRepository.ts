@@ -72,7 +72,7 @@ export function createInitialWorryBackfillFirestoreRepository(params: {
     async fetchCandidateWorries({ limit }) {
       const snap = await db.collection('worries')
         .where('status', '==', 'active')
-        .limit(Math.max(1, Math.min(limit, 100)))
+        .limit(Math.max(1, Math.min(limit, 500)))
         .get();
       return snap.docs
         .map(candidateFromDoc)

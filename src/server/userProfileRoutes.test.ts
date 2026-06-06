@@ -22,6 +22,7 @@ function createRes() {
 function captureRoutes(repository: UserProfileRepository, options: {
   readonly userDoc?: Record<string, unknown>;
   readonly initialWorryBackfillRepository?: InitialWorryBackfillRepository;
+  readonly refillWorryInbox?: (params: { uid: string }) => Promise<{ createdCount: number; deliveryIds: readonly string[] }>;
 } = {}) {
   const routes = new Map<string, Array<(req: unknown, res: unknown, next?: () => void) => unknown>>();
   const app = {
@@ -47,6 +48,7 @@ function captureRoutes(repository: UserProfileRepository, options: {
     auth: { verifyIdToken: async () => ({ uid: 'verified-user' }) } as never,
     repository,
     initialWorryBackfillRepository: options.initialWorryBackfillRepository,
+    refillWorryInbox: options.refillWorryInbox,
   });
 
   async function call(path: string, body: unknown) {
@@ -333,4 +335,34 @@ test('interests update route rejects empty interests before persistence', async 
 
   assert.equal(res.statusCode, 400);
   assert.equal(called, false);
+});
+
+test('worry inbox refill route requires active user and returns created deliveries', async () => {
+  let calledUid = '';
+  const route = captureRoutes({
+    async reserveNickname() {
+      throw new Error('unused');
+    },
+    async completeOnboarding() {
+      throw new Error('unused');
+    },
+    async updateInterests() {
+      throw new Error('unused');
+    },
+  }, {
+    async refillWorryInbox(params) {
+      calledUid = params.uid;
+      return { createdCount: 2, deliveryIds: ['delivery1', 'delivery2'] };
+    },
+  });
+
+  const res = await route.call('/api/users/me/worry-inbox-refill', {});
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(calledUid, 'verified-user');
+  assert.deepEqual(res.body, {
+    status: 'completed',
+    refillDeliveryCount: 2,
+    refillDeliveryIds: ['delivery1', 'delivery2'],
+  });
 });

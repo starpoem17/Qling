@@ -41,6 +41,9 @@ export type CompleteOnboardingResult =
   | {
       readonly status: 'completed';
       readonly profile: UserProfileWriteModel;
+      readonly initialDeliveryCount?: number;
+      readonly initialDeliveryIds?: readonly string[];
+      readonly initialDeliveryBackfillStatus?: 'failed';
     }
   | {
       readonly status: 'invalid' | 'reservation_missing' | 'reservation_conflict' | 'server_error';
