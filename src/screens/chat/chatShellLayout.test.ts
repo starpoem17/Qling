@@ -97,7 +97,10 @@ test('chat list uses the 480px tab frame while chat room keeps its scaled 393px 
 });
 
 test('chat shell routes keep scrolling in route-owned content areas', () => {
-  assert.match(chatScreenSource, /absolute left-0 top-\[calc\(var\(--qling-space-safe-top\)\+136px\)\] h-\[calc\(716px-var\(--qling-space-safe-top\)\)\] w-full overflow-y-auto/);
+  assert.match(chatScreenSource, /const contentTop = 'calc\(var\(--qling-space-safe-top\) \+ 136px\)'/);
+  assert.match(chatScreenSource, /const contentViewportHeight = 'calc\(var\(--qling-tab-viewport-height\) - var\(--qling-space-safe-top\) - 136px\)'/);
+  assert.match(chatScreenSource, /className="absolute left-0 w-full overflow-y-auto rounded-t-\[30px\] px-4 pb-\[108px\] pt-4 \[-webkit-overflow-scrolling:touch\]"[\s\S]*style=\{\{ height: contentViewportHeight, top: contentTop \}\}/);
+  assert.doesNotMatch(chatScreenSource, /h-\[calc\(716px-var\(--qling-space-safe-top\)\)\] w-full overflow-y-auto/);
   assert.match(chatScreenSource, /CreamContentBackground/);
   assert.match(chatScreenSource, /touch-none overscroll-none overflow-hidden rounded-t-\[30px\]/);
   assert.match(chatRoomScreenSource, /data-chat-room-canvas className="relative flex w-\[393px\] shrink-0 origin-top flex-col overflow-hidden bg-\[#fff1d1\] qling-figma-font"/);
@@ -258,7 +261,9 @@ test('chat list header matches the Figma vertical positions', () => {
   assert.match(chatScreenSource, /right-\[17px\] top-\[calc\(var\(--qling-space-safe-top\)\+21px\)\] h-\[49px\] w-\[49px\]/);
   assert.match(chatScreenSource, /absolute left-4 right-4 top-\[calc\(var\(--qling-space-safe-top\)\+75px\)\] flex h-10/);
   assert.doesNotMatch(chatScreenSource, /absolute left-4 top-\[75px\] flex h-10 w-\[361px\]/);
-  assert.match(chatScreenSource, /absolute left-0 top-\[calc\(var\(--qling-space-safe-top\)\+136px\)\] h-\[calc\(716px-var\(--qling-space-safe-top\)\)\] w-full overflow-hidden rounded-t-\[30px\] bg-\[#fff1d1\]/);
+  assert.match(chatScreenSource, /<CreamContentBackground height=\{contentViewportHeight\} top=\{contentTop\} \/>/);
+  assert.match(chatScreenSource, /className="absolute left-0 w-full overflow-hidden rounded-t-\[30px\] bg-\[#fff1d1\]"[\s\S]*style=\{\{ height, top \}\}/);
+  assert.doesNotMatch(chatScreenSource, /top-\[calc\(var\(--qling-space-safe-top\)\+136px\)\] h-\[calc\(716px-var\(--qling-space-safe-top\)\)\]/);
 });
 
 test('chat list cards and empty state scale from their container width', () => {

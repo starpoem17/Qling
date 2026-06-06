@@ -174,6 +174,8 @@ export function ChatScreen({
   const [searchQuery, setSearchQuery] = useState('');
   const screenClassName = '-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-full max-w-[480px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font';
+  const contentTop = 'calc(var(--qling-space-safe-top) + 136px)';
+  const contentViewportHeight = 'calc(var(--qling-tab-viewport-height) - var(--qling-space-safe-top) - 136px)';
   const visibleChats = filterChatsByOpponentName(chats ?? [], searchQuery);
   const selectedMenuChat = visibleChats.find(chat => chat.chatId === openMenuId) ?? null;
 
@@ -186,11 +188,12 @@ export function ChatScreen({
             onSearchChange={setSearchQuery}
             onOpenMyPage={onProfileClick}
           />
-          <CreamContentBackground />
+          <CreamContentBackground height={contentViewportHeight} top={contentTop} />
 
           {loading ? (
             <section
-              className="absolute left-0 top-[calc(var(--qling-space-safe-top)+136px)] h-[calc(716px-var(--qling-space-safe-top))] w-full touch-none overscroll-none overflow-hidden rounded-t-[30px]"
+              className="absolute left-0 w-full touch-none overscroll-none overflow-hidden rounded-t-[30px]"
+              style={{ height: contentViewportHeight, top: contentTop }}
               aria-label="채팅 목록 로딩 상태"
               onWheel={blockStaticScroll}
               onTouchMove={blockStaticScroll}
@@ -199,7 +202,8 @@ export function ChatScreen({
             </section>
           ) : chats && chats.length > 0 ? (
             <section
-              className="absolute left-0 top-[calc(var(--qling-space-safe-top)+136px)] h-[calc(716px-var(--qling-space-safe-top))] w-full overflow-y-auto rounded-t-[30px] px-4 pb-[108px] pt-4 [-webkit-overflow-scrolling:touch]"
+              className="absolute left-0 w-full overflow-y-auto rounded-t-[30px] px-4 pb-[108px] pt-4 [-webkit-overflow-scrolling:touch]"
+              style={{ height: contentViewportHeight, top: contentTop }}
               aria-label="채팅 목록"
             >
               <div className="flex flex-col gap-3">
@@ -215,7 +219,8 @@ export function ChatScreen({
             </section>
           ) : (
             <section
-              className="absolute left-0 top-[calc(var(--qling-space-safe-top)+136px)] flex h-[calc(716px-var(--qling-space-safe-top))] w-full touch-none overscroll-none items-center justify-center overflow-hidden rounded-t-[30px] [container-type:inline-size]"
+              className="absolute left-0 flex w-full touch-none overscroll-none items-center justify-center overflow-hidden rounded-t-[30px] [container-type:inline-size]"
+              style={{ height: contentViewportHeight, top: contentTop }}
               aria-label="채팅 목록 빈 상태"
               onWheel={blockStaticScroll}
               onTouchMove={blockStaticScroll}
@@ -288,11 +293,18 @@ function ChatStaticHeader({
   );
 }
 
-function CreamContentBackground() {
+function CreamContentBackground({
+  height,
+  top,
+}: {
+  readonly height: string;
+  readonly top: string;
+}) {
   return (
     <div
       aria-hidden="true"
-      className="absolute left-0 top-[calc(var(--qling-space-safe-top)+136px)] h-[calc(716px-var(--qling-space-safe-top))] w-full overflow-hidden rounded-t-[30px] bg-[#fff1d1]"
+      className="absolute left-0 w-full overflow-hidden rounded-t-[30px] bg-[#fff1d1]"
+      style={{ height, top }}
     />
   );
 }
