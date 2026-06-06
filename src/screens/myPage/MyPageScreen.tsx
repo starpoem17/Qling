@@ -94,7 +94,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
                   className="absolute right-5 top-[26px] whitespace-nowrap text-[12px] font-bold leading-[15px] tracking-[-0.36px] text-[#7a7a7e] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d]"
                   aria-label="관심 분야 수정으로 이동"
                 >
-                  관심분야 수정 &gt;
+                  관심분야 수정 ›
                 </button>
               </section>
 
@@ -102,7 +102,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
               <button
                 type="button"
                 onClick={props.onOpenMyAnswers}
-                className="absolute right-5 top-[174px] whitespace-nowrap text-[13px] font-bold leading-4 text-white/90 focus:outline-none focus:ring-2 focus:ring-white"
+                className="absolute right-10 top-[174px] whitespace-nowrap text-[13px] font-bold leading-4 text-white/90 focus:outline-none focus:ring-2 focus:ring-white"
                 aria-label="내가 쓴 답변 전체보기"
               >
                 전체보기 ›
