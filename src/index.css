@@ -181,8 +181,15 @@ body,
 
 html.qling-ios-safari-browser,
 html.qling-ios-safari-browser body,
-html.qling-ios-safari-browser #root {
+html.qling-ios-safari-browser #root,
+html.qling-ios-standalone-pwa,
+html.qling-ios-standalone-pwa body,
+html.qling-ios-standalone-pwa #root {
   background: #fff5eb;
+}
+
+html.qling-ios-standalone-pwa {
+  --qling-space-nav-base-height: 65px;
 }
 
 html.qling-ios-safari-browser .qling-production-main--with-bottom-nav {

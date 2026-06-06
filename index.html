@@ -12,9 +12,13 @@
         const isIos = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || Boolean(navigator.standalone);
-        if (!isIos || !isSafari || isStandalone) return;
+        if (!isIos || !isSafari) return;
 
-        document.documentElement.classList.add('qling-ios-safari-browser');
+        if (isStandalone) {
+          document.documentElement.classList.add('qling-ios-standalone-pwa');
+        } else {
+          document.documentElement.classList.add('qling-ios-safari-browser');
+        }
         document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#fff5eb');
       })();
     </script>

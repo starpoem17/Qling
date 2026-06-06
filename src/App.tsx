@@ -374,7 +374,7 @@ export default function App() {
           : [
             routeBoundary.routeGroup === 'onboarding flow'
               ? 'px-0 pt-0 pb-0 overflow-hidden bg-[#ff8b0d]'
-              : 'pt-6',
+              : routeBoundary.mountsBottomNavigation ? 'pt-0' : 'pt-6',
             routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto',
             currentRoute === '답변하기' || currentRoute === 'received_worries' || currentRoute === '나의 고민' || currentRoute === 'my_worries' || currentRoute === 'my_worry_detail' || currentRoute === 'answer_check' || currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page' || currentRoute === 'my_answers' || currentRoute === 'edit_interests' || currentRoute === '채팅' || currentRoute === 'chat' || currentRoute === 'chat_room' || currentRoute === 'report_user'
               ? 'overflow-hidden'

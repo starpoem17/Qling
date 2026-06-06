@@ -107,6 +107,7 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.doesNotMatch(source, /pb-\[var\(--qling-space-safe-bottom\)\]/);
   assert.match(cssSource, /--qling-space-safe-top: env\(safe-area-inset-top, 0px\);/);
   assert.match(cssSource, /--qling-space-nav-base-height: 80px;/);
+  assert.match(cssSource, /html\.qling-ios-standalone-pwa[\s\S]*--qling-space-nav-base-height: 65px;/);
   assert.match(cssSource, /--qling-space-nav-height: calc\(var\(--qling-space-nav-base-height\) \+ var\(--qling-space-safe-bottom\)\);/);
   assert.match(cssSource, /--qling-tab-viewport-height: calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\);/);
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*height: 100%;/);
@@ -114,6 +115,7 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*overscroll-behavior: none;/);
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*background: #ff8b3d;/);
   assert.match(cssSource, /html\.qling-ios-safari-browser,\s*html\.qling-ios-safari-browser body,\s*html\.qling-ios-safari-browser #root[\s\S]*background: #fff5eb;/);
+  assert.match(cssSource, /html\.qling-ios-standalone-pwa,\s*html\.qling-ios-standalone-pwa body,\s*html\.qling-ios-standalone-pwa #root[\s\S]*background: #fff5eb;/);
   assert.match(cssSource, /html\.qling-ios-safari-browser \.qling-production-main--with-bottom-nav[\s\S]*padding-top: 0;/);
   assert.doesNotMatch(source, /fixed bottom-0 left-0 right-0/);
 });

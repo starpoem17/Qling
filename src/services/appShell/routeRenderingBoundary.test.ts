@@ -164,7 +164,7 @@ test('keeps answer check status bar background aligned with the cream route canv
   assert.match(source, /document\.body\.style\.backgroundColor = routeChromeColor/);
 });
 
-test('detects iOS Safari browser mode before app boot without changing standalone PWA manifest defaults', () => {
+test('detects iOS Safari browser and standalone PWA mode before app boot', () => {
   const indexHtml = fs.readFileSync('index.html', 'utf8');
   const cssSource = fs.readFileSync('src/index.css', 'utf8');
 
@@ -172,10 +172,18 @@ test('detects iOS Safari browser mode before app boot without changing standalon
   assert.match(indexHtml, /const isSafari = \/Safari\/\.test\(ua\) && !\/CriOS\|FxiOS\|EdgiOS\|OPiOS\/\.test\(ua\)/);
   assert.match(indexHtml, /window\.matchMedia\('\(display-mode: standalone\)'\)\.matches \|\| Boolean\(navigator\.standalone\)/);
   assert.match(indexHtml, /document\.documentElement\.classList\.add\('qling-ios-safari-browser'\)/);
+  assert.match(indexHtml, /document\.documentElement\.classList\.add\('qling-ios-standalone-pwa'\)/);
   assert.match(indexHtml, /document\.querySelector\('meta\[name="theme-color"\]'\)\?\.setAttribute\('content', '#fff5eb'\)/);
   assert.match(indexHtml, /<meta name="theme-color" content="#ff8b3d" \/>/);
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*background: #ff8b3d;/);
+  assert.match(cssSource, /html\.qling-ios-standalone-pwa[\s\S]*--qling-space-nav-base-height: 65px;/);
   assert.match(cssSource, /html\.qling-ios-safari-browser \.qling-production-main--with-bottom-nav[\s\S]*padding-top: 0;/);
+});
+
+test('bottom navigation shell routes remove default top padding', () => {
+  const source = fs.readFileSync('src/App.tsx', 'utf8');
+
+  assert.match(source, /routeBoundary\.mountsBottomNavigation \? 'pt-0' : 'pt-6'/);
 });
 
 test('onboarding flow removes App shell padding for responsive canvas routes', () => {
