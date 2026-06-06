@@ -309,8 +309,10 @@ test('peek header screens use transform layout without scroll-time height transi
   assert.match(myWorriesSource, /contentTop = 'calc\(74px \+ var\(--qling-space-safe-top\)\)'/);
   assert.match(myWorriesSource, /contentViewportHeight = `min\(733px, max\(320px, calc\(\(\$\{tabViewportHeight\}\) - 74px - var\(--qling-space-safe-top\)\)\)\)`/);
   assert.doesNotMatch(myWorriesSource, /canvasScale/);
-  assert.match(myWorriesSource, /style=\{\{ height: contentViewportHeight, top: contentTop \}\}/);
-  assert.match(myWorriesSource, /overflow-y-auto rounded-t-\[32px\] px-4 pb-\[180px\] pt-4/);
+  assert.match(myWorriesSource, /scrollableContentStyle = \{\s*height: contentViewportHeight,\s*top: contentTop,\s*paddingBottom: '78px',\s*\}/);
+  assert.match(myWorriesSource, /style=\{scrollableContentStyle\}/);
+  assert.match(myWorriesSource, /overflow-y-auto rounded-t-\[32px\] px-4 pt-4/);
+  assert.doesNotMatch(myWorriesSource, /pb-\[180px\]/);
   assert.doesNotMatch(myWorriesSource, /--qling-peek-progress/);
   assert.doesNotMatch(myWorriesSource, /translateY\(calc/);
   assert.doesNotMatch(myWorriesSource, /contentHeightClassName/);

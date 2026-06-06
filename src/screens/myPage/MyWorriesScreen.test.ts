@@ -116,7 +116,7 @@ test('my worries screen actions match PRD entry points', () => {
   assert.equal(openedWrite, true);
 });
 
-test('my worries write button uses the widened unscaled Figma canvas coordinates', () => {
+test('my worries write button stays above the flex bottom navigation', () => {
   const html = renderToStaticMarkup(MyWorriesScreen(baseProps()));
 
   assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] h-\[var\(--qling-tab-viewport-height\)\] overflow-hidden bg-\[#ff8b3d\]/);
@@ -128,13 +128,30 @@ test('my worries write button uses the widened unscaled Figma canvas coordinates
   assert.doesNotMatch(html, /absolute left-\[258px\]/);
   assert.match(html, /relative aspect-\[361\/168\] overflow-hidden rounded-\[18px\]/);
   assert.doesNotMatch(html, /h-\[168px\]/);
-  assert.match(html, /style="top:min\(710px, calc\(\(var\(--qling-tab-viewport-height\)\) - 62px\)\)"/);
+  assert.match(html, /style="bottom:16px"/);
+  assert.doesNotMatch(html, /top:min\(710px/);
   assert.match(html, /my_concerns\/write_plus\.svg/);
   assert.match(html, /h-\[15\.563px\] w-\[15\.563px\] shrink-0/);
   assert.match(html, /고민 쓰기/);
   assert.doesNotMatch(html, /my_concerns\/send\.svg/);
   assert.doesNotMatch(html, /rounded-sm bg-white/);
   assert.doesNotMatch(html, /fixed bottom-\[calc\(var\(--qling-space-nav-height\)\+29\.5px\)\]/);
+});
+
+test('my worries scrollable states reserve room for the floating write button', () => {
+  const readyHtml = renderToStaticMarkup(MyWorriesScreen(baseProps()));
+  const errorHtml = renderToStaticMarkup(MyWorriesScreen(baseProps({
+    state: { status: 'error', message: '네트워크 오류', canRetry: false },
+    items: [],
+  })));
+  const scrollableStyle = /style="height:min\(733px, max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\);padding-bottom:78px"/;
+
+  assert.match(readyHtml, /aria-label="나의 고민 목록"/);
+  assert.match(readyHtml, scrollableStyle);
+  assert.match(errorHtml, /나의 고민을 불러오지 못했어요/);
+  assert.match(errorHtml, scrollableStyle);
+  assert.doesNotMatch(readyHtml, /pb-\[180px\]/);
+  assert.doesNotMatch(errorHtml, /pb-\[180px\]/);
 });
 
 test('my worries screen does not render the fixed bottom fade overlay', () => {

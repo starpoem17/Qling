@@ -49,8 +49,13 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
   const contentViewportHeight = `min(733px, max(320px, calc((${tabViewportHeight}) - 74px - var(--qling-space-safe-top))))`;
   const screenClassName = '-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-full min-h-0 w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d]';
+  const scrollableContentStyle = {
+    height: contentViewportHeight,
+    top: contentTop,
+    paddingBottom: '78px',
+  } satisfies CSSProperties;
   const writeButtonStyle = {
-    top: `min(710px, calc((${tabViewportHeight}) - 62px))`,
+    bottom: '16px',
   } satisfies CSSProperties;
 
   const writeButton = (
@@ -87,8 +92,8 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
             </section>
           ) : props.state.status === 'error' ? (
             <section
-              className="qling-received-worries-font absolute left-0 w-full overflow-y-auto rounded-t-[32px] px-4 pb-[180px] pt-4 [-webkit-overflow-scrolling:touch]"
-              style={{ height: contentViewportHeight, top: contentTop }}
+              className="qling-received-worries-font absolute left-0 w-full overflow-y-auto rounded-t-[32px] px-4 pt-4 [-webkit-overflow-scrolling:touch]"
+              style={scrollableContentStyle}
             >
               <ErrorState title="나의 고민을 불러오지 못했어요" message={props.state.message} />
             </section>
@@ -104,8 +109,8 @@ export function MyWorriesScreen(props: MyWorriesScreenProps) {
             </section>
           ) : (
             <section
-              className="qling-received-worries-font absolute left-0 w-full overflow-y-auto rounded-t-[32px] px-4 pb-[180px] pt-4 [-webkit-overflow-scrolling:touch]"
-              style={{ height: contentViewportHeight, top: contentTop }}
+              className="qling-received-worries-font absolute left-0 w-full overflow-y-auto rounded-t-[32px] px-4 pt-4 [-webkit-overflow-scrolling:touch]"
+              style={scrollableContentStyle}
               aria-label="나의 고민 목록"
             >
               <div className="grid gap-[14px]">
