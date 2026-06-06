@@ -423,81 +423,87 @@ export function ChatRoomScreen({
               onTouchCancel={resetBackSwipe}
               onWheel={isMessageScrollerScrollable ? undefined : blockStaticScroll}
             >
-            <div className="mb-[14px] flex w-full justify-center">
-              <span className="rounded-full bg-[#ffe7d2] px-3 py-[4px] text-[11px] font-semibold leading-[16.5px] text-[#f26c0f]">
-                {worryInfo?.createdAtStr || '날짜 정보 없음'}
-              </span>
-            </div>
-
-            <div className="mb-[14px] h-[99.425px] w-full rounded-[14px] border-[0.8px] border-[#f1e7da] bg-white px-[14.8px] py-[12.8px] shadow-[0_2px_8px_rgb(120_90_60/0.07)]">
-              <div className="flex h-[30.2px] items-center">
-                <span className="rounded-full bg-[#ffe7d2] px-[7.2px] py-[2px] font-['Qling_Noto_Sans_KR_Black'] text-[10px] font-black leading-[15px] text-[#f26c0f]">
-                  {worryInfo?.category || '고민'}
+              <div
+                data-chat-room-message-stack
+                className="flex flex-col justify-end"
+                style={{ minHeight: 'calc(100% - var(--chat-input-height) - var(--chat-keyboard-inset))' }}
+              >
+              <div className="mb-[14px] flex w-full justify-center">
+                <span className="rounded-full bg-[#ffe7d2] px-3 py-[4px] text-[11px] font-semibold leading-[16.5px] text-[#f26c0f]">
+                  {worryInfo?.createdAtStr || '날짜 정보 없음'}
                 </span>
               </div>
-              <h3 className="truncate text-[13px] font-semibold leading-[21.125px] tracking-[-0.325px] text-[#2b2620]">
-                {worryInfo?.title || '게시글 정보 불러오는 중...'}
-              </h3>
-              <p className="pt-[6px] text-[11px] font-normal leading-[16.5px] text-[#a39e96]">
-                이 고민의 답변에서 시작된 대화예요
-              </p>
-            </div>
 
-            <div className="flex flex-col gap-[14px]">
-              {messages.map((msg, index) => {
-                const showProfile = !msg.isMine && (index === 0 || messages[index - 1].isMine);
-                
-                let readStatusText = '';
-                if (msg.isMine) {
-                  const isMineIndex = mineMessageIds.indexOf(msg.messageId);
-                  const isRead = isMineIndex < unreadThresholdIndex;
-                  if (isRead) readStatusText = '읽음';
-                }
+              <div className="mb-[14px] h-[99.425px] w-full rounded-[14px] border-[0.8px] border-[#f1e7da] bg-white px-[14.8px] py-[12.8px] shadow-[0_2px_8px_rgb(120_90_60/0.07)]">
+                <div className="flex h-[30.2px] items-center">
+                  <span className="rounded-full bg-[#ffe7d2] px-[7.2px] py-[2px] font-['Qling_Noto_Sans_KR_Black'] text-[10px] font-black leading-[15px] text-[#f26c0f]">
+                    {worryInfo?.category || '고민'}
+                  </span>
+                </div>
+                <h3 className="truncate text-[13px] font-semibold leading-[21.125px] tracking-[-0.325px] text-[#2b2620]">
+                  {worryInfo?.title || '게시글 정보 불러오는 중...'}
+                </h3>
+                <p className="pt-[6px] text-[11px] font-normal leading-[16.5px] text-[#a39e96]">
+                  이 고민의 답변에서 시작된 대화예요
+                </p>
+              </div>
 
-                return (
-                  <div key={msg.messageId} className={cn('flex w-full', msg.isMine ? 'justify-end' : 'justify-start')}>
-                    {!msg.isMine && (
-                      <div className="flex max-w-full items-end gap-2">
-                        <div className="relative h-full min-h-[31px] w-[34px] shrink-0 self-stretch">
-                             {showProfile ? (
-                                <>
-                                  <img 
-                                    src={profileImageUrlForColor(opponent?.profileColor || '#FF8B3D')}
-                                    alt="프로필"
-                                    className="absolute left-[0.4px] top-[0.5px] h-[30px] w-[30px] rounded-full object-cover"
-                                  />
-                                </>
-                             ) : (
-                               <span className="block h-[30px] w-[30px]" aria-hidden="true" />
-                             )}
-                          </div>
-                          
-                        <div className="w-fit max-w-[min(260px,calc(100vw_-_174px))] rounded-bl-[18px] rounded-br-[18px] rounded-tl-[7px] rounded-tr-[18px] border-[0.8px] border-[#f1e7da] bg-white px-[14px] py-[10.4px] text-[14px] font-normal leading-[22.75px] tracking-[-0.35px] text-[#2b2620] shadow-[0_2px_4px_rgb(120_90_60/0.07)]">
-                                {msg.content}
-                             </div>
-                          
-                        <div className="flex h-[18px] w-[43px] shrink-0 items-end pb-[2px]">
-                          <span className="whitespace-nowrap text-[10.5px] font-normal leading-[15.75px] text-[#a39e96]">{msg.createdAtStr}</span>
-                          </div>
-                       </div>
-                    )}
-                    
-                    {msg.isMine && (
-                      <div className="flex max-w-[calc(100%_-_40px)] items-end justify-end gap-2">
-                        <div className="flex shrink-0 flex-col items-end justify-end gap-[2px] pb-[2px]">
-                          {readStatusText && <span className="whitespace-nowrap text-[10.5px] font-semibold leading-[15.75px] text-[#f26c0f]">{readStatusText}</span>}
-                          <span className="whitespace-nowrap text-[10.5px] font-normal leading-[15.75px] text-[#a39e96]">{msg.createdAtStr}</span>
-                          </div>
+              <div className="flex flex-col gap-[14px]">
+                {messages.map((msg, index) => {
+                  const showProfile = !msg.isMine && (index === 0 || messages[index - 1].isMine);
+                  
+                  let readStatusText = '';
+                  if (msg.isMine) {
+                    const isMineIndex = mineMessageIds.indexOf(msg.messageId);
+                    const isRead = isMineIndex < unreadThresholdIndex;
+                    if (isRead) readStatusText = '읽음';
+                  }
 
-                        <div className="w-fit max-w-[min(300px,calc(100vw_-_132px))] rounded-bl-[18px] rounded-br-[18px] rounded-tl-[18px] rounded-tr-[7px] bg-[#ff8a2e] px-[14px] py-[10.4px] text-[14px] font-normal leading-[22.75px] tracking-[-0.35px] text-white shadow-[0_4px_6px_rgb(255_122_26/0.32)]">
-                             {msg.content}
-                          </div>
-                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                  return (
+                    <div key={msg.messageId} className={cn('flex w-full', msg.isMine ? 'justify-end' : 'justify-start')}>
+                      {!msg.isMine && (
+                        <div className="flex max-w-full items-end gap-2">
+                          <div className="relative h-full min-h-[31px] w-[34px] shrink-0 self-stretch">
+                               {showProfile ? (
+                                  <>
+                                    <img 
+                                      src={profileImageUrlForColor(opponent?.profileColor || '#FF8B3D')}
+                                      alt="프로필"
+                                      className="absolute left-[0.4px] top-[0.5px] h-[30px] w-[30px] rounded-full object-cover"
+                                    />
+                                  </>
+                               ) : (
+                                 <span className="block h-[30px] w-[30px]" aria-hidden="true" />
+                               )}
+                            </div>
+                            
+                          <div className="w-fit max-w-[min(260px,calc(100vw_-_174px))] rounded-bl-[18px] rounded-br-[18px] rounded-tl-[7px] rounded-tr-[18px] border-[0.8px] border-[#f1e7da] bg-white px-[14px] py-[10.4px] text-[14px] font-normal leading-[22.75px] tracking-[-0.35px] text-[#2b2620] shadow-[0_2px_4px_rgb(120_90_60/0.07)]">
+                                  {msg.content}
+                               </div>
+                            
+                          <div className="flex h-[18px] w-[43px] shrink-0 items-end pb-[2px]">
+                            <span className="whitespace-nowrap text-[10.5px] font-normal leading-[15.75px] text-[#a39e96]">{msg.createdAtStr}</span>
+                            </div>
+                         </div>
+                      )}
+                      
+                      {msg.isMine && (
+                        <div className="flex max-w-[calc(100%_-_40px)] items-end justify-end gap-2">
+                          <div className="flex shrink-0 flex-col items-end justify-end gap-[2px] pb-[2px]">
+                            {readStatusText && <span className="whitespace-nowrap text-[10.5px] font-semibold leading-[15.75px] text-[#f26c0f]">{readStatusText}</span>}
+                            <span className="whitespace-nowrap text-[10.5px] font-normal leading-[15.75px] text-[#a39e96]">{msg.createdAtStr}</span>
+                            </div>
+
+                          <div className="w-fit max-w-[min(300px,calc(100vw_-_132px))] rounded-bl-[18px] rounded-br-[18px] rounded-tl-[18px] rounded-tr-[7px] bg-[#ff8a2e] px-[14px] py-[10.4px] text-[14px] font-normal leading-[22.75px] tracking-[-0.35px] text-white shadow-[0_4px_6px_rgb(255_122_26/0.32)]">
+                               {msg.content}
+                            </div>
+                         </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              </div>
             </div>
           </div>
         </div>

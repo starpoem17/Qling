@@ -119,6 +119,7 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(chatRoomScreenSource, /data-chat-room-canvas className="relative flex h-full w-full max-w-\[480px\] shrink-0 flex-col overflow-hidden bg-\[#fff1d1\] qling-figma-font"/);
   assert.match(chatRoomScreenSource, /data-chat-room-message-scroller[\s\S]*'min-h-0 w-full flex-1 bg-\[#fff1d1\] px-4 pt-4'/);
   assert.match(chatRoomScreenSource, /style=\{\{ paddingBottom: 'calc\(var\(--chat-input-height\) \+ var\(--chat-keyboard-inset\)\)' \}\}/);
+  assert.match(chatRoomScreenSource, /data-chat-room-message-stack[\s\S]*className="flex flex-col justify-end"[\s\S]*style=\{\{ minHeight: 'calc\(100% - var\(--chat-input-height\) - var\(--chat-keyboard-inset\)\)' \}\}/);
   assert.match(chatRoomScreenSource, /isMessageScrollerScrollable[\s\S]*\? 'overflow-y-auto overscroll-contain/);
   assert.match(chatRoomScreenSource, /\: 'touch-none overscroll-none overflow-hidden'/);
   assert.match(chatRoomScreenSource, /data-chat-room-message-scroller[\s\S]*onTouchStart=\{handleBackSwipeStart\}[\s\S]*onTouchMove=\{handleMessagesTouchMove\}[\s\S]*onTouchEnd=\{resetBackSwipe\}[\s\S]*onTouchCancel=\{resetBackSwipe\}/);
