@@ -3,8 +3,11 @@ import { cn } from '../../lib/utils';
 import { FigmaCanvasFrame, FigmaTopBar, QlingAlertDialog } from '../shared/ui';
 import type { WriteWorryScreenProps } from './contract';
 
-const sendButtonTop = 'min(684px, calc((100dvh - var(--qling-space-nav-height)) - 88px))';
-const inputAreaHeight = `min(541px, max(240px, calc(${sendButtonTop} - 143px)))`;
+const pwaTopbarShift = 'var(--qling-pwa-topbar-shift, 0px)';
+const sendButtonBaseTop = 'min(684px, calc((100dvh - var(--qling-space-nav-height)) - 88px))';
+const sendButtonTop = `calc(${sendButtonBaseTop} + ${pwaTopbarShift})`;
+const inputAreaTop = `calc(120px + ${pwaTopbarShift})`;
+const inputAreaHeight = `min(541px, max(240px, calc(${sendButtonTop} - ${inputAreaTop} - 23px)))`;
 
 export function WriteWorryScreen(props: WriteWorryScreenProps) {
   const isDisabled = Boolean(props.draft.submitDisabledReason);
@@ -26,8 +29,8 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
       {FigmaTopBar({ title: '고민 작성', onBack: props.onBack, backLabel: '나의 고민으로 돌아가기' })}
 
       <section
-        className="absolute left-5 right-5 top-[120px] rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
-        style={{ height: inputAreaHeight }}
+        className="absolute left-5 right-5 rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
+        style={{ top: inputAreaTop, height: inputAreaHeight }}
       >
         <label className="relative block h-full">
           <span className="sr-only">고민 내용</span>

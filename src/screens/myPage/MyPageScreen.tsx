@@ -21,6 +21,8 @@ const settingLabels: Record<MyPageSettingItem, string> = {
 };
 
 const PRIVACY_POLICY_FEEDBACK_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe88_R7B_cP_pIa7aIe-Fcb1gRYeDfBETNpehOODMrEY0skVQ/viewform?usp=publish-editor';
+const pwaTopBarShift = 'var(--qling-pwa-topbar-shift, 0px)';
+const shiftedTopBarTop = (top: number) => `calc(${top}px + ${pwaTopBarShift})`;
 
 const editInterestsFigmaOrder = [
   '진로',
@@ -51,7 +53,8 @@ export function MyPageScreen(props: MyPageScreenProps) {
   const settingsCardTop = hasMultiplePreviewItems ? 444 : 359;
   const contentBottom = settingsCardTop + 192;
   const myPageTabViewportHeight = 'var(--qling-tab-viewport-height)';
-  const myPageContentHeight = `min(752px, max(520px, calc(${myPageTabViewportHeight} - 100px)))`;
+  const directTopbarShift = 'var(--qling-pwa-direct-topbar-shift)';
+  const myPageContentHeight = `min(752px, max(520px, calc(${myPageTabViewportHeight} - 100px - ${directTopbarShift})))`;
 
   return (
     <section
@@ -136,22 +139,22 @@ function MyPageHeader({
 }) {
   return (
     <header
-      className="h-[100px] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
+      className="h-[calc(100px+var(--qling-pwa-direct-topbar-shift))] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
       onTouchMove={blockLockedScroll}
       onWheel={blockLockedScroll}
     >
       <div
-        className="relative mx-auto h-[100px] w-full max-w-[480px]"
+        className="relative mx-auto h-[calc(100px+var(--qling-pwa-direct-topbar-shift))] w-full max-w-[480px]"
       >
         <button
           type="button"
           aria-label="이전 화면으로 돌아가기"
           onClick={onBack}
-          className="absolute left-[6px] top-[45px] flex h-[45px] w-[44px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute left-[6px] top-[calc(45px+var(--qling-pwa-direct-topbar-shift))] flex h-[45px] w-[44px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
         >
           <span aria-hidden="true">‹</span>
         </button>
-        <h1 className="absolute left-0 top-[60px] w-full text-center text-[17px] font-extrabold leading-none tracking-[-0.02em] text-white">
+        <h1 className="absolute left-0 top-[calc(60px+var(--qling-pwa-direct-topbar-shift))] w-full text-center text-[17px] font-extrabold leading-none tracking-[-0.02em] text-white">
           마이페이지
         </h1>
       </div>
@@ -360,8 +363,8 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
         >
           <FigmaTopBar title="개인정보 처리방침" titleAriaLabel={props.title} onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
           <article
-            className="absolute left-4 right-4 top-[127px] overflow-y-auto rounded-[18px] bg-white px-[18px] py-[17px] [-webkit-overflow-scrolling:touch]"
-            style={{ bottom: policyCardBottom }}
+            className="absolute left-4 right-4 overflow-y-auto rounded-[18px] bg-white px-[18px] py-[17px] [-webkit-overflow-scrolling:touch]"
+            style={{ top: shiftedTopBarTop(127), bottom: policyCardBottom }}
           >
             {shouldShowFeedbackLink && (
               <>
@@ -392,35 +395,31 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
 export function EditInterestsScreen(props: EditInterestsProps) {
   const hasValidationError = Boolean(props.validationMessages.interests);
   const orderedCategoryOptions = editInterestsFigmaOrder.filter(category => props.categoryOptions.includes(category));
-  const editInterestsCanvasScale = 'min(calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px), calc(var(--qling-tab-viewport-height) / 852px))';
 
   return (
     <section
       aria-label="관심분야 수정"
       className="-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d] text-[#1a1a1a] qling-figma-font"
     >
-      <div
-        className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"
-        data-measure="edit-interests-responsive-canvas"
-      >
+      <FigmaCanvasFrame className="max-w-[480px]" data-measure="edit-interests-responsive-canvas">
         <div
-          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]"
+          className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d]"
           data-measure="edit-interests-screen"
-          style={{ transform: `scale(${editInterestsCanvasScale})` }}
         >
-          <div className="absolute left-0 top-[196px] h-[656px] w-[393px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" />
+          <div className="absolute left-0 right-0 h-[656px] rounded-tl-[44px] rounded-tr-[44px] border-t border-[#b99b62] bg-[#fff7e3]" style={{ top: shiftedTopBarTop(196) }} />
           <FigmaTopBar title="관심분야 수정" onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
-          <p className="absolute left-[28px] top-[147px] text-[26px] font-extrabold leading-[normal] tracking-[-1.3px] text-white">
+          <p className="absolute left-[28px] right-[28px] text-[26px] font-extrabold leading-[normal] tracking-[-1.3px] text-white" style={{ top: shiftedTopBarTop(147) }}>
             공감할 수 있는 주제를 골라주세요
           </p>
-          <p className="absolute left-6 top-[243px] text-[13px] font-bold leading-[normal] tracking-[-0.13px] text-[#8e9095]">
+          <p className="absolute left-6 right-6 text-[13px] font-bold leading-[normal] tracking-[-0.13px] text-[#8e9095]" style={{ top: shiftedTopBarTop(243) }}>
             변경사항은 저장하기를 눌러야 반영돼요.
           </p>
-          <p className="absolute left-6 top-[262px] text-[13px] font-bold leading-[normal] tracking-[-0.13px] text-[#8e9095]">
+          <p className="absolute left-6 right-6 text-[13px] font-bold leading-[normal] tracking-[-0.13px] text-[#8e9095]" style={{ top: shiftedTopBarTop(262) }}>
             최소 1개 선택, 복수 선택 가능
           </p>
           <div
-            className="absolute left-[35px] top-[303px] grid w-[323px] grid-cols-2 justify-center gap-x-[13px] gap-y-[9px]"
+            className="absolute left-[35px] right-[35px] grid grid-cols-2 justify-center gap-x-[13px] gap-y-[9px]"
+            style={{ top: shiftedTopBarTop(303) }}
             aria-label="관심 분야 선택"
           >
             {orderedCategoryOptions.map(interest => {
@@ -432,7 +431,7 @@ export function EditInterestsScreen(props: EditInterestsProps) {
                   disabled={props.isProcessing}
                   aria-pressed={selected}
                   onClick={() => props.onInterestToggle(interest)}
-                  className={`box-border h-[43px] w-[155px] rounded-[19px] border-2 px-1 py-0 text-[14px] font-bold leading-none tracking-normal disabled:cursor-not-allowed disabled:opacity-55 ${selected ? 'border-[#ff8b0d] bg-transparent text-[#2a2a2a]' : 'border-[#d4be91] bg-[#fff1d1] text-[#25272b]'}`}
+                  className={`box-border h-[43px] w-full rounded-[19px] border-2 px-1 py-0 text-[14px] font-bold leading-none tracking-normal disabled:cursor-not-allowed disabled:opacity-55 ${selected ? 'border-[#ff8b0d] bg-transparent text-[#2a2a2a]' : 'border-[#d4be91] bg-[#fff1d1] text-[#25272b]'}`}
                 >
                   {interest}
                 </button>
@@ -440,7 +439,7 @@ export function EditInterestsScreen(props: EditInterestsProps) {
             })}
           </div>
           {hasValidationError && (
-            <p className="absolute left-1/2 top-[730px] -translate-x-1/2 whitespace-nowrap text-center text-[13px] font-extrabold leading-[normal] tracking-[-0.13px] text-[#ea4335]" role="alert">
+            <p className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-center text-[13px] font-extrabold leading-[normal] tracking-[-0.13px] text-[#ea4335]" style={{ top: shiftedTopBarTop(730) }} role="alert">
               최소 1개의 관심분야를 선택해주세요
             </p>
           )}
@@ -450,12 +449,13 @@ export function EditInterestsScreen(props: EditInterestsProps) {
             disabled={props.isProcessing}
             aria-label="관심 분야 저장"
             aria-busy={props.isProcessing || undefined}
-            className="absolute left-[24px] top-[752px] h-[56px] w-[345px] rounded-[28px] bg-[#ff8b3d] text-[17px] font-bold leading-none tracking-[-0.17px] text-white disabled:cursor-not-allowed disabled:opacity-55"
+            className="absolute left-[24px] right-[24px] h-[56px] rounded-[28px] bg-[#ff8b3d] text-[17px] font-bold leading-none tracking-[-0.17px] text-white disabled:cursor-not-allowed disabled:opacity-55"
+            style={{ top: shiftedTopBarTop(752) }}
           >
             {props.isProcessing ? '저장 중' : '저장하기'}
           </button>
         </div>
-      </div>
+      </FigmaCanvasFrame>
     </section>
   );
 }

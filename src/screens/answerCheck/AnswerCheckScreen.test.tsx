@@ -86,7 +86,8 @@ test('answer check loading state matches the Figma loading shell', () => {
   assert.match(html, /figma-progress-track\.svg/);
   assert.match(html, /relative h-\[852px\] w-full max-w-\[480px\] shrink-0 overflow-hidden bg-\[#fff1d1\]/);
   assert.doesNotMatch(html, /transform:scale/);
-  assert.match(html, /left-\[14px\] top-\[49px\] z-20 h-\[44px\] w-\[44px\]/);
+  assert.match(html, /left-\[14px\] z-20 h-\[44px\] w-\[44px\]/);
+  assert.match(html, /top:calc\(49px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
   assert.match(html, /left-1\/2 top-\[406px\] h-10 w-10 -translate-x-1\/2/);
   assert.doesNotMatch(html, /flex min-h-48 flex-col items-center justify-center rounded-\[var\(--qling-radius-card\)\]/);
 });
@@ -104,8 +105,12 @@ test('zero replies state shows only my worry without empty copy', () => {
 test('answer check cards use Figma-like card internals without the old helper labels', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps()));
 
-  assert.match(html, /absolute left-0 top-\[127px\] w-full overflow-y-auto/);
-  assert.match(html, /height:min\(725px, max\(320px, calc\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 127px\)\)\)/);
+  assert.match(html, /data-measure="figma-top-bar"/);
+  assert.match(html, /top-\[calc\(49px\+var\(--qling-pwa-figma-topbar-shift\)\)\]/);
+  assert.match(html, /top-\[calc\(60px\+var\(--qling-pwa-figma-topbar-shift\)\)\]/);
+  assert.match(html, /absolute left-0 w-full overflow-y-auto/);
+  assert.match(html, /top:calc\(127px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.match(html, /height:min\(725px, max\(320px, calc\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - calc\(127px \+ var\(--qling-pwa-topbar-shift, 0px\)\)\)\)\)/);
   assert.match(html, /overflow-hidden rounded-\[18px\] bg-white px-\[19px\] pb-\[24px\] pt-\[11px\]/);
   assert.match(html, /shadow-\[0_4px_4px_rgb\(0_0_0\/0\.25\)\]/);
   assert.match(html, /flex min-w-0 items-start gap-\[18px\]/);

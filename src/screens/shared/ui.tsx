@@ -310,7 +310,7 @@ export function FigmaTopBar({
         onClick={onBack}
         aria-label={backLabel}
         className={cn(
-          'absolute left-[14px] top-[49px] h-[44px] w-[44px] rounded-full transition-colors focus:outline-none focus:ring-2',
+          'absolute left-[14px] top-[calc(49px+var(--qling-pwa-figma-topbar-shift))] h-[44px] w-[44px] rounded-full transition-colors focus:outline-none focus:ring-2',
           hoverClassName,
         )}
       >
@@ -323,12 +323,12 @@ export function FigmaTopBar({
       </button>
       <h1
         aria-label={titleAriaLabel}
-        className={cn('absolute left-0 top-[60px] w-full whitespace-nowrap text-center text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] font-sans', textClassName)}
+        className={cn('absolute left-0 top-[calc(60px+var(--qling-pwa-figma-topbar-shift))] w-full whitespace-nowrap text-center text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] font-sans', textClassName)}
       >
         {title}
       </h1>
       {rightComponent && (
-        <div className="absolute right-[14px] top-[49px] flex h-[44px] items-center">
+        <div className="absolute right-[14px] top-[calc(49px+var(--qling-pwa-figma-topbar-shift))] flex h-[44px] items-center">
           {rightComponent}
         </div>
       )}

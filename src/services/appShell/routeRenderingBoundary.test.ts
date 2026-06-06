@@ -153,15 +153,18 @@ test('chat room route wrapper avoids vertical motion during keyboard-sensitive l
   assert.match(source, /currentRoute === 'chat_room' \? 'px-0 pb-0 pt-0 bg-\[#fff1d1\]' : undefined/);
 });
 
-test('keeps answer check status bar background aligned with the cream route canvas', () => {
+test('keeps standalone PWA route chrome split between top status bar and bottom outside area', () => {
   const source = fs.readFileSync('src/App.tsx', 'utf8');
 
-  assert.match(source, /currentRoute !== 'write_worry' && currentRoute !== 'write_reply' && currentRoute !== 'answer_check'/);
-  assert.match(source, /document\.documentElement\.classList\.contains\('qling-ios-safari-browser'\)/);
-  assert.match(source, /\? '#fff5eb'\s*: '#fff1d1'/);
-  assert.match(source, /themeMeta\?\.setAttribute\('content', routeChromeColor\)/);
-  assert.match(source, /document\.documentElement\.style\.backgroundColor = routeChromeColor/);
-  assert.match(source, /document\.body\.style\.backgroundColor = routeChromeColor/);
+  assert.match(source, /pwaRouteChromeForRoute\(currentRoute\)/);
+  assert.match(source, /document\.documentElement\.classList\.contains\('qling-ios-standalone-pwa'\)/);
+  assert.match(source, /themeMeta\?\.setAttribute\('content', standalonePwaRouteChrome\.top\)/);
+  assert.match(source, /document\.documentElement\.style\.backgroundColor = standalonePwaRouteChrome\.bottom/);
+  assert.match(source, /document\.body\.style\.backgroundColor = standalonePwaRouteChrome\.bottom/);
+  assert.match(source, /route === 'write_worry' \|\| route === 'write_reply' \|\| route === 'answer_check'/);
+  assert.match(source, /route === 'privacy_policy'/);
+  assert.match(source, /route === 'edit_interests'/);
+  assert.match(source, /route === '마이페이지' \|\| route === 'my_page' \|\| route === 'my_answers'/);
 });
 
 test('detects iOS Safari browser and standalone PWA mode before app boot', () => {

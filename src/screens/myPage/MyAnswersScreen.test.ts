@@ -53,19 +53,20 @@ test('my answers screen renders same card format with heart and one small commen
   assert.doesNotMatch(html, /내가 보낸 답변과 받은 반응을 확인합니다\./);
 });
 
-test('my answers screen uses the fixed 393px Figma canvas and ready-only body scroll area', () => {
+test('my answers screen uses the responsive direct header canvas and ready-only body scroll area', () => {
   const html = renderToStaticMarkup(createElement(MyAnswersScreen, baseProps()));
 
-  assert.match(html, /mx-auto flex h-full w-full max-w-\[393px\] justify-center overflow-hidden/);
-  assert.match(html, /h-\[852px\] w-\[393px\]/);
+  assert.match(html, /mx-auto flex h-full w-full justify-center overflow-hidden max-w-\[480px\]/);
+  assert.match(html, /h-\[852px\] w-full max-w-\[480px\]/);
   assert.doesNotMatch(html, /transform:scale/);
-  assert.doesNotMatch(html, /max-w-\[480px\]/);
   assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] h-\[var\(--qling-tab-viewport-height\)\] overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /aria-label="내가 쓴 답변 목록"/);
-  assert.match(html, /<header[^>]*h-\[100px\][\s\S]*<section[^>]*aria-label="내가 쓴 답변 목록"/);
+  assert.match(html, /<header[^>]*h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\][\s\S]*<section[^>]*aria-label="내가 쓴 답변 목록"/);
+  assert.match(html, /top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
+  assert.match(html, /top-\[calc\(60px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /relative h-\[752px\] overflow-y-auto overscroll-contain/);
   assert.match(html, /pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
-  assert.match(html, /height:min\(752px, max\(320px, calc\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 100px\)\)\)/);
+  assert.match(html, /height:min\(752px, max\(320px, calc\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 100px - var\(--qling-pwa-direct-topbar-shift\)\)\)\)/);
   assert.doesNotMatch(html, /data-qling-peek-header-content/);
   assert.doesNotMatch(html, /qling-peek-progress/);
   assert.doesNotMatch(html, /transform:translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);

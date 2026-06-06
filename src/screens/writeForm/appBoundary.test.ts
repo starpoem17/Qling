@@ -22,16 +22,18 @@ test('App.tsx delegates write-form routes to containers instead of inline public
   assert.doesNotMatch(appSource, /setFilterAlert\(['"`]고민 전송/);
 });
 
-test('App.tsx gives write-form routes their own main canvas and iOS chrome color', () => {
+test('App.tsx gives write-form routes their own main canvas and standalone PWA chrome colors', () => {
   const cssSource = fs.readFileSync('src/index.css', 'utf8');
 
   assert.match(appSource, /currentRoute === 'write_worry' \|\| currentRoute === 'write_reply'\s*\?\s*'qling-write-form-main'/);
-  assert.match(appSource, /currentRoute !== 'write_worry' && currentRoute !== 'write_reply'/);
-  assert.match(appSource, /document\.documentElement\.classList\.contains\('qling-ios-safari-browser'\)/);
-  assert.match(appSource, /\? '#fff5eb'\s*: '#fff1d1'/);
-  assert.match(appSource, /themeMeta\?\.setAttribute\('content', routeChromeColor\)/);
-  assert.match(appSource, /document\.body\.style\.backgroundColor = routeChromeColor/);
-  assert.match(appSource, /root\.style\.backgroundColor = routeChromeColor/);
+  assert.match(appSource, /pwaRouteChromeForRoute\(currentRoute\)/);
+  assert.match(appSource, /document\.documentElement\.classList\.contains\('qling-ios-standalone-pwa'\)/);
+  assert.match(appSource, /themeMeta\?\.setAttribute\('content', standalonePwaRouteChrome\.top\)/);
+  assert.match(appSource, /document\.body\.style\.backgroundColor = standalonePwaRouteChrome\.bottom/);
+  assert.match(appSource, /root\.style\.backgroundColor = standalonePwaRouteChrome\.bottom/);
+  assert.match(appSource, /route === 'write_worry' \|\| route === 'write_reply' \|\| route === 'answer_check'/);
+  assert.match(appSource, /return \{ top: '#fff1d1', bottom: '#fff5eb' \}/);
+  assert.match(cssSource, /--qling-pwa-figma-topbar-shift: calc\(var\(--qling-space-safe-top\) - 25\.5px\)/);
   assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*overflow: hidden;/);
   assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*overscroll-behavior: contain;/);
   assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*-webkit-overflow-scrolling: touch;/);

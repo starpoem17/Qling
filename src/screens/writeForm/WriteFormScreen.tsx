@@ -2,8 +2,12 @@ import { ChevronDown, Pencil } from 'lucide-react';
 import { FigmaCanvasFrame, FigmaTopBar } from '../shared/ui';
 import type { WriteFormScreenProps } from './contract';
 
-const sendButtonTop = 'min(684px, calc((100dvh - var(--qling-space-nav-height)) - 88px))';
-const inputAreaHeight = `min(434px, max(240px, calc(${sendButtonTop} - 250px)))`;
+const pwaTopbarShift = 'var(--qling-pwa-topbar-shift, 0px)';
+const sendButtonBaseTop = 'min(684px, calc((100dvh - var(--qling-space-nav-height)) - 88px))';
+const sendButtonTop = `calc(${sendButtonBaseTop} + ${pwaTopbarShift})`;
+const topBoxTop = `calc(127px + ${pwaTopbarShift})`;
+const inputAreaTop = `calc(227px + ${pwaTopbarShift})`;
+const inputAreaHeight = `min(434px, max(240px, calc(${sendButtonTop} - ${inputAreaTop} - 23px)))`;
 const topBoxSummaryLimit = 25;
 
 export function WriteFormScreen(props: WriteFormScreenProps) {
@@ -14,11 +18,11 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
 
   return (
     <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
-      <FigmaCanvasFrame>
-        <div className="relative h-[852px] w-[393px] shrink-0 overflow-hidden bg-[#fff1d1]">
+      <FigmaCanvasFrame className="max-w-[480px]">
+        <div className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
       {FigmaTopBar({ title: '답변 작성', onBack: props.onBack, backLabel: '답변하기로 돌아가기' })}
 
-      <section className="absolute left-4 right-4 top-[127px] h-[79px] overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]">
+      <section className="absolute left-4 right-4 h-[79px] overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]" style={{ top: topBoxTop }}>
         <div className="absolute left-[18px] top-[11px]">
           <ReplyCategoryChip label={props.originalWorry.category} />
         </div>
@@ -44,8 +48,8 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
       </section>
 
       <label
-        className="absolute left-5 right-5 top-[227px] block overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
-        style={{ height: inputAreaHeight }}
+        className="absolute left-5 right-5 block overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
+        style={{ top: inputAreaTop, height: inputAreaHeight }}
       >
         <span className="sr-only">답변 작성</span>
         <textarea

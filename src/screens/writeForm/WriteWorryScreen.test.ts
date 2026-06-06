@@ -55,9 +55,10 @@ test('write worry screen uses the widened unscaled form frame while keeping the 
   assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /고민 작성/);
   assert.doesNotMatch(html, /질문 작성/);
-  assert.match(html, /left-5 right-5 top-\[120px\]/);
-  assert.match(html, /height:min\(541px, max\(240px, calc\(min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) - 88px\)\) - 143px\)\)\)/);
-  assert.match(html, /top:min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) - 88px\)\)/);
+  assert.match(html, /left-5 right-5 rounded-\[18px\]/);
+  assert.match(html, /top:calc\(120px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.match(html, /height:min\(541px, max\(240px, calc\(calc\(min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) - 88px\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) - calc\(120px \+ var\(--qling-pwa-topbar-shift, 0px\)\) - 23px\)\)\)/);
+  assert.match(html, /top:calc\(min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) - 88px\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
   assert.match(html, /left-5 right-5 inline-flex h-12/);
   assert.match(html, /pl-\[16\.5px\]/);
   assert.match(html, /text-\[16px\] font-bold leading-6 tracking-\[-0\.36px\]/);

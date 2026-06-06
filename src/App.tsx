@@ -25,6 +25,7 @@ import {
   routeAfterOnboardingComplete,
   routeAfterTutorialComplete,
   routeAfterProfileReadDenied,
+  type AppRoute,
   type AppRouteViewState,
 } from './services/appShell/prdNavigationPolicy';
 import { routeRenderingBoundaryForRoute } from './services/appShell/routeRenderingBoundary';
@@ -106,6 +107,22 @@ async function createExampleWorriesForCurrentUser(user: FirebaseUser) {
     throw new Error(body?.error?.message ?? 'Example worry creation failed.');
   }
   return response.json();
+}
+
+function pwaRouteChromeForRoute(route: AppRoute): { readonly top: string; readonly bottom: string } | null {
+  if (route === 'write_worry' || route === 'write_reply' || route === 'answer_check') {
+    return { top: '#fff1d1', bottom: '#fff5eb' };
+  }
+  if (route === 'privacy_policy') {
+    return { top: '#ff8b0d', bottom: '#fff5eb' };
+  }
+  if (route === 'edit_interests') {
+    return { top: '#ff8b3d', bottom: '#ff8b3d' };
+  }
+  if (route === '마이페이지' || route === 'my_page' || route === 'my_answers') {
+    return { top: '#ff8b3d', bottom: '#fff5eb' };
+  }
+  return null;
 }
 
 // --- App Component ---
@@ -308,7 +325,9 @@ export default function App() {
   const currentAnswerCheckRoute = typeof view === 'object' && view.route === 'answer_check' ? view : null;
 
   useEffect(() => {
-    if (currentRoute !== 'write_worry' && currentRoute !== 'write_reply' && currentRoute !== 'answer_check') return;
+    const standalonePwaRouteChrome = pwaRouteChromeForRoute(currentRoute);
+    if (!standalonePwaRouteChrome) return;
+    if (!document.documentElement.classList.contains('qling-ios-standalone-pwa')) return;
 
     const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     const root = document.getElementById('root');
@@ -316,14 +335,11 @@ export default function App() {
     const previousHtmlBackground = document.documentElement.style.backgroundColor;
     const previousBodyBackground = document.body.style.backgroundColor;
     const previousRootBackground = root?.style.backgroundColor ?? null;
-    const routeChromeColor = document.documentElement.classList.contains('qling-ios-safari-browser')
-      ? '#fff5eb'
-      : '#fff1d1';
 
-    themeMeta?.setAttribute('content', routeChromeColor);
-    document.documentElement.style.backgroundColor = routeChromeColor;
-    document.body.style.backgroundColor = routeChromeColor;
-    if (root) root.style.backgroundColor = routeChromeColor;
+    themeMeta?.setAttribute('content', standalonePwaRouteChrome.top);
+    document.documentElement.style.backgroundColor = standalonePwaRouteChrome.bottom;
+    document.body.style.backgroundColor = standalonePwaRouteChrome.bottom;
+    if (root) root.style.backgroundColor = standalonePwaRouteChrome.bottom;
 
     return () => {
       if (themeMeta && previousThemeColor !== null) themeMeta.setAttribute('content', previousThemeColor);
