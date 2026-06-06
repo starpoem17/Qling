@@ -42,6 +42,7 @@ export type MyPageContainerProps = {
   readonly disablePushRegistrationForCurrentDevice: () => Promise<void>;
   readonly resetPushRegistrationOnSignOut: () => Promise<void>;
   readonly onAccountDeleted: () => void;
+  readonly onInterestsUpdated: (interests: readonly WorryCategory[]) => void;
 };
 
 export const ACCOUNT_DELETION_SUCCESS_ROUTE = routeAfterAccountDeletion();
@@ -121,6 +122,7 @@ export function MyPageContainer(props: MyPageContainerProps) {
         setInterestsError(result.message);
         return;
       }
+      props.onInterestsUpdated(result.interests);
       props.setView(backRouteForRoute('edit_interests'));
     } catch (error) {
       console.error('Interests update failed:', error);

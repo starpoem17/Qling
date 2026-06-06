@@ -466,6 +466,9 @@ export default function App() {
                 disablePushRegistrationForCurrentDevice={disablePushRegistrationForCurrentDevice}
                 resetPushRegistrationOnSignOut={resetPushRegistrationOnSignOut}
                 onAccountDeleted={handleAccountDeleted}
+                onInterestsUpdated={interests => {
+                  setProfile(current => current ? { ...current, interests: [...interests] } : current);
+                }}
               />
             </motion.div>
           )}
