@@ -190,7 +190,7 @@ export function ChatScreen({
 
           {loading ? (
             <section
-              className="absolute left-0 top-[136px] h-[716px] w-full touch-none overscroll-none overflow-hidden rounded-t-[30px]"
+              className="absolute left-0 top-[170px] h-[682px] w-full touch-none overscroll-none overflow-hidden rounded-t-[30px]"
               aria-label="채팅 목록 로딩 상태"
               onWheel={blockStaticScroll}
               onTouchMove={blockStaticScroll}
@@ -199,7 +199,7 @@ export function ChatScreen({
             </section>
           ) : chats && chats.length > 0 ? (
             <section
-              className="absolute left-0 top-[136px] h-[716px] w-full overflow-y-auto rounded-t-[30px] px-4 pb-[108px] pt-4 [-webkit-overflow-scrolling:touch]"
+              className="absolute left-0 top-[170px] h-[682px] w-full overflow-y-auto rounded-t-[30px] px-4 pb-[108px] pt-4 [-webkit-overflow-scrolling:touch]"
               aria-label="채팅 목록"
             >
               <div className="flex flex-col gap-3">
@@ -215,7 +215,7 @@ export function ChatScreen({
             </section>
           ) : (
             <section
-              className="absolute left-0 top-[136px] flex h-[716px] w-full touch-none overscroll-none items-center justify-center overflow-hidden rounded-t-[30px] [container-type:inline-size]"
+              className="absolute left-0 top-[170px] flex h-[682px] w-full touch-none overscroll-none items-center justify-center overflow-hidden rounded-t-[30px] [container-type:inline-size]"
               aria-label="채팅 목록 빈 상태"
               onWheel={blockStaticScroll}
               onTouchMove={blockStaticScroll}
@@ -262,18 +262,18 @@ function ChatStaticHeader({
       onTouchMove={blockStaticScroll}
       onWheel={blockStaticScroll}
     >
-      <h1 className="absolute left-0 top-[34px] w-full text-center text-[17px] font-extrabold leading-normal tracking-[-0.34px] text-white">
+      <h1 className="absolute left-0 top-[68px] w-full text-center text-[17px] font-extrabold leading-normal tracking-[-0.34px] text-white">
         채팅
       </h1>
       <button
         type="button"
         aria-label="마이페이지 열기"
         onClick={onOpenMyPage}
-        className="absolute right-[17px] top-[20px] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+        className="absolute right-[17px] top-[54px] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
       >
         <img src={myPageIconUrl} alt="" aria-hidden="true" className="absolute left-3 top-[13px] h-[25px] w-[25px]" draggable={false} />
       </button>
-      <label className="absolute left-4 right-4 top-[75px] flex h-10 items-center gap-2 rounded-[14px] bg-white/[0.22] px-3">
+      <label className="absolute left-4 right-4 top-[109px] flex h-10 items-center gap-2 rounded-[14px] bg-white/[0.22] px-3">
         <span className="sr-only">닉네임으로 검색</span>
         <img src={searchIconUrl} alt="" aria-hidden="true" className="h-4 w-4 shrink-0" draggable={false} />
         <input
@@ -292,7 +292,7 @@ function CreamContentBackground() {
   return (
     <div
       aria-hidden="true"
-      className="absolute left-0 top-[136px] h-[716px] w-full overflow-hidden rounded-t-[30px] bg-[#fff1d1]"
+      className="absolute left-0 top-[170px] h-[682px] w-full overflow-hidden rounded-t-[30px] bg-[#fff1d1]"
     />
   );
 }

@@ -31,7 +31,7 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
   readonly onConfirmChatStartConfirmation: () => void;
 }) {
   const tabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
-  const contentViewportHeight = `min(752px, max(320px, calc(${tabViewportHeight} - 100px)))`;
+  const contentViewportHeight = `min(718px, max(320px, calc(${tabViewportHeight} - 134px)))`;
   const screenClassName = '-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 overflow-hidden bg-[#ff8b3d] qling-figma-font text-[#1a1a1e]';
 
@@ -106,22 +106,22 @@ function MyAnswersHeader({
 }) {
   return (
     <header
-      className="h-[100px] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
+      className="h-[134px] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
       onTouchMove={blockLockedScroll}
       onWheel={blockLockedScroll}
     >
       <div
-        className="relative mx-auto h-[100px] w-full max-w-[393px]"
+        className="relative mx-auto h-[134px] w-full max-w-[393px]"
       >
         <button
           type="button"
           aria-label="마이페이지로 돌아가기"
           onClick={onBack}
-          className="absolute left-[6px] top-[45px] flex h-[45px] w-[44px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute left-[6px] top-[79px] flex h-[45px] w-[44px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
         >
           <span aria-hidden="true">‹</span>
         </button>
-        <h1 className="absolute left-0 top-[60px] w-full text-center text-[17px] font-extrabold leading-none tracking-[-0.02em] text-white">
+        <h1 className="absolute left-0 top-[94px] w-full text-center text-[17px] font-extrabold leading-none tracking-[-0.02em] text-white">
           내가 쓴 답변
         </h1>
       </div>

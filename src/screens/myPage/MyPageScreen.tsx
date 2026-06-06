@@ -51,7 +51,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
   const settingsCardTop = hasMultiplePreviewItems ? 444 : 359;
   const contentBottom = settingsCardTop + 192;
   const myPageTabViewportHeight = 'var(--qling-tab-viewport-height)';
-  const myPageContentHeight = `min(752px, max(520px, calc(${myPageTabViewportHeight} - 100px)))`;
+  const myPageContentHeight = `min(718px, max(520px, calc(${myPageTabViewportHeight} - 134px)))`;
 
   return (
     <section
@@ -136,22 +136,22 @@ function MyPageHeader({
 }) {
   return (
     <header
-      className="h-[100px] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
+      className="h-[134px] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
       onTouchMove={blockLockedScroll}
       onWheel={blockLockedScroll}
     >
       <div
-        className="relative mx-auto h-[100px] w-full max-w-[480px]"
+        className="relative mx-auto h-[134px] w-full max-w-[480px]"
       >
         <button
           type="button"
           aria-label="이전 화면으로 돌아가기"
           onClick={onBack}
-          className="absolute left-[6px] top-[45px] flex h-[45px] w-[44px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute left-[6px] top-[79px] flex h-[45px] w-[44px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
         >
           <span aria-hidden="true">‹</span>
         </button>
-        <h1 className="absolute left-0 top-[60px] w-full text-center text-[17px] font-extrabold leading-none tracking-[-0.02em] text-white">
+        <h1 className="absolute left-0 top-[94px] w-full text-center text-[17px] font-extrabold leading-none tracking-[-0.02em] text-white">
           마이페이지
         </h1>
       </div>

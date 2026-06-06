@@ -15,10 +15,11 @@ import type {
 const rankingCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
 const rankingTabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
 const rankingUsableCanvasHeight = `calc((${rankingTabViewportHeight}) / (${rankingCanvasScale}))`;
+const rankingSheetTop = 434;
 const viewerRankCardTop = `min(773px, calc(${rankingUsableCanvasHeight} - 79px))`;
-const rankingSheetReadyHeight = `min(452px, max(372px, calc(${rankingUsableCanvasHeight} - 400px)))`;
-const rankingSheetReadyHeightWithViewer = `min(452px, max(72px, calc(${viewerRankCardTop} - 400px - 12px)))`;
-const rankingSheetEmptyTopWithViewer = `min(156px, max(8px, calc(${rankingSheetReadyHeightWithViewer} / 2 - 8px)), max(8px, calc(${viewerRankCardTop} - 400px - 28px)))`;
+const rankingSheetReadyHeight = `min(418px, max(338px, calc(${rankingUsableCanvasHeight} - ${rankingSheetTop}px)))`;
+const rankingSheetReadyHeightWithViewer = `min(418px, max(72px, calc(${viewerRankCardTop} - ${rankingSheetTop}px - 12px)))`;
+const rankingSheetEmptyTopWithViewer = `min(156px, max(8px, calc(${rankingSheetReadyHeightWithViewer} / 2 - 8px)), max(8px, calc(${viewerRankCardTop} - ${rankingSheetTop}px - 28px)))`;
 const qlingNotoSansKrStyle = { fontFamily: '"Qling Noto Sans KR"' } as const;
 
 const rankingAssetUrlByName = {
@@ -114,12 +115,12 @@ function RankingHero({
   readonly onOpenMyPage: () => void;
 }) {
   return (
-    <div className="absolute left-0 top-0 h-[406px] w-full bg-[#ff8b3d] text-white">
-      <h1 className="absolute left-6 top-[56px] text-[24px] font-black leading-[31px] font-['Qling_Noto_Sans_KR_Black']">
+    <div className="absolute left-0 top-0 h-[440px] w-full bg-[#ff8b3d] text-white">
+      <h1 className="absolute left-6 top-[90px] text-[24px] font-black leading-[31px] font-['Qling_Noto_Sans_KR_Black']">
         랭킹
       </h1>
       {seasonLabel && (
-        <p className="absolute left-6 top-[90px] text-[12px] font-medium leading-4 opacity-85 font-['Qling_Noto_Sans_KR']">
+        <p className="absolute left-6 top-[124px] text-[12px] font-medium leading-4 opacity-85 font-['Qling_Noto_Sans_KR']">
           {seasonLabel}
         </p>
       )}
@@ -127,7 +128,7 @@ function RankingHero({
         type="button"
         aria-label="마이페이지"
         onClick={onOpenMyPage}
-        className="absolute left-[333.5px] top-[53.5px] flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+        className="absolute left-[333.5px] top-[87.5px] flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
       >
         <CircleUserRound className="h-[25px] w-[25px]" aria-hidden="true" />
       </button>
@@ -146,7 +147,7 @@ function SegmentedControl({
   readonly disabled?: boolean;
 }) {
   return (
-    <div className="absolute left-[79px] top-[114px] h-11 w-[236px] rounded-full bg-white/20" data-measure="ranking-segmented-outer">
+    <div className="absolute left-[79px] top-[148px] h-11 w-[236px] rounded-full bg-white/20" data-measure="ranking-segmented-outer">
       <span
         className={cn(
           'absolute top-1 h-9 w-[114px] rounded-full bg-white shadow-[0_2px_7px_rgb(128_87_33/0.2)] transition-transform',
@@ -194,7 +195,7 @@ function TopRankings({ period }: { readonly period: RankingDisplayPeriod }) {
       <TopRank entry={topEntries[0] ?? null} place="first" />
       <TopRank entry={topEntries[1] ?? null} place="second" />
       <TopRank entry={topEntries[2] ?? null} place="third" />
-      <Podium topOffset={326} />
+      <Podium topOffset={360} />
     </>
   );
 }
@@ -208,37 +209,37 @@ function TopRank({
 }) {
   const layout = {
     first: {
-      avatar: 'left-[163px] top-[200px] h-[69px] w-[69px]',
-      crown: 'left-[177px] top-[170px] h-6 w-[42px]',
+      avatar: 'left-[163px] top-[234px] h-[69px] w-[69px]',
+      crown: 'left-[177px] top-[204px] h-6 w-[42px]',
       crownUrl: rankingAssetUrlByName.crownFirst,
-      name: 'left-[136px] top-[274px] w-[120px] text-[15px] leading-5',
-      hearts: 'left-[136px] top-[296px] w-[120px]',
-      ellipse: 'left-[171px] top-[252px] h-[23px] w-[53px]',
+      name: 'left-[136px] top-[308px] w-[120px] text-[15px] leading-5',
+      hearts: 'left-[136px] top-[330px] w-[120px]',
+      ellipse: 'left-[171px] top-[286px] h-[23px] w-[53px]',
       ellipseUrl: rankingAssetUrlByName.bigEllipse,
     },
     second: {
-      avatar: 'left-[50px] top-[230px] h-[52px] w-[52px]',
-      crown: 'left-[61px] top-[209px] h-[17px] w-[30px]',
+      avatar: 'left-[50px] top-[264px] h-[52px] w-[52px]',
+      crown: 'left-[61px] top-[243px] h-[17px] w-[30px]',
       crownUrl: rankingAssetUrlByName.crownSecond,
-      name: 'left-[16px] top-[290px] w-[120px] text-[13px] leading-[17px]',
-      hearts: 'left-[16px] top-[312px] w-[120px]',
-      ellipse: 'left-[55px] top-[269px] h-[18px] w-[42px]',
+      name: 'left-[16px] top-[324px] w-[120px] text-[13px] leading-[17px]',
+      hearts: 'left-[16px] top-[346px] w-[120px]',
+      ellipse: 'left-[55px] top-[303px] h-[18px] w-[42px]',
       ellipseUrl: rankingAssetUrlByName.smallEllipse,
     },
     third: {
-      avatar: 'left-[289px] top-[245px] h-[52px] w-[52px]',
-      crown: 'left-[301px] top-[223px] h-[17px] w-[30px]',
+      avatar: 'left-[289px] top-[279px] h-[52px] w-[52px]',
+      crown: 'left-[301px] top-[257px] h-[17px] w-[30px]',
       crownUrl: rankingAssetUrlByName.crownThird,
-      name: 'left-[255px] top-[305px] w-[120px] text-[13px] leading-[17px]',
-      hearts: 'left-[255px] top-[327px] w-[120px]',
-      ellipse: 'left-[294px] top-[284px] h-[18px] w-[42px]',
+      name: 'left-[255px] top-[339px] w-[120px] text-[13px] leading-[17px]',
+      hearts: 'left-[255px] top-[361px] w-[120px]',
+      ellipse: 'left-[294px] top-[318px] h-[18px] w-[42px]',
       ellipseUrl: rankingAssetUrlByName.smallEllipse,
     },
   };
   const item = layout[place];
 
   return (
-    <div className="pointer-events-none absolute left-0 top-0 z-10 h-[406px] w-[393px] text-center text-white" data-measure={`ranking-top-${place}`}>
+    <div className="pointer-events-none absolute left-0 top-0 z-10 h-[440px] w-[393px] text-center text-white" data-measure={`ranking-top-${place}`}>
       <img src={item.ellipseUrl} alt="" aria-hidden="true" className={cn('absolute block max-w-none', item.ellipse)} />
       <img src={item.crownUrl} alt="" className={cn('absolute block max-w-none', item.crown)} />
       {entry && (
@@ -258,7 +259,7 @@ function TopRank({
 function LoadingPodium() {
   return (
     <>
-      <Podium topOffset={326} />
+      <Podium topOffset={360} />
     </>
   );
 }
@@ -290,7 +291,7 @@ function RankingSheet({
     <section
       className={cn(
         'absolute left-0 w-full overflow-hidden rounded-t-[26px] bg-white shadow-[0_-5px_8px_rgb(128_87_33/0.1)]',
-        loading ? 'top-[400px] h-[452px]' : 'top-[400px]',
+        loading ? 'top-[434px] h-[418px]' : 'top-[434px]',
       )}
       style={loading ? undefined : { height: readyHeight }}
     >

@@ -154,8 +154,8 @@ test('standalone back buttons keep at least a 44px touch target', () => {
 
   assert.match(chatRoomSource, /left-\[7px\] top-\[18px\] flex h-12 w-11/);
   assert.match(reportSource, /aria-label="뒤로가기"[\s\S]*h-\[44px\] w-\[44px\]/);
-  assert.match(myPageSource, /left-\[6px\] top-\[45px\] flex h-\[45px\] w-\[44px\]/);
-  assert.match(myAnswersSource, /left-\[6px\] top-\[45px\] flex h-\[45px\] w-\[44px\]/);
+  assert.match(myPageSource, /left-\[6px\] top-\[79px\] flex h-\[45px\] w-\[44px\]/);
+  assert.match(myAnswersSource, /left-\[6px\] top-\[79px\] flex h-\[45px\] w-\[44px\]/);
   assert.match(replyDetailSource, /aria-label="목록으로 돌아가기"[\s\S]*h-11 w-11/);
 });
 
