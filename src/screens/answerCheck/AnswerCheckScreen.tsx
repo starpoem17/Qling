@@ -82,7 +82,7 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
 
 function AnswerCheckLoadingScreen({ label, onBack }: { readonly label: string; readonly onBack: () => void }) {
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
+    <section className="-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
       <FigmaCanvasFrame className="max-w-[480px]">
         <div className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
           <button
@@ -137,7 +137,7 @@ function AnswerCheckFrame({
   readonly overlay?: ReactNode;
 }) {
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
+    <section className="-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
       <FigmaCanvasFrame className="max-w-[480px]">
         <div className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1] qling-received-worries-font">
           <FigmaTopBar title="답변 확인" onBack={onBack} backLabel="나의 고민으로 돌아가기" />

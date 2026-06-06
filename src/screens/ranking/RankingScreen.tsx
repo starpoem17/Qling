@@ -52,7 +52,7 @@ export function RankingScreen(props: RankingScreenProps) {
 
   if (props.state.status === 'error') {
     return (
-      <div className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ffd3a8] px-4 pt-[calc(62px+env(safe-area-inset-top,0px))]">
+      <div className="-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ffd3a8] px-4 pt-[calc(62px+env(safe-area-inset-top,0px))]">
         <ErrorState title="순위를 불러오지 못했어요" message={props.state.message} />
       </div>
     );
@@ -82,7 +82,7 @@ function RankingFrame({ children }: { readonly children: ReactNode }) {
   return (
     <section
       aria-label="순위"
-      className="-mx-[var(--qling-space-shell-x)] -mt-6 h-full min-h-0 overflow-hidden bg-[#ff8b3d] font-['Qling_Noto_Sans_KR']"
+      className="-mx-[var(--qling-space-shell-x)] h-full min-h-0 overflow-hidden bg-[#ff8b3d] font-['Qling_Noto_Sans_KR']"
       style={{ height: rankingTabViewportHeight }}
     >
       <div

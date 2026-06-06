@@ -32,7 +32,7 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
 }) {
   const tabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
   const contentViewportHeight = `min(752px, max(320px, calc(${tabViewportHeight} - 100px)))`;
-  const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d]';
+  const screenClassName = '-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-[393px] shrink-0 overflow-hidden bg-[#ff8b3d] qling-figma-font text-[#1a1a1e]';
 
   return (

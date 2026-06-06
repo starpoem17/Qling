@@ -31,8 +31,8 @@ test('received worries scroll sheet uses the visual viewport height and keeps bo
   assert.match(html, /답변하기/);
   assert.match(html, /답변하기 화면에?[^"]*|받은 고민 목록/);
   assert.match(html, /mx-auto flex h-full w-full justify-center overflow-hidden max-w-\[480px\]/);
-  assert.match(html, /style="height:min\(752px, max\(320px, calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) - 74px\)\)\)"/);
-  assert.match(html, /overflow-y-auto rounded-t-\[32px\] px-4 pb-\[calc\(132px\+env\(safe-area-inset-bottom,0px\)\)\] pt-4/);
+  assert.match(html, /style="height:min\(752px, max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\)"/);
+  assert.match(html, /overflow-y-auto rounded-t-\[32px\] px-4 pb-\[132px\] pt-4/);
   assert.match(html, /relative aspect-\[361\/135\] overflow-hidden rounded-\[18px\]/);
   assert.doesNotMatch(html, /h-\[135px\]/);
   assert.doesNotMatch(html, /h-\[752px\] w-full overflow-y-auto/);
@@ -50,8 +50,8 @@ test('received worries empty and loading states share the same visual viewport s
 
   assert.match(emptyHtml, /받은 고민 빈 상태/);
   assert.match(loadingHtml, /받은 고민 로딩 상태/);
-  assert.match(emptyHtml, /var\(--qling-visual-viewport-height\)/);
-  assert.match(loadingHtml, /var\(--qling-visual-viewport-height\)/);
+  assert.match(emptyHtml, /var\(--qling-tab-viewport-height\)/);
+  assert.match(loadingHtml, /var\(--qling-tab-viewport-height\)/);
   assert.doesNotMatch(emptyHtml, /h-\[752px\] w-full touch-none/);
   assert.doesNotMatch(loadingHtml, /h-\[752px\] w-full touch-none/);
 });

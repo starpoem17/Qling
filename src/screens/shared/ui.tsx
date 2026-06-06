@@ -66,7 +66,7 @@ export function MobileAppShell({
           className={cn(
             'mx-auto min-h-0 w-full flex-1 px-[var(--qling-space-shell-x)]',
             hasBottomNavigation
-              ? 'overflow-y-auto overscroll-contain pb-[var(--qling-space-safe-bottom)] [-webkit-overflow-scrolling:touch]'
+              ? 'overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
               : 'pb-12',
             mainClassName,
           )}
@@ -143,9 +143,9 @@ export function BottomNavigation({
   return (
     <nav
       aria-label="주요 화면"
-      className="h-[80px] w-full shrink-0 bg-[#fff5eb] qling-figma-font"
+      className="h-[var(--qling-space-nav-height)] w-full shrink-0 bg-[#fff5eb] qling-figma-font"
     >
-      <div className="relative mx-auto h-full w-full max-w-[480px]" data-measure="bottom-nav-frame">
+      <div className="relative mx-auto h-[var(--qling-space-nav-base-height)] w-full max-w-[480px]" data-measure="bottom-nav-frame">
         {tabs.map(({ tab, label, unreadCount }) => {
           const isActive = activeTab === tab;
           const item = itemByTab[tab];

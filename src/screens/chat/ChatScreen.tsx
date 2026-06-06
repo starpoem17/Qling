@@ -172,7 +172,7 @@ export function ChatScreen({
 }) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d]';
+  const screenClassName = '-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-[852px] w-full max-w-[480px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font';
   const visibleChats = filterChatsByOpponentName(chats ?? [], searchQuery);
   const selectedMenuChat = visibleChats.find(chat => chat.chatId === openMenuId) ?? null;

@@ -35,10 +35,11 @@ const receivedWorryCardBodyStyle = {
 
 export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   const passingDeliveryIds = new Set(props.passingDeliveryIds);
-  const tabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
-  const contentViewportHeight = `min(752px, max(320px, calc((${tabViewportHeight}) - 74px)))`;
-  const screenClassName = '-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d]';
-  const canvasClassName = 'relative h-[852px] w-full max-w-[480px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
+  const tabViewportHeight = 'var(--qling-tab-viewport-height)';
+  const contentTop = 'calc(74px + var(--qling-space-safe-top))';
+  const contentViewportHeight = `min(752px, max(320px, calc((${tabViewportHeight}) - 74px - var(--qling-space-safe-top))))`;
+  const screenClassName = '-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d]';
+  const canvasClassName = 'relative h-full min-h-0 w-full max-w-[480px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
 
   if (props.state.status === 'loading') {
     return (
@@ -48,8 +49,8 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
             <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
             <CreamContentBackground height={contentViewportHeight} />
             <section
-              className="qling-received-worries-font absolute left-0 top-[74px] w-full touch-none overscroll-none overflow-hidden rounded-t-[32px]"
-              style={{ height: contentViewportHeight }}
+              className="qling-received-worries-font absolute left-0 w-full touch-none overscroll-none overflow-hidden rounded-t-[32px]"
+              style={{ height: contentViewportHeight, top: contentTop }}
               aria-label="받은 고민 로딩 상태"
               onWheel={blockLoadingScroll}
               onTouchMove={blockLoadingScroll}
@@ -70,8 +71,8 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
             <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
             <CreamContentBackground height={contentViewportHeight} />
             <section
-              className="qling-received-worries-font absolute left-0 top-[74px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[calc(132px+env(safe-area-inset-bottom,0px))] pt-4 [-webkit-overflow-scrolling:touch]"
-              style={{ height: contentViewportHeight }}
+              className="qling-received-worries-font absolute left-0 w-full overflow-y-auto rounded-t-[32px] px-4 pb-[132px] pt-4 [-webkit-overflow-scrolling:touch]"
+              style={{ height: contentViewportHeight, top: contentTop }}
             >
               <ErrorState title="답변 피드를 불러오지 못했어요" message={props.state.message} />
             </section>
@@ -89,8 +90,8 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
             <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
             <CreamContentBackground height={contentViewportHeight} />
             <section
-              className="qling-received-worries-font absolute left-0 top-[74px] w-full touch-none overscroll-none overflow-hidden rounded-t-[32px] px-4 pt-4"
-              style={{ height: contentViewportHeight }}
+              className="qling-received-worries-font absolute left-0 w-full touch-none overscroll-none overflow-hidden rounded-t-[32px] px-4 pt-4"
+              style={{ height: contentViewportHeight, top: contentTop }}
               aria-label="받은 고민 빈 상태"
               onWheel={blockLoadingScroll}
               onTouchMove={blockLoadingScroll}
@@ -110,8 +111,8 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
           <ReplyStaticHeader onOpenMyPage={props.onOpenMyPage} />
           <CreamContentBackground height={contentViewportHeight} />
           <section
-            className="qling-received-worries-font absolute left-0 top-[74px] w-full overflow-y-auto rounded-t-[32px] px-4 pb-[calc(132px+env(safe-area-inset-bottom,0px))] pt-4 [-webkit-overflow-scrolling:touch]"
-            style={{ height: contentViewportHeight }}
+            className="qling-received-worries-font absolute left-0 w-full overflow-y-auto rounded-t-[32px] px-4 pb-[132px] pt-4 [-webkit-overflow-scrolling:touch]"
+            style={{ height: contentViewportHeight, top: contentTop }}
             aria-label="받은 고민 목록"
           >
             <div className="grid gap-[14px]">
@@ -187,7 +188,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
 function ReplyStaticHeader({ onOpenMyPage }: { readonly onOpenMyPage: () => void }) {
   return (
     <header
-      className="absolute left-0 top-0 h-[74px] w-full touch-none overscroll-none bg-[#ff8b3d]"
+      className="absolute left-0 top-0 h-[calc(74px+var(--qling-space-safe-top))] w-full touch-none overscroll-none bg-[#ff8b3d]"
       onTouchMove={blockLoadingScroll}
       onWheel={blockLoadingScroll}
     >
@@ -196,14 +197,14 @@ function ReplyStaticHeader({ onOpenMyPage }: { readonly onOpenMyPage: () => void
         alt=""
         role="presentation"
         aria-hidden="true"
-        className="absolute left-8 top-5 h-[38.179px] w-[48.001px]"
+        className="absolute left-8 top-[calc(var(--qling-space-safe-top)+20px)] h-[38.179px] w-[48.001px]"
         draggable={false}
       />
       <button
         type="button"
         aria-label="마이페이지 열기"
         onClick={onOpenMyPage}
-        className="absolute right-[17px] top-[21px] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
+        className="absolute right-[17px] top-[calc(var(--qling-space-safe-top)+21px)] h-[49px] w-[49px] rounded-full transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white"
       >
         <img
           src={myPageIconUrl}
@@ -227,8 +228,8 @@ function CreamContentBackground({ height }: { readonly height: string }) {
   return (
     <div
       aria-hidden="true"
-      className="absolute left-0 top-[74px] w-full rounded-t-[32px] bg-[#fff1d1]"
-      style={{ height }}
+      className="absolute left-0 w-full rounded-t-[32px] bg-[#fff1d1]"
+      style={{ height, top: 'calc(74px + var(--qling-space-safe-top))' }}
     />
   );
 }

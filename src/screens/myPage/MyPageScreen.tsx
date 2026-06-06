@@ -50,13 +50,13 @@ export function MyPageScreen(props: MyPageScreenProps) {
   const settingsHeadingTop = hasMultiplePreviewItems ? 411 : 326;
   const settingsCardTop = hasMultiplePreviewItems ? 444 : 359;
   const contentBottom = settingsCardTop + 192;
-  const myPageTabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
+  const myPageTabViewportHeight = 'var(--qling-tab-viewport-height)';
   const myPageContentHeight = `min(752px, max(520px, calc(${myPageTabViewportHeight} - 100px)))`;
 
   return (
     <section
       aria-label="마이페이지"
-      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d] text-[#1a1a1e] qling-figma-font"
+      className="-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d] text-[#1a1a1e] qling-figma-font"
     >
       <FigmaCanvasFrame className="max-w-[480px]" data-measure="my-page-responsive-canvas">
         <div
@@ -345,13 +345,13 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
     : props.state.status === 'error'
       ? props.state.message
       : policyBody || (props.state.status === 'empty' ? props.state.message : '정책을 준비 중입니다.');
-  const policyTabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
+  const policyTabViewportHeight = 'var(--qling-tab-viewport-height)';
   const policyCardBottom = `max(calc(108px + env(safe-area-inset-bottom,0px)), calc(876px - ${policyTabViewportHeight}))`;
 
   return (
     <section
       aria-label={props.title}
-      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b0d] text-[#1a1a1e] qling-figma-font"
+      className="-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b0d] text-[#1a1a1e] qling-figma-font"
     >
       <FigmaCanvasFrame className="max-w-[480px]" data-measure="policy-responsive-canvas">
         <div
@@ -392,12 +392,12 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
 export function EditInterestsScreen(props: EditInterestsProps) {
   const hasValidationError = Boolean(props.validationMessages.interests);
   const orderedCategoryOptions = editInterestsFigmaOrder.filter(category => props.categoryOptions.includes(category));
-  const editInterestsCanvasScale = 'min(calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px), calc(100dvh / 852px))';
+  const editInterestsCanvasScale = 'min(calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px), calc(var(--qling-tab-viewport-height) / 852px))';
 
   return (
     <section
       aria-label="관심분야 수정"
-      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d] text-[#1a1a1a] qling-figma-font"
+      className="-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d] text-[#1a1a1a] qling-figma-font"
     >
       <div
         className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"

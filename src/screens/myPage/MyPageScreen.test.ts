@@ -102,7 +102,7 @@ test('my-page root uses a widened unscaled Figma canvas with fixed header and bo
   assert.match(html, /aria-label="마이페이지 본문"/);
   assert.match(html, /<header[^>]*h-\[100px\][\s\S]*<section[^>]*aria-label="마이페이지 본문"/);
   assert.match(html, /relative overflow-y-auto overscroll-contain pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
-  assert.match(html, /height:min\(752px, max\(520px, calc\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 100px\)\)\)/);
+  assert.match(html, /height:min\(752px, max\(520px, calc\(var\(--qling-tab-viewport-height\) - 100px\)\)\)/);
   assert.match(html, /pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
   assert.doesNotMatch(html, /scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
   assert.match(html, /left-5 right-5 top-\[32px\] h-\[93px\]/);
@@ -332,7 +332,7 @@ test('edit interests screen renders fixed two-column chip grid and exact zero-se
   assert.match(html, /h-\[852px\]/);
   assert.match(html, /w-\[393px\]/);
   assert.match(html, /origin-top/);
-  assert.match(html, /min\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\), calc\(100dvh \/ 852px\)\)/);
+  assert.match(html, /min\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\), calc\(var\(--qling-tab-viewport-height\) \/ 852px\)\)/);
   assert.match(html, /공감할 수 있는 주제를 골라주세요/);
   assert.match(html, /grid-cols-2/);
   assert.match(html, /w-\[155px\]/);
@@ -385,12 +385,12 @@ test('privacy policy screen renders document body in the Figma card layout', () 
   }));
 
   assert.match(html, /bg-\[#ff8b0d\]/);
-  assert.match(html, /h-\[calc\(var\(--qling-visual-viewport-height\)-var\(--qling-space-nav-height\)\)\]/);
+  assert.match(html, /h-\[var\(--qling-tab-viewport-height\)\]/);
   assert.match(html, /data-measure="policy-responsive-canvas"/);
   assert.match(html, /data-measure="policy-screen"/);
   assert.match(html, /h-\[852px\] w-full max-w-\[480px\]/);
   assert.match(html, /top-\[127px\]/);
-  assert.match(html, /bottom:max\(calc\(108px \+ env\(safe-area-inset-bottom,0px\)\), calc\(876px - calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\)\)/);
+  assert.match(html, /bottom:max\(calc\(108px \+ env\(safe-area-inset-bottom,0px\)\), calc\(876px - var\(--qling-tab-viewport-height\)\)\)/);
   assert.match(html, /left-4 right-4 top-\[127px\]/);
   assert.doesNotMatch(html, /w-\[361px\]/);
   assert.doesNotMatch(html, /transform:scale/);

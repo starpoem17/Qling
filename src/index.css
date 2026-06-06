@@ -89,10 +89,13 @@
   --qling-space-shell-x: clamp(1rem, 4vw, 1.5rem);
   --qling-space-section-gap: 1.5rem;
   --qling-space-card-padding: 1.25rem;
-  --qling-space-nav-height: 5rem;
+  --qling-space-safe-top: env(safe-area-inset-top, 0px);
   --qling-space-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --qling-space-nav-base-height: 80px;
+  --qling-space-nav-height: calc(var(--qling-space-nav-base-height) + var(--qling-space-safe-bottom));
+  --qling-tab-viewport-height: calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height));
   --qling-space-cta-gap: 0.75rem;
-  --qling-space-scroll-bottom: calc(var(--qling-space-nav-height) + var(--qling-space-safe-bottom) + 2rem);
+  --qling-space-scroll-bottom: calc(var(--qling-space-nav-height) + 2rem);
   --qling-category-chip-width: 4.75rem;
   --qling-category-chip-height: 2rem;
 
