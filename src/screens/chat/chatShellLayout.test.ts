@@ -71,6 +71,7 @@ test('chat list and chat room use widened unscaled 480px frames', () => {
   assert.match(chatRoomScreenSource, /const chatRoomTopBarHeight = 100/);
   assert.match(chatRoomScreenSource, /const chatTextareaMaxHeight = 60/);
   assert.match(chatRoomScreenSource, /const chatRoomKeyboardOpenThreshold = 120/);
+  assert.match(chatRoomScreenSource, /const chatRoomKeyboardSettleDelayMs = 220/);
   assert.doesNotMatch(chatRoomScreenSource, /--chat-keyboard-inset/);
   assert.doesNotMatch(chatRoomScreenSource, /--chat-keyboard-offset/);
   assert.doesNotMatch(chatRoomScreenSource, /--chat-input-y-offset/);
@@ -91,6 +92,7 @@ test('chat list and chat room use widened unscaled 480px frames', () => {
   assert.match(chatRoomScreenSource, /const \[isTopBarHiddenForKeyboard, setIsTopBarHiddenForKeyboard\] = useState\(false\)/);
   assert.match(chatRoomScreenSource, /const fullViewportHeightRef = useRef<number \| null>\(null\)/);
   assert.match(chatRoomScreenSource, /const keyboardInputIntentRef = useRef\(false\)/);
+  assert.match(chatRoomScreenSource, /const pendingTopBarHideTimeoutRef = useRef<number \| null>\(null\)/);
   assert.match(chatRoomScreenSource, /const chatRoomTopBarHeightCss = `calc\(\$\{chatRoomTopBarHeight\}px \+ var\(--qling-pwa-direct-topbar-shift\)\)`/);
   assert.match(chatRoomScreenSource, /const topBarLayerStyle: CSSProperties = \{\s*height: isTopBarHiddenForKeyboard \? 0 : chatRoomTopBarHeightCss,\s*transform: isTopBarHiddenForKeyboard \? `translateY\(calc\(-1 \* \$\{chatRoomTopBarHeightCss\}\)\)` : undefined,\s*\}/);
   assert.doesNotMatch(chatRoomScreenSource, /paddingTop: `\$\{isTopBarHiddenForKeyboard \? 0 : viewportMetrics/);
@@ -171,8 +173,16 @@ test('chat room accounts for visual viewport and document background without rec
   assert.match(chatRoomScreenSource, /const viewportHeightShrink = Math\.max\(0, fullViewportHeight - visibleHeight\)/);
   assert.match(chatRoomScreenSource, /const isKeyboardHeightVisible = viewportHeightShrink >= chatRoomKeyboardOpenThreshold/);
   assert.match(chatRoomScreenSource, /fullViewportHeightRef\.current = Math\.max\(fullViewportHeight, nextFullViewportHeight\)/);
-  assert.match(chatRoomScreenSource, /visualViewport && keyboardInputIntentRef\.current && isKeyboardHeightVisible/);
+  assert.match(chatRoomScreenSource, /const clearScheduledTopBarHide = \(\) => \{/);
+  assert.match(chatRoomScreenSource, /window\.clearTimeout\(pendingTopBarHideTimeoutRef\.current\)/);
+  assert.match(chatRoomScreenSource, /const scheduleSettledTopBarHide = \(\) => \{/);
+  assert.match(chatRoomScreenSource, /pendingTopBarHideTimeoutRef\.current = window\.setTimeout\(\(\) => \{/);
+  assert.match(chatRoomScreenSource, /\}, chatRoomKeyboardSettleDelayMs\)/);
+  assert.match(chatRoomScreenSource, /visualViewport && !isTopBarHiddenForKeyboard && keyboardInputIntentRef\.current && isKeyboardHeightVisible/);
+  assert.match(chatRoomScreenSource, /scheduleSettledTopBarHide\(\)/);
   assert.match(chatRoomScreenSource, /visualViewport && isTopBarHiddenForKeyboard && !isKeyboardHeightVisible/);
+  assert.match(chatRoomScreenSource, /clearScheduledTopBarHide\(\);\s*keyboardInputIntentRef\.current = false;\s*setIsTopBarHiddenForKeyboard\(false\)/);
+  assert.match(chatRoomScreenSource, /visualViewport && !isKeyboardHeightVisible/);
   assert.doesNotMatch(chatRoomScreenSource, /offsetTop === 0/);
   assert.match(chatRoomScreenSource, /const chatRoomDocumentBackground = '#ffffff'/);
   assert.match(chatRoomScreenSource, /const backgroundColor = menuOpen \? dimThemeColor : chatRoomDocumentBackground/);
@@ -247,7 +257,7 @@ test('chat room keyboard diagnostics log repeated focus viewport state in dev or
   assert.match(chatRoomScreenSource, /console\.info\('\[chat-room-keyboard\]'/);
   assert.match(chatRoomScreenSource, /if \(source === 'textarea\.touchstart' \|\| source === 'textarea\.focus' \|\| pointerType === 'touch'\) \{\s*keyboardInputIntentRef\.current = true;\s*\}/);
   assert.doesNotMatch(chatRoomScreenSource, /setIsTopBarHiddenForKeyboard\(true\);\s*\}\s*logChatRoomKeyboardMetric\(source\)/);
-  assert.match(chatRoomScreenSource, /if \(!window\.visualViewport\) \{\s*setIsTopBarHiddenForKeyboard\(false\);\s*\}\s*logChatRoomKeyboardMetric\('textarea\.blur'\)/);
+  assert.match(chatRoomScreenSource, /if \(pendingTopBarHideTimeoutRef\.current !== null\) \{\s*window\.clearTimeout\(pendingTopBarHideTimeoutRef\.current\);\s*pendingTopBarHideTimeoutRef\.current = null;\s*\}\s*setIsTopBarHiddenForKeyboard\(false\);\s*logChatRoomKeyboardMetric\('textarea\.blur'\)/);
   assert.doesNotMatch(chatRoomScreenSource, /bodyLocked/);
   assert.doesNotMatch(chatRoomScreenSource, /rootLocked/);
   assert.match(chatRoomScreenSource, /scrollY: window\.scrollY/);

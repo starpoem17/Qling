@@ -15,6 +15,7 @@ const chatInputBaseHeight = 67;
 const chatRoomTopBarHeight = 100;
 const chatRoomTopBarHeightCss = `calc(${chatRoomTopBarHeight}px + var(--qling-pwa-direct-topbar-shift))`;
 const chatRoomKeyboardOpenThreshold = 120;
+const chatRoomKeyboardSettleDelayMs = 220;
 const chatTextareaMinHeight = 40;
 const chatTextareaMaxHeight = 60;
 const chatRoomBackSwipeEdgeWidth = 32;
@@ -91,6 +92,7 @@ export function ChatRoomScreen({
   const shouldStickToBottomRef = useRef(true);
   const fullViewportHeightRef = useRef<number | null>(null);
   const keyboardInputIntentRef = useRef(false);
+  const pendingTopBarHideTimeoutRef = useRef<number | null>(null);
   const canAutoScrollAfterViewportChangeRef = useRef(false);
   const backSwipeRef = useRef<ChatRoomBackSwipeState | null>(null);
   const previousAutoScrollInputsRef = useRef<{
@@ -101,6 +103,20 @@ export function ChatRoomScreen({
   } | null>(null);
 
   useEffect(() => {
+    const clearScheduledTopBarHide = () => {
+      if (pendingTopBarHideTimeoutRef.current === null) return;
+      window.clearTimeout(pendingTopBarHideTimeoutRef.current);
+      pendingTopBarHideTimeoutRef.current = null;
+    };
+    const scheduleSettledTopBarHide = () => {
+      clearScheduledTopBarHide();
+      pendingTopBarHideTimeoutRef.current = window.setTimeout(() => {
+        pendingTopBarHideTimeoutRef.current = null;
+        if (keyboardInputIntentRef.current) {
+          setIsTopBarHiddenForKeyboard(true);
+        }
+      }, chatRoomKeyboardSettleDelayMs);
+    };
     const updateViewportMetrics = (source: string = 'viewport.measure') => {
       const visualViewport = window.visualViewport;
       const layoutHeight = window.innerHeight ?? document.documentElement.clientHeight ?? 852;
@@ -113,11 +129,14 @@ export function ChatRoomScreen({
       if (!visualViewport || !isTopBarHiddenForKeyboard) {
         fullViewportHeightRef.current = Math.max(fullViewportHeight, nextFullViewportHeight);
       }
-      if (visualViewport && keyboardInputIntentRef.current && isKeyboardHeightVisible) {
-        setIsTopBarHiddenForKeyboard(true);
+      if (visualViewport && !isTopBarHiddenForKeyboard && keyboardInputIntentRef.current && isKeyboardHeightVisible) {
+        scheduleSettledTopBarHide();
       } else if (visualViewport && isTopBarHiddenForKeyboard && !isKeyboardHeightVisible) {
+        clearScheduledTopBarHide();
         keyboardInputIntentRef.current = false;
         setIsTopBarHiddenForKeyboard(false);
+      } else if (visualViewport && !isKeyboardHeightVisible) {
+        clearScheduledTopBarHide();
       }
       const nextMetrics = {
         canvasHeight: viewportHeight,
@@ -146,6 +165,7 @@ export function ChatRoomScreen({
       window.removeEventListener('orientationchange', handleOrientationChange);
       window.visualViewport?.removeEventListener('resize', handleViewportResize);
       window.visualViewport?.removeEventListener('scroll', handleViewportScroll);
+      clearScheduledTopBarHide();
     };
   }, [isTopBarHiddenForKeyboard]);
 
@@ -273,9 +293,11 @@ export function ChatRoomScreen({
 
   const handleMessageInputBlur = () => {
     keyboardInputIntentRef.current = false;
-    if (!window.visualViewport) {
-      setIsTopBarHiddenForKeyboard(false);
+    if (pendingTopBarHideTimeoutRef.current !== null) {
+      window.clearTimeout(pendingTopBarHideTimeoutRef.current);
+      pendingTopBarHideTimeoutRef.current = null;
     }
+    setIsTopBarHiddenForKeyboard(false);
     logChatRoomKeyboardMetric('textarea.blur');
   };
 
