@@ -138,6 +138,7 @@ export interface ExampleUserProfile {
   interests: string[];
   gender?: string | null;
   helpedCount?: number;
+  activeDeliveryCount?: number;
 }
 
 export interface ExampleCreationState {

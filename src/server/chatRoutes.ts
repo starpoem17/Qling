@@ -3,8 +3,16 @@ import type { Auth } from 'firebase-admin/auth';
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 import type { Messaging } from 'firebase-admin/messaging';
 import { createRequireActiveFirebaseAuth, type ActiveAuthenticatedRequest } from './auth';
+import {
+  enqueueChatContextModerationJob,
+  shouldRunChatContextModeration,
+} from '../services/chatSafety/server/contextModeration';
+import {
+  evaluateChatMessageRuleSafety,
+  type ChatRuleSafetyResult,
+} from '../services/chatSafety/server/ruleBasedFilter';
 
-export type ChatModerationProvider = (content: string) => Promise<{ status: 'approved' } | { status: 'rejected'; reason: string }>;
+export type ChatMessageSafetyPolicy = (content: string) => ChatRuleSafetyResult;
 
 export type ChatAnswerAdoptionMetrics = {
   readonly adoptionRatePercent: number;
@@ -16,14 +24,17 @@ export function registerChatRoutes(app: express.Express, deps: {
   db: Firestore | null;
   messaging: Messaging | null;
   auth: Auth;
-  moderationProvider: ChatModerationProvider;
+  messageSafetyPolicy?: ChatMessageSafetyPolicy;
+  contextModerationEnabled?: boolean;
 }): void {
   if (!deps.db) {
     app.post('/api/chats/create', (_req, res) => res.status(500).json({ error: 'firebase_unavailable' }));
     app.post('/api/chats/:chatId/messages', (_req, res) => res.status(500).json({ error: 'firebase_unavailable' }));
     app.get('/api/chats/:chatId/answer-adoption', (_req, res) => res.status(500).json({ error: 'firebase_unavailable' }));
+    app.post('/api/chats/:chatId/moderation-notice/read', (_req, res) => res.status(500).json({ error: 'firebase_unavailable' }));
     return;
   }
+  const messageSafetyPolicy = deps.messageSafetyPolicy ?? evaluateChatMessageRuleSafety;
 
   // Create chat room
   app.post(
@@ -191,8 +202,16 @@ export function registerChatRoutes(app: express.Express, deps: {
           return;
         }
 
+        const safetyResult = messageSafetyPolicy(content);
+        if (safetyResult.status === 'rejected') {
+          res.status(200).json(safetyResult);
+          return;
+        }
+
         const db = deps.db as Firestore;
         const chatRef = db.collection('chats').doc(chatId);
+        let nextMessageCount = 0;
+        let lastModeratedMessageCount: unknown = 0;
         
         await db.runTransaction(async (transaction) => {
           const chatDoc = await transaction.get(chatRef);
@@ -209,18 +228,11 @@ export function registerChatRoutes(app: express.Express, deps: {
             throw new Error('CHAT_CLOSED');
           }
 
-          // AI Moderation
-          const moderationResult = await deps.moderationProvider(content);
-          if (moderationResult.status === 'rejected') {
-            res.status(200).json(moderationResult);
-            // End transaction early, but transaction requires promise resolution, so we throw a special error
-            throw new Error('MODERATION_REJECTED:' + moderationResult.reason);
-          }
-
+          const trimmedContent = content.trim();
           const messageRef = chatRef.collection('messages').doc();
           transaction.set(messageRef, {
             senderUid: uid,
-            content,
+            content: trimmedContent,
             createdAt: FieldValue.serverTimestamp(),
           });
 
@@ -229,14 +241,30 @@ export function registerChatRoutes(app: express.Express, deps: {
             throw new Error('OPPONENT_LEFT');
           }
 
+          const currentMessageCount = typeof chatData.messageCount === 'number' ? chatData.messageCount : 0;
+          nextMessageCount = currentMessageCount + 1;
+          lastModeratedMessageCount = chatData.lastContextModeratedMessageCount;
           const updates: any = {
             lastMessageAt: FieldValue.serverTimestamp(),
-            lastMessageText: content
+            lastMessageText: trimmedContent,
+            messageCount: nextMessageCount,
           };
           
           updates[`unreadCounts.${recipientUid}`] = FieldValue.increment(1);
 
           transaction.update(chatRef, updates);
+          if (
+            deps.contextModerationEnabled === true
+            && shouldRunChatContextModeration({ messageCount: nextMessageCount, lastModeratedMessageCount })
+          ) {
+            enqueueChatContextModerationJob({
+              db,
+              transaction,
+              chatId,
+              messageCount: nextMessageCount,
+              now: FieldValue.serverTimestamp(),
+            });
+          }
         }).then(() => {
           res.status(200).json({ status: 'published' });
           
@@ -255,10 +283,6 @@ export function registerChatRoutes(app: express.Express, deps: {
           });
           
         }).catch(err => {
-          if (err.message.startsWith('MODERATION_REJECTED:')) {
-            // Already handled
-            return;
-          }
           if (err.message === 'NOT_FOUND') {
             res.status(404).json({ error: { code: 'not_found', message: 'Chat not found' } });
             return;
@@ -316,6 +340,39 @@ export function registerChatRoutes(app: express.Express, deps: {
       } catch (error) {
         console.error('Failed to mark chat as read:', error);
         res.status(500).json({ error: { code: 'internal_error', message: 'Failed to mark chat as read.' } });
+      }
+    }
+  );
+
+  app.post(
+    '/api/chats/:chatId/moderation-notice/read',
+    createRequireActiveFirebaseAuth({ auth: deps.auth, db: deps.db }),
+    async (req, res) => {
+      try {
+        const authReq = req as ActiveAuthenticatedRequest;
+        const uid = authReq.auth.uid;
+        const { chatId } = req.params;
+
+        const db = deps.db as Firestore;
+        const chatRef = db.collection('chats').doc(chatId);
+
+        await db.runTransaction(async (transaction) => {
+          const chatDoc = await transaction.get(chatRef);
+          if (!chatDoc.exists) return;
+
+          const chatData = chatDoc.data()!;
+          if (!chatData.participants.includes(uid)) return;
+          if (chatData.status !== 'moderation_blocked') return;
+
+          transaction.update(chatRef, {
+            [`moderationBlockedNoticeSeenBy.${uid}`]: true,
+          });
+        });
+
+        res.status(200).json({ status: 'success' });
+      } catch (error) {
+        console.error('Failed to mark moderation notice as read:', error);
+        res.status(500).json({ error: { code: 'internal_error', message: 'Failed to mark moderation notice as read.' } });
       }
     }
   );

@@ -29,7 +29,9 @@ export async function submitAvailableOnboarding(params: {
       return 'failed';
     }
 
-    await params.deps.createExamples({ user: params.user });
+    if ((result.initialDeliveryCount ?? 0) <= 0) {
+      await params.deps.createExamples({ user: params.user });
+    }
     params.deps.onComplete(result.profile);
     return 'completed';
   } catch (error) {

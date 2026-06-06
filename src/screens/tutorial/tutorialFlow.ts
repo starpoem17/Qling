@@ -6,6 +6,8 @@ const tutorialImageUrls = [
   new URL('../../../assets/tutorial/3.png', import.meta.url).href,
   new URL('../../../assets/tutorial/4.png', import.meta.url).href,
   new URL('../../../assets/tutorial/5.png', import.meta.url).href,
+  new URL('../../../assets/tutorial/6.png', import.meta.url).href,
+  new URL('../../../assets/tutorial/7.png', import.meta.url).href,
 ] as const;
 
 export const TUTORIAL_STEPS: readonly TutorialStep[] = tutorialImageUrls.map((imageUrl, index) => ({

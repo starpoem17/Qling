@@ -92,7 +92,7 @@ function captureAnswerAdoptionRoute(options: {
     } as never,
     db: createDb(store) as never,
     messaging: null,
-    moderationProvider: async () => ({ status: 'approved' }),
+    messageSafetyPolicy: () => ({ status: 'approved' }),
   });
 
   return { handlers };
@@ -198,7 +198,7 @@ test('chat answer adoption route returns firebase unavailable when Admin db is a
     auth: {} as never,
     db: null,
     messaging: null,
-    moderationProvider: async () => ({ status: 'approved' }),
+    messageSafetyPolicy: () => ({ status: 'approved' }),
   });
 
   const res = createRes();

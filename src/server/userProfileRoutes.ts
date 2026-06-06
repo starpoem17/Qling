@@ -6,6 +6,11 @@ import { completeOnboarding, reserveNickname } from '../services/userProfile/onb
 import { updateMyInterests } from '../services/userProfile/profileInterests';
 import { validateAge, validateNickname, isValidGender, isValidProfileColor, normalizeInterests } from '../services/userProfile/profileValidation';
 import { createUserProfileFirestoreRepository } from '../services/userProfile/firestoreRepository';
+import { backfillInitialWorriesForNewUser, type InitialWorryBackfillRepository } from '../services/userProfile/initialWorryBackfill';
+import {
+  createInitialWorryBackfillFirestoreRepository,
+  refillWorryInboxForFirestoreUser,
+} from '../services/userProfile/initialWorryBackfillFirestoreRepository';
 import type { UserProfileRepository } from '../services/userProfile/types';
 
 function sendServiceResult(res: express.Response, result: { status: string; code?: string; message?: string }) {
@@ -46,6 +51,11 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
   readonly db: Firestore | null;
   readonly auth: Pick<Auth, 'verifyIdToken'>;
   readonly repository?: UserProfileRepository;
+  readonly initialWorryBackfillRepository?: InitialWorryBackfillRepository;
+  readonly refillWorryInbox?: (params: { uid: string }) => Promise<{
+    readonly createdCount: number;
+    readonly deliveryIds: readonly string[];
+  }>;
 }): void {
   if (!deps.db && !deps.repository) {
     app.post('/api/users/me/nickname-reservation', (_req, res) => {
@@ -55,6 +65,9 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
       res.status(503).json({ error: { code: 'firebase_unavailable', message: 'Firebase Admin is not initialized.' } });
     });
     app.patch('/api/users/me/interests', (_req, res) => {
+      res.status(503).json({ error: { code: 'firebase_unavailable', message: 'Firebase Admin is not initialized.' } });
+    });
+    app.post('/api/users/me/worry-inbox-refill', (_req, res) => {
       res.status(503).json({ error: { code: 'firebase_unavailable', message: 'Firebase Admin is not initialized.' } });
     });
     return;
@@ -67,6 +80,10 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
   });
 
   const repository = deps.repository ?? createUserProfileFirestoreRepository({ db: deps.db as Firestore });
+  const initialWorryBackfillRepository = deps.initialWorryBackfillRepository
+    ?? (deps.repository ? null : createInitialWorryBackfillFirestoreRepository({ db: deps.db as Firestore }));
+  const refillWorryInbox = deps.refillWorryInbox
+    ?? (({ uid }: { uid: string }) => refillWorryInboxForFirestoreUser({ db: deps.db as Firestore, uid }));
 
   app.post('/api/users/me/nickname-reservation', requireVerifiedAuth, async (req, res) => {
     const nickname = typeof req.body?.nickname === 'string' ? req.body.nickname : '';
@@ -97,7 +114,7 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
     }
 
     const authReq = req as ActiveAuthenticatedRequest;
-    sendServiceResult(res, await completeOnboarding({
+    const result = await completeOnboarding({
       uid: authReq.auth.uid,
       draft: {
         nickname,
@@ -107,7 +124,38 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
         profileColor,
       },
       repository,
-    }));
+    });
+
+    if (result.status !== 'completed') {
+      sendServiceResult(res, result);
+      return;
+    }
+
+    if (!initialWorryBackfillRepository) {
+      res.status(200).json(result);
+      return;
+    }
+
+    try {
+      const backfill = await backfillInitialWorriesForNewUser({
+        uid: authReq.auth.uid,
+        gender,
+        interests,
+        repository: initialWorryBackfillRepository,
+      });
+      res.status(200).json({
+        ...result,
+        initialDeliveryCount: backfill.createdCount,
+        initialDeliveryIds: backfill.deliveryIds,
+      });
+    } catch (error) {
+      console.error('Initial worry backfill failed:', error);
+      res.status(200).json({
+        ...result,
+        initialDeliveryCount: 0,
+        initialDeliveryBackfillStatus: 'failed',
+      });
+    }
   });
 
   app.patch('/api/users/me/interests', requireActiveAuth, async (req, res) => {
@@ -124,5 +172,27 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
     }
 
     res.status(400).json({ error: { code: result.code, message: result.message } });
+  });
+
+  app.post('/api/users/me/worry-inbox-refill', requireActiveAuth, async (req, res) => {
+    const authReq = req as ActiveAuthenticatedRequest;
+    try {
+      const result = await refillWorryInbox({
+        uid: authReq.auth.uid,
+      });
+      res.status(200).json({
+        status: 'completed',
+        refillDeliveryCount: result.createdCount,
+        refillDeliveryIds: result.deliveryIds,
+      });
+    } catch (error) {
+      console.error('Worry inbox refill failed:', error);
+      res.status(500).json({
+        error: {
+          code: 'worry_inbox_refill_failed',
+          message: '받은 고민을 불러오는 중 문제가 발생했습니다.',
+        },
+      });
+    }
   });
 }

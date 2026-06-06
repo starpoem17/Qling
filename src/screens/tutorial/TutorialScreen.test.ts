@@ -24,7 +24,7 @@ test('tutorial screen keeps the full-image responsive canvas without adding sepa
   assert.match(html, /h-\[852px\] w-\[393px\]/);
   assert.match(html, /scale\(min\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\), calc\(100dvh \/ 852px\)\)\)/);
   assert.match(html, /object-contain/);
-  assert.doesNotMatch(html, /1 \/ 5/);
+  assert.doesNotMatch(html, /1 \/ 7/);
   assert.doesNotMatch(html, /다음<\/button>/);
   assert.doesNotMatch(html, /다음 튜토리얼 보기/);
 });
@@ -75,7 +75,7 @@ test('final tutorial step renders only the React start button at the blank CTA p
   let previousCount = 0;
   let completed = false;
   const tree = TutorialScreen(baseProps({
-    currentStepIndex: 4,
+    currentStepIndex: 6,
     onPrevious: () => {
       previousCount += 1;
     },
@@ -86,7 +86,7 @@ test('final tutorial step renders only the React start button at the blank CTA p
   const html = renderToStaticMarkup(tree);
 
   assert.doesNotMatch(html, /다음 튜토리얼 보기/);
-  assert.match(html, /left-\[54px\] top-\[471px\]/);
+  assert.match(html, /left-\[54px\] top-\[678px\]/);
   assert.match(html, /h-\[49px\] w-\[285px\]/);
   assert.match(html, /큐링 시작하기/);
 

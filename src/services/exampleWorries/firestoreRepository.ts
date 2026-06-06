@@ -152,6 +152,7 @@ export function createExampleWorriesFirestoreRepository(params: {
         interests: normalizeWorryCategories(stringArray(data.interests)),
         gender: typeof data.gender === 'string' ? data.gender : null,
         helpedCount: typeof data.helpedCount === 'number' ? data.helpedCount : undefined,
+        activeDeliveryCount: typeof data.activeDeliveryCount === 'number' ? data.activeDeliveryCount : undefined,
         exampleWorriesCreatedAt: data.exampleWorriesCreatedAt,
         exampleWorrySeedIds: stringArray(data.exampleWorrySeedIds),
         exampleDeliveryIds: stringArray(data.exampleDeliveryIds),

@@ -35,31 +35,35 @@ registerRoute(
 );
 
 const firebaseApp = initializeApp(firebaseConfig);
-const messaging = getMessaging(firebaseApp);
+try {
+  const messaging = getMessaging(firebaseApp);
 
-onBackgroundMessage(messaging, (payload) => {
-  const title = payload.notification?.title || payload.data?.title || DEFAULT_NOTIFICATION_TITLE;
-  const body = payload.notification?.body || payload.data?.body || DEFAULT_NOTIFICATION_BODY;
-  const url = normalizeNotificationUrl(payload.data?.url);
-  const notificationOptions = {
-    body,
-    icon: '/pwa-192x192.png',
-    badge: '/pwa-192x192.png',
-    tag: 'qling-notification',
-    renotify: true,
-    requireInteraction: true,
-    data: {
+  onBackgroundMessage(messaging, (payload) => {
+    const title = payload.notification?.title || payload.data?.title || DEFAULT_NOTIFICATION_TITLE;
+    const body = payload.notification?.body || payload.data?.body || DEFAULT_NOTIFICATION_BODY;
+    const url = normalizeNotificationUrl(payload.data?.url);
+    const notificationOptions = {
+      body,
+      icon: '/pwa-192x192.png',
+      badge: '/pwa-192x192.png',
+      tag: 'qling-notification',
+      renotify: true,
+      requireInteraction: true,
+      data: {
+        url,
+      },
+    } as NotificationOptions;
+
+    console.log('[sw] Received background FCM payload.', {
+      title,
       url,
-    },
-  } as NotificationOptions;
+    });
 
-  console.log('[sw] Received background FCM payload.', {
-    title,
-    url,
+    void self.registration.showNotification(title, notificationOptions);
   });
-
-  void self.registration.showNotification(title, notificationOptions);
-});
+} catch (error) {
+  console.warn('[sw] Firebase background messaging is unavailable in this browser.', error);
+}
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();

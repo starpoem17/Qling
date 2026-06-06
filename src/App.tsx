@@ -5,6 +5,7 @@ import {
 import {
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   User as FirebaseUser,
 } from 'firebase/auth';
 import {
@@ -125,6 +126,34 @@ function pwaRouteChromeForRoute(route: AppRoute): { readonly top: string; readon
   return null;
 }
 
+async function refillWorryInboxForCurrentUser(user: FirebaseUser): Promise<{ refillDeliveryCount: number }> {
+  const token = await user.getIdToken();
+  const response = await fetch('/api/users/me/worry-inbox-refill', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({}),
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.error?.message ?? 'Worry inbox refill failed.');
+  }
+  const body = await response.json();
+  return {
+    refillDeliveryCount: typeof body?.refillDeliveryCount === 'number' ? body.refillDeliveryCount : 0,
+  };
+}
+
+function shouldFallbackToRedirectLogin(error: unknown): boolean {
+  const code = typeof error === 'object' && error !== null && 'code' in error
+    ? String((error as { code?: unknown }).code)
+    : '';
+  return code !== 'auth/popup-closed-by-user'
+    && code !== 'auth/cancelled-popup-request';
+}
+
 // --- App Component ---
 export default function App() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -220,16 +249,27 @@ export default function App() {
             setView(prev => routeAfterAuthProfileLoad(prev, {
               tutorialCompletedAt: userData.tutorialCompletedAt,
             }));
-            if (!userData.exampleWorriesCreatedAt) {
-              void createExampleWorriesForCurrentUser(currentUser)
-                .then(async () => {
-                  const refreshed = await getDoc(userRef);
-                  if (refreshed.exists()) setProfile(withAuthProfileUid(refreshed.data() as UserProfile, currentUser.uid));
-                })
-                .catch(err => {
-                  console.error('Example worry retry failed:', err);
-                });
-            }
+            void refillWorryInboxForCurrentUser(currentUser)
+              .then(async result => {
+                if (result.refillDeliveryCount <= 0 && !userData.exampleWorriesCreatedAt) {
+                  await createExampleWorriesForCurrentUser(currentUser);
+                }
+                const refreshed = await getDoc(userRef);
+                if (refreshed.exists()) setProfile(withAuthProfileUid(refreshed.data() as UserProfile, currentUser.uid));
+              })
+              .catch(async err => {
+                console.error('Worry inbox refill failed:', err);
+                if (!userData.exampleWorriesCreatedAt) {
+                  await createExampleWorriesForCurrentUser(currentUser)
+                    .then(async () => {
+                      const refreshed = await getDoc(userRef);
+                      if (refreshed.exists()) setProfile(withAuthProfileUid(refreshed.data() as UserProfile, currentUser.uid));
+                    })
+                    .catch(exampleError => {
+                      console.error('Example worry retry failed:', exampleError);
+                    });
+                }
+              });
           } else {
             setProfile(null);
             setView('onboarding');
@@ -281,7 +321,15 @@ export default function App() {
       await signInWithPopup(auth, googleProvider);
     } catch (err: any) {
       console.error("Login Error", err);
-      setLoginError("구글 로그인에 실패했습니다.");
+      if (shouldFallbackToRedirectLogin(err)) {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectError) {
+          console.error("Redirect Login Error", redirectError);
+        }
+      }
+      setLoginError("구글 로그인에 실패했습니다. 브라우저에서 팝업 또는 리디렉션 로그인을 허용해 주세요.");
     } finally {
       setIsProcessing(false);
     }
@@ -491,6 +539,9 @@ export default function App() {
                 disablePushRegistrationForCurrentDevice={disablePushRegistrationForCurrentDevice}
                 resetPushRegistrationOnSignOut={resetPushRegistrationOnSignOut}
                 onAccountDeleted={handleAccountDeleted}
+                onInterestsUpdated={interests => {
+                  setProfile(current => current ? { ...current, interests: [...interests] } : current);
+                }}
               />
             </motion.div>
           )}

@@ -33,6 +33,13 @@ export async function createExamplesForUser(
         seedIds: profile.exampleWorrySeedIds ?? [],
       };
     }
+    if ((profile.activeDeliveryCount ?? 0) > 0) {
+      return await repository.createExamplesOnce({
+        uid: params.uid,
+        seeds: [],
+        now: params.now ?? new Date(),
+      });
+    }
 
     const seeds = await repository.listSelectableSeeds();
     const selected = selectExampleSeeds({

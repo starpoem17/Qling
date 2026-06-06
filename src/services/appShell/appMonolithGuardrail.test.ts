@@ -96,6 +96,8 @@ test('App.tsx remaining Firebase ownership is limited to shell auth/profile, pre
   assert.ok(appImports.includes('firebase/messaging'));
   assert.match(appSource, /onAuthStateChanged\(auth/);
   assert.match(appSource, /signInWithPopup\(auth, googleProvider\)/);
+  assert.match(appSource, /signInWithRedirect\(auth, googleProvider\)/);
+  assert.match(appSource, /shouldFallbackToRedirectLogin/);
   assert.match(appSource, /onMessage\(messaging/);
   assert.match(appSource, /updateDoc\(doc\(db, 'users', profile\.uid\)/);
   assert.match(appSource, /createExampleWorriesForCurrentUser/);

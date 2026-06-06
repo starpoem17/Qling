@@ -1,4 +1,5 @@
 import { useState, type CSSProperties, type TouchEvent, type WheelEvent } from 'react';
+import { cn } from '../../lib/utils';
 import { FigmaCanvasFrame, profileImageUrlForColor } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import { filterChatsByOpponentName } from './chatListSearch';
@@ -149,6 +150,7 @@ export interface ChatListItem {
   lastMessage: string;
   dateLabel: string;
   unreadCount: number;
+  moderationBlocked?: boolean;
   worryTitle?: string;
   worryCategory?: string;
 }
@@ -366,10 +368,22 @@ function ChatListCard({
             <span className="absolute rounded-full border-[#fff4e8] bg-[#3fc36b]" style={chatListCardOnlineDotStyle} aria-hidden="true" />
           </div>
           <div className="flex min-w-0 flex-1 flex-col items-start overflow-hidden whitespace-nowrap" style={chatListCardNameStyle}>
-            <p className="max-w-full overflow-hidden text-ellipsis font-bold text-[#2b2620]" style={chatListCardOpponentNameStyle}>
+            <p
+              className={cn(
+                'max-w-full overflow-hidden text-ellipsis font-bold',
+                chat.moderationBlocked ? 'text-[#8a3a27]' : 'text-[#2b2620]'
+              )}
+              style={chatListCardOpponentNameStyle}
+            >
               {chat.opponentName}
             </p>
-            <p className="min-w-full overflow-hidden text-ellipsis font-normal text-[#6e6a63]" style={chatListCardLastMessageStyle}>
+            <p
+              className={cn(
+                'min-w-full overflow-hidden text-ellipsis font-normal',
+                chat.moderationBlocked ? 'font-semibold text-[#e5484d]' : 'text-[#6e6a63]'
+              )}
+              style={chatListCardLastMessageStyle}
+            >
               {chat.lastMessage}
             </p>
           </div>

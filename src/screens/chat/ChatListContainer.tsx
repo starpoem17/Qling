@@ -32,7 +32,9 @@ export function ChatListContainer({
         
         for (const docSnap of snap.docs) {
           const data = docSnap.data();
-          if (data.status !== 'active') continue;
+          const isModerationBlocked = data.status === 'moderation_blocked';
+          if (data.status !== 'active' && !isModerationBlocked) continue;
+          if (isModerationBlocked && data.moderationBlockedNoticeSeenBy?.[user.uid] === true) continue;
 
           const opponentUid = data.participants.find((p: string) => p !== user.uid);
           let opponentName = '알 수 없음';
@@ -66,9 +68,12 @@ export function ChatListContainer({
             opponentUid: opponentUid || '',
             opponentName,
             opponentColor,
-            lastMessage: data.lastMessageText || '대화가 시작되었습니다.',
+            lastMessage: isModerationBlocked
+              ? '안전 기준에 따라 종료된 대화방입니다.'
+              : data.lastMessageText || '대화가 시작되었습니다.',
             dateLabel,
-            unreadCount,
+            unreadCount: isModerationBlocked ? 0 : unreadCount,
+            moderationBlocked: isModerationBlocked,
             worryId: data.worryId,
             worryCategory: '기타', // default
             worryTitle: '불러오는 중...', // default

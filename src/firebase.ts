@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { initializeFirestore, doc, getDocFromServer } from 'firebase/firestore';
-import { getMessaging } from 'firebase/messaging';
+import { getMessaging, type Messaging } from 'firebase/messaging';
 // @ts-ignore
 import firebaseConfig from '@/firebase-applet-config.json';
 
@@ -18,7 +18,17 @@ export const db = initializeFirestore(app, {
 }, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
-export const messaging = typeof window !== 'undefined' ? getMessaging(app) : null;
+export const messaging = createMessagingSafely();
+
+function createMessagingSafely(): Messaging | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return getMessaging(app);
+  } catch (error) {
+    console.warn('[Firebase messaging] Messaging is unavailable in this browser.', error);
+    return null;
+  }
+}
 
 export function logFirestoreListenerError(label: string, error: unknown) {
   const firebaseError = error as { code?: unknown; message?: unknown };

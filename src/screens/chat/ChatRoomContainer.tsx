@@ -21,6 +21,8 @@ export function ChatRoomContainer({
   const [worryInfo, setWorryInfo] = useState<{ category: string; content: string; createdAtStr: string } | null>(null);
   const [opponentUnreadCount, setOpponentUnreadCount] = useState(0);
   const [answerAdoptionRatePercent, setAnswerAdoptionRatePercent] = useState<number | null>(null);
+  const [isModerationBlocked, setIsModerationBlocked] = useState(false);
+  const [moderationBlockedReason, setModerationBlockedReason] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -88,6 +90,14 @@ export function ChatRoomContainer({
           setLoading(false);
           return;
         }
+
+        const nextIsModerationBlocked = chatData.status === 'moderation_blocked';
+        setIsModerationBlocked(nextIsModerationBlocked);
+        setModerationBlockedReason(
+          nextIsModerationBlocked && typeof chatData.moderationBlockedReason === 'string'
+            ? chatData.moderationBlockedReason
+            : null
+        );
 
         const opponentUid = chatData.participants.find((uid: string) => uid !== user.uid);
         if (opponentUid && !opponent) {
@@ -181,6 +191,9 @@ export function ChatRoomContainer({
 
   const handleSendMessage = async (content: string) => {
     if (!user || !content.trim()) return { success: false, error: 'empty_message' };
+    if (isModerationBlocked) {
+      return { success: false, error: '안전 기준에 따라 종료된 대화방입니다.' };
+    }
     
     try {
       const token = await user.getIdToken();
@@ -223,6 +236,21 @@ export function ChatRoomContainer({
     }
   };
 
+  const handleConfirmModerationNotice = async () => {
+    if (!user || !chatId) return;
+    try {
+      const token = await user.getIdToken();
+      await fetch(`/api/chats/${chatId}/moderation-notice/read`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setView({ route: 'chat' });
+    } catch (err) {
+      console.error('Failed to confirm moderation notice:', err);
+      setFilterAlert('처리 중 오류가 발생했습니다.');
+    }
+  };
+
   return (
     <ChatRoomScreen
       loading={loading}
@@ -231,11 +259,14 @@ export function ChatRoomContainer({
       opponent={opponent}
       answerAdoptionRatePercent={answerAdoptionRatePercent}
       opponentUnreadCount={opponentUnreadCount}
+      isModerationBlocked={isModerationBlocked}
+      moderationBlockedReason={moderationBlockedReason}
       worryInfo={worryInfo}
       onBack={() => setView({ route: 'chat' })}
       onSendMessage={handleSendMessage}
       onNotificationOff={() => setFilterAlert('알림이 꺼졌습니다.')}
       onLeaveChat={handleLeaveChat}
+      onConfirmModerationNotice={handleConfirmModerationNotice}
       onReportUser={() => {
         const targetUid = opponent?.uid || 'unknown';
         const targetNickname = opponent?.nickname || '알 수 없음';
