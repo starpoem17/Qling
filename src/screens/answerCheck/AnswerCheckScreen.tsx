@@ -11,10 +11,8 @@ const goodActiveIconUrl = new URL('../../../assets/my_concerns/good_activate.svg
 const badIconUrl = new URL('../../../assets/my_concerns/bad.svg', import.meta.url).href;
 const badActiveIconUrl = new URL('../../../assets/my_concerns/bad_activate.svg', import.meta.url).href;
 const answerCheckViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
-const pwaTopBarShift = 'var(--qling-pwa-topbar-shift, 0px)';
-const shiftedTopBarTop = (top: number) => `calc(${top}px + ${pwaTopBarShift})`;
-const answerCheckContentTop = shiftedTopBarTop(100);
-const answerCheckContentHeight = `min(752px, max(320px, calc(${answerCheckViewportHeight} - ${answerCheckContentTop})))`;
+const directTopbarShift = 'var(--qling-pwa-direct-topbar-shift)';
+const answerCheckContentHeight = `min(752px, max(320px, calc(${answerCheckViewportHeight} - 100px - ${directTopbarShift})))`;
 
 export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
   if (props.state.status === 'loading') {
@@ -130,8 +128,8 @@ function AnswerCheckFrame({
         <div className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1] qling-received-worries-font">
           <FigmaTopBar title="답변 확인" onBack={onBack} backLabel="나의 고민으로 돌아가기" />
           <div
-            className="absolute left-0 w-full overflow-y-auto overscroll-contain px-4 pb-[108px] [-webkit-overflow-scrolling:touch]"
-            style={{ top: answerCheckContentTop, height: answerCheckContentHeight }}
+            className="relative w-full overflow-y-auto overscroll-contain px-4 pb-[108px] [-webkit-overflow-scrolling:touch]"
+            style={{ height: answerCheckContentHeight }}
             aria-label="답변 확인 내용"
           >
             <div className="grid gap-[22px]">

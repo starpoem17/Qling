@@ -62,6 +62,7 @@ test('my answers screen uses the responsive direct header canvas and ready-only 
   assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] h-\[var\(--qling-tab-viewport-height\)\] overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /aria-label="내가 쓴 답변 목록"/);
   assert.match(html, /data-measure="figma-top-bar"[\s\S]*<section[^>]*aria-label="내가 쓴 답변 목록"/);
+  assert.match(html, /relative z-20 h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\] w-full shrink-0/);
   assert.match(html, /h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /top-\[calc\(60px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);

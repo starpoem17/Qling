@@ -314,7 +314,8 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
       ? props.state.message
       : policyBody || (props.state.status === 'empty' ? props.state.message : '정책을 준비 중입니다.');
   const policyTabViewportHeight = 'var(--qling-tab-viewport-height)';
-  const policyCardBottom = `max(calc(108px + env(safe-area-inset-bottom,0px)), calc(876px - ${policyTabViewportHeight}))`;
+  const directTopbarShift = 'var(--qling-pwa-direct-topbar-shift)';
+  const policyCardHeight = `min(752px, max(320px, calc(${policyTabViewportHeight} - 100px - ${directTopbarShift} - max(calc(108px + env(safe-area-inset-bottom,0px)), calc(876px - ${policyTabViewportHeight})))))`;
 
   return (
     <section
@@ -328,8 +329,8 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
         >
           <FigmaTopBar title="개인정보 처리방침" titleAriaLabel={props.title} onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
           <article
-            className="absolute left-4 right-4 overflow-y-auto rounded-[18px] bg-white px-[18px] py-[17px] [-webkit-overflow-scrolling:touch]"
-            style={{ top: shiftedTopBarTop(100), bottom: policyCardBottom }}
+            className="relative mx-4 overflow-y-auto rounded-[18px] bg-white px-[18px] py-[17px] [-webkit-overflow-scrolling:touch]"
+            style={{ height: policyCardHeight }}
           >
             {shouldShowFeedbackLink && (
               <>

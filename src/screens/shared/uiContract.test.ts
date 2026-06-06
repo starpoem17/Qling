@@ -142,6 +142,8 @@ test('figma top bar keeps the shared Figma back and title coordinates', () => {
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
 
   assert.match(source, /data-measure="figma-top-bar"/);
+  assert.match(source, /relative z-20 h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\] w-full shrink-0/);
+  assert.doesNotMatch(source, /absolute left-0 top-0 z-20 h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(source, /h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(source, /left-\[6px\] top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\] flex h-\[45px\] w-\[44px\]/);
   assert.match(source, /text-\[32px\] font-semibold leading-none/);

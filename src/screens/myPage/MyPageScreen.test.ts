@@ -93,7 +93,7 @@ test('my-page renders colored profile svg at the existing profile image size', (
   assert.doesNotMatch(html, /aria-label="프로필 모티프" role="img"/);
 });
 
-test('my-page root uses a widened unscaled Figma canvas with fixed header and body scrolling', () => {
+test('my-page root uses a widened unscaled Figma canvas with flow header and body scrolling', () => {
   const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps()));
 
   assert.match(html, /data-measure="my-page-responsive-canvas"/);
@@ -101,6 +101,7 @@ test('my-page root uses a widened unscaled Figma canvas with fixed header and bo
   assert.match(html, /h-\[852px\] w-full max-w-\[480px\]/);
   assert.match(html, /aria-label="마이페이지 본문"/);
   assert.match(html, /data-measure="figma-top-bar"[\s\S]*<section[^>]*aria-label="마이페이지 본문"/);
+  assert.match(html, /relative z-20 h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\] w-full shrink-0/);
   assert.match(html, /h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /top-\[calc\(60px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
@@ -114,6 +115,7 @@ test('my-page root uses a widened unscaled Figma canvas with fixed header and bo
   assert.doesNotMatch(html, /qling-peek-progress/);
   assert.doesNotMatch(html, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
   assert.match(html, /figma-top-bar/);
+  assert.doesNotMatch(html, /absolute left-0 top-0 z-20 h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.doesNotMatch(html, /home-indicator/);
 });
 
@@ -401,9 +403,10 @@ test('privacy policy screen renders document body in the Figma card layout', () 
   assert.match(html, /data-measure="policy-responsive-canvas"/);
   assert.match(html, /data-measure="policy-screen"/);
   assert.match(html, /h-\[852px\] w-full max-w-\[480px\]/);
-  assert.match(html, /top:calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
-  assert.match(html, /bottom:max\(calc\(108px \+ env\(safe-area-inset-bottom,0px\)\), calc\(876px - var\(--qling-tab-viewport-height\)\)\)/);
-  assert.match(html, /left-4 right-4 overflow-y-auto/);
+  assert.doesNotMatch(html, /top:calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.doesNotMatch(html, /bottom:max\(calc\(108px \+ env\(safe-area-inset-bottom,0px\)\), calc\(876px - var\(--qling-tab-viewport-height\)\)\)/);
+  assert.match(html, /relative mx-4 overflow-y-auto/);
+  assert.match(html, /height:min\(752px, max\(320px, calc\(var\(--qling-tab-viewport-height\) - 100px - var\(--qling-pwa-direct-topbar-shift\) - max\(calc\(108px \+ env\(safe-area-inset-bottom,0px\)\), calc\(876px - var\(--qling-tab-viewport-height\)\)\)\)\)\)/);
   assert.doesNotMatch(html, /w-\[361px\]/);
   assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);

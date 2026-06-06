@@ -107,9 +107,9 @@ test('answer check cards use Figma-like card internals without the old helper la
   assert.match(html, /data-measure="figma-top-bar"/);
   assert.match(html, /top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /top-\[calc\(60px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
-  assert.match(html, /absolute left-0 w-full overflow-y-auto/);
-  assert.match(html, /top:calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
-  assert.match(html, /height:min\(752px, max\(320px, calc\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\)\)\)\)/);
+  assert.match(html, /relative w-full overflow-y-auto/);
+  assert.doesNotMatch(html, /top:calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.match(html, /height:min\(752px, max\(320px, calc\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 100px - var\(--qling-pwa-direct-topbar-shift\)\)\)\)/);
   assert.match(html, /overflow-hidden rounded-\[18px\] bg-white px-\[19px\] pb-\[24px\] pt-\[11px\]/);
   assert.match(html, /shadow-\[0_4px_4px_rgb\(0_0_0\/0\.25\)\]/);
   assert.match(html, /flex min-w-0 items-start gap-\[18px\]/);

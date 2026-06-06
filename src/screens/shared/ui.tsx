@@ -304,7 +304,7 @@ export function FigmaTopBar({
     : 'hover:bg-black/10 focus:ring-[#2a2a2a]';
 
   return (
-    <div className="absolute left-0 top-0 z-20 h-[calc(100px+var(--qling-pwa-direct-topbar-shift))] w-full" data-measure="figma-top-bar">
+    <div className="relative z-20 h-[calc(100px+var(--qling-pwa-direct-topbar-shift))] w-full shrink-0" data-measure="figma-top-bar">
       <button
         type="button"
         onClick={onBack}
