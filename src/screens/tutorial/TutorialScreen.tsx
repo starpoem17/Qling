@@ -1,15 +1,13 @@
 import type { KeyboardEvent } from 'react';
-import { AnimatePresence, motion, type PanInfo } from 'motion/react';
+import { motion, type PanInfo } from 'motion/react';
 import { cn } from '../../lib/utils';
 import type { TutorialScreenProps } from './contract';
-import { isLastTutorialStep } from './tutorialFlow';
 
 const swipeOffsetThreshold = 54;
 const swipeVelocityThreshold = 500;
 
 export function TutorialScreen(props: TutorialScreenProps) {
   const currentStep = props.steps[props.currentStepIndex];
-  const isLastStep = isLastTutorialStep(props.currentStepIndex, props.steps.length);
   const canvasScale = 'min(calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px), calc(100dvh / 852px))';
   const canvasRenderedWidth = 'min(min(100vw, var(--qling-mobile-canvas-max-width)), calc(100dvh * 393 / 852))';
   const canvasRenderedHeight = 'min(calc(min(100vw, var(--qling-mobile-canvas-max-width)) * 852 / 393), 100dvh)';
@@ -76,38 +74,44 @@ export function TutorialScreen(props: TutorialScreenProps) {
               onDragEnd={handleDragEnd}
               onKeyDown={handleScreenKeyDown}
             >
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={currentStep.id}
-                  src={currentStep.imageUrl}
-                  alt={currentStep.alt}
-                  className="absolute inset-0 h-full w-full select-none object-contain"
-                  draggable={false}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.18, ease: 'easeOut' }}
-                />
-              </AnimatePresence>
-            </motion.div>
-
-            {isLastStep && (
-              <button
-                type="button"
-                className={cn(
-                  'absolute left-[54px] top-[471px] z-20 flex h-[49px] w-[285px] items-center justify-center rounded-[18px]',
-                  'bg-[#ff8b3d] text-[18px] font-extrabold leading-none tracking-normal text-white',
-                  'shadow-[0_4px_10px_rgba(255,139,61,0.28)] transition-transform active:scale-[0.98]',
-                  'focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#ff8b3d]',
-                  'disabled:cursor-not-allowed disabled:opacity-70 disabled:active:scale-100',
-                )}
-                disabled={props.isCompleting}
-                onClick={props.onComplete}
-                aria-label="큐링 시작하기"
+              <motion.div
+                className="absolute inset-y-0 left-0 flex h-full"
+                style={{ width: `${props.steps.length * 393}px` }}
+                animate={{ x: -props.currentStepIndex * 393 }}
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               >
-                {props.isCompleting ? '시작하는 중' : '큐링 시작하기'}
-              </button>
-            )}
+                {props.steps.map((step, index) => (
+                  <div key={step.id} className="relative h-full w-[393px] shrink-0">
+                    <img
+                      src={step.imageUrl}
+                      alt={index === props.currentStepIndex ? step.alt : ''}
+                      aria-hidden={index === props.currentStepIndex ? undefined : true}
+                      className="h-full w-full select-none object-contain"
+                      draggable={false}
+                      loading="eager"
+                      decoding="async"
+                    />
+                    {index === props.steps.length - 1 && (
+                      <button
+                        type="button"
+                        className={cn(
+                          'absolute left-[54px] top-[471px] z-20 flex h-[49px] w-[285px] items-center justify-center rounded-[18px]',
+                          'bg-[#ff8b3d] text-[18px] font-extrabold leading-none tracking-normal text-white',
+                          'shadow-[0_4px_10px_rgba(255,139,61,0.28)] transition-transform active:scale-[0.98]',
+                          'focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#ff8b3d]',
+                          'disabled:cursor-not-allowed disabled:opacity-70 disabled:active:scale-100',
+                        )}
+                        disabled={props.isCompleting}
+                        onClick={props.onComplete}
+                        aria-label="큐링 시작하기"
+                      >
+                        {props.isCompleting ? '시작하는 중' : '큐링 시작하기'}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </div>
