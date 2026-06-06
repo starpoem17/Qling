@@ -19,11 +19,15 @@ test('chat room autoscroll stays inside the message scroller', () => {
   assert.match(chatRoomScreenSource, /const previousAutoScrollInputsRef = useRef</);
   assert.match(chatRoomScreenSource, /function canScrollMessageScroller\(scroller: HTMLElement\)/);
   assert.match(chatRoomScreenSource, /return scroller\.scrollHeight > scroller\.clientHeight \+ 1/);
-  assert.match(chatRoomScreenSource, /const canScrollMessages = canScrollMessageScroller\(scroller\);\s*setIsMessageScrollerScrollable\(canScrollMessages\)/);
+  assert.match(chatRoomScreenSource, /function getMessageScrollerMaxScrollTop\(scroller: HTMLElement\)/);
+  assert.match(chatRoomScreenSource, /return Math\.max\(0, scroller\.scrollHeight - scroller\.clientHeight\)/);
+  assert.match(chatRoomScreenSource, /const canScrollMessages = canScrollMessageScroller\(scroller\);[\s\S]*setIsMessageScrollerScrollable\(canScrollMessages\)/);
   assert.match(chatRoomScreenSource, /if \(!canScrollMessages\) \{\s*shouldStickToBottomRef\.current = true;\s*\}/);
-  assert.match(chatRoomScreenSource, /else if \(shouldStickToBottomRef\.current && !viewportOnlyChanged\) \{\s*scroller\.scrollTop = scroller\.scrollHeight;\s*\}/);
+  assert.match(chatRoomScreenSource, /useLayoutEffect\(\(\) => \{/);
+  assert.match(chatRoomScreenSource, /const shouldAnchorToBottom = shouldStickToBottomRef\.current\s*&& \(messagesChanged \|\| textareaHeightChanged \|\| viewportOnlyChanged\)/);
+  assert.match(chatRoomScreenSource, /else if \(shouldAnchorToBottom\) \{\s*scroller\.scrollTop = getMessageScrollerMaxScrollTop\(scroller\);\s*\}/);
   assert.match(chatRoomScreenSource, /distanceFromBottom <= 72/);
-  assert.match(chatRoomScreenSource, /scroller\.scrollTop = scroller\.scrollHeight/);
+  assert.doesNotMatch(chatRoomScreenSource, /scroller\.scrollTop = scroller\.scrollHeight/);
   assert.match(chatRoomScreenSource, /ref=\{messagesScrollerRef\}[\s\S]*data-chat-room-message-scroller[\s\S]*isMessageScrollerScrollable[\s\S]*\? 'overflow-y-auto overscroll-contain/);
   assert.match(chatRoomScreenSource, /\: 'touch-none overscroll-none overflow-hidden'/);
   assert.match(chatRoomScreenSource, /onTouchMove=\{handleMessagesTouchMove\}/);
@@ -69,6 +73,7 @@ test('chat list and chat room use widened unscaled 480px frames', () => {
   assert.match(chatRoomScreenSource, /const chatInputBaseHeight = 67/);
   assert.match(chatRoomScreenSource, /const chatRoomTopBarHeight = 100/);
   assert.match(chatRoomScreenSource, /const chatTextareaMaxHeight = 60/);
+  assert.match(chatRoomScreenSource, /const chatRoomMessageInputGap = 8/);
   assert.match(chatRoomScreenSource, /const chatRoomKeyboardOpenThreshold = 120/);
   assert.match(chatRoomScreenSource, /const chatRoomKeyboardSettleDelayMs = 220/);
   assert.match(chatRoomScreenSource, /readonly '--chat-keyboard-inset': string/);
@@ -126,8 +131,9 @@ test('chat shell routes keep scrolling in route-owned content areas', () => {
   assert.match(chatScreenSource, /touch-none overscroll-none overflow-hidden rounded-t-\[30px\]/);
   assert.match(chatRoomScreenSource, /data-chat-room-canvas className="relative flex h-full w-full max-w-\[480px\] shrink-0 flex-col overflow-hidden bg-\[#fff1d1\] qling-figma-font"/);
   assert.match(chatRoomScreenSource, /data-chat-room-message-scroller[\s\S]*'min-h-0 w-full flex-1 bg-\[#fff1d1\] px-4 pt-4'/);
-  assert.match(chatRoomScreenSource, /style=\{\{ paddingBottom: 'calc\(var\(--chat-input-height\) \+ var\(--chat-keyboard-inset\)\)' \}\}/);
-  assert.match(chatRoomScreenSource, /data-chat-room-message-stack[\s\S]*className="flex flex-col justify-end"[\s\S]*style=\{\{ minHeight: 'calc\(100% - var\(--chat-input-height\) - var\(--chat-keyboard-inset\)\)' \}\}/);
+  assert.match(chatRoomScreenSource, /style=\{\{ paddingBottom: `calc\(var\(--chat-input-height\) \+ var\(--chat-keyboard-inset\) \+ \$\{chatRoomMessageInputGap\}px\)` \}\}/);
+  assert.match(chatRoomScreenSource, /data-chat-room-message-stack[\s\S]*className="flex flex-col justify-end"[\s\S]*style=\{\{ minHeight: '100%' \}\}/);
+  assert.doesNotMatch(chatRoomScreenSource, /minHeight: 'calc\(100% - var\(--chat-input-height\) - var\(--chat-keyboard-inset\)\)'/);
   assert.match(chatRoomScreenSource, /isMessageScrollerScrollable[\s\S]*\? 'overflow-y-auto overscroll-contain/);
   assert.match(chatRoomScreenSource, /\: 'touch-none overscroll-none overflow-hidden'/);
   assert.match(chatRoomScreenSource, /data-chat-room-message-scroller[\s\S]*onTouchStart=\{handleBackSwipeStart\}[\s\S]*onTouchMove=\{handleMessagesTouchMove\}[\s\S]*onTouchEnd=\{resetBackSwipe\}[\s\S]*onTouchCancel=\{resetBackSwipe\}/);

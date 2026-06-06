@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type CSSProperties, type ChangeEvent, type KeyboardEvent, type ReactNode, type RefObject, type TouchEvent, type WheelEvent } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, type CSSProperties, type ChangeEvent, type KeyboardEvent, type ReactNode, type RefObject, type TouchEvent, type WheelEvent } from 'react';
 import { cn } from '../../lib/utils';
 import { ErrorState, profileImageUrlForColor } from '../shared/ui';
 
@@ -18,6 +18,7 @@ const chatRoomKeyboardOpenThreshold = 120;
 const chatRoomKeyboardSettleDelayMs = 220;
 const chatTextareaMinHeight = 40;
 const chatTextareaMaxHeight = 60;
+const chatRoomMessageInputGap = 8;
 const chatRoomBackSwipeEdgeWidth = 32;
 const chatRoomBackSwipeMinDistance = 72;
 const chatRoomBackSwipeMaxVerticalDrift = 48;
@@ -209,7 +210,7 @@ export function ChatRoomScreen({
     setTextareaHeight(nextHeight);
   }, [draft]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const scroller = messagesScrollerRef.current;
     if (!scroller) return;
     const previousInputs = previousAutoScrollInputsRef.current;
@@ -229,12 +230,14 @@ export function ChatRoomScreen({
         || previousInputs.isTopBarHiddenForKeyboard !== isTopBarHiddenForKeyboard
       );
     const canScrollMessages = canScrollMessageScroller(scroller);
+    const shouldAnchorToBottom = shouldStickToBottomRef.current
+      && (messagesChanged || textareaHeightChanged || viewportOnlyChanged);
     setIsMessageScrollerScrollable(canScrollMessages);
 
     if (!canScrollMessages) {
       shouldStickToBottomRef.current = true;
-    } else if (shouldStickToBottomRef.current && !viewportOnlyChanged) {
-      scroller.scrollTop = scroller.scrollHeight;
+    } else if (shouldAnchorToBottom) {
+      scroller.scrollTop = getMessageScrollerMaxScrollTop(scroller);
     }
 
     previousAutoScrollInputsRef.current = currentInputs;
@@ -247,7 +250,7 @@ export function ChatRoomScreen({
       shouldStickToBottomRef.current = true;
       return;
     }
-    const distanceFromBottom = scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop;
+    const distanceFromBottom = getMessageScrollerMaxScrollTop(scroller) - scroller.scrollTop;
     shouldStickToBottomRef.current = distanceFromBottom <= 72;
   };
 
@@ -415,7 +418,7 @@ export function ChatRoomScreen({
                   ? 'overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
                   : 'touch-none overscroll-none overflow-hidden',
               )}
-              style={{ paddingBottom: 'calc(var(--chat-input-height) + var(--chat-keyboard-inset))' }}
+              style={{ paddingBottom: `calc(var(--chat-input-height) + var(--chat-keyboard-inset) + ${chatRoomMessageInputGap}px)` }}
               onScroll={handleMessagesScroll}
               onTouchStart={handleBackSwipeStart}
               onTouchMove={handleMessagesTouchMove}
@@ -426,7 +429,7 @@ export function ChatRoomScreen({
               <div
                 data-chat-room-message-stack
                 className="flex flex-col justify-end"
-                style={{ minHeight: 'calc(100% - var(--chat-input-height) - var(--chat-keyboard-inset))' }}
+                style={{ minHeight: '100%' }}
               >
               <div className="mb-[14px] flex w-full justify-center">
                 <span className="rounded-full bg-[#ffe7d2] px-3 py-[4px] text-[11px] font-semibold leading-[16.5px] text-[#f26c0f]">
@@ -736,6 +739,10 @@ function blockStaticScroll(event: WheelEvent<HTMLElement> | TouchEvent<HTMLEleme
 
 function canScrollMessageScroller(scroller: HTMLElement) {
   return scroller.scrollHeight > scroller.clientHeight + 1;
+}
+
+function getMessageScrollerMaxScrollTop(scroller: HTMLElement) {
+  return Math.max(0, scroller.scrollHeight - scroller.clientHeight);
 }
 
 function isChatRoomIosSafariBrowser() {
