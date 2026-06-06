@@ -47,6 +47,14 @@ async function queryIsEmpty(
   return snap.empty || snap.docs.length === 0;
 }
 
+function isVisibleRealActiveDelivery(data: FirebaseFirestore.DocumentData): boolean {
+  return data.status === 'active'
+    && data.isExample !== true
+    && !data.answeredAt
+    && !data.passedAt
+    && !data.hiddenAt;
+}
+
 function candidateFromDoc(doc: FirebaseFirestore.QueryDocumentSnapshot): InitialWorryBackfillCandidate | null {
   const data = doc.data();
   if (!isVisibleActiveWorry(data) || typeof data.authorUid !== 'string') return null;
@@ -93,9 +101,16 @@ export function createInitialWorryBackfillFirestoreRepository(params: {
           return { status: 'completed' as const, createdCount: 0, deliveryIds: [], worryIds: [] };
         }
 
-        const remainingUserCapacity = Math.max(0, ACTIVE_DELIVERY_LIMIT - user.activeDeliveryCount);
+        const activeDeliveriesQuery = db.collection('deliveries')
+          .where('recipientUid', '==', uid)
+          .where('status', '==', 'active');
+        const activeDeliveriesSnap = await transaction.get(activeDeliveriesQuery);
+        const actualActiveDeliveryCount = activeDeliveriesSnap.docs
+          .filter(doc => isVisibleRealActiveDelivery(doc.data()))
+          .length;
+        const remainingUserCapacity = Math.max(0, ACTIVE_DELIVERY_LIMIT - actualActiveDeliveryCount);
         const targetActiveShortfall = typeof targetActiveDeliveryCount === 'number'
-          ? Math.max(0, targetActiveDeliveryCount - user.activeDeliveryCount)
+          ? Math.max(0, targetActiveDeliveryCount - actualActiveDeliveryCount)
           : targetCount;
         const maxCreateCount = Math.min(targetCount, remainingUserCapacity, targetActiveShortfall);
         if (maxCreateCount <= 0) {
@@ -207,10 +222,10 @@ export function createInitialWorryBackfillFirestoreRepository(params: {
         }
 
         if (selected.length > 0) {
-          transaction.update(userRef, {
-            activeDeliveryCount: FieldValue.increment(selected.length),
+          transaction.set(userRef, {
+            activeDeliveryCount: actualActiveDeliveryCount + selected.length,
             updatedAt: now,
-          });
+          }, { merge: true });
         }
 
         return {
