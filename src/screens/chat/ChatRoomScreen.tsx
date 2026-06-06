@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type CSSProperties, type ChangeEvent, type KeyboardEvent, type RefObject, type TouchEvent, type WheelEvent } from 'react';
+import { useState, useRef, useEffect, type CSSProperties, type ChangeEvent, type KeyboardEvent, type ReactNode, type RefObject, type TouchEvent, type WheelEvent } from 'react';
 import { cn } from '../../lib/utils';
 import { ErrorState, profileImageUrlForColor } from '../shared/ui';
 
@@ -25,10 +25,11 @@ const chatRoomBackSwipeHorizontalRatio = 1.5;
 
 type ChatRoomCanvasStyle = CSSProperties & {
   readonly '--chat-input-height': string;
+  readonly '--chat-keyboard-inset': string;
 };
 
 type ChatRoomViewportMetrics = {
-  readonly canvasHeight: number;
+  readonly keyboardInset: number;
 };
 
 type ChatRoomBackSwipeState = {
@@ -84,7 +85,7 @@ export function ChatRoomScreen({
   const [sendError, setSendError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [textareaHeight, setTextareaHeight] = useState(chatTextareaMinHeight);
-  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ canvasHeight: 852 });
+  const [viewportMetrics, setViewportMetrics] = useState<ChatRoomViewportMetrics>({ keyboardInset: 0 });
   const [isTopBarHiddenForKeyboard, setIsTopBarHiddenForKeyboard] = useState(false);
   const [isMessageScrollerScrollable, setIsMessageScrollerScrollable] = useState(false);
   const messagesScrollerRef = useRef<HTMLDivElement>(null);
@@ -98,7 +99,7 @@ export function ChatRoomScreen({
   const previousAutoScrollInputsRef = useRef<{
     readonly messages: readonly ChatMessage[];
     readonly textareaHeight: number;
-    readonly canvasHeight: number;
+    readonly keyboardInset: number;
     readonly isTopBarHiddenForKeyboard: boolean;
   } | null>(null);
 
@@ -121,11 +122,14 @@ export function ChatRoomScreen({
       const visualViewport = window.visualViewport;
       const layoutHeight = window.innerHeight ?? document.documentElement.clientHeight ?? 852;
       const visibleHeight = visualViewport?.height ?? window.innerHeight ?? document.documentElement.clientHeight ?? 852;
-      const viewportHeight = visualViewport ? visibleHeight : layoutHeight;
       const nextFullViewportHeight = Math.max(layoutHeight, visibleHeight);
       const fullViewportHeight = fullViewportHeightRef.current ?? nextFullViewportHeight;
       const viewportHeightShrink = Math.max(0, fullViewportHeight - visibleHeight);
-      const isKeyboardHeightVisible = viewportHeightShrink >= chatRoomKeyboardOpenThreshold;
+      const viewportOffsetTop = visualViewport?.offsetTop ?? 0;
+      const keyboardInset = visualViewport
+        ? Math.max(0, fullViewportHeight - visibleHeight - viewportOffsetTop)
+        : 0;
+      const isKeyboardHeightVisible = Math.max(keyboardInset, viewportHeightShrink) >= chatRoomKeyboardOpenThreshold;
       if (!visualViewport || !isTopBarHiddenForKeyboard) {
         fullViewportHeightRef.current = Math.max(fullViewportHeight, nextFullViewportHeight);
       }
@@ -139,11 +143,11 @@ export function ChatRoomScreen({
         clearScheduledTopBarHide();
       }
       const nextMetrics = {
-        canvasHeight: viewportHeight,
+        keyboardInset,
       };
 
       setViewportMetrics(previousMetrics => {
-        return previousMetrics.canvasHeight === nextMetrics.canvasHeight
+        return previousMetrics.keyboardInset === nextMetrics.keyboardInset
           ? previousMetrics
           : nextMetrics;
       });
@@ -189,7 +193,7 @@ export function ChatRoomScreen({
 
   const canvasStyle: ChatRoomCanvasStyle = {
     '--chat-input-height': `${chatInputBaseHeight + Math.max(0, textareaHeight - chatTextareaMinHeight)}px`,
-    height: `${viewportMetrics.canvasHeight}px`,
+    '--chat-keyboard-inset': `${viewportMetrics.keyboardInset}px`,
   };
   const topBarLayerStyle: CSSProperties = {
     height: isTopBarHiddenForKeyboard ? 0 : chatRoomTopBarHeightCss,
@@ -212,7 +216,7 @@ export function ChatRoomScreen({
     const currentInputs = {
       messages,
       textareaHeight,
-      canvasHeight: viewportMetrics.canvasHeight,
+      keyboardInset: viewportMetrics.keyboardInset,
       isTopBarHiddenForKeyboard,
     };
     const messagesChanged = previousInputs === null || previousInputs.messages !== messages;
@@ -221,7 +225,7 @@ export function ChatRoomScreen({
       && !messagesChanged
       && !textareaHeightChanged
       && (
-        previousInputs.canvasHeight !== viewportMetrics.canvasHeight
+        previousInputs.keyboardInset !== viewportMetrics.keyboardInset
         || previousInputs.isTopBarHiddenForKeyboard !== isTopBarHiddenForKeyboard
       );
     const canScrollMessages = canScrollMessageScroller(scroller);
@@ -240,7 +244,7 @@ export function ChatRoomScreen({
     canAutoScrollAfterViewportChangeRef.current = viewportOnlyChanged
       ? canAutoScrollAfterViewportChangeRef.current
       : canScrollMessages;
-  }, [messages, textareaHeight, viewportMetrics.canvasHeight, isTopBarHiddenForKeyboard]);
+  }, [messages, textareaHeight, viewportMetrics.keyboardInset, isTopBarHiddenForKeyboard]);
 
   const handleMessagesScroll = () => {
     const scroller = messagesScrollerRef.current;
@@ -360,9 +364,10 @@ export function ChatRoomScreen({
         />
         <section
           className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]"
+          style={canvasStyle}
         >
           <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-            <div data-chat-room-canvas className="relative flex h-full w-full max-w-[480px] shrink-0 flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+            <div data-chat-room-canvas className="relative flex h-full w-full max-w-[480px] shrink-0 flex-col overflow-hidden bg-[#fff1d1] qling-figma-font">
               <ChatRoomTopBarSpacer isHidden={isTopBarHiddenForKeyboard} />
               <div className="flex min-h-0 w-full flex-1 items-start justify-center bg-[#fff1d1] px-6 pt-10">
                 {error ? <ErrorState title="오류" message={error} /> : <div className="text-center text-[14px] font-bold text-[#a39e96]">로딩 중...</div>}
@@ -402,19 +407,21 @@ export function ChatRoomScreen({
       />
       <section
         className="fixed inset-0 z-40 overflow-hidden bg-[#fff1d1]"
+        style={canvasStyle}
       >
         <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-          <div data-chat-room-canvas className="relative flex h-full w-full max-w-[480px] shrink-0 flex-col overflow-hidden bg-[#fff1d1] qling-figma-font" style={canvasStyle}>
+          <div data-chat-room-canvas className="relative flex h-full w-full max-w-[480px] shrink-0 flex-col overflow-hidden bg-[#fff1d1] qling-figma-font">
             <ChatRoomTopBarSpacer isHidden={isTopBarHiddenForKeyboard} />
             <div
               ref={messagesScrollerRef}
               data-chat-room-message-scroller
               className={cn(
-                'min-h-0 w-full flex-1 bg-[#fff1d1] px-4 pb-[28px] pt-4',
+                'min-h-0 w-full flex-1 bg-[#fff1d1] px-4 pt-4',
                 isMessageScrollerScrollable
                   ? 'overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
                   : 'touch-none overscroll-none overflow-hidden',
               )}
+              style={{ paddingBottom: 'calc(28px + var(--chat-input-height) + var(--chat-keyboard-inset))' }}
               onScroll={handleMessagesScroll}
               onTouchStart={handleBackSwipeStart}
               onTouchMove={handleMessagesTouchMove}
@@ -498,6 +505,9 @@ export function ChatRoomScreen({
               })}
             </div>
             </div>
+          </div>
+        </div>
+        <ChatRoomInputLayer>
             <ChatRoomInputBar
               draft={draft}
               sendError={sendError}
@@ -510,8 +520,7 @@ export function ChatRoomScreen({
               onMessageInputBlur={handleMessageInputBlur}
               onSend={handleSend}
             />
-          </div>
-        </div>
+        </ChatRoomInputLayer>
       </section>
       {menuOpen && (
         <ChatRoomActionSheet
@@ -575,6 +584,18 @@ function ChatRoomTopBarSpacer({ isHidden }: { readonly isHidden: boolean }) {
       style={{ height: isHidden ? 0 : chatRoomTopBarHeightCss }}
       aria-hidden="true"
     />
+  );
+}
+
+function ChatRoomInputLayer({ children }: { readonly children: ReactNode }) {
+  return (
+    <div
+      data-chat-room-input-layer
+      className="fixed left-0 right-0 z-50 mx-auto w-full max-w-[480px]"
+      style={{ bottom: 'var(--chat-keyboard-inset)' }}
+    >
+      {children}
+    </div>
   );
 }
 
