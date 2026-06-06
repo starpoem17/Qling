@@ -193,6 +193,12 @@ html.qling-ios-standalone-pwa {
   --qling-space-nav-height: var(--qling-space-nav-base-height);
 }
 
+html.qling-ios-safari-browser {
+  --qling-space-safe-top: max(env(safe-area-inset-top, 0px), 47px);
+  --qling-space-nav-base-height: 65px;
+  --qling-space-nav-height: var(--qling-space-nav-base-height);
+}
+
 html.qling-ios-safari-browser .qling-production-main--with-bottom-nav {
   padding-top: 0;
 }

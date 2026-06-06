@@ -117,6 +117,9 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*background: #ff8b3d;/);
   assert.match(cssSource, /html\.qling-ios-safari-browser,\s*html\.qling-ios-safari-browser body,\s*html\.qling-ios-safari-browser #root[\s\S]*background: #fff5eb;/);
   assert.match(cssSource, /html\.qling-ios-standalone-pwa,\s*html\.qling-ios-standalone-pwa body,\s*html\.qling-ios-standalone-pwa #root[\s\S]*background: #fff5eb;/);
+  assert.match(cssSource, /html\.qling-ios-safari-browser[\s\S]*--qling-space-safe-top: max\(env\(safe-area-inset-top, 0px\), 47px\);/);
+  assert.match(cssSource, /html\.qling-ios-safari-browser[\s\S]*--qling-space-nav-base-height: 65px;/);
+  assert.match(cssSource, /html\.qling-ios-safari-browser[\s\S]*--qling-space-nav-height: var\(--qling-space-nav-base-height\);/);
   assert.match(cssSource, /html\.qling-ios-safari-browser \.qling-production-main--with-bottom-nav[\s\S]*padding-top: 0;/);
   assert.doesNotMatch(source, /fixed bottom-0 left-0 right-0/);
 });
