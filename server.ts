@@ -32,6 +32,8 @@ import { registerVersionRoutes } from "./src/server/versionRoutes";
 import { registerRankingRoutes } from "./src/server/rankingRoutes";
 import { registerChatRoutes } from "./src/server/chatRoutes";
 import { registerReportRoutes } from "./src/server/reportRoutes";
+import { buildChatContextModerationInstruction } from "./src/services/chatSafety/server/contextModeration";
+import { registerChatContextModerationRoutes } from "./src/server/chatContextModerationRoutes";
 
 // Read client config to get database ID
 const clientConfigPath = path.join(process.cwd(), 'firebase-applet-config.json');
@@ -162,25 +164,14 @@ async function startServer() {
       db,
       messaging,
       auth: getAuth(),
-      moderationProvider: chatContent => processSimpleModerationResponse(
-        chatContent,
-        content => fetchFromOpenAI(`You are a moderator for a Korean anonymous worry-sharing app.
-1. Check if the chat message is inappropriate, abusive, violent, or spam.
-2. Return JSON exactly like this:
-   - If bad: { "status": "rejected", "reason": "부적절한 표현이 감지되었습니다." }
-   - If good: { "status": "approved" }`, content)
-      ).then(result => {
-        const body = result.body;
-        if (result.statusCode !== 200 || !('status' in body) || body.status !== 'approved') {
-          return {
-            status: 'rejected' as const,
-            reason: 'status' in body && body.status === 'rejected'
-              ? body.reason
-              : '부적절한 표현이 감지되었습니다.',
-          };
-        }
-        return { status: 'approved' as const };
-      }),
+      contextModerationEnabled: true,
+    });
+    registerChatContextModerationRoutes(app, {
+      db,
+      provider: transcript => fetchFromOpenAI(
+        buildChatContextModerationInstruction(),
+        transcript
+      ),
     });
     registerReportRoutes(app, { db, auth: getAuth() });
   } else {

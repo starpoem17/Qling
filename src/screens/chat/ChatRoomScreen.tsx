@@ -60,10 +60,13 @@ export function ChatRoomScreen({
   answerAdoptionRatePercent,
   worryInfo,
   opponentUnreadCount,
+  isModerationBlocked = false,
+  moderationBlockedReason,
   onBack,
   onSendMessage,
   onNotificationOff,
   onLeaveChat,
+  onConfirmModerationNotice,
   onReportUser,
 }: {
   readonly loading: boolean;
@@ -73,10 +76,13 @@ export function ChatRoomScreen({
   readonly answerAdoptionRatePercent: number | null;
   readonly worryInfo?: WorryInfo | null;
   readonly opponentUnreadCount?: number;
+  readonly isModerationBlocked?: boolean;
+  readonly moderationBlockedReason?: string | null;
   readonly onBack: () => void;
   readonly onSendMessage: (content: string) => Promise<{ success: boolean; error?: string }>;
   readonly onNotificationOff: () => void;
   readonly onLeaveChat: () => void;
+  readonly onConfirmModerationNotice?: () => void;
   readonly onReportUser: () => void;
 }) {
   const [draft, setDraft] = useState('');
@@ -495,12 +501,32 @@ export function ChatRoomScreen({
                   </div>
                 );
               })}
+              {isModerationBlocked && (
+                <div className="flex w-full justify-center">
+                  <div className="max-w-[310px] rounded-[14px] border border-[#f3c7bd] bg-white px-4 py-3 text-center shadow-[0_2px_8px_rgb(120_90_60/0.07)]">
+                    <p className="text-[13px] font-extrabold leading-5 text-[#8a3a27]">
+                      안전 기준에 따라 종료된 대화방입니다.
+                    </p>
+                    <p className="mt-1 text-[12px] font-normal leading-[18px] text-[#6e6a63]">
+                      {moderationBlockedReason || '이 대화방에서는 더 이상 메시지를 주고받을 수 없습니다.'}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={onConfirmModerationNotice}
+                      className="mt-3 h-9 rounded-full bg-[#ff8b3d] px-5 text-[13px] font-extrabold leading-5 text-white shadow-[0_3px_6px_rgb(255_122_26/0.28)] focus:outline-none focus:ring-2 focus:ring-[#f26c0f]"
+                    >
+                      확인
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             </div>
             <ChatRoomInputBar
               draft={draft}
               sendError={sendError}
               isSending={isSending}
+              disabled={isModerationBlocked}
               textareaHeight={textareaHeight}
               inputRef={messageInputRef}
               onDraftChange={handleDraftChange}
@@ -584,6 +610,7 @@ function ChatRoomInputBar({
   draft,
   sendError,
   isSending,
+  disabled,
   textareaHeight,
   inputRef,
   onDraftChange,
@@ -595,6 +622,7 @@ function ChatRoomInputBar({
   readonly draft: string;
   readonly sendError: string | null;
   readonly isSending: boolean;
+  readonly disabled: boolean;
   readonly textareaHeight: number;
   readonly inputRef: RefObject<HTMLTextAreaElement | null>;
   readonly onDraftChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
@@ -635,13 +663,14 @@ function ChatRoomInputBar({
           data-lpignore="true"
           data-1p-ignore="true"
           placeholder="메시지를 입력해 주세요"
+          disabled={disabled}
           className="absolute left-[19px] top-[10.2px] w-[310px] resize-none rounded-[21px] border border-[#ede3d6] bg-[#fff4e8] px-[16.8px] py-[9px] text-[14px] font-normal leading-5 text-[#2b2620] outline-none placeholder:text-[#a39e96] focus:ring-2 focus:ring-[#ff8b3d]"
           style={{ height: textareaHeight, overflow: 'hidden' }}
         />
         <button
           type="button"
           onClick={() => void onSend()}
-          disabled={!draft.trim() || isSending}
+          disabled={disabled || !draft.trim() || isSending}
           aria-label="메시지 보내기"
           className="absolute left-[337px] top-[8.2px] flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#ff8b3d] shadow-[0_4px_6px_rgb(255_122_26/0.4)] transition-transform active:scale-95 disabled:opacity-45 focus:outline-none focus:ring-2 focus:ring-[#f26c0f]"
         >

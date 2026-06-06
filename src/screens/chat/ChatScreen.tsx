@@ -1,4 +1,5 @@
 import { useState, type TouchEvent, type WheelEvent } from 'react';
+import { cn } from '../../lib/utils';
 import { profileImageUrlForColor } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import { filterChatsByOpponentName } from './chatListSearch';
@@ -18,6 +19,7 @@ export interface ChatListItem {
   lastMessage: string;
   dateLabel: string;
   unreadCount: number;
+  moderationBlocked?: boolean;
   worryTitle?: string;
   worryCategory?: string;
 }
@@ -223,10 +225,16 @@ function ChatListCard({
           <span className="absolute left-[27px] top-[28px] h-[13px] w-[13px] rounded-full border-[1.6px] border-[#fff4e8] bg-[#3fc36b]" aria-hidden="true" />
         </div>
         <div className="flex min-w-0 flex-1 flex-col items-start gap-[3px] overflow-hidden whitespace-nowrap">
-          <p className="max-w-full overflow-hidden text-ellipsis text-[14.5px] font-bold leading-5 text-[#2b2620]">
+          <p className={cn(
+            "max-w-full overflow-hidden text-ellipsis text-[14.5px] font-bold leading-5",
+            chat.moderationBlocked ? 'text-[#8a3a27]' : 'text-[#2b2620]'
+          )}>
             {chat.opponentName}
           </p>
-          <p className="min-w-full overflow-hidden text-ellipsis text-[13px] font-normal leading-[18px] text-[#6e6a63]">
+          <p className={cn(
+            "min-w-full overflow-hidden text-ellipsis text-[13px] font-normal leading-[18px]",
+            chat.moderationBlocked ? 'font-semibold text-[#e5484d]' : 'text-[#6e6a63]'
+          )}>
             {chat.lastMessage}
           </p>
         </div>
