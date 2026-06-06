@@ -1,6 +1,6 @@
 import { Heart, MessageSquare } from 'lucide-react';
 import { useState, type ReactNode, type TouchEvent, type WheelEvent } from 'react';
-import { ErrorState, FigmaCanvasFrame, SuccessBadge } from '../shared/ui';
+import { ErrorState, FigmaCanvasFrame, FigmaTopBar, SuccessBadge } from '../shared/ui';
 import { FigmaTabLoading } from '../shared/FigmaTabLoading';
 import { ChatStartConfirmationPopup } from '../shared/ChatStartConfirmationPopup';
 import type { MyAnswersScreenProps } from './contract';
@@ -40,7 +40,7 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
     <section className={screenClassName}>
       <FigmaCanvasFrame className="max-w-[480px]">
         <div className={canvasClassName}>
-          <MyAnswersHeader onBack={props.onBack} />
+          <FigmaTopBar title="내가 쓴 답변" onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
 
           {props.state.status === 'loading' ? (
             <section
@@ -97,36 +97,6 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
         </div>
       </FigmaCanvasFrame>
     </section>
-  );
-}
-
-function MyAnswersHeader({
-  onBack,
-}: {
-  readonly onBack: () => void;
-}) {
-  return (
-    <header
-      className="h-[calc(100px+var(--qling-pwa-direct-topbar-shift))] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
-      onTouchMove={blockLockedScroll}
-      onWheel={blockLockedScroll}
-    >
-      <div
-        className="relative mx-auto h-[calc(100px+var(--qling-pwa-direct-topbar-shift))] w-full max-w-[480px]"
-      >
-        <button
-          type="button"
-          aria-label="마이페이지로 돌아가기"
-          onClick={onBack}
-          className="absolute left-[6px] top-[calc(45px+var(--qling-pwa-direct-topbar-shift))] flex h-[45px] w-[44px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
-        >
-          <span aria-hidden="true">‹</span>
-        </button>
-        <h1 className="absolute left-0 top-[calc(60px+var(--qling-pwa-direct-topbar-shift))] w-full text-center text-[17px] font-extrabold leading-none tracking-[-0.02em] text-white">
-          내가 쓴 답변
-        </h1>
-      </div>
-    </header>
   );
 }
 

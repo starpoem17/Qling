@@ -4,7 +4,6 @@ import {
   QlingDialog,
   profileImageUrlForColor,
 } from '../shared/ui';
-import type { TouchEvent, WheelEvent } from 'react';
 import type {
   ConfirmationProps,
   EditInterestsProps,
@@ -68,7 +67,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
           className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d]"
           data-measure="my-page-screen"
         >
-          <MyPageHeader onBack={props.onBack} />
+          <FigmaTopBar title="마이페이지" onBack={props.onBack} backLabel="이전 화면으로 돌아가기" tone="light" />
 
           <section
             className="relative overflow-y-auto overscroll-contain pb-[calc(108px+env(safe-area-inset-bottom,0px))] [-webkit-overflow-scrolling:touch]"
@@ -132,42 +131,6 @@ export function MyPageScreen(props: MyPageScreenProps) {
       <ConfirmationDialog title="계정을 삭제할까요?" description="계정 삭제는 되돌릴 수 없습니다. 작성한 고민과 답변 접근도 함께 중단됩니다." confirmLabel="계정 삭제" confirmation={props.accountDeletionConfirmation} destructive />
     </section>
   );
-}
-
-function MyPageHeader({
-  onBack,
-}: {
-  readonly onBack: () => void;
-}) {
-  return (
-    <header
-      className="h-[calc(100px+var(--qling-pwa-direct-topbar-shift))] touch-none overscroll-none overflow-hidden bg-[#ff8b3d]"
-      onTouchMove={blockLockedScroll}
-      onWheel={blockLockedScroll}
-    >
-      <div
-        className="relative mx-auto h-[calc(100px+var(--qling-pwa-direct-topbar-shift))] w-full max-w-[480px]"
-      >
-        <button
-          type="button"
-          aria-label="이전 화면으로 돌아가기"
-          onClick={onBack}
-          className="absolute left-[6px] top-[calc(45px+var(--qling-pwa-direct-topbar-shift))] flex h-[45px] w-[44px] items-center justify-center text-[32px] font-semibold leading-none text-white focus:outline-none focus:ring-2 focus:ring-white"
-        >
-          <span aria-hidden="true">‹</span>
-        </button>
-        <h1 className="absolute left-0 top-[calc(60px+var(--qling-pwa-direct-topbar-shift))] w-full text-center text-[17px] font-extrabold leading-none tracking-[-0.02em] text-white">
-          마이페이지
-        </h1>
-      </div>
-    </header>
-  );
-}
-
-function blockLockedScroll(event: TouchEvent<HTMLElement> | WheelEvent<HTMLElement>) {
-  const { preventDefault, stopPropagation } = event;
-  preventDefault.call(event);
-  stopPropagation.call(event);
 }
 
 function DefaultProfileImage({ label, profileColor }: { readonly label: string; readonly profileColor: string }) {
@@ -366,7 +329,7 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
           <FigmaTopBar title="개인정보 처리방침" titleAriaLabel={props.title} onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
           <article
             className="absolute left-4 right-4 overflow-y-auto rounded-[18px] bg-white px-[18px] py-[17px] [-webkit-overflow-scrolling:touch]"
-            style={{ top: shiftedTopBarTop(127), bottom: policyCardBottom }}
+            style={{ top: shiftedTopBarTop(100), bottom: policyCardBottom }}
           >
             {shouldShowFeedbackLink && (
               <>

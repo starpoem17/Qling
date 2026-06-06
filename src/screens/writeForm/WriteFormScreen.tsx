@@ -5,9 +5,9 @@ import type { WriteFormScreenProps } from './contract';
 const pwaTopbarShift = 'var(--qling-pwa-topbar-shift, 0px)';
 const sendButtonBaseTop = 'min(684px, calc((100dvh - var(--qling-space-nav-height)) - 88px))';
 const sendButtonTop = `calc(${sendButtonBaseTop} + ${pwaTopbarShift})`;
-const topBoxTop = `calc(127px + ${pwaTopbarShift})`;
-const inputAreaTop = `calc(227px + ${pwaTopbarShift})`;
-const inputAreaHeight = `min(434px, max(240px, calc(${sendButtonTop} - ${inputAreaTop} - 23px)))`;
+const topBoxTop = `calc(100px + ${pwaTopbarShift})`;
+const inputAreaTop = `calc(200px + ${pwaTopbarShift})`;
+const inputAreaHeight = `min(461px, max(240px, calc(${sendButtonTop} - ${inputAreaTop} - 23px)))`;
 const topBoxSummaryLimit = 25;
 
 export function WriteFormScreen(props: WriteFormScreenProps) {

@@ -142,10 +142,11 @@ test('figma top bar keeps the shared Figma back and title coordinates', () => {
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
 
   assert.match(source, /data-measure="figma-top-bar"/);
-  assert.match(source, /left-\[14px\] top-\[calc\(49px\+var\(--qling-pwa-figma-topbar-shift\)\)\] h-\[44px\] w-\[44px\]/);
-  assert.match(source, /text-\[32px\] font-semibold leading-\[38px\]/);
-  assert.match(source, /top-\[calc\(60px\+var\(--qling-pwa-figma-topbar-shift\)\)\] w-full whitespace-nowrap text-center text-\[17px\]/);
-  assert.match(source, /tracking-\[-0\.34px\]/);
+  assert.match(source, /h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
+  assert.match(source, /left-\[6px\] top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\] flex h-\[45px\] w-\[44px\]/);
+  assert.match(source, /text-\[32px\] font-semibold leading-none/);
+  assert.match(source, /top-\[calc\(60px\+var\(--qling-pwa-direct-topbar-shift\)\)\] w-full whitespace-nowrap text-center text-\[17px\]/);
+  assert.match(source, /tracking-\[-0\.02em\]/);
 });
 
 test('standalone back buttons keep at least a 44px touch target', () => {
@@ -154,11 +155,13 @@ test('standalone back buttons keep at least a 44px touch target', () => {
   const myPageSource = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'myPage', 'MyPageScreen.tsx'), 'utf8');
   const myAnswersSource = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'myPage', 'MyAnswersScreen.tsx'), 'utf8');
   const replyDetailSource = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'replyDetail', 'ReplyDetailScreen.tsx'), 'utf8');
+  const sharedUiSource = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
 
   assert.match(chatRoomSource, /left-\[7px\] top-\[18px\] flex h-12 w-11/);
   assert.match(reportSource, /aria-label="뒤로가기"[\s\S]*h-\[44px\] w-\[44px\]/);
-  assert.match(myPageSource, /left-\[6px\] top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\] flex h-\[45px\] w-\[44px\]/);
-  assert.match(myAnswersSource, /left-\[6px\] top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\] flex h-\[45px\] w-\[44px\]/);
+  assert.match(myPageSource, /<FigmaTopBar title="마이페이지"/);
+  assert.match(myAnswersSource, /<FigmaTopBar title="내가 쓴 답변"/);
+  assert.match(sharedUiSource, /left-\[6px\] top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\] flex h-\[45px\] w-\[44px\]/);
   assert.match(replyDetailSource, /aria-label="목록으로 돌아가기"[\s\S]*h-11 w-11/);
 });
 

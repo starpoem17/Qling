@@ -33,7 +33,7 @@ test('App.tsx gives write-form routes their own main canvas and standalone PWA c
   assert.match(appSource, /root\.style\.backgroundColor = standalonePwaRouteChrome\.bottom/);
   assert.match(appSource, /route === 'write_worry' \|\| route === 'write_reply' \|\| route === 'answer_check'/);
   assert.match(appSource, /return \{ top: '#fff1d1', bottom: '#fff5eb' \}/);
-  assert.match(cssSource, /--qling-pwa-figma-topbar-shift: calc\(var\(--qling-space-safe-top\) - 25\.5px\)/);
+  assert.match(cssSource, /--qling-pwa-topbar-shift: var\(--qling-pwa-direct-topbar-shift\)/);
   assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*overflow: hidden;/);
   assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*overscroll-behavior: contain;/);
   assert.match(cssSource, /\.qling-write-form-main\s*\{[^}]*-webkit-overflow-scrolling: touch;/);

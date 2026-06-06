@@ -13,8 +13,8 @@ const badActiveIconUrl = new URL('../../../assets/my_concerns/bad_activate.svg',
 const answerCheckViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
 const pwaTopBarShift = 'var(--qling-pwa-topbar-shift, 0px)';
 const shiftedTopBarTop = (top: number) => `calc(${top}px + ${pwaTopBarShift})`;
-const answerCheckContentTop = shiftedTopBarTop(127);
-const answerCheckContentHeight = `min(725px, max(320px, calc(${answerCheckViewportHeight} - ${answerCheckContentTop})))`;
+const answerCheckContentTop = shiftedTopBarTop(100);
+const answerCheckContentHeight = `min(752px, max(320px, calc(${answerCheckViewportHeight} - ${answerCheckContentTop})))`;
 
 export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
   if (props.state.status === 'loading') {
@@ -88,26 +88,7 @@ function AnswerCheckLoadingScreen({ label, onBack }: { readonly label: string; r
     <section className="-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
       <FigmaCanvasFrame className="max-w-[480px]">
         <div className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
-          <button
-            type="button"
-            onClick={onBack}
-            aria-label="나의 고민으로 돌아가기"
-            className="absolute left-[14px] z-20 h-[44px] w-[44px] rounded-full transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-[#2a2a2a]"
-            style={{ top: shiftedTopBarTop(49) }}
-          >
-            <span
-              aria-hidden="true"
-              className="absolute left-[8px] top-0 font-['Qling_Figma_Inter'] text-[32px] font-semibold leading-[38px] text-black"
-            >
-              ‹
-            </span>
-          </button>
-          <h1
-            className="absolute left-0 z-10 w-full whitespace-nowrap text-center font-sans text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] text-[#2a2a2a]"
-            style={{ top: shiftedTopBarTop(60) }}
-          >
-            답변 확인
-          </h1>
+          <FigmaTopBar title="답변 확인" onBack={onBack} backLabel="나의 고민으로 돌아가기" />
           <span
             role="status"
             aria-live="polite"

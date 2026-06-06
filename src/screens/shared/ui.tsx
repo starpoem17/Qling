@@ -304,31 +304,31 @@ export function FigmaTopBar({
     : 'hover:bg-black/10 focus:ring-[#2a2a2a]';
 
   return (
-    <div className="absolute left-0 top-0 z-20 h-[127px] w-full" data-measure="figma-top-bar">
+    <div className="absolute left-0 top-0 z-20 h-[calc(100px+var(--qling-pwa-direct-topbar-shift))] w-full" data-measure="figma-top-bar">
       <button
         type="button"
         onClick={onBack}
         aria-label={backLabel}
         className={cn(
-          'absolute left-[14px] top-[calc(49px+var(--qling-pwa-figma-topbar-shift))] h-[44px] w-[44px] rounded-full transition-colors focus:outline-none focus:ring-2',
+          'absolute left-[6px] top-[calc(45px+var(--qling-pwa-direct-topbar-shift))] flex h-[45px] w-[44px] items-center justify-center transition-colors focus:outline-none focus:ring-2',
           hoverClassName,
         )}
       >
         <span
           aria-hidden="true"
-          className={cn('absolute left-[8px] top-0 font-["Qling_Figma_Inter"] text-[32px] font-semibold leading-[38px]', textClassName)}
+          className={cn('text-[32px] font-semibold leading-none', textClassName)}
         >
           ‹
         </span>
       </button>
       <h1
         aria-label={titleAriaLabel}
-        className={cn('absolute left-0 top-[calc(60px+var(--qling-pwa-figma-topbar-shift))] w-full whitespace-nowrap text-center text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] font-sans', textClassName)}
+        className={cn('absolute left-0 top-[calc(60px+var(--qling-pwa-direct-topbar-shift))] w-full whitespace-nowrap text-center text-[17px] font-extrabold leading-none tracking-[-0.02em] font-sans', textClassName)}
       >
         {title}
       </h1>
       {rightComponent && (
-        <div className="absolute right-[14px] top-[calc(49px+var(--qling-pwa-figma-topbar-shift))] flex h-[44px] items-center">
+        <div className="absolute right-[14px] top-[calc(45px+var(--qling-pwa-direct-topbar-shift))] flex h-[45px] items-center">
           {rightComponent}
         </div>
       )}

@@ -100,7 +100,8 @@ test('my-page root uses a widened unscaled Figma canvas with fixed header and bo
   assert.match(html, /data-measure="my-page-screen"/);
   assert.match(html, /h-\[852px\] w-full max-w-\[480px\]/);
   assert.match(html, /aria-label="마이페이지 본문"/);
-  assert.match(html, /<header[^>]*h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\][\s\S]*<section[^>]*aria-label="마이페이지 본문"/);
+  assert.match(html, /data-measure="figma-top-bar"[\s\S]*<section[^>]*aria-label="마이페이지 본문"/);
+  assert.match(html, /h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /top-\[calc\(60px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /relative overflow-y-auto overscroll-contain pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
@@ -112,7 +113,7 @@ test('my-page root uses a widened unscaled Figma canvas with fixed header and bo
   assert.doesNotMatch(html, /data-qling-peek-header-content/);
   assert.doesNotMatch(html, /qling-peek-progress/);
   assert.doesNotMatch(html, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
-  assert.doesNotMatch(html, /figma-top-bar/);
+  assert.match(html, /figma-top-bar/);
   assert.doesNotMatch(html, /home-indicator/);
 });
 
@@ -340,8 +341,8 @@ test('edit interests screen renders fixed two-column chip grid and exact zero-se
   assert.doesNotMatch(html, /origin-top/);
   assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /top:calc\(196px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
-  assert.match(html, /top-\[calc\(49px\+var\(--qling-pwa-figma-topbar-shift\)\)\]/);
-  assert.match(html, /top-\[calc\(60px\+var\(--qling-pwa-figma-topbar-shift\)\)\]/);
+  assert.match(html, /top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
+  assert.match(html, /top-\[calc\(60px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /공감할 수 있는 주제를 골라주세요/);
   assert.match(html, /grid-cols-2/);
   assert.match(html, /left-\[35px\] right-\[35px\] grid grid-cols-2/);
@@ -400,13 +401,13 @@ test('privacy policy screen renders document body in the Figma card layout', () 
   assert.match(html, /data-measure="policy-responsive-canvas"/);
   assert.match(html, /data-measure="policy-screen"/);
   assert.match(html, /h-\[852px\] w-full max-w-\[480px\]/);
-  assert.match(html, /top:calc\(127px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.match(html, /top:calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
   assert.match(html, /bottom:max\(calc\(108px \+ env\(safe-area-inset-bottom,0px\)\), calc\(876px - var\(--qling-tab-viewport-height\)\)\)/);
   assert.match(html, /left-4 right-4 overflow-y-auto/);
   assert.doesNotMatch(html, /w-\[361px\]/);
   assert.doesNotMatch(html, /transform:scale/);
-  assert.match(html, /top-\[calc\(49px\+var\(--qling-pwa-figma-topbar-shift\)\)\]/);
-  assert.match(html, /top-\[calc\(60px\+var\(--qling-pwa-figma-topbar-shift\)\)\]/);
+  assert.match(html, /top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
+  assert.match(html, /top-\[calc\(60px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /rounded-\[18px\]/);
   assert.match(html, /\[-webkit-overflow-scrolling:touch\]/);
   assert.match(html, /개인정보 처리방침/);
