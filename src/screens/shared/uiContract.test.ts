@@ -108,6 +108,7 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.match(cssSource, /--qling-space-safe-top: env\(safe-area-inset-top, 0px\);/);
   assert.match(cssSource, /--qling-space-nav-base-height: 80px;/);
   assert.match(cssSource, /html\.qling-ios-standalone-pwa[\s\S]*--qling-space-nav-base-height: 65px;/);
+  assert.match(cssSource, /html\.qling-ios-standalone-pwa[\s\S]*--qling-space-nav-height: var\(--qling-space-nav-base-height\);/);
   assert.match(cssSource, /--qling-space-nav-height: calc\(var\(--qling-space-nav-base-height\) \+ var\(--qling-space-safe-bottom\)\);/);
   assert.match(cssSource, /--qling-tab-viewport-height: calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\);/);
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*height: 100%;/);

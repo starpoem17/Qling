@@ -177,6 +177,7 @@ test('detects iOS Safari browser and standalone PWA mode before app boot', () =>
   assert.match(indexHtml, /<meta name="theme-color" content="#ff8b3d" \/>/);
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*background: #ff8b3d;/);
   assert.match(cssSource, /html\.qling-ios-standalone-pwa[\s\S]*--qling-space-nav-base-height: 65px;/);
+  assert.match(cssSource, /html\.qling-ios-standalone-pwa[\s\S]*--qling-space-nav-height: var\(--qling-space-nav-base-height\);/);
   assert.match(cssSource, /html\.qling-ios-safari-browser \.qling-production-main--with-bottom-nav[\s\S]*padding-top: 0;/);
 });
 

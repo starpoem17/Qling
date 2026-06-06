@@ -190,6 +190,7 @@ html.qling-ios-standalone-pwa #root {
 
 html.qling-ios-standalone-pwa {
   --qling-space-nav-base-height: 65px;
+  --qling-space-nav-height: var(--qling-space-nav-base-height);
 }
 
 html.qling-ios-safari-browser .qling-production-main--with-bottom-nav {
