@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '../../lib/utils';
 import { ChatStartConfirmationPopup } from '../shared/ChatStartConfirmationPopup';
-import { ErrorState, FigmaTopBar } from '../shared/ui';
+import { ErrorState, FigmaCanvasFrame, FigmaTopBar } from '../shared/ui';
 import type { AnswerCheckReplyProps, AnswerCheckScreenProps } from './contract';
 
 const activeIndicatorUrl = new URL('../../../assets/loading/figma-progress-active.svg', import.meta.url).href;
@@ -10,6 +10,8 @@ const goodIconUrl = new URL('../../../assets/my_concerns/good.svg', import.meta.
 const goodActiveIconUrl = new URL('../../../assets/my_concerns/good_activate.svg', import.meta.url).href;
 const badIconUrl = new URL('../../../assets/my_concerns/bad.svg', import.meta.url).href;
 const badActiveIconUrl = new URL('../../../assets/my_concerns/bad_activate.svg', import.meta.url).href;
+const answerCheckViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
+const answerCheckContentHeight = `min(725px, max(320px, calc(${answerCheckViewportHeight} - 127px)))`;
 
 export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
   if (props.state.status === 'loading') {
@@ -79,15 +81,10 @@ export function AnswerCheckScreen(props: AnswerCheckScreenProps) {
 }
 
 function AnswerCheckLoadingScreen({ label, onBack }: { readonly label: string; readonly onBack: () => void }) {
-  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
-
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-        <div
-          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1]"
-          style={{ transform: `scale(${canvasScale})` }}
-        >
+    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
+      <FigmaCanvasFrame className="max-w-[480px]">
+        <div className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
           <button
             type="button"
             onClick={onBack}
@@ -107,7 +104,7 @@ function AnswerCheckLoadingScreen({ label, onBack }: { readonly label: string; r
           <span
             role="status"
             aria-live="polite"
-            className="absolute left-[177px] top-[406px] h-10 w-10"
+            className="absolute left-1/2 top-[406px] h-10 w-10 -translate-x-1/2"
             data-testid="answer-check-figma-loading-indicator"
           >
             <span className="block h-full w-full animate-spin" aria-hidden="true">
@@ -125,7 +122,7 @@ function AnswerCheckLoadingScreen({ label, onBack }: { readonly label: string; r
             <span className="sr-only">{label}</span>
           </span>
         </div>
-      </div>
+      </FigmaCanvasFrame>
     </section>
   );
 }
@@ -139,18 +136,14 @@ function AnswerCheckFrame({
   readonly children: ReactNode;
   readonly overlay?: ReactNode;
 }) {
-  const canvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
-
   return (
-    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-        <div
-          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1] qling-received-worries-font"
-          style={{ transform: `scale(${canvasScale})` }}
-        >
+    <section className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
+      <FigmaCanvasFrame className="max-w-[480px]">
+        <div className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1] qling-received-worries-font">
           <FigmaTopBar title="답변 확인" onBack={onBack} backLabel="나의 고민으로 돌아가기" />
           <div
-            className="absolute left-0 top-[127px] h-[725px] w-full overflow-y-auto overscroll-contain px-4 pb-[108px] [-webkit-overflow-scrolling:touch]"
+            className="absolute left-0 top-[127px] w-full overflow-y-auto overscroll-contain px-4 pb-[108px] [-webkit-overflow-scrolling:touch]"
+            style={{ height: answerCheckContentHeight }}
             aria-label="답변 확인 내용"
           >
             <div className="grid gap-[22px]">
@@ -159,7 +152,7 @@ function AnswerCheckFrame({
           </div>
           {overlay}
         </div>
-      </div>
+      </FigmaCanvasFrame>
     </section>
   );
 }

@@ -84,9 +84,10 @@ test('answer check loading state matches the Figma loading shell', () => {
   assert.match(html, /답변을 불러오고 있습니다\./);
   assert.match(html, /figma-progress-active\.svg/);
   assert.match(html, /figma-progress-track\.svg/);
-  assert.match(html, /relative h-\[852px\] w-\[393px\] shrink-0 origin-top overflow-hidden bg-\[#fff1d1\]/);
+  assert.match(html, /relative h-\[852px\] w-full max-w-\[480px\] shrink-0 overflow-hidden bg-\[#fff1d1\]/);
+  assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /left-\[14px\] top-\[49px\] z-20 h-\[44px\] w-\[44px\]/);
-  assert.match(html, /left-\[177px\] top-\[406px\] h-10 w-10/);
+  assert.match(html, /left-1\/2 top-\[406px\] h-10 w-10 -translate-x-1\/2/);
   assert.doesNotMatch(html, /flex min-h-48 flex-col items-center justify-center rounded-\[var\(--qling-radius-card\)\]/);
 });
 
@@ -103,7 +104,8 @@ test('zero replies state shows only my worry without empty copy', () => {
 test('answer check cards use Figma-like card internals without the old helper labels', () => {
   const html = renderToStaticMarkup(AnswerCheckScreen(baseProps()));
 
-  assert.match(html, /absolute left-0 top-\[127px\] h-\[725px\] w-full overflow-y-auto/);
+  assert.match(html, /absolute left-0 top-\[127px\] w-full overflow-y-auto/);
+  assert.match(html, /height:min\(725px, max\(320px, calc\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 127px\)\)\)/);
   assert.match(html, /overflow-hidden rounded-\[18px\] bg-white px-\[19px\] pb-\[24px\] pt-\[11px\]/);
   assert.match(html, /shadow-\[0_4px_4px_rgb\(0_0_0\/0\.25\)\]/);
   assert.match(html, /flex min-w-0 items-start gap-\[18px\]/);
@@ -331,8 +333,8 @@ test('chat start confirmation popup matches the Figma modal chrome', () => {
   assert.match(html, /aria-modal="true"/);
   assert.match(html, /aria-labelledby="answer-check-chat-start-confirmation-title"/);
   assert.match(html, /aria-describedby="answer-check-chat-start-confirmation-description"/);
-  assert.match(html, /left-\[-1px\] top-0 z-40 h-\[852px\] w-\[394px\] bg-\[rgba\(40,30,20,0\.42\)\]/);
-  assert.match(html, /left-\[42px\] top-\[251px\] z-50 h-\[288px\] w-\[310px\] rounded-\[24px\] bg-white/);
+  assert.match(html, /absolute inset-0 z-40 bg-\[rgba\(40,30,20,0\.42\)\]/);
+  assert.match(html, /left-1\/2 top-\[251px\] z-50 h-\[288px\] w-\[310px\] -translate-x-1\/2 rounded-\[24px\] bg-white/);
   assert.match(html, /shadow-\[0_12px_20px_rgba\(0,0,0,0\.18\)\]/);
   assert.match(html, /chat_start_dot\.svg/);
   assert.match(html, /채팅을 시작할까요\?/);

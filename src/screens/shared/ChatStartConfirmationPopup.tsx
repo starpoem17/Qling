@@ -16,13 +16,13 @@ export function ChatStartConfirmationPopup({
 
   return (
     <>
-      <div className="absolute left-[-1px] top-0 z-40 h-[852px] w-[394px] bg-[rgba(40,30,20,0.42)]" aria-hidden="true" />
+      <div className="absolute inset-0 z-40 bg-[rgba(40,30,20,0.42)]" aria-hidden="true" />
       <section
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="absolute left-[42px] top-[251px] z-50 h-[288px] w-[310px] rounded-[24px] bg-white shadow-[0_12px_20px_rgba(0,0,0,0.18)]"
+        className="absolute left-1/2 top-[251px] z-50 h-[288px] w-[310px] -translate-x-1/2 rounded-[24px] bg-white shadow-[0_12px_20px_rgba(0,0,0,0.18)]"
       >
         <img
           src={chatStartDotUrl}

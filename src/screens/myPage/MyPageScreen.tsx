@@ -1,4 +1,5 @@
 import {
+  FigmaCanvasFrame,
   FigmaTopBar,
   QlingDialog,
   profileImageUrlForColor,
@@ -49,22 +50,18 @@ export function MyPageScreen(props: MyPageScreenProps) {
   const settingsHeadingTop = hasMultiplePreviewItems ? 411 : 326;
   const settingsCardTop = hasMultiplePreviewItems ? 444 : 359;
   const contentBottom = settingsCardTop + 192;
-  const myPageCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
-  const myPageContentHeight = `min(836px, max(520px, calc((100dvh - var(--qling-space-nav-height)) / (${myPageCanvasScale}) - 100px)))`;
+  const myPageTabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
+  const myPageContentHeight = `min(752px, max(520px, calc(${myPageTabViewportHeight} - 100px)))`;
 
   return (
     <section
       aria-label="마이페이지"
-      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-dvh overflow-hidden bg-[#ff8b3d] text-[#1a1a1e] qling-figma-font"
+      className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b3d] text-[#1a1a1e] qling-figma-font"
     >
-      <div
-        className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"
-        data-measure="my-page-responsive-canvas"
-      >
+      <FigmaCanvasFrame className="max-w-[480px]" data-measure="my-page-responsive-canvas">
         <div
-          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]"
+          className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d]"
           data-measure="my-page-screen"
-          style={{ transform: `scale(${myPageCanvasScale})` }}
         >
           <MyPageHeader onBack={props.onBack} />
 
@@ -74,7 +71,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
             aria-label="마이페이지 본문"
           >
             <div className="relative" style={{ height: contentBottom }}>
-              <section className="absolute left-5 top-[32px] h-[93px] w-[353px] overflow-hidden rounded-[24px] bg-white" data-measure="my-page-profile-card">
+              <section className="absolute left-5 right-5 top-[32px] h-[93px] overflow-hidden rounded-[24px] bg-white" data-measure="my-page-profile-card">
                 <DefaultProfileImage label={props.profile.profileMotif.label} profileColor={props.profile.profileMotif.profileColor} />
                 <h2 className="absolute left-[100px] top-[23px] max-w-[128px] truncate text-[18px] font-extrabold leading-[22px] tracking-[-0.18px] text-[#1a1a1e]">
                   {props.profile.nickname}
@@ -105,7 +102,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
               >
                 전체보기 ›
               </button>
-              <section className="absolute left-5 w-[353px]" style={{ top: 202, height: answerSectionBottom - 202 }} data-measure="my-page-answer-preview">
+              <section className="absolute left-5 right-5" style={{ top: 202, height: answerSectionBottom - 202 }} data-measure="my-page-answer-preview">
                 {previewItems.length === 0 ? (
                   <EmptyAnswerPreviewCard />
                 ) : previewItems.map((item, index) => (
@@ -125,7 +122,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
             </div>
           </section>
         </div>
-      </div>
+      </FigmaCanvasFrame>
       <ConfirmationDialog title="로그아웃할까요?" description="이 기기에서 Qling 계정 연결을 해제합니다." confirmLabel="로그아웃" confirmation={props.logoutConfirmation} />
       <ConfirmationDialog title="계정을 삭제할까요?" description="계정 삭제는 되돌릴 수 없습니다. 작성한 고민과 답변 접근도 함께 중단됩니다." confirmLabel="계정 삭제" confirmation={props.accountDeletionConfirmation} destructive />
     </section>
@@ -144,7 +141,7 @@ function MyPageHeader({
       onWheel={blockLockedScroll}
     >
       <div
-        className="relative mx-auto h-[100px] w-full max-w-[393px]"
+        className="relative mx-auto h-[100px] w-full max-w-[480px]"
       >
         <button
           type="button"
@@ -181,14 +178,14 @@ function DefaultProfileImage({ label, profileColor }: { readonly label: string; 
 
 function AnswerPreviewCard({ item, top }: { readonly item: MyPageScreenProps['answerPreviewItems'][number]; readonly top: number }) {
   return (
-    <article className="absolute left-0 h-[86px] w-[353px] overflow-hidden rounded-[18px] bg-white" style={{ top }} aria-label={item.accessibilityLabel}>
+    <article className="absolute left-0 right-0 h-[86px] overflow-hidden rounded-[18px] bg-white" style={{ top }} aria-label={item.accessibilityLabel}>
       <div className="absolute left-[18px] top-4 flex h-[22px] min-w-0 items-center gap-2 text-xs font-bold">
         {item.categoryLabel && (
           <span className="flex h-[22px] max-w-[90px] items-center rounded-[999px] bg-[#ffe4cc] px-[10.5px] font-['Qling_Figma_Inter'] text-[11px] font-bold leading-[13px] text-[#c45614]">{item.categoryLabel}</span>
         )}
         {item.dateLabel && <span className="min-w-0 truncate font-['Qling_Figma_Inter'] text-[12px] font-bold leading-[15px] text-[#9a9aa0]">{item.dateLabel}</span>}
       </div>
-      <p className="absolute left-[18px] top-[49px] h-[19px] w-[305px] truncate text-[13px] font-semibold leading-[1.45] tracking-[-0.52px] text-[#1a1a1e]">
+      <p className="absolute left-[18px] right-[18px] top-[49px] h-[19px] truncate text-[13px] font-semibold leading-[1.45] tracking-[-0.52px] text-[#1a1a1e]">
         "{item.previewText}"
       </p>
     </article>
@@ -197,8 +194,8 @@ function AnswerPreviewCard({ item, top }: { readonly item: MyPageScreenProps['an
 
 function EmptyAnswerPreviewCard() {
   return (
-    <article className="absolute left-0 top-0 h-[86px] w-[353px] overflow-hidden rounded-[18px] bg-white" data-measure="my-page-empty-answer-preview">
-      <p className="absolute left-[18px] top-[35px] h-9 w-[305px] break-words text-[13px] font-semibold leading-[1.45] tracking-[-0.52px] text-[#1a1a1e]">
+    <article className="absolute left-0 right-0 top-0 h-[86px] overflow-hidden rounded-[18px] bg-white" data-measure="my-page-empty-answer-preview">
+      <p className="absolute left-[18px] right-[18px] top-[35px] h-9 break-words text-[13px] font-semibold leading-[1.45] tracking-[-0.52px] text-[#1a1a1e]">
         답변하기 탭에서 따뜻한 첫 답변을 남겨보세요
       </p>
     </article>
@@ -223,17 +220,17 @@ function SettingsCard({
   const enabledSettings = new Set(settings);
 
   return (
-    <section className="absolute left-5 h-[192px] w-[353px] overflow-hidden rounded-[18px] bg-white" style={{ top }} data-measure="my-page-settings-card">
+    <section className="absolute left-5 right-5 h-[192px] overflow-hidden rounded-[18px] bg-white" style={{ top }} data-measure="my-page-settings-card">
       {enabledSettings.has('push_notifications') && <PushToggleRow pushSettings={pushSettings} />}
-      <div className="absolute left-6 top-12 h-px w-[305px] bg-[#f0f0f2]" />
+      <div className="absolute left-6 right-6 top-12 h-px bg-[#f0f0f2]" />
       {enabledSettings.has('privacy_policy') && (
         <SettingsActionRow item="privacy_policy" top={48} onSettingSelect={onSettingSelect} />
       )}
-      <div className="absolute left-6 top-24 h-px w-[305px] bg-[#f0f0f2]" />
+      <div className="absolute left-6 right-6 top-24 h-px bg-[#f0f0f2]" />
       {enabledSettings.has('logout') && (
         <SettingsActionRow item="logout" top={96} disabled={isLogoutProcessing} onSettingSelect={onSettingSelect} />
       )}
-      <div className="absolute left-6 top-36 h-px w-[305px] bg-[#f0f0f2]" />
+      <div className="absolute left-6 right-6 top-36 h-px bg-[#f0f0f2]" />
       {enabledSettings.has('delete_account') && (
         <SettingsActionRow item="delete_account" top={144} disabled={isAccountDeletionProcessing} onSettingSelect={onSettingSelect} />
       )}
@@ -267,7 +264,7 @@ function SettingsActionRow({
       <span className={`absolute left-14 top-[15px] text-[15px] font-semibold leading-[18px] tracking-[-0.6px] ${item === 'delete_account' ? 'text-[#ea4335]' : 'text-[#1a1a1e]'}`}>
         {settingLabels[item]}
       </span>
-      <span className="absolute left-[323px] top-[15px] text-[18px] font-semibold leading-[18px] text-[#c2c4c8]" aria-hidden="true">›</span>
+      <span className="absolute right-5 top-[15px] text-[18px] font-semibold leading-[18px] text-[#c2c4c8]" aria-hidden="true">›</span>
     </button>
   );
 }
@@ -290,7 +287,7 @@ function PushToggleRow({ pushSettings }: { readonly pushSettings: MyPageScreenPr
         aria-label="알림 설정 토글"
         onClick={handleToggleClick}
         disabled={pushSettings.status === 'unsupported'}
-        className={`absolute left-[288px] top-[9px] h-[31px] w-[51px] rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] disabled:opacity-50 ${pushSettings.enabled ? 'bg-[#34c759]' : 'bg-[#d8d8dc]'}`}
+        className={`absolute right-[14px] top-[9px] h-[31px] w-[51px] rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] disabled:opacity-50 ${pushSettings.enabled ? 'bg-[#34c759]' : 'bg-[#d8d8dc]'}`}
       >
         <span
           aria-hidden="true"
@@ -348,28 +345,22 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
     : props.state.status === 'error'
       ? props.state.message
       : policyBody || (props.state.status === 'empty' ? props.state.message : '정책을 준비 중입니다.');
-  const policyCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
   const policyTabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
-  const policyUsableCanvasHeight = `calc((${policyTabViewportHeight}) / (${policyCanvasScale}))`;
-  const policyCardBottom = `max(calc(108px + env(safe-area-inset-bottom,0px)), calc(876px - ${policyUsableCanvasHeight}))`;
+  const policyCardBottom = `max(calc(108px + env(safe-area-inset-bottom,0px)), calc(876px - ${policyTabViewportHeight}))`;
 
   return (
     <section
       aria-label={props.title}
       className="-mx-[var(--qling-space-shell-x)] -mb-[var(--qling-space-scroll-bottom)] -mt-6 h-[calc(var(--qling-visual-viewport-height)-var(--qling-space-nav-height))] overflow-hidden bg-[#ff8b0d] text-[#1a1a1e] qling-figma-font"
     >
-      <div
-        className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden"
-        data-measure="policy-responsive-canvas"
-      >
+      <FigmaCanvasFrame className="max-w-[480px]" data-measure="policy-responsive-canvas">
         <div
-          className="relative h-[852px] w-[393px] shrink-0 origin-top bg-[#ff8b0d]"
+          className="relative h-[852px] w-full max-w-[480px] shrink-0 bg-[#ff8b0d]"
           data-measure="policy-screen"
-          style={{ transform: `scale(${policyCanvasScale})` }}
         >
           <FigmaTopBar title="개인정보 처리방침" titleAriaLabel={props.title} onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
           <article
-            className="absolute left-4 top-[127px] w-[361px] overflow-y-auto rounded-[18px] bg-white px-[18px] py-[17px] [-webkit-overflow-scrolling:touch]"
+            className="absolute left-4 right-4 top-[127px] overflow-y-auto rounded-[18px] bg-white px-[18px] py-[17px] [-webkit-overflow-scrolling:touch]"
             style={{ bottom: policyCardBottom }}
           >
             {shouldShowFeedbackLink && (
@@ -393,7 +384,7 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
             </div>
           </article>
         </div>
-      </div>
+      </FigmaCanvasFrame>
     </section>
   );
 }

@@ -93,18 +93,20 @@ test('my-page renders colored profile svg at the existing profile image size', (
   assert.doesNotMatch(html, /aria-label="프로필 모티프" role="img"/);
 });
 
-test('my-page root uses a fixed scaled Figma canvas with fixed header and body scrolling', () => {
+test('my-page root uses a widened unscaled Figma canvas with fixed header and body scrolling', () => {
   const html = renderToStaticMarkup(MyPageScreen(baseMyPageProps()));
 
   assert.match(html, /data-measure="my-page-responsive-canvas"/);
   assert.match(html, /data-measure="my-page-screen"/);
-  assert.match(html, /h-\[852px\] w-\[393px\]/);
+  assert.match(html, /h-\[852px\] w-full max-w-\[480px\]/);
   assert.match(html, /aria-label="마이페이지 본문"/);
   assert.match(html, /<header[^>]*h-\[100px\][\s\S]*<section[^>]*aria-label="마이페이지 본문"/);
   assert.match(html, /relative overflow-y-auto overscroll-contain pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
-  assert.match(html, /height:min\(836px, max\(520px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 100px\)\)\)/);
+  assert.match(html, /height:min\(752px, max\(520px, calc\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 100px\)\)\)/);
   assert.match(html, /pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
-  assert.match(html, /scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.doesNotMatch(html, /scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.match(html, /left-5 right-5 top-\[32px\] h-\[93px\]/);
+  assert.match(html, /absolute left-5 right-5/);
   assert.doesNotMatch(html, /data-qling-peek-header-content/);
   assert.doesNotMatch(html, /qling-peek-progress/);
   assert.doesNotMatch(html, /translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
@@ -130,7 +132,8 @@ test('my-page renders one real answer preview without the preview heart icon', (
   assert.match(html, /누구나 그런 시기가 있는 것 같아요/);
   assert.match(html, /2026\.05\.02/);
   assert.match(html, /text-\[#c45614\]/);
-  assert.match(html, /h-\[19px\] w-\[305px\] truncate/);
+  assert.match(html, /h-\[19px\] truncate/);
+  assert.match(html, /left-\[18px\] right-\[18px\] top-\[49px\]/);
   assert.doesNotMatch(html, /line-clamp-2 h-9/);
   assert.doesNotMatch(html, /h-4 w-4 shrink-0 fill-\[#ea4335\]/);
 });
@@ -385,9 +388,12 @@ test('privacy policy screen renders document body in the Figma card layout', () 
   assert.match(html, /h-\[calc\(var\(--qling-visual-viewport-height\)-var\(--qling-space-nav-height\)\)\]/);
   assert.match(html, /data-measure="policy-responsive-canvas"/);
   assert.match(html, /data-measure="policy-screen"/);
+  assert.match(html, /h-\[852px\] w-full max-w-\[480px\]/);
   assert.match(html, /top-\[127px\]/);
-  assert.match(html, /bottom:max\(calc\(108px \+ env\(safe-area-inset-bottom,0px\)\), calc\(876px - calc\(\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)\)\)\)/);
-  assert.match(html, /w-\[361px\]/);
+  assert.match(html, /bottom:max\(calc\(108px \+ env\(safe-area-inset-bottom,0px\)\), calc\(876px - calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\)\)\)/);
+  assert.match(html, /left-4 right-4 top-\[127px\]/);
+  assert.doesNotMatch(html, /w-\[361px\]/);
+  assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /rounded-\[18px\]/);
   assert.match(html, /\[-webkit-overflow-scrolling:touch\]/);
   assert.match(html, /개인정보 처리방침/);

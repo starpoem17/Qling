@@ -1,10 +1,9 @@
 import { Pencil } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { FigmaTopBar, QlingAlertDialog } from '../shared/ui';
+import { FigmaCanvasFrame, FigmaTopBar, QlingAlertDialog } from '../shared/ui';
 import type { WriteWorryScreenProps } from './contract';
 
-const writeWorryCanvasScale = 'calc(min(100vw, var(--qling-mobile-canvas-max-width)) / 393px)';
-const sendButtonTop = `min(684px, calc((100dvh - var(--qling-space-nav-height)) / (${writeWorryCanvasScale}) - 88px))`;
+const sendButtonTop = 'min(684px, calc((100dvh - var(--qling-space-nav-height)) - 88px))';
 const inputAreaHeight = `min(541px, max(240px, calc(${sendButtonTop} - 143px)))`;
 
 export function WriteWorryScreen(props: WriteWorryScreenProps) {
@@ -22,15 +21,12 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
 
   return (
     <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
-      <div className="mx-auto flex h-full w-full max-w-[480px] justify-center overflow-hidden">
-        <div
-          className="relative h-[852px] w-[393px] shrink-0 origin-top overflow-hidden bg-[#fff1d1]"
-          style={{ transform: `scale(${writeWorryCanvasScale})` }}
-        >
+      <FigmaCanvasFrame className="max-w-[480px]">
+        <div className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
       {FigmaTopBar({ title: '고민 작성', onBack: props.onBack, backLabel: '나의 고민으로 돌아가기' })}
 
       <section
-        className="absolute left-5 top-[120px] w-[353px] rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
+        className="absolute left-5 right-5 top-[120px] rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
         style={{ height: inputAreaHeight }}
       >
         <label className="relative block h-full">
@@ -73,7 +69,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
         aria-busy={props.draft.isProcessing || undefined}
         disabled={isDisabled || props.draft.isProcessing}
         onClick={props.onPublish}
-        className="absolute left-1/2 inline-flex h-12 w-[267px] -translate-x-1/2 items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-[16px] font-extrabold leading-normal text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-5 right-5 inline-flex h-12 items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-[16px] font-extrabold leading-normal text-[#fff5eb] transition-colors hover:bg-[var(--qling-color-secondary-orange)] focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
         style={{ top: sendButtonTop }}
       >
         고민 전송
@@ -87,7 +83,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
         onConfirm={props.onDismissPopup}
       />
         </div>
-      </div>
+      </FigmaCanvasFrame>
     </section>
   );
 }

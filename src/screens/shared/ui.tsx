@@ -1,4 +1,4 @@
-import { useEffect, useId, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useId, type HTMLAttributes, type MouseEvent, type ReactNode } from 'react';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import { normalizeProfileColor } from '../../lib/profileColor';
 import {
@@ -82,12 +82,12 @@ export function MobileAppShell({
 export function FigmaCanvasFrame({
   children,
   className,
-}: {
+  ...props
+}: HTMLAttributes<HTMLDivElement> & {
   readonly children: ReactNode;
-  readonly className?: string;
 }) {
   return (
-    <div className={cn('mx-auto flex h-full w-full max-w-[393px] justify-center overflow-hidden', className)}>
+    <div {...props} className={cn('mx-auto flex h-full w-full max-w-[393px] justify-center overflow-hidden', className)}>
       {children}
     </div>
   );

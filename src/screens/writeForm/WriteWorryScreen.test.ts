@@ -46,23 +46,26 @@ test('write worry screen renders pencil visual placeholder only for an empty dra
   assert.doesNotMatch(filledHtml, /write-worry-pencil/);
 });
 
-test('write worry screen uses Figma canvas positions while keeping the send button above the shell bottom nav', () => {
+test('write worry screen uses the widened unscaled form frame while keeping the send button above the shell bottom nav', () => {
   const html = renderToStaticMarkup(WriteWorryScreen(baseProps()));
 
-  assert.match(html, /w-\[393px\]/);
+  assert.match(html, /max-w-\[480px\]/);
+  assert.match(html, /w-full/);
   assert.match(html, /h-\[852px\]/);
-  assert.match(html, /transform:scale\(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\)/);
+  assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /고민 작성/);
   assert.doesNotMatch(html, /질문 작성/);
-  assert.match(html, /left-5 top-\[120px\] w-\[353px\]/);
-  assert.match(html, /height:min\(541px, max\(240px, calc\(min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 88px\)\) - 143px\)\)\)/);
-  assert.match(html, /top:min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) \/ \(calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \/ 393px\)\) - 88px\)\)/);
+  assert.match(html, /left-5 right-5 top-\[120px\]/);
+  assert.match(html, /height:min\(541px, max\(240px, calc\(min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) - 88px\)\) - 143px\)\)\)/);
+  assert.match(html, /top:min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) - 88px\)\)/);
+  assert.match(html, /left-5 right-5 inline-flex h-12/);
   assert.match(html, /pl-\[16\.5px\]/);
   assert.match(html, /text-\[16px\] font-bold leading-6 tracking-\[-0\.36px\]/);
   assert.match(html, /left-\[22\.5px\] top-\[20\.5px\]/);
   assert.match(html, /text-\[16px\] font-bold leading-6 tracking-\[-0\.64px\]/);
   assert.doesNotMatch(html, /100dvh-var\(--qling-space-scroll-bottom\)/);
   assert.doesNotMatch(html, /flex h-full min-h-0 flex-col/);
+  assert.doesNotMatch(html, /writeWorryCanvasScale/);
   assert.doesNotMatch(html, /top-\[684px\]/);
   assert.doesNotMatch(html, /top-\[69px\]/);
 });

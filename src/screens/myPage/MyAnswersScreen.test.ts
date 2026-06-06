@@ -138,8 +138,8 @@ test('my answers chat start confirmation popup matches the Figma modal chrome', 
   assert.match(html, /aria-modal="true"/);
   assert.match(html, /aria-labelledby="my-answers-chat-start-confirmation-title"/);
   assert.match(html, /aria-describedby="my-answers-chat-start-confirmation-description"/);
-  assert.match(html, /left-\[-1px\] top-0 z-40 h-\[852px\] w-\[394px\] bg-\[rgba\(40,30,20,0\.42\)\]/);
-  assert.match(html, /left-\[42px\] top-\[251px\] z-50 h-\[288px\] w-\[310px\] rounded-\[24px\] bg-white/);
+  assert.match(html, /absolute inset-0 z-40 bg-\[rgba\(40,30,20,0\.42\)\]/);
+  assert.match(html, /left-1\/2 top-\[251px\] z-50 h-\[288px\] w-\[310px\] -translate-x-1\/2 rounded-\[24px\] bg-white/);
   assert.match(html, /shadow-\[0_12px_20px_rgba\(0,0,0,0\.18\)\]/);
   assert.match(html, /chat_start_dot\.svg/);
   assert.match(html, /채팅을 시작할까요\?/);
