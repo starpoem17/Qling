@@ -179,6 +179,16 @@ body,
   background: #ff8b3d;
 }
 
+html.qling-ios-safari-browser,
+html.qling-ios-safari-browser body,
+html.qling-ios-safari-browser #root {
+  background: #fff5eb;
+}
+
+html.qling-ios-safari-browser .qling-production-main--with-bottom-nav {
+  padding-top: 0;
+}
+
 body {
   font-family: var(--qling-font-sans);
   color: var(--qling-color-text);

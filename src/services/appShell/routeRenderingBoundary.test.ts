@@ -157,9 +157,25 @@ test('keeps answer check status bar background aligned with the cream route canv
   const source = fs.readFileSync('src/App.tsx', 'utf8');
 
   assert.match(source, /currentRoute !== 'write_worry' && currentRoute !== 'write_reply' && currentRoute !== 'answer_check'/);
-  assert.match(source, /themeMeta\?\.setAttribute\('content', '#fff1d1'\)/);
-  assert.match(source, /document\.documentElement\.style\.backgroundColor = '#fff1d1'/);
-  assert.match(source, /document\.body\.style\.backgroundColor = '#fff1d1'/);
+  assert.match(source, /document\.documentElement\.classList\.contains\('qling-ios-safari-browser'\)/);
+  assert.match(source, /\? '#fff5eb'\s*: '#fff1d1'/);
+  assert.match(source, /themeMeta\?\.setAttribute\('content', routeChromeColor\)/);
+  assert.match(source, /document\.documentElement\.style\.backgroundColor = routeChromeColor/);
+  assert.match(source, /document\.body\.style\.backgroundColor = routeChromeColor/);
+});
+
+test('detects iOS Safari browser mode before app boot without changing standalone PWA manifest defaults', () => {
+  const indexHtml = fs.readFileSync('index.html', 'utf8');
+  const cssSource = fs.readFileSync('src/index.css', 'utf8');
+
+  assert.match(indexHtml, /const isIos = \/iPad\|iPhone\|iPod\/\.test\(ua\)/);
+  assert.match(indexHtml, /const isSafari = \/Safari\/\.test\(ua\) && !\/CriOS\|FxiOS\|EdgiOS\|OPiOS\/\.test\(ua\)/);
+  assert.match(indexHtml, /window\.matchMedia\('\(display-mode: standalone\)'\)\.matches \|\| Boolean\(navigator\.standalone\)/);
+  assert.match(indexHtml, /document\.documentElement\.classList\.add\('qling-ios-safari-browser'\)/);
+  assert.match(indexHtml, /document\.querySelector\('meta\[name="theme-color"\]'\)\?\.setAttribute\('content', '#fff5eb'\)/);
+  assert.match(indexHtml, /<meta name="theme-color" content="#ff8b3d" \/>/);
+  assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*background: #ff8b3d;/);
+  assert.match(cssSource, /html\.qling-ios-safari-browser \.qling-production-main--with-bottom-nav[\s\S]*padding-top: 0;/);
 });
 
 test('onboarding flow removes App shell padding for responsive canvas routes', () => {

@@ -64,9 +64,9 @@ export function MobileAppShell({
         {header}
         <main
           className={cn(
-            'mx-auto min-h-0 w-full flex-1 px-[var(--qling-space-shell-x)]',
+            'qling-production-main mx-auto min-h-0 w-full flex-1 px-[var(--qling-space-shell-x)]',
             hasBottomNavigation
-              ? 'overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
+              ? 'qling-production-main--with-bottom-nav overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
               : 'pb-12',
             mainClassName,
           )}

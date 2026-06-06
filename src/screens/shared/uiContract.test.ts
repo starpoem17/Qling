@@ -96,6 +96,8 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.match(cssSource, /--qling-font-sans: "SUIT Variable", "Qling Noto Sans KR", "SUIT"/);
   assert.match(source, /qling-production-root overflow-hidden/);
   assert.doesNotMatch(source, /qling-production-root h-dvh/);
+  assert.match(source, /qling-production-main mx-auto min-h-0 w-full flex-1/);
+  assert.match(source, /qling-production-main--with-bottom-nav overflow-y-auto overscroll-contain/);
   assert.match(source, /min-h-0 w-full flex-1/);
   assert.match(source, /overflow-y-auto overscroll-contain/);
   assert.match(source, /\[-webkit-overflow-scrolling:touch\]/);
@@ -110,6 +112,9 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*height: 100%;/);
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*overflow: hidden;/);
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*overscroll-behavior: none;/);
+  assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*background: #ff8b3d;/);
+  assert.match(cssSource, /html\.qling-ios-safari-browser,\s*html\.qling-ios-safari-browser body,\s*html\.qling-ios-safari-browser #root[\s\S]*background: #fff5eb;/);
+  assert.match(cssSource, /html\.qling-ios-safari-browser \.qling-production-main--with-bottom-nav[\s\S]*padding-top: 0;/);
   assert.doesNotMatch(source, /fixed bottom-0 left-0 right-0/);
 });
 

@@ -316,11 +316,14 @@ export default function App() {
     const previousHtmlBackground = document.documentElement.style.backgroundColor;
     const previousBodyBackground = document.body.style.backgroundColor;
     const previousRootBackground = root?.style.backgroundColor ?? null;
+    const routeChromeColor = document.documentElement.classList.contains('qling-ios-safari-browser')
+      ? '#fff5eb'
+      : '#fff1d1';
 
-    themeMeta?.setAttribute('content', '#fff1d1');
-    document.documentElement.style.backgroundColor = '#fff1d1';
-    document.body.style.backgroundColor = '#fff1d1';
-    if (root) root.style.backgroundColor = '#fff1d1';
+    themeMeta?.setAttribute('content', routeChromeColor);
+    document.documentElement.style.backgroundColor = routeChromeColor;
+    document.body.style.backgroundColor = routeChromeColor;
+    if (root) root.style.backgroundColor = routeChromeColor;
 
     return () => {
       if (themeMeta && previousThemeColor !== null) themeMeta.setAttribute('content', previousThemeColor);
