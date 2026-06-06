@@ -100,7 +100,8 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.match(source, /overflow-y-auto overscroll-contain/);
   assert.match(source, /\[-webkit-overflow-scrolling:touch\]/);
   assert.match(source, /h-\[var\(--qling-space-nav-height\)\] w-full shrink-0/);
-  assert.match(source, /h-\[var\(--qling-space-nav-base-height\)\] w-full max-w-\[480px\]/);
+  assert.match(source, /h-full w-full max-w-\[480px\]/);
+  assert.match(source, /absolute top-0 h-\[80px\]/);
   assert.doesNotMatch(source, /pb-\[var\(--qling-space-safe-bottom\)\]/);
   assert.match(cssSource, /--qling-space-safe-top: env\(safe-area-inset-top, 0px\);/);
   assert.match(cssSource, /--qling-space-nav-base-height: 80px;/);

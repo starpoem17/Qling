@@ -145,7 +145,7 @@ export function BottomNavigation({
       aria-label="주요 화면"
       className="h-[var(--qling-space-nav-height)] w-full shrink-0 bg-[#fff5eb] qling-figma-font"
     >
-      <div className="relative mx-auto h-[var(--qling-space-nav-base-height)] w-full max-w-[480px]" data-measure="bottom-nav-frame">
+      <div className="relative mx-auto h-full w-full max-w-[480px]" data-measure="bottom-nav-frame">
         {tabs.map(({ tab, label, unreadCount }) => {
           const isActive = activeTab === tab;
           const item = itemByTab[tab];
