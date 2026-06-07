@@ -33,6 +33,14 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
             props.isOriginalExpanded ? 'min-h-[159px] pb-[18px]' : 'h-[79px]',
           )}
         >
+          <button
+            type="button"
+            onClick={props.onToggleOriginalExpanded}
+            aria-label={props.isOriginalExpanded ? '원문 접기' : '원문 펼치기'}
+            aria-expanded={props.isOriginalExpanded}
+            aria-controls="write-reply-original-card"
+            className="absolute inset-0 z-20 cursor-pointer appearance-none rounded-[18px] border-0 bg-transparent p-0 text-left focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
+          />
           <div className="absolute left-[18px] top-[11px]">
             <ReplyCategoryChip label={props.originalWorry.category} />
           </div>
@@ -44,16 +52,12 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
               {props.originalWorry.receivedAt.label}
             </time>
           )}
-          <button
-            type="button"
-            onClick={props.onToggleOriginalExpanded}
-            aria-label={props.isOriginalExpanded ? '원문 접기' : '원문 펼치기'}
-            aria-expanded={props.isOriginalExpanded}
-            aria-controls="write-reply-original-card"
-            className="absolute right-[11px] top-[10px] z-10 flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
+          <span
+            className="pointer-events-none absolute right-[11px] top-[10px] z-10 flex h-10 w-10 items-center justify-center text-[#2a2a2a]"
+            aria-hidden="true"
           >
-            <ChevronDown className={cn('h-6 w-6', props.isOriginalExpanded && 'rotate-180')} aria-hidden="true" />
-          </button>
+            <ChevronDown className={cn('h-6 w-6', props.isOriginalExpanded && 'rotate-180')} />
+          </span>
           <p
             className={cn(
               'break-words text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]',

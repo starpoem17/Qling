@@ -48,6 +48,7 @@ test('write reply screen shows summary on the base card and keeps original body 
   assert.match(closedHtml, /aria-expanded="false"/);
   assert.match(expandedHtml, /원문 전체는 펼친 카드 안에서만 표시됩니다\./);
   assert.match(expandedHtml, /aria-expanded="true"/);
+  assert.match(expandedHtml, /id="write-reply-original-card"/);
   assert.doesNotMatch(expandedHtml, /role="dialog"/);
 });
 
@@ -122,6 +123,8 @@ test('write reply screen uses Figma canvas positions while keeping the send butt
   assert.match(html, /max-w-\[480px\]/);
   assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /top:calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.match(html, /relative mx-4 overflow-hidden rounded-\[18px\] bg-white/);
+  assert.match(html, /absolute inset-0 z-20 cursor-pointer appearance-none rounded-\[18px\] border-0 bg-transparent p-0 text-left/);
   assert.match(html, /height:max\(240px, calc\(calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 88px\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) - calc\(200px \+ var\(--qling-pwa-topbar-shift, 0px\)\) - 23px\)\)/);
   assert.match(html, /mx-5 mt-\[21px\] block overflow-hidden/);
   assert.match(html, /mx-auto mt-\[23px\] flex h-12 w-\[267px\]/);
@@ -133,7 +136,7 @@ test('write reply screen uses Figma canvas positions while keeping the send butt
   assert.doesNotMatch(html, /top:calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 88px\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
 });
 
-test('write reply screen forwards back, expansion, draft, and publish events without route objects', () => {
+test('write reply screen toggles expansion from the whole card and forwards other events without route objects', () => {
   const events: string[] = [];
   const collapsedTree = WriteFormScreen(baseProps({
     draft: {
@@ -163,9 +166,9 @@ test('write reply screen forwards back, expansion, draft, and publish events wit
     isOriginalExpanded: true,
   }));
 
-  click(findButtonByAriaLabel(collapsedTree, /원문 펼치기/));
+  click(findOriginalCardToggle(collapsedTree));
   change(findElement(collapsedTree, element => element.type === 'textarea'), '바뀐 답변');
-  click(findButtonByAriaLabel(expandedTree, /원문 접기/));
+  click(findOriginalCardToggle(expandedTree));
   click(findButtonByAriaLabel(collapsedTree, /답변하기로 돌아가기/));
   click(findButtonByAriaLabel(collapsedTree, /답변 전송/));
 
@@ -176,6 +179,20 @@ test('write reply screen forwards back, expansion, draft, and publish events wit
     'back',
     'publish:delivery-1:worry-1',
   ]);
+});
+
+test('write reply chevron is visual state only instead of a separate toggle button', () => {
+  const tree = WriteFormScreen(baseProps({ isOriginalExpanded: true }));
+  const toggle = findOriginalCardToggle(tree);
+  const card = findElement(tree, element => element.type === 'section' && element.props.id === 'write-reply-original-card');
+  const buttonsInCard = findElements(card, element => element.type === 'button');
+  const chevronWrapper = findElement(card, element => element.type === 'span' && String(element.props.className ?? '').includes('pointer-events-none') && element.props['aria-hidden'] === 'true');
+
+  assert.equal(buttonsInCard.length, 1);
+  assert.equal(buttonsInCard[0], toggle);
+  assert.equal(chevronWrapper.props['aria-hidden'], 'true');
+  assert.equal(toggle.props['aria-expanded'], true);
+  assert.equal(toggle.props['aria-controls'], 'write-reply-original-card');
 });
 
 test('write reply screen omits AI filter guidance from the Figma-aligned form', () => {
@@ -211,10 +228,29 @@ function findButtonByAriaLabel(tree: ReactNode, pattern: RegExp): TestElement {
   return findElement(tree, element => element.type === 'button' && pattern.test(String(element.props['aria-label'] ?? '')));
 }
 
+function findOriginalCardToggle(tree: ReactNode): TestElement {
+  return findElement(tree, element => element.type === 'button' && element.props['aria-controls'] === 'write-reply-original-card');
+}
+
 function findElement(tree: ReactNode, predicate: (element: TestElement) => boolean): TestElement {
   const found = findOptionalElement(tree, predicate);
   assert.ok(found, 'element not found');
   return found;
+}
+
+function findElements(tree: ReactNode, predicate: (element: TestElement) => boolean): TestElement[] {
+  const found: TestElement[] = [];
+  collectElements(tree, predicate, found);
+  return found;
+}
+
+function collectElements(tree: ReactNode, predicate: (element: TestElement) => boolean, found: TestElement[]) {
+  if (!isValidElement(tree)) return;
+  const element = tree as TestElement;
+  if (predicate(element)) found.push(element);
+  Children.forEach(element.props.children as ReactNode, child => {
+    collectElements(child, predicate, found);
+  });
 }
 
 function findOptionalElement(tree: ReactNode, predicate: (element: TestElement) => boolean): TestElement | null {
