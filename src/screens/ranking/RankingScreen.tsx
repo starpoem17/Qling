@@ -30,6 +30,10 @@ const rankingSheetTop = `max(${rankingSheetMinimumTop}px, calc(${rankingTopGraph
 const viewerRankCardTop = `calc(${rankingTabViewportHeight} - 79px)`;
 const rankingSheetReadyHeight = `max(372px, calc(${rankingTabViewportHeight} - ${rankingSheetTop}))`;
 const rankingSheetEmptyTopWithViewer = `max(8px, calc((${viewerRankCardTop} - ${rankingSheetTop}) / 2 - 8px))`;
+const rankingScrollListTopOffset = 48;
+const rankingRowHeight = 57;
+const rankingScrollBaseBottomPadding = 94;
+const rankingScrollMinimumOverflow = 80;
 const qlingNotoSansKrStyle = { fontFamily: '"Qling Noto Sans KR"' } as const;
 
 const rankingAssetUrlByName = {
@@ -305,6 +309,8 @@ function RankingSheet({
   const rows = period?.entries.slice(3, 10) ?? [];
   const hasViewerCard = Boolean(period?.viewer);
   const sheetStyle = { top: rankingSheetTop, height: rankingSheetReadyHeight };
+  const listContentHeight = rows.length * rankingRowHeight;
+  const listPaddingBottom = `max(${rankingScrollBaseBottomPadding}px, calc(${rankingSheetReadyHeight} - ${rankingScrollListTopOffset}px - ${listContentHeight}px + ${rankingScrollMinimumOverflow}px))`;
   return (
     <section
       className={cn(
@@ -328,7 +334,8 @@ function RankingSheet({
           </div>
           {rows.length > 0 ? (
             <ol
-              className="absolute bottom-0 left-0 top-12 flex w-full flex-col overflow-y-auto px-5 pb-[94px] [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="absolute bottom-0 left-0 top-12 flex w-full flex-col overflow-y-auto px-5 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              style={{ paddingBottom: listPaddingBottom }}
               data-measure="ranking-scroll-list"
             >
               {rows.map(entry => <RankingRow key={entry.uid} entry={entry} />)}

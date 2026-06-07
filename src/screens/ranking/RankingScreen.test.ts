@@ -343,7 +343,9 @@ test('ready ranking sheet extends behind the viewer card when my rank is visible
   assert.doesNotMatch(html, /min\(452px/);
   assert.doesNotMatch(html, /min\(773px/);
   assert.match(html, /data-measure="ranking-scroll-list"/);
-  assert.match(html, /bottom-0 left-0 top-12 flex w-full flex-col overflow-y-auto px-5 pb-\[94px\] \[-webkit-overflow-scrolling:touch\] \[scrollbar-width:none\] \[&amp;::-webkit-scrollbar\]:hidden/);
+  assert.match(html, /bottom-0 left-0 top-12 flex w-full flex-col overflow-y-auto px-5 \[-webkit-overflow-scrolling:touch\] \[scrollbar-width:none\] \[&amp;::-webkit-scrollbar\]:hidden/);
+  assert.match(html, /padding-bottom:max\(94px, calc\(max\(372px, calc\(var\(--qling-tab-viewport-height\) - max\(430px, calc\(max\(12px,/);
+  assert.match(html, /- 48px - 285px \+ 80px\)\)/);
 });
 
 test('ready ranking sheet can still stretch when no viewer card is visible', () => {
