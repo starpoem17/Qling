@@ -38,14 +38,18 @@ export async function getPrdAnswerFeed(params: {
   const legacyWorryIds = [...new Set(deliveries
     .map(delivery => delivery.worryId)
     .filter((worryId): worryId is string => typeof worryId === 'string' && !snapshotWorryIds.has(worryId)))];
-  const [worryDocs, readStatesSnap] = await Promise.all([
+  const activeDeliveryIds = deliveries.map(delivery => delivery.id);
+  const readStateRefs = activeDeliveryIds.map(deliveryId => (
+    params.db.collection('users').doc(params.uid).collection('deliveryReadStates').doc(deliveryId)
+  ));
+  const [worryDocs, readStateDocs] = await Promise.all([
     Promise.all(legacyWorryIds.map(async worryId => {
       const worrySnap = await params.db.collection('worries').doc(worryId).get();
       return worrySnap.exists
         ? { id: worrySnap.id, ...worrySnap.data() } as PrdWorryDoc
         : null;
     })),
-    params.db.collection('users').doc(params.uid).collection('deliveryReadStates').get(),
+    Promise.all(readStateRefs.map(readStateRef => readStateRef.get())),
   ]);
 
   const worriesById = new Map(
@@ -54,7 +58,7 @@ export async function getPrdAnswerFeed(params: {
       .map(worry => [worry.id, worry])
   );
   const readStatesByDeliveryId = new Map(
-    readStatesSnap.docs.map(readStateDoc => [
+    readStateDocs.filter(readStateDoc => readStateDoc.exists).map(readStateDoc => [
       readStateDoc.id,
       {
         deliveryId: readStateDoc.id,

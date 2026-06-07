@@ -12,7 +12,11 @@ function createDoc(id: string, data: Record<string, unknown> | undefined) {
   };
 }
 
-function createDb(store: Store, reads: { worryDocGets?: number } = {}) {
+function createDb(store: Store, reads: {
+  worryDocGets?: number;
+  deliveryReadStateDocGets?: number;
+  deliveryReadStateCollectionGets?: number;
+} = {}) {
   function collection(path: string) {
     return {
       where(field: string, op: string, value: unknown) {
@@ -38,6 +42,9 @@ function createDb(store: Store, reads: { worryDocGets?: number } = {}) {
         return {
           async get() {
             if (path === 'worries') reads.worryDocGets = (reads.worryDocGets ?? 0) + 1;
+            if (path.includes('/deliveryReadStates')) {
+              reads.deliveryReadStateDocGets = (reads.deliveryReadStateDocGets ?? 0) + 1;
+            }
             return createDoc(id, store[`${path}/${id}`]);
           },
           collection(child: string) {
@@ -46,6 +53,9 @@ function createDb(store: Store, reads: { worryDocGets?: number } = {}) {
         };
       },
       async get() {
+        if (path.includes('/deliveryReadStates')) {
+          reads.deliveryReadStateCollectionGets = (reads.deliveryReadStateCollectionGets ?? 0) + 1;
+        }
         const prefix = `${path}/`;
         return {
           docs: Object.entries(store)
@@ -140,6 +150,23 @@ test('server answer feed preserves read-state behavior', async () => {
   });
 
   assert.equal(items[0].hasUnread, false);
+});
+
+test('server answer feed reads only visible delivery read-state docs', async () => {
+  const reads = { deliveryReadStateDocGets: 0, deliveryReadStateCollectionGets: 0 };
+  const items = await getPrdAnswerFeed({
+    db: createDb(visibleStore({
+      'users/recipient/deliveryReadStates/delivery1': { readAt: 'now' },
+      'users/recipient/deliveryReadStates/old-delivery-1': { readAt: 'old' },
+      'users/recipient/deliveryReadStates/old-delivery-2': { readAt: 'old' },
+    }), reads) as never,
+    uid: 'recipient',
+  });
+
+  assert.equal(items.length, 1);
+  assert.equal(items[0].hasUnread, false);
+  assert.equal(reads.deliveryReadStateDocGets, 1);
+  assert.equal(reads.deliveryReadStateCollectionGets, 0);
 });
 
 test('server answer feed excludes answered deliveries', async () => {

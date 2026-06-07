@@ -17,15 +17,28 @@ interface FakeRef {
 }
 
 interface FakeDoc {
+  id?: string;
   exists: boolean;
   data(): Record<string, unknown> | undefined;
 }
 
-function fakeDoc(data: Record<string, unknown> | undefined): FakeDoc {
+function fakeDoc(data: Record<string, unknown> | undefined, id?: string): FakeDoc {
   return {
+    id,
     exists: data !== undefined,
     data: () => data,
   };
+}
+
+function matchesFilter(data: Record<string, unknown>, filter: readonly [string, string, unknown]) {
+  const [field, op, value] = filter;
+  if (op === '<') {
+    return typeof data[field] === 'number' && typeof value === 'number' && data[field] < value;
+  }
+  if (op === '==') {
+    return data[field] === value;
+  }
+  throw new Error(`unsupported_filter:${op}`);
 }
 
 function createFakeFirestore(initial?: {
@@ -41,6 +54,11 @@ function createFakeFirestore(initial?: {
     summaryFailureLogs: {},
   };
   const transactionReads: string[] = [];
+  const collectionReads: Array<{
+    collectionName: CollectionName;
+    filters: Array<[string, string, unknown]>;
+    limit?: number;
+  }> = [];
 
   const makeRef = (collectionName: CollectionName, id: string): FakeRef => ({
     collectionName,
@@ -51,8 +69,26 @@ function createFakeFirestore(initial?: {
   return {
     state,
     transactionReads,
+    collectionReads,
     collection(collectionName: CollectionName) {
+      const buildQuery = (filters: Array<[string, string, unknown]> = [], max?: number) => ({
+        where(field: string, op: string, value: unknown) {
+          return buildQuery([...filters, [field, op, value]], max);
+        },
+        limit(nextMax: number) {
+          return buildQuery(filters, nextMax);
+        },
+        async get() {
+          collectionReads.push({ collectionName, filters, limit: max });
+          const docs = Object.entries(state[collectionName])
+            .filter(([, data]) => filters.every(filter => matchesFilter(data, filter)))
+            .slice(0, max)
+            .map(([id, data]) => fakeDoc(data, id));
+          return { docs };
+        },
+      });
       return {
+        ...buildQuery(),
         doc(id = `${collectionName}_generated`) {
           return makeRef(collectionName, id);
         },
@@ -67,7 +103,7 @@ function createFakeFirestore(initial?: {
       const transaction = {
         get: async (ref: FakeRef) => {
           transactionReads.push(ref.path);
-          return fakeDoc(state[ref.collectionName][ref.id]);
+          return fakeDoc(state[ref.collectionName][ref.id], ref.id);
         },
         set: (ref: FakeRef, data: Record<string, unknown>) => {
           writes.push(() => {
@@ -102,6 +138,65 @@ function user(overrides: Record<string, unknown> = {}) {
     ...overrides,
   };
 }
+
+test('recipient candidate fetch uses capacity query instead of full user collection scan', async () => {
+  const db = createFakeFirestore({
+    users: {
+      author: user(),
+      a: user({ helpedCount: 5 }),
+      b: user({ activeDeliveryCount: 9 }),
+      c: user(),
+      d: user(),
+      e: user(),
+      overlimit: user({ activeDeliveryCount: 10 }),
+      missingCounter: user({ activeDeliveryCount: undefined }),
+      disabled: user({ disabled: true }),
+    },
+  });
+  const repository = createInitialWorryPublicationRepository({ db: db as never });
+
+  const candidates = await repository.fetchRecipientCandidates({
+    authorUid: 'author',
+    minimumCandidateCount: 5,
+  });
+
+  assert.deepEqual(db.collectionReads, [{
+    collectionName: 'users',
+    filters: [['activeDeliveryCount', '<', 10]],
+    limit: 200,
+  }]);
+  assert.deepEqual(candidates.map(candidate => candidate.uid), ['author', 'a', 'b', 'c', 'd', 'e', 'disabled']);
+});
+
+test('recipient candidate fetch falls back to bounded legacy sample when counters are missing', async () => {
+  const db = createFakeFirestore({
+    users: {
+      legacyA: user({ activeDeliveryCount: undefined }),
+      legacyB: user({ activeDeliveryCount: undefined }),
+      active: user({ activeDeliveryCount: 0 }),
+    },
+  });
+  const repository = createInitialWorryPublicationRepository({ db: db as never });
+
+  const candidates = await repository.fetchRecipientCandidates({
+    authorUid: 'author',
+    minimumCandidateCount: 5,
+  });
+
+  assert.deepEqual(db.collectionReads, [
+    {
+      collectionName: 'users',
+      filters: [['activeDeliveryCount', '<', 10]],
+      limit: 200,
+    },
+    {
+      collectionName: 'users',
+      filters: [],
+      limit: 50,
+    },
+  ]);
+  assert.deepEqual(candidates.map(candidate => candidate.uid), ['active', 'legacyA', 'legacyB']);
+});
 
 function buildCommitModels(recipientUids = ['a', 'b', 'c', 'd', 'e']) {
   const worry: WorryWriteModel = {

@@ -130,20 +130,26 @@ export function ChatRoomContainer({
         );
 
         const opponentUid = chatData.participants.find((uid: string) => uid !== user.uid);
-        if (opponentUid && !opponent) {
-          if (chatData.participantProfiles && chatData.participantProfiles[opponentUid]) {
-            setOpponent({
+        if (opponentUid) {
+          const nextOpponent = chatData.participantProfiles && chatData.participantProfiles[opponentUid]
+            ? {
               uid: opponentUid,
               nickname: chatData.participantProfiles[opponentUid].nickname || '익명',
               profileColor: chatData.participantProfiles[opponentUid].profileColor || '#FF8B3D',
-            });
-          } else {
-            setOpponent({ uid: opponentUid, nickname: '알 수 없음', profileColor: '#cccccc' });
-          }
+            }
+            : { uid: opponentUid, nickname: '알 수 없음', profileColor: '#cccccc' };
+          setOpponent(current => (
+            current
+            && current.uid === nextOpponent.uid
+            && current.nickname === nextOpponent.nickname
+            && current.profileColor === nextOpponent.profileColor
+              ? current
+              : nextOpponent
+          ));
         }
 
         if (opponentUid) {
-           setOpponentUnreadCount(chatData.unreadCounts?.[opponentUid] || 0);
+          setOpponentUnreadCount(chatData.unreadCounts?.[opponentUid] || 0);
         }
 
         const snapshotWorryInfo = worryInfoFromSnapshot(chatData.worrySnapshot);
@@ -223,7 +229,7 @@ export function ChatRoomContainer({
       unsubscribeChat();
       unsubscribeMessages();
     };
-  }, [user, chatId, opponent]);
+  }, [user, chatId]);
 
   const handleSendMessage = async (content: string) => {
     if (!user || !content.trim()) return { success: false, error: 'empty_message' };

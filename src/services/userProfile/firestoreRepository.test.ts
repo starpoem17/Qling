@@ -267,6 +267,7 @@ test('real repository completeOnboarding writes server-owned profile fields afte
   assert.deepEqual(written?.interests, ['직장']);
   assert.equal(written?.profileColor, '#FF8B3D');
   assert.equal(written?.profileStatus, 'cold_start');
+  assert.equal(written?.activeDeliveryCount, 0);
   assert.deepEqual(written?.experienceProfile, createInitialExperienceProfile(['직장']));
   assert.ok(Object.hasOwn(written ?? {}, 'createdAt'));
   assert.ok(Object.hasOwn(written ?? {}, 'updatedAt'));

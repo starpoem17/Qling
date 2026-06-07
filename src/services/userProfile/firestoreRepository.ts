@@ -21,6 +21,7 @@ function profileData(params: UserProfileWriteModel, timestamp: unknown) {
     profileColor: params.profileColor,
     profileStatus: params.profileStatus,
     experienceProfile: params.experienceProfile,
+    activeDeliveryCount: 0,
     createdAt: timestamp,
     updatedAt: timestamp,
     lastActive: timestamp,

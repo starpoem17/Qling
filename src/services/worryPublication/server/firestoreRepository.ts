@@ -15,9 +15,13 @@ import type {
   WorryWriteModel,
 } from './types';
 import {
+  ACTIVE_DELIVERY_LIMIT,
   isEligiblePhase1HumanCandidate,
 } from './recipientSelection';
 import { normalizeExperienceProfileStatus } from '../../matching/server/experienceProfile';
+
+const DEFAULT_CANDIDATE_QUERY_LIMIT = 200;
+const LEGACY_CANDIDATE_FALLBACK_LIMIT = 50;
 
 function withoutId<T extends { id: string }>(model: T): Omit<T, 'id'> {
   const { id: _id, ...rest } = model;
@@ -77,12 +81,34 @@ export function createInitialWorryPublicationRepository(params: {
       };
     },
 
-    async fetchRecipientCandidates(_params) {
-      // Phase 1 correctness-first strategy: scan the broad user pool and keep
-      // final eligibility/ranking policy in the use case. Later phases can add
-      // indexed prefilters without changing publication semantics.
-      const snap = await db.collection('users').get();
-      return snap.docs.map(doc => userDocToCandidate(doc.id, doc.data()));
+    async fetchRecipientCandidates({ authorUid, minimumCandidateCount, limit }) {
+      const safeLimit = Math.max(
+        minimumCandidateCount,
+        Math.min(limit ?? DEFAULT_CANDIDATE_QUERY_LIMIT, DEFAULT_CANDIDATE_QUERY_LIMIT)
+      );
+      const byCapacitySnap = await db.collection('users')
+        .where('activeDeliveryCount', '<', ACTIVE_DELIVERY_LIMIT)
+        .limit(safeLimit)
+        .get();
+      const candidatesByUid = new Map(
+        byCapacitySnap.docs.map(doc => [doc.id, userDocToCandidate(doc.id, doc.data())])
+      );
+
+      const eligibleCount = [...candidatesByUid.values()]
+        .filter(candidate => isEligiblePhase1HumanCandidate(candidate, authorUid))
+        .length;
+      if (eligibleCount < minimumCandidateCount) {
+        const legacySnap = await db.collection('users')
+          .limit(LEGACY_CANDIDATE_FALLBACK_LIMIT)
+          .get();
+        for (const doc of legacySnap.docs) {
+          if (!candidatesByUid.has(doc.id)) {
+            candidatesByUid.set(doc.id, userDocToCandidate(doc.id, doc.data()));
+          }
+        }
+      }
+
+      return [...candidatesByUid.values()];
     },
 
     async commitRejectedWorryModeration({ moderationLog }) {
