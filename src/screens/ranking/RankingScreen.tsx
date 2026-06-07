@@ -34,6 +34,7 @@ const rankingScrollListTopOffset = 48;
 const rankingRowHeight = 57;
 const rankingScrollBaseBottomPadding = 94;
 const rankingScrollMinimumOverflow = 80;
+const rankingScrollLastRowGap = 16;
 const qlingNotoSansKrStyle = { fontFamily: '"Qling Noto Sans KR"' } as const;
 
 const rankingAssetUrlByName = {
@@ -310,7 +311,10 @@ function RankingSheet({
   const hasViewerCard = Boolean(period?.viewer);
   const sheetStyle = { top: rankingSheetTop, height: rankingSheetReadyHeight };
   const listContentHeight = rows.length * rankingRowHeight;
-  const listPaddingBottom = `max(${rankingScrollBaseBottomPadding}px, calc(${rankingSheetReadyHeight} - ${rankingScrollListTopOffset}px - ${listContentHeight}px + ${rankingScrollMinimumOverflow}px))`;
+  const viewerCardBottomSpacer = `calc(${rankingSheetTop} + ${rankingSheetReadyHeight} - ${viewerRankCardTop} + ${rankingScrollLastRowGap}px)`;
+  const listBottomSpacerHeight = hasViewerCard
+    ? `max(${rankingScrollBaseBottomPadding}px, ${viewerCardBottomSpacer}, calc(${rankingSheetReadyHeight} - ${rankingScrollListTopOffset}px - ${listContentHeight}px + ${rankingScrollMinimumOverflow}px))`
+    : `max(${rankingScrollBaseBottomPadding}px, calc(${rankingSheetReadyHeight} - ${rankingScrollListTopOffset}px - ${listContentHeight}px + ${rankingScrollMinimumOverflow}px))`;
   return (
     <section
       className={cn(
@@ -335,10 +339,15 @@ function RankingSheet({
           {rows.length > 0 ? (
             <ol
               className="absolute bottom-0 left-0 top-12 flex w-full flex-col overflow-y-auto px-5 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              style={{ paddingBottom: listPaddingBottom }}
               data-measure="ranking-scroll-list"
             >
               {rows.map(entry => <RankingRow key={entry.uid} entry={entry} />)}
+              <li
+                aria-hidden="true"
+                className="shrink-0 list-none"
+                style={{ height: listBottomSpacerHeight }}
+                data-measure="ranking-scroll-spacer"
+              />
             </ol>
           ) : (
             <div
