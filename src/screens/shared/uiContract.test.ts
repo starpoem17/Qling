@@ -172,7 +172,7 @@ test('standalone back buttons keep at least a 44px touch target', () => {
   assert.match(myPageSource, /<FigmaTopBar title="마이페이지"/);
   assert.match(myAnswersSource, /<FigmaTopBar title="내가 쓴 답변"/);
   assert.match(sharedUiSource, /left-\[6px\] top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\] flex h-\[45px\] w-\[44px\]/);
-  assert.match(replyDetailSource, /aria-label="목록으로 돌아가기"[\s\S]*h-11 w-11/);
+  assert.match(replyDetailSource, /<FigmaTopBar title=\{title\} onBack=\{onBack\} backLabel="목록으로 돌아가기" tone="light" \/>/);
 });
 
 test('profile motif remains visual-only without avatar data requirements', () => {

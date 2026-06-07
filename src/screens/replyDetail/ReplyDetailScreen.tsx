@@ -1,9 +1,11 @@
-import { ArrowLeft, CheckCircle2, Heart, Loader2, MessageCircle, Send, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { CheckCircle2, Heart, Loader2, MessageCircle, Send, ThumbsDown, ThumbsUp } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '../../lib/utils';
 import {
   EmptyState,
   ErrorState,
+  FigmaCanvasFrame,
+  FigmaTopBar,
   LoadingState,
   PrimaryCTA,
   QlingCard,
@@ -16,7 +18,7 @@ import type { ReplyDetailScreenProps } from './contract';
 export function ReplyDetailScreen(props: ReplyDetailScreenProps) {
   if (props.state.status === 'loading') {
     return (
-      <DetailFrame title={props.variant === 'my-answer-detail' ? '내 답변' : '답변 확인'} onBack={props.onBack}>
+      <DetailFrame title={props.variant === 'my-answer-detail' ? '상세 답변' : '답변 확인'} onBack={props.onBack}>
         <LoadingState title={props.state.label} />
       </DetailFrame>
     );
@@ -24,7 +26,7 @@ export function ReplyDetailScreen(props: ReplyDetailScreenProps) {
 
   if (props.state.status === 'error') {
     return (
-      <DetailFrame title={props.variant === 'my-answer-detail' ? '내 답변' : '답변 확인'} onBack={props.onBack}>
+      <DetailFrame title={props.variant === 'my-answer-detail' ? '상세 답변' : '답변 확인'} onBack={props.onBack}>
         <ErrorState title="답장을 불러오지 못했어요." message={props.state.message} />
       </DetailFrame>
     );
@@ -32,14 +34,14 @@ export function ReplyDetailScreen(props: ReplyDetailScreenProps) {
 
   if (props.state.status === 'empty') {
     return (
-      <DetailFrame title={props.variant === 'my-answer-detail' ? '내 답변' : '답변 확인'} onBack={props.onBack}>
+      <DetailFrame title={props.variant === 'my-answer-detail' ? '상세 답변' : '답변 확인'} onBack={props.onBack}>
         <EmptyState title="답장을 찾을 수 없어요." message={props.state.message ?? '답장 상세 준비 중입니다.'} />
       </DetailFrame>
     );
   }
 
   return (
-    <DetailFrame title={props.variant === 'my-answer-detail' ? '내 답변' : '답변 확인'} onBack={props.onBack}>
+    <DetailFrame title={props.variant === 'my-answer-detail' ? '상세 답변' : '답변 확인'} onBack={props.onBack}>
       {props.originalWorry && <OriginalWorryCard {...props} />}
       {props.reply && <ReplyCard {...props} />}
       {props.variant === 'received-answer-detail' ? (
@@ -60,27 +62,26 @@ function DetailFrame({
   readonly onBack: () => void;
   readonly children: ReactNode;
 }) {
+  const detailViewportHeight = 'var(--qling-tab-viewport-height)';
+  const directTopbarShift = 'var(--qling-pwa-direct-topbar-shift)';
+  const contentViewportHeight = `max(320px, calc(${detailViewportHeight} - 100px - ${directTopbarShift}))`;
+
   return (
-    <div className="mx-auto flex h-full min-h-0 max-w-xl flex-col">
-      <div className="sticky top-0 z-20 -mx-[var(--qling-space-shell-x)] shrink-0 bg-[var(--qling-color-cream)]/95 px-[var(--qling-space-shell-x)] py-3 backdrop-blur-md">
-        <div className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center">
-          <button
-            type="button"
-            onClick={onBack}
-            aria-label="목록으로 돌아가기"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-[var(--qling-color-text)] transition-colors hover:bg-[var(--qling-color-cream-soft)] focus:outline-none focus:ring-2 focus:ring-[var(--qling-color-primary-orange)]"
+    <section className="-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d]">
+      <FigmaCanvasFrame className="max-w-[480px]">
+        <div className="relative h-full min-h-0 w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d] qling-figma-font text-[#1a1a1e]">
+          <FigmaTopBar title={title} onBack={onBack} backLabel="목록으로 돌아가기" tone="light" />
+          <div
+            className="relative overflow-y-auto overscroll-contain bg-[var(--qling-color-cream)] px-4 pb-[calc(24px+env(safe-area-inset-bottom,0px))] pt-[27px] [-webkit-overflow-scrolling:touch]"
+            style={{ height: contentViewportHeight }}
           >
-            <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-          </button>
-          <h1 className="text-center text-lg font-extrabold text-[var(--qling-color-text)]">{title}</h1>
+            <div className="mx-auto max-w-xl space-y-5">
+              {children}
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6 pt-5 [-webkit-overflow-scrolling:touch]">
-        <div className="space-y-5">
-          {children}
-        </div>
-      </div>
-    </div>
+      </FigmaCanvasFrame>
+    </section>
   );
 }
 

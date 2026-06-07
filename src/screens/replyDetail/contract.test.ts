@@ -124,6 +124,9 @@ test('reply detail contract represents failed feedback/comment and existing disp
 test('reply detail source disables feedback and comment buttons while processing', () => {
   const source = readFileSync(join(process.cwd(), 'src/screens/replyDetail/ReplyDetailScreen.tsx'), 'utf8');
 
+  assert.match(source, /<FigmaTopBar title=\{title\} onBack=\{onBack\} backLabel="목록으로 돌아가기" tone="light" \/>/);
+  assert.match(source, /var\(--qling-pwa-direct-topbar-shift\)/);
+  assert.match(source, /height: contentViewportHeight/);
   assert.match(source, /processing=\{props\.isFeedbackProcessing\}/);
   assert.match(source, /disabled=\{props\.isCommentProcessing\}/);
   assert.match(source, /aria-label=\{isLike \? '이 답변이 위로가 되었어요 선택 후 제출' : '이 답변이 그냥 그랬어요 선택 후 제출'\}/);
