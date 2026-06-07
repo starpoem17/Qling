@@ -9,3 +9,4 @@ reports/
 .env*
 !.env.example
 codex
+.firebase-service-account.*
