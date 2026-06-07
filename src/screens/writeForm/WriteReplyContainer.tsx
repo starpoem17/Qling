@@ -108,28 +108,26 @@ export function WriteReplyContainer(props: WriteReplyContainerProps) {
   };
 
   return (
-    <div>
-      <WriteFormScreen
-        kind="write-reply"
-        originalWorry={originalWorry}
-        draft={buildWriteDraftContract({
-          value: draft,
-          maxLength: CONTENT_MAX_LENGTH,
-          validation,
-          moderation,
-          isProcessing,
-        })}
-        isOriginalOverlayOpen={isOriginalOverlayOpen}
-        onBack={backToReceivedWorries}
-        onDraftChange={value => {
-          setDraft(value);
-          setStoredDraft(replyDraftKey(originalWorry.deliveryId), value);
-          setModeration({ status: 'idle' });
-        }}
-        onOpenOriginal={() => setIsOriginalOverlayOpen(true)}
-        onCloseOriginal={() => setIsOriginalOverlayOpen(false)}
-        onPublish={publish}
-      />
-    </div>
+    <WriteFormScreen
+      kind="write-reply"
+      originalWorry={originalWorry}
+      draft={buildWriteDraftContract({
+        value: draft,
+        maxLength: CONTENT_MAX_LENGTH,
+        validation,
+        moderation,
+        isProcessing,
+      })}
+      isOriginalOverlayOpen={isOriginalOverlayOpen}
+      onBack={backToReceivedWorries}
+      onDraftChange={value => {
+        setDraft(value);
+        setStoredDraft(replyDraftKey(originalWorry.deliveryId), value);
+        setModeration({ status: 'idle' });
+      }}
+      onOpenOriginal={() => setIsOriginalOverlayOpen(true)}
+      onCloseOriginal={() => setIsOriginalOverlayOpen(false)}
+      onPublish={publish}
+    />
   );
 }
