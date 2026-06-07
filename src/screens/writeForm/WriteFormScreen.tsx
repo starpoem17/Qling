@@ -1,4 +1,5 @@
 import { ChevronDown, Pencil } from 'lucide-react';
+import { cn } from '../../lib/utils';
 import { FigmaCanvasFrame, FigmaTopBar } from '../shared/ui';
 import type { WriteFormScreenProps } from './contract';
 
@@ -8,7 +9,6 @@ const sendButtonTop = `calc(${sendButtonBaseTop} + ${pwaTopbarShift})`;
 const topBoxTop = `calc(100px + ${pwaTopbarShift})`;
 const inputAreaTop = `calc(200px + ${pwaTopbarShift})`;
 const inputAreaHeight = `max(240px, calc(${sendButtonTop} - ${inputAreaTop} - 23px))`;
-const topBoxSummaryLimit = 25;
 
 export function WriteFormScreen(props: WriteFormScreenProps) {
   const isDisabled = Boolean(props.draft.submitDisabledReason);
@@ -22,34 +22,58 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
         <div className="relative h-full min-h-0 w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
       {FigmaTopBar({ title: '답변 작성', onBack: props.onBack, backLabel: '답변하기로 돌아가기' })}
 
-      <section className="absolute left-4 right-4 h-[79px] overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]" style={{ top: topBoxTop }}>
-        <div className="absolute left-[18px] top-[11px]">
-          <ReplyCategoryChip label={props.originalWorry.category} />
-        </div>
-        {props.originalWorry.receivedAt && (
-          <time
-            className="absolute left-[80px] top-[17px] text-xs font-semibold leading-[15px] tracking-[-0.36px] text-[#b8b8b8]"
-            dateTime={props.originalWorry.receivedAt.isoValue}
-          >
-            {props.originalWorry.receivedAt.label}
-          </time>
-        )}
-        <button
-          type="button"
-          onClick={props.onOpenOriginal}
-          aria-label="원문 보기"
-          className="group absolute inset-0 text-left focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
+      <div
+        className="absolute inset-x-0 bottom-0 overflow-y-auto overscroll-contain pb-[calc(var(--qling-space-nav-height)+32px)] [-webkit-overflow-scrolling:touch]"
+        style={{ top: topBoxTop }}
+      >
+        <section
+          id="write-reply-original-card"
+          className={cn(
+            'relative mx-4 overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
+            props.isOriginalExpanded ? 'min-h-[159px] pb-[18px]' : 'h-[79px]',
+          )}
         >
-          <span className="absolute left-[19px] right-8 top-[44px] truncate text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
-            {truncateDisplayText(props.originalWorry.summaryText, topBoxSummaryLimit)}
-          </span>
-          <ChevronDown className="absolute right-[17px] top-[17px] h-6 w-6 text-[#2a2a2a] transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
-        </button>
-      </section>
+          <div className="absolute left-[18px] top-[11px]">
+            <ReplyCategoryChip label={props.originalWorry.category} />
+          </div>
+          {props.originalWorry.receivedAt && (
+            <time
+              className="absolute left-[80px] top-[17px] text-xs font-semibold leading-[15px] tracking-[-0.36px] text-[#b8b8b8]"
+              dateTime={props.originalWorry.receivedAt.isoValue}
+            >
+              {props.originalWorry.receivedAt.label}
+            </time>
+          )}
+          <button
+            type="button"
+            onClick={props.onToggleOriginalExpanded}
+            aria-label={props.isOriginalExpanded ? '원문 접기' : '원문 펼치기'}
+            aria-expanded={props.isOriginalExpanded}
+            aria-controls="write-reply-original-card"
+            className="absolute right-[11px] top-[10px] z-10 flex h-10 w-10 items-center justify-center rounded-full text-[#2a2a2a] transition-colors hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
+          >
+            <ChevronDown className={cn('h-6 w-6', props.isOriginalExpanded && 'rotate-180')} aria-hidden="true" />
+          </button>
+          <p
+            className={cn(
+              'break-words text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]',
+              props.isOriginalExpanded
+                ? 'px-[19px] pt-[44px] pr-12'
+                : 'truncate pl-[19px] pr-12 pt-[44px]',
+            )}
+          >
+            {props.originalWorry.summaryText}
+          </p>
+          {props.isOriginalExpanded && (
+            <p className="whitespace-pre-wrap break-words px-[19px] pt-[13px] text-xs font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
+              {props.originalWorry.originalBodyText}
+            </p>
+          )}
+        </section>
 
       <label
-        className="absolute left-5 right-5 block overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
-        style={{ top: inputAreaTop, height: inputAreaHeight }}
+        className="relative mx-5 mt-[21px] block overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
+        style={{ height: inputAreaHeight }}
       >
         <span className="sr-only">답변 작성</span>
         <textarea
@@ -90,55 +114,11 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           deliveryId: props.originalWorry.deliveryId,
           worryId: props.originalWorry.worryId,
         })}
-        className="absolute left-1/2 flex h-12 w-[267px] -translate-x-1/2 items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold leading-5 text-[#fff5eb] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
-        style={{ top: sendButtonTop }}
+        className="mx-auto mt-[23px] flex h-12 w-[267px] items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold leading-5 text-[#fff5eb] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
       >
         답변 전송
       </button>
-
-      {props.isOriginalOverlayOpen && (
-        <div className="absolute inset-0 z-[80] flex justify-center bg-black/30" role="presentation">
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="write-reply-original-title"
-            className="absolute top-[224px] flex h-[440px] w-[393px] max-w-full flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_12px_40px_rgb(0_0_0/0.18)]"
-          >
-            <div className="relative h-11 shrink-0 border-b border-[#c2c4c8]">
-              <h2 id="write-reply-original-title" className="absolute left-1/2 top-3 -translate-x-1/2 text-[17px] font-extrabold leading-[21px] tracking-[-0.34px] text-[#2a2a2a]">
-                고민 보기
-              </h2>
-            </div>
-
-            <div className="flex min-h-0 flex-1 flex-col px-[13px] pt-[10px]">
-              <div className="shrink-0">
-                <ReplyCategoryChip label={props.originalWorry.category} />
-              </div>
-
-              <p className="mt-[11px] shrink-0 break-words px-1 text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]">
-                {props.originalWorry.summaryText}
-              </p>
-
-              <div className="mt-[13px] min-h-0 flex-1 overflow-y-auto px-[6px] pb-4">
-                <p className="whitespace-pre-wrap break-words text-xs font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
-                  {props.originalWorry.originalBodyText}
-                </p>
-              </div>
-            </div>
-
-            <div className="shrink-0 pb-[37px] pt-[8px]">
-              <button
-                type="button"
-                onClick={props.onCloseOriginal}
-                aria-label="원문 닫기"
-                className="mx-auto flex h-[52px] w-full max-w-[262px] items-center justify-center rounded-[12px] bg-[#ff8b3d] text-[15px] font-bold leading-[19px] tracking-[-0.15px] text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2"
-              >
-                닫기
-              </button>
-            </div>
-          </section>
-        </div>
-      )}
+      </div>
         </div>
       </FigmaCanvasFrame>
     </section>
@@ -153,10 +133,4 @@ function ReplyCategoryChip({ label }: { readonly label: string }) {
       {label}
     </span>
   );
-}
-
-function truncateDisplayText(text: string, limit: number): string {
-  const normalized = text.replace(/\n/g, ' ');
-  const chars = Array.from(normalized);
-  return chars.length > limit ? `${chars.slice(0, limit).join('').trim()}...` : text;
 }

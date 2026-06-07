@@ -48,11 +48,10 @@ export type WriteReplyFormProps = {
   readonly kind: 'write-reply';
   readonly originalWorry: OriginalWorrySummaryProps;
   readonly draft: WriteDraftContract;
-  readonly isOriginalOverlayOpen: boolean;
+  readonly isOriginalExpanded: boolean;
   readonly onBack: () => void;
   readonly onDraftChange: (value: string) => void;
-  readonly onOpenOriginal: () => void;
-  readonly onCloseOriginal: () => void;
+  readonly onToggleOriginalExpanded: () => void;
   readonly onPublish: (target: { readonly deliveryId: string; readonly worryId: string }) => void;
 };
 

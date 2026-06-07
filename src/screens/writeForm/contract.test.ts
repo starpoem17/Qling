@@ -104,11 +104,10 @@ test('write-reply form contract carries original worry summary, selected deliver
       errorMessage: 'Submit failed',
       submitDisabledReason: 'moderation-pending',
     },
-    isOriginalOverlayOpen: false,
+    isOriginalExpanded: false,
     onBack: () => undefined,
     onDraftChange: () => undefined,
-    onOpenOriginal: () => undefined,
-    onCloseOriginal: () => undefined,
+    onToggleOriginalExpanded: () => undefined,
     onPublish: () => undefined,
   } satisfies WriteReplyFormProps;
 
@@ -121,8 +120,7 @@ test('write-reply form contract carries original worry summary, selected deliver
   assert.equal(props.draft.submitDisabledReason, 'moderation-pending');
   assert.equal(typeof props.onDraftChange, 'function');
   assert.equal(typeof props.onBack, 'function');
-  assert.equal(typeof props.onOpenOriginal, 'function');
-  assert.equal(typeof props.onCloseOriginal, 'function');
+  assert.equal(typeof props.onToggleOriginalExpanded, 'function');
   assert.equal(typeof props.onPublish, 'function');
 });
 
@@ -141,11 +139,10 @@ test('write form union keeps publication as event props only', () => {
       validation: { status: 'invalid', message: 'Too long' },
       submitDisabledReason: 'too-long',
     },
-    isOriginalOverlayOpen: false,
+    isOriginalExpanded: false,
     onBack: () => undefined,
     onDraftChange: () => undefined,
-    onOpenOriginal: () => undefined,
-    onCloseOriginal: () => undefined,
+    onToggleOriginalExpanded: () => undefined,
     onPublish: () => undefined,
   };
 
@@ -199,21 +196,19 @@ test('write form callbacks stay pure events for publish, draft clearing, and rou
       originalBodyText: 'Original',
     },
     draft: validDraft,
-    isOriginalOverlayOpen: false,
+    isOriginalExpanded: false,
     onBack: () => events.push('back'),
     onDraftChange: value => events.push(`draft:${value}`),
-    onOpenOriginal: () => events.push('open-original'),
-    onCloseOriginal: () => events.push('close-original'),
+    onToggleOriginalExpanded: () => events.push('toggle-original'),
     onPublish: target => events.push(`publish:${target.deliveryId}:${target.worryId}`),
   } satisfies WriteReplyFormProps;
 
   props.onBack();
   props.onDraftChange('updated');
-  props.onOpenOriginal();
-  props.onCloseOriginal();
+  props.onToggleOriginalExpanded();
   props.onPublish({ deliveryId: props.originalWorry.deliveryId, worryId: props.originalWorry.worryId });
 
-  assert.deepEqual(events, ['back', 'draft:updated', 'open-original', 'close-original', 'publish:delivery-1:worry-1']);
+  assert.deepEqual(events, ['back', 'draft:updated', 'toggle-original', 'publish:delivery-1:worry-1']);
   assert.equal(Object.hasOwn(props, 'clearDraft'), false);
   assert.equal(Object.hasOwn(props, 'setView'), false);
   assert.equal(Object.hasOwn(props, 'routeAfterReplyPublish'), false);

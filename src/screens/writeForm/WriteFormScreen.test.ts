@@ -24,73 +24,67 @@ function baseProps(overrides: Partial<WriteFormScreenProps> = {}): WriteFormScre
       worryId: 'worry-1',
       category: WORRY_CATEGORIES[0],
       summaryText: '요약만 기본 카드에 표시됩니다.',
-      originalBodyText: '원문 전체는 overlay 안에서만 표시됩니다.',
+      originalBodyText: '원문 전체는 펼친 카드 안에서만 표시됩니다.',
       receivedAt: { label: '2026.05.18', isoValue: '2026-05-18T00:00:00.000Z' },
     },
     draft: baseDraft,
-    isOriginalOverlayOpen: false,
+    isOriginalExpanded: false,
     onBack: () => undefined,
     onDraftChange: () => undefined,
-    onOpenOriginal: () => undefined,
-    onCloseOriginal: () => undefined,
+    onToggleOriginalExpanded: () => undefined,
     onPublish: () => undefined,
     ...overrides,
   };
 }
 
-test('write reply screen shows summary on the base card and keeps original body out until overlay opens', () => {
+test('write reply screen shows summary on the base card and keeps original body out until the card expands', () => {
   const closedHtml = renderToStaticMarkup(WriteFormScreen(baseProps()));
-  const openHtml = renderToStaticMarkup(WriteFormScreen(baseProps({ isOriginalOverlayOpen: true })));
+  const expandedHtml = renderToStaticMarkup(WriteFormScreen(baseProps({ isOriginalExpanded: true })));
 
   assert.match(closedHtml, /요약만 기본 카드에 표시됩니다\./);
   assert.match(closedHtml, />2026\.05\.18</);
   assert.doesNotMatch(closedHtml, />2026-05-18</);
-  assert.doesNotMatch(closedHtml, /원문 전체는 overlay 안에서만 표시됩니다\./);
-  assert.match(openHtml, /원문 전체는 overlay 안에서만 표시됩니다\./);
-  assert.match(openHtml, /role="dialog"/);
+  assert.doesNotMatch(closedHtml, /원문 전체는 펼친 카드 안에서만 표시됩니다\./);
+  assert.match(closedHtml, /aria-expanded="false"/);
+  assert.match(expandedHtml, /원문 전체는 펼친 카드 안에서만 표시됩니다\./);
+  assert.match(expandedHtml, /aria-expanded="true"/);
+  assert.doesNotMatch(expandedHtml, /role="dialog"/);
 });
 
-test('write reply top box truncates summary at 25 characters only when needed', () => {
-  const exactSummary = '1234567890123456789012345';
-  const longSummary = `${exactSummary}6`;
-  const exactHtml = renderToStaticMarkup(WriteFormScreen(baseProps({
-    originalWorry: {
-      ...baseProps().originalWorry,
-      summaryText: exactSummary,
-    },
-  })));
+test('write reply collapsed card keeps the saved summary text and uses css line truncation', () => {
+  const longSummary = '12345678901234567890123456';
   const closedLongHtml = renderToStaticMarkup(WriteFormScreen(baseProps({
     originalWorry: {
       ...baseProps().originalWorry,
       summaryText: longSummary,
     },
   })));
-  const openLongHtml = renderToStaticMarkup(WriteFormScreen(baseProps({
-    isOriginalOverlayOpen: true,
+  const expandedLongHtml = renderToStaticMarkup(WriteFormScreen(baseProps({
+    isOriginalExpanded: true,
     originalWorry: {
       ...baseProps().originalWorry,
       summaryText: longSummary,
     },
   })));
 
-  assert.match(exactHtml, new RegExp(`>${exactSummary}<`));
-  assert.doesNotMatch(exactHtml, new RegExp(`${exactSummary}\\.\\.\\.`));
-  assert.match(closedLongHtml, new RegExp(`>${exactSummary}\\.\\.\\.<`));
-  assert.doesNotMatch(closedLongHtml, new RegExp(longSummary));
-  assert.match(openLongHtml, new RegExp(`>${longSummary}<`));
-  assert.match(openLongHtml, /font-extrabold/);
+  assert.match(closedLongHtml, new RegExp(`>${longSummary}<`));
+  assert.match(closedLongHtml, /truncate pl-\[19px\] pr-12 pt-\[44px\]/);
+  assert.doesNotMatch(closedLongHtml, /\.\.\.<\/p>/);
+  assert.match(expandedLongHtml, new RegExp(`>${longSummary}<`));
+  assert.doesNotMatch(expandedLongHtml, /truncate pl-\[19px\] pr-12 pt-\[44px\]/);
 });
 
-test('write reply original overlay keeps only the original body scrollable', () => {
-  const html = renderToStaticMarkup(WriteFormScreen(baseProps({ isOriginalOverlayOpen: true })));
+test('write reply expanded card grows inline without an original-body-only scroller', () => {
+  const html = renderToStaticMarkup(WriteFormScreen(baseProps({ isOriginalExpanded: true })));
 
-  assert.match(html, /고민 보기/);
   assert.match(html, /요약만 기본 카드에 표시됩니다\./);
-  assert.match(html, /원문 전체는 overlay 안에서만 표시됩니다\./);
-  assert.match(html, /mt-\[13px\] min-h-0 flex-1 overflow-y-auto px-\[6px\] pb-4/);
+  assert.match(html, /원문 전체는 펼친 카드 안에서만 표시됩니다\./);
+  assert.match(html, /min-h-\[159px\] pb-\[18px\]/);
+  assert.match(html, /whitespace-pre-wrap break-words px-\[19px\] pt-\[13px\]/);
   assert.match(html, /text-xs font-bold leading-6 tracking-\[-0\.36px\]/);
-  assert.match(html, /shrink-0 pb-\[37px\] pt-\[8px\]/);
-  assert.match(html, /top-\[224px\]/);
+  assert.match(html, /overflow-y-auto overscroll-contain pb-\[calc\(var\(--qling-space-nav-height\)\+32px\)\]/);
+  assert.doesNotMatch(html, /mt-\[13px\] min-h-0 flex-1 overflow-y-auto px-\[6px\] pb-4/);
+  assert.doesNotMatch(html, /aria-modal="true"/);
 });
 
 test('write reply screen renders visual pencil placeholder only for an empty draft', () => {
@@ -127,20 +121,21 @@ test('write reply screen uses Figma canvas positions while keeping the send butt
   assert.match(html, /h-full min-h-0/);
   assert.match(html, /max-w-\[480px\]/);
   assert.doesNotMatch(html, /transform:scale/);
-  assert.match(html, /top:calc\(200px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.match(html, /top:calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
   assert.match(html, /height:max\(240px, calc\(calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 88px\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) - calc\(200px \+ var\(--qling-pwa-topbar-shift, 0px\)\) - 23px\)\)/);
-  assert.match(html, /top:calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 88px\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.match(html, /mx-5 mt-\[21px\] block overflow-hidden/);
+  assert.match(html, /mx-auto mt-\[23px\] flex h-12 w-\[267px\]/);
+  assert.match(html, /pb-\[calc\(var\(--qling-space-nav-height\)\+32px\)\]/);
   assert.doesNotMatch(html, /min\(461px/);
   assert.doesNotMatch(html, /min\(684px/);
   assert.doesNotMatch(html, /writeCanvasScale/);
   assert.doesNotMatch(html, /min-height:calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \* 852 \/ 393\)/);
-  assert.doesNotMatch(html, /100dvh-var\(--qling-space-scroll-bottom\)/);
-  assert.doesNotMatch(html, /mt-6 flex h-12 w-\[267px\]/);
+  assert.doesNotMatch(html, /top:calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 88px\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
 });
 
-test('write reply screen forwards back, overlay, draft, close, and publish events without route objects', () => {
+test('write reply screen forwards back, expansion, draft, and publish events without route objects', () => {
   const events: string[] = [];
-  const tree = WriteFormScreen(baseProps({
+  const collapsedTree = WriteFormScreen(baseProps({
     draft: {
       ...baseDraft,
       value: '보낼 수 있는 답변',
@@ -150,22 +145,34 @@ test('write reply screen forwards back, overlay, draft, close, and publish event
     },
     onBack: () => events.push('back'),
     onDraftChange: value => events.push(`draft:${value}`),
-    onOpenOriginal: () => events.push('open-original'),
-    onCloseOriginal: () => events.push('close-original'),
+    onToggleOriginalExpanded: () => events.push('toggle-original'),
     onPublish: target => events.push(`publish:${target.deliveryId}:${target.worryId}`),
-    isOriginalOverlayOpen: true,
+  }));
+  const expandedTree = WriteFormScreen(baseProps({
+    draft: {
+      ...baseDraft,
+      value: '보낼 수 있는 답변',
+      characterCount: 9,
+      validation: { status: 'valid' },
+      submitDisabledReason: undefined,
+    },
+    onBack: () => events.push('back'),
+    onDraftChange: value => events.push(`draft:${value}`),
+    onToggleOriginalExpanded: () => events.push('toggle-original'),
+    onPublish: target => events.push(`publish:${target.deliveryId}:${target.worryId}`),
+    isOriginalExpanded: true,
   }));
 
-  click(findButtonByAriaLabel(tree, /원문 보기/));
-  change(findElement(tree, element => element.type === 'textarea'), '바뀐 답변');
-  click(findButtonByAriaLabel(tree, /원문 닫기/));
-  click(findButtonByAriaLabel(tree, /답변하기로 돌아가기/));
-  click(findButtonByAriaLabel(tree, /답변 전송/));
+  click(findButtonByAriaLabel(collapsedTree, /원문 펼치기/));
+  change(findElement(collapsedTree, element => element.type === 'textarea'), '바뀐 답변');
+  click(findButtonByAriaLabel(expandedTree, /원문 접기/));
+  click(findButtonByAriaLabel(collapsedTree, /답변하기로 돌아가기/));
+  click(findButtonByAriaLabel(collapsedTree, /답변 전송/));
 
   assert.deepEqual(events, [
-    'open-original',
+    'toggle-original',
     'draft:바뀐 답변',
-    'close-original',
+    'toggle-original',
     'back',
     'publish:delivery-1:worry-1',
   ]);
@@ -179,7 +186,7 @@ test('write reply screen omits AI filter guidance from the Figma-aligned form', 
 });
 
 test('write reply screen uses compact Figma category chips', () => {
-  const html = renderToStaticMarkup(WriteFormScreen(baseProps({ isOriginalOverlayOpen: true })));
+  const html = renderToStaticMarkup(WriteFormScreen(baseProps({ isOriginalExpanded: true })));
 
   assert.match(html, /h-\[23px\]/);
   assert.match(html, /box-border/);
@@ -190,7 +197,7 @@ test('write reply screen uses compact Figma category chips', () => {
 
 test('write reply screen does not expose publisher profile metadata', () => {
   const html = renderToStaticMarkup(WriteFormScreen(baseProps({
-    isOriginalOverlayOpen: true,
+    isOriginalExpanded: true,
   })));
 
   for (const forbidden of ['publisher nickname', 'gender', 'age', 'interests', 'profile metadata', 'author-uid']) {

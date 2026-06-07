@@ -34,7 +34,7 @@ export function WriteReplyContainer(props: WriteReplyContainerProps) {
   ));
   const [isProcessing, setIsProcessing] = useState(false);
   const [moderation, setModeration] = useState<ScreenModerationState>({ status: 'idle' });
-  const [isOriginalOverlayOpen, setIsOriginalOverlayOpen] = useState(false);
+  const [isOriginalExpanded, setIsOriginalExpanded] = useState(false);
   const originalWorry = mapSelectedWorryToOriginalWorrySummary(props.selectedWorry);
   const validation = validateDraftContent(draft, 'reply');
 
@@ -118,15 +118,14 @@ export function WriteReplyContainer(props: WriteReplyContainerProps) {
         moderation,
         isProcessing,
       })}
-      isOriginalOverlayOpen={isOriginalOverlayOpen}
+      isOriginalExpanded={isOriginalExpanded}
       onBack={backToReceivedWorries}
       onDraftChange={value => {
         setDraft(value);
         setStoredDraft(replyDraftKey(originalWorry.deliveryId), value);
         setModeration({ status: 'idle' });
       }}
-      onOpenOriginal={() => setIsOriginalOverlayOpen(true)}
-      onCloseOriginal={() => setIsOriginalOverlayOpen(false)}
+      onToggleOriginalExpanded={() => setIsOriginalExpanded(value => !value)}
       onPublish={publish}
     />
   );
