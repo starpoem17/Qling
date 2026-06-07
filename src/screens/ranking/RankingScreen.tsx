@@ -379,7 +379,7 @@ function ViewerRankCard({
 
   return (
     <div
-      className="absolute left-4 right-4 flex h-[70px] items-center gap-[18px] overflow-hidden rounded-[18px] bg-[#ffe3cb] py-[11px] pl-[14px] pr-4 text-left shadow-[0_8px_22px_rgb(128_87_33/0.16)]"
+      className="absolute left-4 right-4 flex h-[70px] items-center gap-[18px] overflow-hidden rounded-[18px] bg-[#ffe3cb] py-[11px] pl-[14px] pr-4 text-left shadow-[0_8px_22px_rgb(128_87_33/0.16)] pointer-events-none"
       style={{ top: viewerRankCardTop }}
       aria-label={hasNoHearts ? '내 순위 -' : `내 순위 ${viewer.rank}위`}
     >

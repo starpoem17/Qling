@@ -327,6 +327,7 @@ test('viewer rank card stays above the shell bottom navigation on shorter iPhone
   assert.doesNotMatch(html, /chevron-right\.svg/);
   assert.doesNotMatch(html, /top-\[693px\]/);
   assert.match(html, /class="absolute left-4 right-4 flex h-\[70px\]/);
+  assert.match(html, /pointer-events-none/);
   assert.match(html, /top:calc\(var\(--qling-tab-viewport-height\) - 79px\)/);
   assert.doesNotMatch(html, /min\(773px/);
 });
