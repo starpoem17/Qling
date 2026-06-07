@@ -8,18 +8,18 @@ const sendButtonBaseTop = 'calc((var(--qling-stable-viewport-height) - var(--qli
 const sendButtonTop = `calc(${sendButtonBaseTop} + ${pwaTopbarShift})`;
 const originalCardTop = `calc(100px + ${pwaTopbarShift})`;
 const originalCardCollapsedHeight = '79px';
-const originalCardExpandedHeight = `max(${originalCardCollapsedHeight}, min(30%, calc(${sendButtonTop} - ${originalCardTop} - 21px - 240px - 23px)))`;
-const inputAreaCollapsedTop = `calc(${originalCardTop} + ${originalCardCollapsedHeight} + 21px)`;
-const inputAreaExpandedTop = `calc(${originalCardTop} + ${originalCardExpandedHeight} + 21px)`;
+const originalCardExpandedMaxHeight = `min(30%, calc(${sendButtonTop} - ${originalCardTop} - 21px - 240px - 23px))`;
+const formStackBottom = `calc(100% - ${sendButtonTop} + 23px)`;
 
 export function WriteFormScreen(props: WriteFormScreenProps) {
+  let originalBodyPointerStart: { readonly x: number; readonly y: number; readonly scrollTop: number } | null = null;
   const isDisabled = Boolean(props.draft.submitDisabledReason);
   const validationMessage = props.draft.validation.status === 'invalid' && props.draft.value !== ''
     ? props.draft.validation.message
     : undefined;
-  const originalCardHeight = props.isOriginalExpanded ? originalCardExpandedHeight : originalCardCollapsedHeight;
-  const inputAreaTop = props.isOriginalExpanded ? inputAreaExpandedTop : inputAreaCollapsedTop;
-  const inputAreaHeight = `max(240px, calc(${sendButtonTop} - ${inputAreaTop} - 23px))`;
+  const originalCardStyle = props.isOriginalExpanded
+    ? { maxHeight: originalCardExpandedMaxHeight }
+    : { height: originalCardCollapsedHeight };
 
   return (
     <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
@@ -27,13 +27,17 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
         <div className="relative h-full min-h-0 w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
       {FigmaTopBar({ title: '답변 작성', onBack: props.onBack, backLabel: '답변하기로 돌아가기' })}
 
+        <div
+          className="absolute left-4 right-4 flex min-h-0 flex-col gap-[21px] overflow-hidden"
+          style={{ top: originalCardTop, bottom: formStackBottom }}
+        >
         <section
           id="write-reply-original-card"
           className={cn(
-            'absolute left-4 right-4 overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
-            props.isOriginalExpanded && 'flex flex-col',
+            'w-full shrink-0 overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
+            props.isOriginalExpanded && 'flex min-h-[79px] flex-col',
           )}
-          style={{ top: originalCardTop, height: originalCardHeight }}
+          style={originalCardStyle}
         >
           <button
             type="button"
@@ -71,15 +75,31 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
             {props.originalWorry.summaryText}
           </p>
           {props.isOriginalExpanded && (
-            <p className="relative z-30 mt-[13px] min-h-0 flex-1 overflow-y-auto overscroll-contain whitespace-pre-wrap break-words px-[19px] pb-[18px] text-xs font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a] [-webkit-overflow-scrolling:touch]">
+            <p
+              onPointerDown={event => {
+                originalBodyPointerStart = {
+                  x: event.clientX,
+                  y: event.clientY,
+                  scrollTop: event.currentTarget.scrollTop,
+                };
+              }}
+              onPointerUp={event => {
+                const start = originalBodyPointerStart;
+                originalBodyPointerStart = null;
+                if (!start) return;
+                const moved = Math.hypot(event.clientX - start.x, event.clientY - start.y);
+                const scrolled = Math.abs(event.currentTarget.scrollTop - start.scrollTop);
+                if (moved <= 8 && scrolled <= 2) props.onToggleOriginalExpanded();
+              }}
+              className="relative z-30 mt-[13px] min-h-0 flex-1 cursor-pointer overflow-y-auto overscroll-contain whitespace-pre-wrap break-words px-[19px] pb-[18px] text-xs font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a] [-webkit-overflow-scrolling:touch]"
+            >
               {props.originalWorry.originalBodyText}
             </p>
           )}
         </section>
 
       <label
-        className="absolute left-5 right-5 block overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
-        style={{ top: inputAreaTop, height: inputAreaHeight }}
+        className="relative mx-1 block min-h-[240px] flex-1 overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
       >
         <span className="sr-only">답변 작성</span>
         <textarea
@@ -109,6 +129,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           {props.draft.value.length} / {props.draft.maxLength}
         </span>
       </label>
+        </div>
 
 
       <button

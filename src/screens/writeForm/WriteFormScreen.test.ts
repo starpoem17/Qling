@@ -81,15 +81,31 @@ test('write reply expanded card limits original body to its own scroller', () =>
 
   assert.match(html, /요약만 기본 카드에 표시됩니다\./);
   assert.match(html, /원문 전체는 펼친 카드 안에서만 표시됩니다\./);
-  assert.match(html, /flex flex-col/);
-  assert.match(html, /height:max\(79px, min\(30%, calc\(/);
+  assert.match(html, /flex min-h-\[79px\] flex-col/);
+  assert.match(html, /max-height:min\(30%, calc\(/);
   assert.match(html, /- 21px - 240px - 23px/);
-  assert.match(html, /relative z-30 mt-\[13px\] min-h-0 flex-1 overflow-y-auto overscroll-contain whitespace-pre-wrap break-words px-\[19px\] pb-\[18px\]/);
+  assert.match(html, /relative z-30 mt-\[13px\] min-h-0 flex-1 cursor-pointer overflow-y-auto overscroll-contain whitespace-pre-wrap break-words px-\[19px\] pb-\[18px\]/);
   assert.match(html, /text-xs font-bold leading-6 tracking-\[-0\.36px\]/);
+  assert.doesNotMatch(html, /height:max\(79px, min\(30%, calc\(/);
   assert.doesNotMatch(html, /absolute inset-x-0 bottom-0 overflow-y-auto/);
   assert.doesNotMatch(html, /pb-\[calc\(var\(--qling-space-nav-height\)\+32px\)\]/);
   assert.doesNotMatch(html, /min-h-\[159px\] pb-\[18px\]/);
   assert.doesNotMatch(html, /aria-modal="true"/);
+});
+
+test('write reply expanded card sizes to content instead of forcing the old large minimum', () => {
+  const html = renderToStaticMarkup(WriteFormScreen(baseProps({
+    isOriginalExpanded: true,
+    originalWorry: {
+      ...baseProps().originalWorry,
+      originalBodyText: '짧은 원문',
+    },
+  })));
+
+  assert.match(html, /max-height:min\(30%, calc\(/);
+  assert.match(html, /min-h-\[79px\]/);
+  assert.doesNotMatch(html, /height:max\(79px, min\(30%, calc\(/);
+  assert.doesNotMatch(html, /style="height:min\(30%, calc\(/);
 });
 
 test('write reply screen renders visual pencil placeholder only for an empty draft', () => {
@@ -126,12 +142,12 @@ test('write reply screen uses Figma canvas positions while keeping the send butt
   assert.match(html, /h-full min-h-0/);
   assert.match(html, /max-w-\[480px\]/);
   assert.doesNotMatch(html, /transform:scale/);
-  assert.match(html, /top:calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
-  assert.match(html, /absolute left-4 right-4 overflow-hidden rounded-\[18px\] bg-white/);
+  assert.match(html, /top:calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\);bottom:calc\(100% - calc\(calc\(\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\) - var\(--qling-write-form-send-bottom-offset\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) \+ 23px\)/);
+  assert.match(html, /absolute left-4 right-4 flex min-h-0 flex-col gap-\[21px\] overflow-hidden/);
+  assert.match(html, /w-full shrink-0 overflow-hidden rounded-\[18px\] bg-white/);
   assert.match(html, /absolute inset-0 z-20 cursor-pointer appearance-none rounded-\[18px\] border-0 bg-transparent p-0 text-left/);
   assert.match(html, /height:79px/);
-  assert.match(html, /height:max\(240px, calc\(calc\(calc\(\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\) - var\(--qling-write-form-send-bottom-offset\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) - calc\(calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\) \+ 79px \+ 21px\) - 23px\)\)/);
-  assert.match(html, /absolute left-5 right-5 block overflow-hidden/);
+  assert.match(html, /relative mx-1 block min-h-\[240px\] flex-1 overflow-hidden/);
   assert.match(html, /absolute left-1\/2 flex h-12 w-\[267px\] -translate-x-1\/2/);
   assert.match(html, /top:calc\(calc\(\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\) - var\(--qling-write-form-send-bottom-offset\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
   assert.doesNotMatch(html, /absolute inset-x-0 bottom-0 overflow-y-auto/);
@@ -184,7 +200,7 @@ test('write reply screen toggles expansion from the whole card and forwards othe
 
   click(findOriginalCardToggle(collapsedTree));
   change(findElement(collapsedTree, element => element.type === 'textarea'), '바뀐 답변');
-  click(findOriginalCardToggle(expandedTree));
+  tapOriginalBody(expandedTree);
   click(findButtonByAriaLabel(collapsedTree, /답변하기로 돌아가기/));
   click(findButtonByAriaLabel(collapsedTree, /답변 전송/));
 
@@ -195,6 +211,22 @@ test('write reply screen toggles expansion from the whole card and forwards othe
     'back',
     'publish:delivery-1:worry-1',
   ]);
+});
+
+test('write reply expanded original body keeps scroll gestures separate from tap-to-collapse', () => {
+  const events: string[] = [];
+  const tree = WriteFormScreen(baseProps({
+    isOriginalExpanded: true,
+    onToggleOriginalExpanded: () => events.push('toggle-original'),
+  }));
+  const originalBody = findOriginalBody(tree);
+
+  pointerDown(originalBody, { x: 10, y: 10, scrollTop: 0 });
+  pointerUp(originalBody, { x: 10, y: 10, scrollTop: 0 });
+  pointerDown(originalBody, { x: 10, y: 10, scrollTop: 0 });
+  pointerUp(originalBody, { x: 10, y: 28, scrollTop: 20 });
+
+  assert.deepEqual(events, ['toggle-original']);
 });
 
 test('write reply chevron is visual state only instead of a separate toggle button', () => {
@@ -248,6 +280,10 @@ function findOriginalCardToggle(tree: ReactNode): TestElement {
   return findElement(tree, element => element.type === 'button' && element.props['aria-controls'] === 'write-reply-original-card');
 }
 
+function findOriginalBody(tree: ReactNode): TestElement {
+  return findElement(tree, element => element.type === 'p' && String(element.props.className ?? '').includes('cursor-pointer overflow-y-auto'));
+}
+
 function findElement(tree: ReactNode, predicate: (element: TestElement) => boolean): TestElement {
   const found = findOptionalElement(tree, predicate);
   assert.ok(found, 'element not found');
@@ -285,6 +321,32 @@ function click(element: TestElement): void {
   const onClick = element.props.onClick;
   assert.equal(typeof onClick, 'function');
   (onClick as () => void)();
+}
+
+function tapOriginalBody(tree: ReactNode): void {
+  const originalBody = findOriginalBody(tree);
+  pointerDown(originalBody, { x: 10, y: 10, scrollTop: 0 });
+  pointerUp(originalBody, { x: 10, y: 10, scrollTop: 0 });
+}
+
+function pointerDown(element: TestElement, event: { readonly x: number; readonly y: number; readonly scrollTop: number }): void {
+  const onPointerDown = element.props.onPointerDown;
+  assert.equal(typeof onPointerDown, 'function');
+  (onPointerDown as (event: { clientX: number; clientY: number; currentTarget: { scrollTop: number } }) => void)({
+    clientX: event.x,
+    clientY: event.y,
+    currentTarget: { scrollTop: event.scrollTop },
+  });
+}
+
+function pointerUp(element: TestElement, event: { readonly x: number; readonly y: number; readonly scrollTop: number }): void {
+  const onPointerUp = element.props.onPointerUp;
+  assert.equal(typeof onPointerUp, 'function');
+  (onPointerUp as (event: { clientX: number; clientY: number; currentTarget: { scrollTop: number } }) => void)({
+    clientX: event.x,
+    clientY: event.y,
+    currentTarget: { scrollTop: event.scrollTop },
+  });
 }
 
 function change(element: TestElement, value: string): void {
