@@ -135,6 +135,30 @@ test('initial like without comment stores exact feedback document shape', async 
   assert.ok(!('dislikedAt' in store['replies/reply1']));
 });
 
+test('feedback stores reply source worry snapshot for notification reuse', async () => {
+  const { store } = await save({
+    ...baseStore,
+    'replies/reply1': {
+      ...baseStore['replies/reply1'],
+      sourceWorrySnapshot: {
+        content: 'original worry',
+        summaryText: 'original summary',
+        matchingCategories: ['진로'],
+        validCategories: ['진로'],
+        createdAt: null,
+      },
+    },
+  }, { type: 'like' });
+
+  assert.deepEqual(store['feedbacks/reply1'].sourceWorrySnapshot, {
+    content: 'original worry',
+    summaryText: 'original summary',
+    matchingCategories: ['진로'],
+    validCategories: ['진로'],
+    createdAt: null,
+  });
+});
+
 test('initial like with comment stores replier-visible comment fields', async () => {
   const { store } = await save(baseStore, {
     type: 'like',

@@ -42,6 +42,13 @@ export interface ReplyFeedbackDoc {
   comment: string | null;
   commentVisibility: CommentVisibility;
   commentModerationLogId: string | null;
+  sourceWorrySnapshot?: {
+    content?: unknown;
+    summaryText?: unknown;
+    matchingCategories?: unknown;
+    validCategories?: unknown;
+    createdAt?: unknown;
+  };
   helpedCountApplied: boolean;
   isForAiReply: boolean;
   isForExampleReply: boolean;

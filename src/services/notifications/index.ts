@@ -47,6 +47,13 @@ function readSummaryText(data: FirebaseFirestore.DocumentData | undefined): stri
   return trimmed ? trimmed : null;
 }
 
+function readSnapshotSummaryText(data: FirebaseFirestore.DocumentData | undefined, fieldName: 'worrySnapshot' | 'sourceWorrySnapshot'): string | null {
+  const snapshot = data?.[fieldName];
+  return snapshot && typeof snapshot === 'object'
+    ? readSummaryText(snapshot as FirebaseFirestore.DocumentData)
+    : null;
+}
+
 async function getWorrySummaryText(params: {
   db: Firestore;
   sourceId: string;
@@ -59,19 +66,29 @@ async function getWorrySummaryText(params: {
   } else if (params.sourceType === 'delivery') {
     const delivery = await params.db.collection('deliveries').doc(params.sourceId).get();
     const data = delivery.data();
+    const snapshotSummary = readSnapshotSummaryText(data, 'worrySnapshot');
+    if (snapshotSummary) return snapshotSummary;
     worryId = typeof data?.worryId === 'string' ? data.worryId : null;
   } else if (params.sourceType === 'reply') {
     const reply = await params.db.collection('replies').doc(params.sourceId).get();
     const data = reply.data();
+    const snapshotSummary = readSnapshotSummaryText(data, 'sourceWorrySnapshot');
+    if (snapshotSummary) return snapshotSummary;
     worryId = typeof data?.worryId === 'string' ? data.worryId : null;
   } else if (params.sourceType === 'feedback') {
     const feedback = await params.db.collection('feedbacks').doc(params.sourceId).get();
     const feedbackData = feedback.data();
+    const feedbackSnapshotSummary = readSnapshotSummaryText(feedbackData, 'sourceWorrySnapshot');
+    if (feedbackSnapshotSummary) return feedbackSnapshotSummary;
+
     worryId = typeof feedbackData?.worryId === 'string' ? feedbackData.worryId : null;
 
     if (!worryId) {
-      const reply = await params.db.collection('replies').doc(params.sourceId).get();
+      const replyId = typeof feedbackData?.replyId === 'string' ? feedbackData.replyId : params.sourceId;
+      const reply = await params.db.collection('replies').doc(replyId).get();
       const replyData = reply.data();
+      const snapshotSummary = readSnapshotSummaryText(replyData, 'sourceWorrySnapshot');
+      if (snapshotSummary) return snapshotSummary;
       worryId = typeof replyData?.worryId === 'string' ? replyData.worryId : null;
     }
   }

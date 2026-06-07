@@ -118,6 +118,7 @@ export function createReplyFeedbackRepository(params: { db: Firestore }): ReplyF
           comment: input.comment,
           commentVisibility: visibilityFor(input.type, input.comment),
           commentModerationLogId: input.commentModerationLogId,
+          ...(reply.sourceWorrySnapshot ? { sourceWorrySnapshot: reply.sourceWorrySnapshot } : {}),
           helpedCountApplied,
           isForAiReply: reply.isAiGenerated === true,
           isForExampleReply: reply.isExampleReply === true,

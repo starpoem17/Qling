@@ -15,10 +15,12 @@ function createDb(options: {
   docs?: Record<string, Record<string, unknown> | undefined>;
 } = {}) {
   const logs: Record<string, unknown>[] = [];
+  const reads: Record<string, number> = {};
   const tokens = options.tokens ?? [{ id: 'token-1', token: 'token-1' }];
   const docs = options.docs ?? {};
   const db = {
     logs,
+    reads,
     tokens,
     collection(name: string) {
       if (name === 'pushLogs') {
@@ -35,6 +37,7 @@ function createDb(options: {
             const data = docs[`${name}/${id}`];
             return {
               async get() {
+                reads[`${name}/${id}`] = (reads[`${name}/${id}`] ?? 0) + 1;
                 return {
                   exists: data !== undefined,
                   data: () => data,
@@ -108,6 +111,31 @@ test('new_worry sends and writes sent', async () => {
   });
   assert.equal(db.logs[0].kind, 'new_worry');
   assert.equal(db.logs[0].status, 'sent');
+});
+
+test('new_worry uses delivery worrySnapshot without reading worry document', async () => {
+  const db = createDb({
+    docs: {
+      'deliveries/delivery-1': {
+        worryId: 'worry-1',
+        worrySnapshot: { summaryText: '스냅샷 고민 요약' },
+      },
+      'worries/worry-1': { summaryText: '원본 고민 요약' },
+    },
+  });
+  const sends: unknown[] = [];
+
+  await sendNewWorryNotificationAfterCommit({
+    db: db as never,
+    messaging: { send: async message => { sends.push(message); return 'message-id'; } } as never,
+    targetUid: 'user-1',
+    sourceId: 'delivery-1',
+    sourceType: 'delivery',
+  });
+
+  assert.equal((sends[0] as { data?: Record<string, string> }).data?.body, '스냅샷 고민 요약');
+  assert.equal(db.reads['deliveries/delivery-1'], 1);
+  assert.equal(db.reads['worries/worry-1'], undefined);
 });
 
 test('push payload is data-only so the service worker owns notification display', async () => {
@@ -216,6 +244,61 @@ test('reply_liked can resolve summary through reply id when feedback doc is abse
   });
 
   assert.equal((sends[0] as { data?: Record<string, string> }).data?.body, '답변 원문 고민 요약');
+});
+
+test('new_reply uses reply sourceWorrySnapshot without reading worry document', async () => {
+  const sends: unknown[] = [];
+  const db = createDb({
+    docs: {
+      'replies/reply-1': {
+        worryId: 'worry-1',
+        sourceWorrySnapshot: { summaryText: '답변 스냅샷 요약' },
+      },
+      'worries/worry-1': { summaryText: '원본 요약' },
+    },
+  });
+
+  await sendNewReplyNotificationAfterCommit({
+    db: db as never,
+    messaging: { send: async message => { sends.push(message); return 'message-id'; } } as never,
+    targetUid: 'author',
+    sourceId: 'reply-1',
+  });
+
+  assert.equal((sends[0] as { data?: Record<string, string> }).data?.body, '답변 스냅샷 요약');
+  assert.equal(db.reads['replies/reply-1'], 1);
+  assert.equal(db.reads['worries/worry-1'], undefined);
+});
+
+test('reply_liked uses feedback sourceWorrySnapshot without reading reply or worry document', async () => {
+  const sends: unknown[] = [];
+  const db = createDb({
+    docs: {
+      'feedbacks/feedback-1': {
+        replyId: 'reply-1',
+        worryId: 'worry-1',
+        sourceWorrySnapshot: { summaryText: '피드백 스냅샷 요약' },
+      },
+      'replies/reply-1': {
+        worryId: 'worry-1',
+        sourceWorrySnapshot: { summaryText: '답변 스냅샷 요약' },
+      },
+      'worries/worry-1': { summaryText: '원본 요약' },
+    },
+  });
+
+  await sendReplyLikedNotificationAfterCommit({
+    db: db as never,
+    messaging: { send: async message => { sends.push(message); return 'message-id'; } } as never,
+    targetUid: 'replier',
+    sourceId: 'feedback-1',
+    sourceType: 'feedback',
+  });
+
+  assert.equal((sends[0] as { data?: Record<string, string> }).data?.body, '피드백 스냅샷 요약');
+  assert.equal(db.reads['feedbacks/feedback-1'], 1);
+  assert.equal(db.reads['replies/reply-1'], undefined);
+  assert.equal(db.reads['worries/worry-1'], undefined);
 });
 
 test('missing messaging writes failed and does not throw', async () => {
