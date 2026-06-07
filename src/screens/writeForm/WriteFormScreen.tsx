@@ -6,15 +6,20 @@ import type { WriteFormScreenProps } from './contract';
 const pwaTopbarShift = 'var(--qling-pwa-topbar-shift, 0px)';
 const sendButtonBaseTop = 'calc((var(--qling-stable-viewport-height) - var(--qling-space-nav-height)) - var(--qling-write-form-send-bottom-offset))';
 const sendButtonTop = `calc(${sendButtonBaseTop} + ${pwaTopbarShift})`;
-const topBoxTop = `calc(100px + ${pwaTopbarShift})`;
-const inputAreaTop = `calc(200px + ${pwaTopbarShift})`;
-const inputAreaHeight = `max(240px, calc(${sendButtonTop} - ${inputAreaTop} - 23px))`;
+const originalCardTop = `calc(100px + ${pwaTopbarShift})`;
+const originalCardCollapsedHeight = '79px';
+const originalCardExpandedHeight = `max(${originalCardCollapsedHeight}, min(30%, calc(${sendButtonTop} - ${originalCardTop} - 21px - 240px - 23px)))`;
+const inputAreaCollapsedTop = `calc(${originalCardTop} + ${originalCardCollapsedHeight} + 21px)`;
+const inputAreaExpandedTop = `calc(${originalCardTop} + ${originalCardExpandedHeight} + 21px)`;
 
 export function WriteFormScreen(props: WriteFormScreenProps) {
   const isDisabled = Boolean(props.draft.submitDisabledReason);
   const validationMessage = props.draft.validation.status === 'invalid' && props.draft.value !== ''
     ? props.draft.validation.message
     : undefined;
+  const originalCardHeight = props.isOriginalExpanded ? originalCardExpandedHeight : originalCardCollapsedHeight;
+  const inputAreaTop = props.isOriginalExpanded ? inputAreaExpandedTop : inputAreaCollapsedTop;
+  const inputAreaHeight = `max(240px, calc(${sendButtonTop} - ${inputAreaTop} - 23px))`;
 
   return (
     <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
@@ -22,16 +27,13 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
         <div className="relative h-full min-h-0 w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
       {FigmaTopBar({ title: '답변 작성', onBack: props.onBack, backLabel: '답변하기로 돌아가기' })}
 
-      <div
-        className="absolute inset-x-0 bottom-0 overflow-y-auto overscroll-contain pb-[calc(var(--qling-space-nav-height)+32px)] [-webkit-overflow-scrolling:touch]"
-        style={{ top: topBoxTop }}
-      >
         <section
           id="write-reply-original-card"
           className={cn(
-            'relative mx-4 overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
-            props.isOriginalExpanded ? 'min-h-[159px] pb-[18px]' : 'h-[79px]',
+            'absolute left-4 right-4 overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
+            props.isOriginalExpanded && 'flex flex-col',
           )}
+          style={{ top: originalCardTop, height: originalCardHeight }}
         >
           <button
             type="button"
@@ -60,7 +62,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           </span>
           <p
             className={cn(
-              'break-words text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]',
+              'shrink-0 break-words text-base font-extrabold leading-6 tracking-[-0.48px] text-[#2a2a2a]',
               props.isOriginalExpanded
                 ? 'px-[19px] pt-[44px] pr-12'
                 : 'truncate pl-[19px] pr-12 pt-[44px]',
@@ -69,15 +71,15 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
             {props.originalWorry.summaryText}
           </p>
           {props.isOriginalExpanded && (
-            <p className="whitespace-pre-wrap break-words px-[19px] pt-[13px] text-xs font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a]">
+            <p className="relative z-30 mt-[13px] min-h-0 flex-1 overflow-y-auto overscroll-contain whitespace-pre-wrap break-words px-[19px] pb-[18px] text-xs font-bold leading-6 tracking-[-0.36px] text-[#2a2a2a] [-webkit-overflow-scrolling:touch]">
               {props.originalWorry.originalBodyText}
             </p>
           )}
         </section>
 
       <label
-        className="relative mx-5 mt-[21px] block overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
-        style={{ height: inputAreaHeight }}
+        className="absolute left-5 right-5 block overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
+        style={{ top: inputAreaTop, height: inputAreaHeight }}
       >
         <span className="sr-only">답변 작성</span>
         <textarea
@@ -118,11 +120,11 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           deliveryId: props.originalWorry.deliveryId,
           worryId: props.originalWorry.worryId,
         })}
-        className="mx-auto mt-[23px] flex h-12 w-[267px] items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold leading-5 text-[#fff5eb] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
+        className="absolute left-1/2 flex h-12 w-[267px] -translate-x-1/2 items-center justify-center rounded-full bg-[#ff8b3d] px-[22px] text-base font-extrabold leading-5 text-[#fff5eb] transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff8b3d] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-55"
+        style={{ top: sendButtonTop }}
       >
         답변 전송
       </button>
-      </div>
         </div>
       </FigmaCanvasFrame>
     </section>

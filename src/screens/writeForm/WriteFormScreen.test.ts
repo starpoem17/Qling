@@ -76,16 +76,19 @@ test('write reply collapsed card keeps the saved summary text and uses css line 
   assert.doesNotMatch(expandedLongHtml, /truncate pl-\[19px\] pr-12 pt-\[44px\]/);
 });
 
-test('write reply expanded card grows inline without an original-body-only scroller', () => {
+test('write reply expanded card limits original body to its own scroller', () => {
   const html = renderToStaticMarkup(WriteFormScreen(baseProps({ isOriginalExpanded: true })));
 
   assert.match(html, /요약만 기본 카드에 표시됩니다\./);
   assert.match(html, /원문 전체는 펼친 카드 안에서만 표시됩니다\./);
-  assert.match(html, /min-h-\[159px\] pb-\[18px\]/);
-  assert.match(html, /whitespace-pre-wrap break-words px-\[19px\] pt-\[13px\]/);
+  assert.match(html, /flex flex-col/);
+  assert.match(html, /height:max\(79px, min\(30%, calc\(/);
+  assert.match(html, /- 21px - 240px - 23px/);
+  assert.match(html, /relative z-30 mt-\[13px\] min-h-0 flex-1 overflow-y-auto overscroll-contain whitespace-pre-wrap break-words px-\[19px\] pb-\[18px\]/);
   assert.match(html, /text-xs font-bold leading-6 tracking-\[-0\.36px\]/);
-  assert.match(html, /overflow-y-auto overscroll-contain pb-\[calc\(var\(--qling-space-nav-height\)\+32px\)\]/);
-  assert.doesNotMatch(html, /mt-\[13px\] min-h-0 flex-1 overflow-y-auto px-\[6px\] pb-4/);
+  assert.doesNotMatch(html, /absolute inset-x-0 bottom-0 overflow-y-auto/);
+  assert.doesNotMatch(html, /pb-\[calc\(var\(--qling-space-nav-height\)\+32px\)\]/);
+  assert.doesNotMatch(html, /min-h-\[159px\] pb-\[18px\]/);
   assert.doesNotMatch(html, /aria-modal="true"/);
 });
 
@@ -124,17 +127,19 @@ test('write reply screen uses Figma canvas positions while keeping the send butt
   assert.match(html, /max-w-\[480px\]/);
   assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /top:calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
-  assert.match(html, /relative mx-4 overflow-hidden rounded-\[18px\] bg-white/);
+  assert.match(html, /absolute left-4 right-4 overflow-hidden rounded-\[18px\] bg-white/);
   assert.match(html, /absolute inset-0 z-20 cursor-pointer appearance-none rounded-\[18px\] border-0 bg-transparent p-0 text-left/);
-  assert.match(html, /height:max\(240px, calc\(calc\(calc\(\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\) - var\(--qling-write-form-send-bottom-offset\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) - calc\(200px \+ var\(--qling-pwa-topbar-shift, 0px\)\) - 23px\)\)/);
-  assert.match(html, /mx-5 mt-\[21px\] block overflow-hidden/);
-  assert.match(html, /mx-auto mt-\[23px\] flex h-12 w-\[267px\]/);
-  assert.match(html, /pb-\[calc\(var\(--qling-space-nav-height\)\+32px\)\]/);
+  assert.match(html, /height:79px/);
+  assert.match(html, /height:max\(240px, calc\(calc\(calc\(\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\) - var\(--qling-write-form-send-bottom-offset\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) - calc\(calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\) \+ 79px \+ 21px\) - 23px\)\)/);
+  assert.match(html, /absolute left-5 right-5 block overflow-hidden/);
+  assert.match(html, /absolute left-1\/2 flex h-12 w-\[267px\] -translate-x-1\/2/);
+  assert.match(html, /top:calc\(calc\(\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\) - var\(--qling-write-form-send-bottom-offset\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.doesNotMatch(html, /absolute inset-x-0 bottom-0 overflow-y-auto/);
+  assert.doesNotMatch(html, /pb-\[calc\(var\(--qling-space-nav-height\)\+32px\)\]/);
   assert.doesNotMatch(html, /min\(461px/);
   assert.doesNotMatch(html, /min\(684px/);
   assert.doesNotMatch(html, /writeCanvasScale/);
   assert.doesNotMatch(html, /min-height:calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \* 852 \/ 393\)/);
-  assert.doesNotMatch(html, /top:calc\(calc\(\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\) - var\(--qling-write-form-send-bottom-offset\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
 });
 
 test('write reply PWA spacing uses the shared 24px bottom-nav gap variable', () => {
