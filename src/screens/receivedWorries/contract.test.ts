@@ -142,7 +142,8 @@ test('received-worries empty state renders the fixed Figma intro without an empt
   assert.doesNotMatch(html, /left-\[327px\] top-\[21px\]/);
   assert.match(html, /absolute left-0 w-full rounded-t-\[32px\] bg-\[#fff1d1\]/);
   assert.match(html, /absolute left-0 w-full touch-none overscroll-none overflow-hidden rounded-t-\[32px\] px-4 pt-4/);
-  assert.match(html, /height:min\(752px, max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\)/);
+  assert.match(html, /height:max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\)/);
+  assert.doesNotMatch(html, /min\(752px/);
   assert.doesNotMatch(html, /받은 고민 목록/);
   assert.doesNotMatch(html, /overflow-y-auto/);
 
@@ -176,7 +177,8 @@ test('received-worries loading state renders the Figma spinner status without vi
   assert.match(html, /h-\[calc\(74px\+var\(--qling-space-safe-top\)\)\]/);
   assert.match(html, /bg-\[#ff8b3d\]/);
   assert.match(html, /w-full touch-none overscroll-none overflow-hidden/);
-  assert.match(html, /height:min\(752px, max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\)/);
+  assert.match(html, /height:max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\)/);
+  assert.doesNotMatch(html, /min\(752px/);
   assert.doesNotMatch(html, /h-\[752px\] overflow-y-auto/);
   assert.doesNotMatch(html, /w-\[100dvw\]/);
   assert.doesNotMatch(html, /min-h-\[calc\(100dvh-180px\)\]/);

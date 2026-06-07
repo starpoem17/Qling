@@ -4,10 +4,10 @@ import { FigmaCanvasFrame, FigmaTopBar, QlingAlertDialog } from '../shared/ui';
 import type { WriteWorryScreenProps } from './contract';
 
 const pwaTopbarShift = 'var(--qling-pwa-topbar-shift, 0px)';
-const sendButtonBaseTop = 'min(684px, calc((100dvh - var(--qling-space-nav-height)) - 88px))';
+const sendButtonBaseTop = 'calc((var(--qling-visual-viewport-height) - var(--qling-space-nav-height)) - 88px)';
 const sendButtonTop = `calc(${sendButtonBaseTop} + ${pwaTopbarShift})`;
 const inputAreaTop = `calc(120px + ${pwaTopbarShift})`;
-const inputAreaHeight = `min(541px, max(240px, calc(${sendButtonTop} - ${inputAreaTop} - 23px)))`;
+const inputAreaHeight = `max(240px, calc(${sendButtonTop} - ${inputAreaTop} - 23px))`;
 
 export function WriteWorryScreen(props: WriteWorryScreenProps) {
   const isDisabled = Boolean(props.draft.submitDisabledReason);
@@ -25,7 +25,7 @@ export function WriteWorryScreen(props: WriteWorryScreenProps) {
   return (
     <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
       <FigmaCanvasFrame className="max-w-[480px]">
-        <div className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
+        <div className="relative h-full min-h-0 w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
       {FigmaTopBar({ title: '고민 작성', onBack: props.onBack, backLabel: '나의 고민으로 돌아가기' })}
 
       <section

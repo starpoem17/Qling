@@ -37,7 +37,7 @@ export function ReceivedWorriesScreen(props: ReceivedWorriesScreenProps) {
   const passingDeliveryIds = new Set(props.passingDeliveryIds);
   const tabViewportHeight = 'var(--qling-tab-viewport-height)';
   const contentTop = 'calc(74px + var(--qling-space-safe-top))';
-  const contentViewportHeight = `min(752px, max(320px, calc((${tabViewportHeight}) - 74px - var(--qling-space-safe-top))))`;
+  const contentViewportHeight = `max(320px, calc((${tabViewportHeight}) - 74px - var(--qling-space-safe-top)))`;
   const screenClassName = '-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d]';
   const canvasClassName = 'relative h-full min-h-0 w-full max-w-[480px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d]';
 

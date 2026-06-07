@@ -305,8 +305,8 @@ test('ranking sheet is empty when there are fewer than four ranked entries', () 
   })));
 
   assert.match(html, /아직 순위가 없어요/);
-  assert.match(html, /style="top:min\(156px, max\(8px, calc\(min\(452px, max\(72px/);
-  assert.match(html, /max\(8px, calc\(min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\) - max\(430px, calc\(max\(12px,/);
+  assert.match(html, /style="top:min\(156px, max\(8px, calc\(max\(72px/);
+  assert.match(html, /max\(8px, calc\(calc\(var\(--qling-tab-viewport-height\) - 79px\) - max\(430px, calc\(max\(12px,/);
   assert.doesNotMatch(html, />User 4</);
 });
 
@@ -326,7 +326,8 @@ test('viewer rank card stays above the shell bottom navigation on shorter iPhone
   assert.doesNotMatch(html, /chevron-right\.svg/);
   assert.doesNotMatch(html, /top-\[693px\]/);
   assert.match(html, /class="absolute left-4 right-4 flex h-\[70px\]/);
-  assert.match(html, /top:min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\)/);
+  assert.match(html, /top:calc\(var\(--qling-tab-viewport-height\) - 79px\)/);
+  assert.doesNotMatch(html, /min\(773px/);
 });
 
 test('ready ranking sheet stops above the viewer card when my rank is visible', () => {
@@ -336,7 +337,9 @@ test('ready ranking sheet stops above the viewer card when my rank is visible', 
   assert.doesNotMatch(html, /top-\[400px\] h-\[372px\]/);
   assert.match(html, /style="top:max\(430px, calc\(max\(12px,/);
   assert.match(html, /overflow-hidden rounded-t-\[26px\]/);
-  assert.match(html, /height:min\(452px, max\(72px, calc\(min\(773px, calc\(var\(--qling-tab-viewport-height\) - 79px\)\) - max\(430px, calc\(max\(12px,/);
+  assert.match(html, /height:max\(72px, calc\(calc\(var\(--qling-tab-viewport-height\) - 79px\) - max\(430px, calc\(max\(12px,/);
+  assert.doesNotMatch(html, /min\(452px/);
+  assert.doesNotMatch(html, /min\(773px/);
 });
 
 test('ready ranking sheet can still stretch when no viewer card is visible', () => {
@@ -354,7 +357,8 @@ test('ready ranking sheet can still stretch when no viewer card is visible', () 
   })));
 
   assert.match(html, /전체 랭킹/);
-  assert.match(html, /height:min\(452px, max\(372px, calc\(var\(--qling-tab-viewport-height\) - max\(430px, calc\(max\(12px,/);
+  assert.match(html, /height:max\(372px, calc\(var\(--qling-tab-viewport-height\) - max\(430px, calc\(max\(12px,/);
+  assert.doesNotMatch(html, /min\(452px/);
 });
 
 test('ranking loading state uses the widened unscaled canvas', () => {
@@ -365,7 +369,9 @@ test('ranking loading state uses the widened unscaled canvas', () => {
 
   assert.match(html, /data-measure="ranking-screen"/);
   assert.doesNotMatch(html, /transform:scale/);
-  assert.match(html, /h-\[452px\]" style="top:max\(430px, calc\(max\(12px,/);
+  assert.match(html, /style="top:max\(430px, calc\(max\(12px,/);
+  assert.match(html, /height:max\(372px, calc\(var\(--qling-tab-viewport-height\) - max\(430px, calc\(max\(12px,/);
+  assert.doesNotMatch(html, /h-\[452px\]/);
   assert.match(html, /class="absolute left-1\/2 w-\[393px\] -translate-x-1\/2" style="top:max\(12px, calc\(calc\(var\(--qling-space-safe-top\) \+ 88px\) \+ 44px \+ 24px - calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 170px\)\)\)" data-measure="ranking-top-layer"/);
   assert.match(html, /style="top:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 326px\)"/);
   assert.match(html, /data-testid="figma-tab-loading-indicator"/);

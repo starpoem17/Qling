@@ -27,9 +27,9 @@ const rankingSheetMinimumTop = 430;
 const rankingThirdPodiumNumberBottom = 75;
 const rankingPodiumToSheetGap = 4;
 const rankingSheetTop = `max(${rankingSheetMinimumTop}px, calc(${rankingTopGraphicOffset} + ${rankingPodiumTop} + ${rankingThirdPodiumNumberBottom}px + ${rankingPodiumToSheetGap}px))`;
-const viewerRankCardTop = `min(773px, calc(${rankingTabViewportHeight} - 79px))`;
-const rankingSheetReadyHeight = `min(452px, max(372px, calc(${rankingTabViewportHeight} - ${rankingSheetTop})))`;
-const rankingSheetReadyHeightWithViewer = `min(452px, max(72px, calc(${viewerRankCardTop} - ${rankingSheetTop} - 12px)))`;
+const viewerRankCardTop = `calc(${rankingTabViewportHeight} - 79px)`;
+const rankingSheetReadyHeight = `max(372px, calc(${rankingTabViewportHeight} - ${rankingSheetTop}))`;
+const rankingSheetReadyHeightWithViewer = `max(72px, calc(${viewerRankCardTop} - ${rankingSheetTop} - 12px))`;
 const rankingSheetEmptyTopWithViewer = `min(156px, max(8px, calc(${rankingSheetReadyHeightWithViewer} / 2 - 8px)), max(8px, calc(${viewerRankCardTop} - ${rankingSheetTop} - 28px)))`;
 const qlingNotoSansKrStyle = { fontFamily: '"Qling Noto Sans KR"' } as const;
 
@@ -299,12 +299,11 @@ function RankingSheet({
   const rows = period?.entries.slice(3, 10) ?? [];
   const hasViewerCard = Boolean(period?.viewer);
   const readyHeight = hasViewerCard ? rankingSheetReadyHeightWithViewer : rankingSheetReadyHeight;
-  const sheetStyle = loading ? { top: rankingSheetTop } : { top: rankingSheetTop, height: readyHeight };
+  const sheetStyle = { top: rankingSheetTop, height: loading ? rankingSheetReadyHeight : readyHeight };
   return (
     <section
       className={cn(
         'absolute left-0 w-full overflow-hidden rounded-t-[26px] bg-white shadow-[0_-5px_8px_rgb(128_87_33/0.1)]',
-        loading && 'h-[452px]',
       )}
       style={sheetStyle}
     >

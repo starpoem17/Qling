@@ -63,7 +63,7 @@ test('chat shell routes fill the app shell without extending under bottom naviga
 test('chat list and chat room use widened unscaled 480px frames', () => {
   assert.match(chatScreenSource, /import \{ FigmaCanvasFrame, profileImageUrlForColor \} from '\.\.\/shared\/ui'/);
   assert.match(chatScreenSource, /<FigmaCanvasFrame className="max-w-\[480px\]">/);
-  assert.match(chatScreenSource, /relative h-\[852px\] w-full max-w-\[480px\] shrink-0 origin-top overflow-hidden/);
+  assert.match(chatScreenSource, /relative h-full min-h-0 w-full max-w-\[480px\] shrink-0 origin-top overflow-hidden/);
   assert.doesNotMatch(chatScreenSource, /const canvasClassName = 'relative h-\[852px\] w-\[393px\]/);
   assert.doesNotMatch(chatScreenSource, /const canvasScale = /);
   assert.doesNotMatch(chatScreenSource, /style=\{\{ transform: `scale\(\$\{canvasScale\}\)` \}\}/);

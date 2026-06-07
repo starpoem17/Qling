@@ -175,7 +175,7 @@ export function ChatScreen({
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const screenClassName = '-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d]';
-  const canvasClassName = 'relative h-[852px] w-full max-w-[480px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font';
+  const canvasClassName = 'relative h-full min-h-0 w-full max-w-[480px] shrink-0 origin-top overflow-hidden bg-[#ff8b3d] qling-figma-font';
   const contentTop = 'calc(var(--qling-space-safe-top) + 136px)';
   const contentViewportHeight = 'calc(var(--qling-tab-viewport-height) - var(--qling-space-safe-top) - 136px)';
   const visibleChats = filterChatsByOpponentName(chats ?? [], searchQuery);

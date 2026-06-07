@@ -3,11 +3,11 @@ import { FigmaCanvasFrame, FigmaTopBar } from '../shared/ui';
 import type { WriteFormScreenProps } from './contract';
 
 const pwaTopbarShift = 'var(--qling-pwa-topbar-shift, 0px)';
-const sendButtonBaseTop = 'min(684px, calc((100dvh - var(--qling-space-nav-height)) - 88px))';
+const sendButtonBaseTop = 'calc((var(--qling-visual-viewport-height) - var(--qling-space-nav-height)) - 88px)';
 const sendButtonTop = `calc(${sendButtonBaseTop} + ${pwaTopbarShift})`;
 const topBoxTop = `calc(100px + ${pwaTopbarShift})`;
 const inputAreaTop = `calc(200px + ${pwaTopbarShift})`;
-const inputAreaHeight = `min(461px, max(240px, calc(${sendButtonTop} - ${inputAreaTop} - 23px)))`;
+const inputAreaHeight = `max(240px, calc(${sendButtonTop} - ${inputAreaTop} - 23px))`;
 const topBoxSummaryLimit = 25;
 
 export function WriteFormScreen(props: WriteFormScreenProps) {
@@ -19,7 +19,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
   return (
     <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
       <FigmaCanvasFrame className="max-w-[480px]">
-        <div className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
+        <div className="relative h-full min-h-0 w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
       {FigmaTopBar({ title: '답변 작성', onBack: props.onBack, backLabel: '답변하기로 돌아가기' })}
 
       <section className="absolute left-4 right-4 h-[79px] overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]" style={{ top: topBoxTop }}>

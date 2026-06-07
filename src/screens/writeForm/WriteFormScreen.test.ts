@@ -124,12 +124,14 @@ test('write reply screen uses Figma canvas positions while keeping the send butt
   const html = renderToStaticMarkup(WriteFormScreen(baseProps()));
 
   assert.match(html, /w-full/);
-  assert.match(html, /h-\[852px\]/);
+  assert.match(html, /h-full min-h-0/);
   assert.match(html, /max-w-\[480px\]/);
   assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /top:calc\(200px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
-  assert.match(html, /height:min\(461px, max\(240px, calc\(calc\(min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) - 88px\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) - calc\(200px \+ var\(--qling-pwa-topbar-shift, 0px\)\) - 23px\)\)\)/);
-  assert.match(html, /top:calc\(min\(684px, calc\(\(100dvh - var\(--qling-space-nav-height\)\) - 88px\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.match(html, /height:max\(240px, calc\(calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 88px\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) - calc\(200px \+ var\(--qling-pwa-topbar-shift, 0px\)\) - 23px\)\)/);
+  assert.match(html, /top:calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 88px\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.doesNotMatch(html, /min\(461px/);
+  assert.doesNotMatch(html, /min\(684px/);
   assert.doesNotMatch(html, /writeCanvasScale/);
   assert.doesNotMatch(html, /min-height:calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \* 852 \/ 393\)/);
   assert.doesNotMatch(html, /100dvh-var\(--qling-space-scroll-bottom\)/);

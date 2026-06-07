@@ -57,7 +57,7 @@ test('my answers screen uses the responsive direct header canvas and ready-only 
   const html = renderToStaticMarkup(createElement(MyAnswersScreen, baseProps()));
 
   assert.match(html, /mx-auto flex h-full w-full justify-center overflow-hidden max-w-\[480px\]/);
-  assert.match(html, /h-\[852px\] w-full max-w-\[480px\]/);
+  assert.match(html, /h-full min-h-0 w-full max-w-\[480px\]/);
   assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /-mx-\[var\(--qling-space-shell-x\)\] h-\[var\(--qling-tab-viewport-height\)\] overflow-hidden bg-\[#ff8b3d\]/);
   assert.match(html, /aria-label="내가 쓴 답변 목록"/);
@@ -66,9 +66,10 @@ test('my answers screen uses the responsive direct header canvas and ready-only 
   assert.match(html, /h-\[calc\(100px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /top-\[calc\(45px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
   assert.match(html, /top-\[calc\(60px\+var\(--qling-pwa-direct-topbar-shift\)\)\]/);
-  assert.match(html, /relative h-\[752px\] overflow-y-auto overscroll-contain/);
+  assert.match(html, /relative overflow-y-auto overscroll-contain/);
   assert.match(html, /pb-\[calc\(108px\+env\(safe-area-inset-bottom,0px\)\)\]/);
-  assert.match(html, /height:min\(752px, max\(320px, calc\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 100px - var\(--qling-pwa-direct-topbar-shift\)\)\)\)/);
+  assert.match(html, /height:max\(320px, calc\(calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 100px - var\(--qling-pwa-direct-topbar-shift\)\)/);
+  assert.doesNotMatch(html, /min\(752px/);
   assert.doesNotMatch(html, /data-qling-peek-header-content/);
   assert.doesNotMatch(html, /qling-peek-progress/);
   assert.doesNotMatch(html, /transform:translateY\(calc\(var\(--qling-peek-progress, 0\) \* -88px\)\)/);
@@ -90,7 +91,8 @@ test('my answers loading empty and error states keep the canvas locked without l
   })));
 
   for (const html of [loadingHtml, emptyHtml, errorHtml]) {
-    assert.match(html, /relative h-\[752px\] touch-none overscroll-none overflow-hidden/);
+    assert.match(html, /relative touch-none overscroll-none overflow-hidden/);
+    assert.doesNotMatch(html, /h-\[752px\]/);
     assert.doesNotMatch(html, /aria-label="내가 쓴 답변 목록"/);
     assert.doesNotMatch(html, /absolute left-0 top-\[100px\]/);
   }

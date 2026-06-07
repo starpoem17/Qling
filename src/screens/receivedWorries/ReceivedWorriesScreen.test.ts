@@ -31,11 +31,12 @@ test('received worries scroll sheet uses the visual viewport height and keeps bo
   assert.match(html, /답변하기/);
   assert.match(html, /답변하기 화면에?[^"]*|받은 고민 목록/);
   assert.match(html, /mx-auto flex h-full w-full justify-center overflow-hidden max-w-\[480px\]/);
-  assert.match(html, /style="height:min\(752px, max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\)"/);
+  assert.match(html, /style="height:max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\)"/);
   assert.match(html, /overflow-y-auto rounded-t-\[32px\] px-4 pb-\[132px\] pt-4/);
   assert.match(html, /relative aspect-\[361\/135\] overflow-hidden rounded-\[18px\]/);
   assert.doesNotMatch(html, /h-\[135px\]/);
   assert.doesNotMatch(html, /h-\[752px\] w-full overflow-y-auto/);
+  assert.doesNotMatch(html, /min\(752px/);
 });
 
 test('received worries empty and loading states share the same visual viewport sheet height', () => {

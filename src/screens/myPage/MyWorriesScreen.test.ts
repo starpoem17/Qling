@@ -144,12 +144,14 @@ test('my worries scrollable states reserve room for the floating write button', 
     state: { status: 'error', message: '네트워크 오류', canRetry: false },
     items: [],
   })));
-  const scrollableStyle = /style="height:min\(733px, max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\);padding-bottom:78px"/;
+  const scrollableStyle = /style="height:max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\);padding-bottom:78px"/;
 
   assert.match(readyHtml, /aria-label="나의 고민 목록"/);
   assert.match(readyHtml, scrollableStyle);
   assert.match(errorHtml, /나의 고민을 불러오지 못했어요/);
   assert.match(errorHtml, scrollableStyle);
+  assert.doesNotMatch(readyHtml, /min\(733px/);
+  assert.doesNotMatch(errorHtml, /min\(733px/);
   assert.doesNotMatch(readyHtml, /pb-\[180px\]/);
   assert.doesNotMatch(errorHtml, /pb-\[180px\]/);
 });
@@ -189,7 +191,8 @@ test('my worries empty state renders Figma intro without the previous static car
   assert.match(html, /고민 쓰기/);
   assert.equal((html.match(/고민 작성 화면으로 이동/g) ?? []).length, 1);
   assert.match(html, /absolute left-0 w-full touch-none overscroll-none overflow-hidden rounded-t-\[32px\] px-4 pt-4/);
-  assert.match(html, /style="height:min\(733px, max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\)"/);
+  assert.match(html, /style="height:max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\)"/);
+  assert.doesNotMatch(html, /min\(733px/);
   assert.doesNotMatch(html, /h-\[168px\] w-full overflow-hidden rounded-\[18px\]/);
   assert.doesNotMatch(html, /나의 고민 목록/);
   assert.doesNotMatch(html, /overflow-y-auto/);
@@ -220,7 +223,8 @@ test('my worries loading state renders the Figma spinner status without visible 
   assert.match(html, /relative h-full min-h-0 w-full max-w-\[480px\] shrink-0 overflow-hidden bg-\[#ff8b3d\]/);
   assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /w-full touch-none overscroll-none overflow-hidden/);
-  assert.match(html, /height:min\(733px, max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\)/);
+  assert.match(html, /height:max\(320px, calc\(\(var\(--qling-tab-viewport-height\)\) - 74px - var\(--qling-space-safe-top\)\)\);top:calc\(74px \+ var\(--qling-space-safe-top\)\)/);
+  assert.doesNotMatch(html, /min\(733px/);
   assert.doesNotMatch(html, /h-\[733px\] w-full overflow-y-auto/);
   assert.match(html, /bg-\[#ff8b3d\]/);
   assert.doesNotMatch(html, /w-\[100dvw\]/);

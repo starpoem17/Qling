@@ -32,9 +32,9 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
 }) {
   const tabViewportHeight = 'calc(var(--qling-visual-viewport-height) - var(--qling-space-nav-height))';
   const directTopbarShift = 'var(--qling-pwa-direct-topbar-shift)';
-  const contentViewportHeight = `min(752px, max(320px, calc(${tabViewportHeight} - 100px - ${directTopbarShift})))`;
+  const contentViewportHeight = `max(320px, calc(${tabViewportHeight} - 100px - ${directTopbarShift}))`;
   const screenClassName = '-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ff8b3d]';
-  const canvasClassName = 'relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d] qling-figma-font text-[#1a1a1e]';
+  const canvasClassName = 'relative h-full min-h-0 w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d] qling-figma-font text-[#1a1a1e]';
 
   return (
     <section className={screenClassName}>
@@ -44,7 +44,7 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
 
           {props.state.status === 'loading' ? (
             <section
-              className="relative h-[752px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
+              className="relative touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
               style={{ height: contentViewportHeight }}
               onWheel={blockLockedScroll}
               onTouchMove={blockLockedScroll}
@@ -53,7 +53,7 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
             </section>
           ) : props.state.status === 'error' ? (
             <section
-              className="relative h-[752px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
+              className="relative touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
               style={{ height: contentViewportHeight }}
               onWheel={blockLockedScroll}
               onTouchMove={blockLockedScroll}
@@ -64,14 +64,14 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
             </section>
           ) : props.state.status === 'empty' ? (
             <section
-              className="relative h-[752px] touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
+              className="relative touch-none overscroll-none overflow-hidden px-4 pt-[27px]"
               style={{ height: contentViewportHeight }}
               onWheel={blockLockedScroll}
               onTouchMove={blockLockedScroll}
             />
           ) : (
             <section
-              className="relative h-[752px] overflow-y-auto overscroll-contain px-4 pb-[calc(108px+env(safe-area-inset-bottom,0px))] pt-[27px] [-webkit-overflow-scrolling:touch]"
+              className="relative overflow-y-auto overscroll-contain px-4 pb-[calc(108px+env(safe-area-inset-bottom,0px))] pt-[27px] [-webkit-overflow-scrolling:touch]"
               style={{ height: contentViewportHeight }}
               aria-label="내가 쓴 답변 목록"
             >

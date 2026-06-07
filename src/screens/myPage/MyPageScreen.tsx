@@ -55,7 +55,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
   const contentBottom = settingsCardTop + 192;
   const myPageTabViewportHeight = 'var(--qling-tab-viewport-height)';
   const directTopbarShift = 'var(--qling-pwa-direct-topbar-shift)';
-  const myPageContentHeight = `min(752px, max(520px, calc(${myPageTabViewportHeight} - 100px - ${directTopbarShift})))`;
+  const myPageContentHeight = `max(520px, calc(${myPageTabViewportHeight} - 100px - ${directTopbarShift}))`;
 
   return (
     <section
@@ -64,7 +64,7 @@ export function MyPageScreen(props: MyPageScreenProps) {
     >
       <FigmaCanvasFrame className="max-w-[480px]" data-measure="my-page-responsive-canvas">
         <div
-          className="relative h-[852px] w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d]"
+          className="relative h-full min-h-0 w-full max-w-[480px] shrink-0 overflow-hidden bg-[#ff8b3d]"
           data-measure="my-page-screen"
         >
           <FigmaTopBar title="마이페이지" onBack={props.onBack} backLabel="이전 화면으로 돌아가기" tone="light" />
@@ -315,7 +315,7 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
       : policyBody || (props.state.status === 'empty' ? props.state.message : '정책을 준비 중입니다.');
   const policyTabViewportHeight = 'var(--qling-tab-viewport-height)';
   const directTopbarShift = 'var(--qling-pwa-direct-topbar-shift)';
-  const policyCardHeight = `min(752px, max(320px, calc(${policyTabViewportHeight} - 100px - ${directTopbarShift} - max(calc(108px + env(safe-area-inset-bottom,0px)), calc(876px - ${policyTabViewportHeight})))))`;
+  const policyCardHeight = `max(320px, calc(${policyTabViewportHeight} - 100px - ${directTopbarShift} - calc(108px + env(safe-area-inset-bottom,0px))))`;
 
   return (
     <section
@@ -324,7 +324,7 @@ export function PolicyScreen(props: PolicyScreenProps & { readonly onBack: () =>
     >
       <FigmaCanvasFrame className="max-w-[480px]" data-measure="policy-responsive-canvas">
         <div
-          className="relative h-[852px] w-full max-w-[480px] shrink-0 bg-[#ff8b0d]"
+          className="relative h-full min-h-0 w-full max-w-[480px] shrink-0 bg-[#ff8b0d]"
           data-measure="policy-screen"
         >
           <FigmaTopBar title="개인정보 처리방침" titleAriaLabel={props.title} onBack={props.onBack} backLabel="마이페이지로 돌아가기" tone="light" />
