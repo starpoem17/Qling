@@ -47,18 +47,49 @@ export function createAdminHidingRepository(params: {
     async hideWorry({ targetId, hiddenReason, hiddenBy }) {
       return db.runTransaction(async transaction => {
         const worryRef = db.collection('worries').doc(targetId);
+        const deliveriesQuery = db.collection('deliveries').where('worryId', '==', targetId);
+        const repliesQuery = db.collection('replies').where('worryId', '==', targetId);
         const worryDoc = await transaction.get(worryRef);
+        const deliveriesSnap = await transaction.get(deliveriesQuery);
+        const repliesSnap = await transaction.get(repliesQuery);
         const worry = dataOrThrow(worryDoc, 'target_missing');
         if (isAlreadyHidden(worry)) {
           return hiddenResult({ targetType: 'worry', targetId, alreadyHidden: true });
         }
 
+        const activeDeliveries = deliveriesSnap.docs.filter(deliveryDoc => {
+          const delivery = deliveryDoc.data();
+          return delivery.status === 'active' && !delivery.hiddenAt && typeof delivery.recipientUid === 'string';
+        });
+        const recipientDocs = await Promise.all(activeDeliveries.map(deliveryDoc => {
+          const recipientUid = deliveryDoc.data().recipientUid as string;
+          return transaction.get(db.collection('users').doc(recipientUid));
+        }));
+        const timestamp = serverTimestamp();
         transaction.update(worryRef, buildHiddenFields({
           hiddenReason,
           hiddenBy,
-          timestamp: serverTimestamp(),
+          timestamp,
         }));
-        return hiddenResult({ targetType: 'worry', targetId, alreadyHidden: false });
+        let counterDecremented = false;
+        activeDeliveries.forEach((deliveryDoc, index) => {
+          transaction.update(deliveryDoc.ref, buildHiddenFields({ hiddenReason, hiddenBy, timestamp }));
+          const recipientDoc = recipientDocs[index];
+          const recipient = recipientDoc.data();
+          if (recipientDoc.exists && typeof recipient?.activeDeliveryCount === 'number') {
+            const nextCounter = nextActiveDeliveryCount(recipient.activeDeliveryCount);
+            if (nextCounter.decremented) counterDecremented = true;
+            transaction.update(recipientDoc.ref, {
+              activeDeliveryCount: nextCounter.value,
+            });
+          }
+        });
+        repliesSnap.docs.forEach(replyDoc => {
+          if (!isAlreadyHidden(replyDoc.data())) {
+            transaction.update(replyDoc.ref, buildHiddenFields({ hiddenReason, hiddenBy, timestamp }));
+          }
+        });
+        return hiddenResult({ targetType: 'worry', targetId, alreadyHidden: false, counterDecremented });
       });
     },
 

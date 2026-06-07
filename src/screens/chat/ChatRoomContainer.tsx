@@ -5,6 +5,36 @@ import { db } from '../../firebase';
 import { ChatRoomScreen, type ChatMessage } from './ChatRoomScreen';
 import type { AppRouteViewState } from '../../services/appShell/prdNavigationPolicy';
 
+type ChatWorrySnapshot = {
+  readonly category?: unknown;
+  readonly summaryText?: unknown;
+  readonly content?: unknown;
+  readonly createdAt?: unknown;
+};
+
+function timestampToDate(value: unknown): Date {
+  if (value && typeof (value as { toDate?: unknown }).toDate === 'function') {
+    return (value as { toDate: () => Date }).toDate();
+  }
+  return new Date();
+}
+
+function worryInfoFromSnapshot(snapshot: unknown): { category: string; content: string; createdAtStr: string } | null {
+  const data = snapshot as ChatWorrySnapshot | null;
+  const content = typeof data?.content === 'string' && data.content.trim().length > 0
+    ? data.content.trim()
+    : typeof data?.summaryText === 'string' && data.summaryText.trim().length > 0
+      ? data.summaryText.trim()
+      : null;
+  if (!content) return null;
+  const date = timestampToDate(data?.createdAt);
+  return {
+    category: typeof data?.category === 'string' && data.category.trim().length > 0 ? data.category.trim() : '기타',
+    content,
+    createdAtStr: `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()}`,
+  };
+}
+
 export function ChatRoomContainer({
   user,
   chatId,
@@ -114,6 +144,12 @@ export function ChatRoomContainer({
 
         if (opponentUid) {
            setOpponentUnreadCount(chatData.unreadCounts?.[opponentUid] || 0);
+        }
+
+        const snapshotWorryInfo = worryInfoFromSnapshot(chatData.worrySnapshot);
+        if (snapshotWorryInfo && !worryFetchedRef.current) {
+          worryFetchedRef.current = true;
+          setWorryInfo(snapshotWorryInfo);
         }
 
         if (chatData.worryId && !worryFetchedRef.current) {

@@ -8,6 +8,7 @@ import type {
   ReplyReadModelMode,
   TimestampLike,
 } from './types';
+import { worryDocFromFeedSnapshot } from '../homeWorryFeed/worrySnapshot';
 
 function stringArray(value: unknown): string[] {
   return Array.isArray(value)
@@ -35,6 +36,17 @@ function summaryTextForWorry(worry: Pick<PrdWorryDoc, 'content' | 'summaryText'>
   return typeof worry.summaryText === 'string' && worry.summaryText.trim()
     ? worry.summaryText
     : legacySummary(worry.content ?? '');
+}
+
+function sourceWorryForReply(reply: PrdReplyDoc, worriesById?: Map<string, PrdWorryDoc>): PrdWorryDoc | undefined {
+  if (!reply.worryId) return undefined;
+  const joinedWorry = worriesById?.get(reply.worryId);
+  if (joinedWorry) return joinedWorry;
+  const snapshotWorry = worryDocFromFeedSnapshot({
+    worryId: reply.worryId,
+    snapshot: reply.sourceWorrySnapshot,
+  });
+  return snapshotWorry ? snapshotWorry as PrdWorryDoc : undefined;
 }
 
 export function isHiddenWorry(worry: Pick<PrdWorryDoc, 'status' | 'hiddenAt'>): boolean {
@@ -122,9 +134,9 @@ export function selectVisibleMyGivenReplies(params: {
   return adaptPrdReplies(
     params.replies.filter(reply => {
       if (reply.replierUid !== params.userUid || isHiddenReply(reply)) return false;
-      if (!params.worriesById) return true;
+      if (!params.worriesById && !reply.sourceWorrySnapshot) return true;
       if (!reply.worryId) return false;
-      const worry = params.worriesById.get(reply.worryId);
+      const worry = sourceWorryForReply(reply, params.worriesById);
       return Boolean(worry && !isHiddenWorry(worry));
     }),
     undefined,
@@ -145,7 +157,7 @@ export function adaptPrdReplies(
     if (!reply.worryId || !reply.authorUid || !reply.replierUid) return [];
     if (typeof reply.content !== 'string') return [];
     const feedback = feedbacksByReplyId?.get(reply.id);
-    const sourceWorry = worriesById?.get(reply.worryId);
+    const sourceWorry = sourceWorryForReply(reply, worriesById);
     const sourceWorryContent = typeof sourceWorry?.content === 'string' ? sourceWorry.content : undefined;
     const sourceWorrySummary = sourceWorry ? summaryTextForWorry(sourceWorry) : undefined;
 

@@ -16,6 +16,7 @@ import { buildHighRiskBlockResult, shouldBlockHighRiskConcern } from './riskPoli
 import { createWorrySummary } from './summary';
 import { validateWorryContent } from './validation';
 import { sendNewWorryPushesAfterCommit } from './pushLogs';
+import { buildWorryFeedSnapshot } from '../../homeWorryFeed/worrySnapshot';
 import type {
   DeliveryBatchWriteModel,
   DeliveryWriteModel,
@@ -142,6 +143,7 @@ function buildDeliveries(params: {
   batchId: string;
   author: Phase1AuthorProfile;
   recipients: SelectedPhase1Recipient[];
+  worrySnapshot: DeliveryWriteModel['worrySnapshot'];
 }): DeliveryWriteModel[] {
   return params.recipients.map(recipient => {
     const timestamp = serverTimestamp();
@@ -152,6 +154,7 @@ function buildDeliveries(params: {
       authorUid: params.author.uid,
       status: 'active',
       answeredAt: null,
+      worrySnapshot: params.worrySnapshot,
       batchId: params.batchId,
       batchRound: 0,
       slotIndex: recipient.slotIndex,
@@ -301,12 +304,6 @@ export async function publishWorryOnServer(params: {
     random: params.random,
   });
 
-  const deliveries = buildDeliveries({
-    worryId: ids.worryId,
-    batchId: ids.batchId,
-    author: params.author,
-    recipients: selection.recipients,
-  });
   const matchedCount = selection.recipients.filter(recipient => recipient.selectionType === 'matched').length;
   const randomCount = selection.recipients.filter(recipient => recipient.selectionType === 'random').length;
 
@@ -339,7 +336,23 @@ export async function publishWorryOnServer(params: {
     invalidCategories: moderation.invalidCategories,
     matchingCategories: moderation.matchingCategories,
     llmAnalysis,
-    humanDeliveryCount: deliveries.length,
+    humanDeliveryCount: selection.recipients.length,
+  });
+  const worrySnapshot = buildWorryFeedSnapshot(worry);
+  if (!worrySnapshot) {
+    return {
+      status: 'server_error',
+      code: 'transaction_aborted',
+      message: '고민 전달 정보를 생성하는 중 문제가 발생했습니다.',
+      details: 'worry_snapshot_missing',
+    };
+  }
+  const deliveries = buildDeliveries({
+    worryId: ids.worryId,
+    batchId: ids.batchId,
+    author: params.author,
+    recipients: selection.recipients,
+    worrySnapshot,
   });
   const batch = buildBatch({
     batchId: ids.batchId,

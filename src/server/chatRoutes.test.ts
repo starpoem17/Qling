@@ -98,6 +98,39 @@ function captureAnswerAdoptionRoute(options: {
   return { handlers };
 }
 
+function captureCreateChatRoute(options: {
+  readonly uid?: string;
+  readonly userData?: Record<string, unknown>;
+  readonly store?: Record<string, Record<string, unknown> | undefined>;
+  readonly verifyIdToken?: () => Promise<{ uid: string }>;
+} = {}) {
+  const handlers: Array<(req: unknown, res: unknown, next: () => void) => unknown> = [];
+  const writes: Record<string, unknown> = {};
+  const store = {
+    [`users/${options.uid ?? 'author'}`]: options.userData ?? {},
+    ...(options.store ?? {}),
+  };
+  const app = {
+    post(path: string, ...routeHandlers: typeof handlers) {
+      if (path === '/api/chats/create') handlers.push(...routeHandlers);
+    },
+    get() {
+      return undefined;
+    },
+  };
+
+  registerChatRoutes(app as never, {
+    auth: {
+      verifyIdToken: options.verifyIdToken ?? (async () => ({ uid: options.uid ?? 'author' })),
+    } as never,
+    db: createWritableDb(store, writes) as never,
+    messaging: null,
+    messageSafetyPolicy: () => ({ status: 'approved' }),
+  });
+
+  return { handlers, writes };
+}
+
 async function callAnswerAdoptionRoute(route: ReturnType<typeof captureAnswerAdoptionRoute>) {
   const req = {
     headers: { authorization: 'Bearer token' },
@@ -107,6 +140,93 @@ async function callAnswerAdoptionRoute(route: ReturnType<typeof captureAnswerAdo
   await route.handlers[0](req, res, () => undefined);
   await route.handlers[1](req, res, () => undefined);
   return res;
+}
+
+async function callCreateChatRoute(route: ReturnType<typeof captureCreateChatRoute>, body: unknown = { replyId: 'reply-1' }) {
+  const req = {
+    headers: { authorization: 'Bearer token' },
+    body,
+  };
+  const res = createRes();
+  await route.handlers[0](req, res, () => undefined);
+  await route.handlers[1](req, res, () => undefined);
+  return res;
+}
+
+function createWritableDb(
+  store: Record<string, Record<string, unknown> | undefined>,
+  writes: Record<string, unknown>
+) {
+  return {
+    collection(name: string) {
+      return {
+        doc(id?: string) {
+          const docId = id ?? 'new-chat';
+          const path = `${name}/${docId}`;
+          return {
+            id: docId,
+            get: async () => {
+              const data = store[path];
+              return {
+                exists: data !== undefined,
+                data: () => data,
+              };
+            },
+            set: async (value: unknown) => {
+              writes[path] = value;
+            },
+            update: async (value: unknown) => {
+              writes[path] = { ...(writes[path] as object | undefined), ...(value as object) };
+            },
+          };
+        },
+        where(field: string, op: string, value: unknown) {
+          return createWritableQuery(store, writes, name, [{ field, op, value }]);
+        },
+      };
+    },
+  };
+}
+
+function createWritableQuery(
+  store: Record<string, Record<string, unknown> | undefined>,
+  writes: Record<string, unknown>,
+  collectionName: string,
+  filters: Array<{ field: string; op: string; value: unknown }>
+) {
+  return {
+    where(field: string, op: string, value: unknown) {
+      return createWritableQuery(store, writes, collectionName, [...filters, { field, op, value }]);
+    },
+    async get() {
+      return {
+        docs: Object.entries(store)
+          .filter(([path, data]) => path.startsWith(`${collectionName}/`) && data !== undefined)
+          .map(([path, data]) => {
+            const id = path.slice(collectionName.length + 1);
+            return {
+              id,
+              ref: {
+                update: async (value: unknown) => {
+                  writes[path] = { ...(writes[path] as object | undefined), ...(value as object) };
+                },
+              },
+              data: () => data,
+            };
+          })
+          .filter(doc => filters.every(filter => {
+            const value = doc.data()?.[filter.field];
+            if (filter.op === 'array-contains') {
+              return Array.isArray(value) && value.includes(filter.value);
+            }
+            assert.equal(filter.op, '==');
+            return Array.isArray(value) && filter.field === 'participants'
+              ? value.includes(filter.value)
+              : value === filter.value;
+          })),
+      };
+    },
+  };
 }
 
 test('chat answer adoption route requires active auth before metrics lookup', async () => {
@@ -119,6 +239,39 @@ test('chat answer adoption route requires active auth before metrics lookup', as
   const deletedRes = createRes();
   await deleted.handlers[0]({ headers: { authorization: 'Bearer token' }, params: { chatId: 'chat-1' } } as never, deletedRes as never, () => undefined);
   assert.equal(deletedRes.statusCode, 403);
+});
+
+test('chat create stores worry display snapshot on the chat document', async () => {
+  const route = captureCreateChatRoute({
+    uid: 'author',
+    store: {
+      'users/author': { nickname: '작성자', profileColor: '#4FB8C9' },
+      'users/replier': { nickname: '답변자', profileColor: '#FF8B3D' },
+      'replies/reply-1': {
+        authorUid: 'author',
+        replierUid: 'replier',
+        worryId: 'worry-1',
+        feedbackType: 'like',
+      },
+      'worries/worry-1': {
+        validCategories: ['진로'],
+        summaryText: '진로 고민 요약',
+        content: '진로 고민 원문',
+        createdAt: 'timestamp',
+      },
+    },
+  });
+
+  const res = await callCreateChatRoute(route);
+
+  assert.equal(res.statusCode, 200);
+  const chat = route.writes['chats/new-chat'] as { worrySnapshot?: unknown };
+  assert.deepEqual(chat.worrySnapshot, {
+    category: '진로',
+    summaryText: '진로 고민 요약',
+    content: '진로 고민 원문',
+    createdAt: 'timestamp',
+  });
 });
 
 test('chat answer adoption route allows only chat participants', async () => {

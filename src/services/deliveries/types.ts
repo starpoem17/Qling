@@ -1,6 +1,7 @@
 import type { MatchingTier } from '../matching/server/candidateRetrieval';
 import type { HumanCandidate, RankedHumanCandidate } from '../matching/server/recipientPolicy';
 import type { MatchingJudgeProvider } from '../matching/server/llmJudge';
+import type { WorryFeedSnapshot } from '../homeWorryFeed/worrySnapshot';
 
 export type ServerTimestampValue = unknown;
 export type ReplacementStatus = 'created' | 'shortfall' | 'not_applicable';
@@ -51,6 +52,7 @@ export interface PassReplacementDeliveryWriteModel {
   status: 'active';
   answeredAt: null;
   passedAt: null;
+  worrySnapshot?: WorryFeedSnapshot;
   answerableUntil: null;
   batchId: null;
   batchRound: null;

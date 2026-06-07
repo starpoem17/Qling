@@ -5,6 +5,32 @@ import { db } from '../../firebase';
 import { ChatScreen, type ChatListItem } from './ChatScreen';
 import type { AppRouteViewState } from '../../services/appShell/prdNavigationPolicy';
 
+type ChatWorrySnapshot = {
+  readonly category?: unknown;
+  readonly summaryText?: unknown;
+  readonly content?: unknown;
+};
+
+type ChatListItemDraft = ChatListItem & {
+  readonly _sortDate: number;
+  readonly worryId?: string;
+  readonly hasWorrySnapshot: boolean;
+};
+
+function chatWorryCategory(snapshot: unknown): string {
+  return typeof (snapshot as ChatWorrySnapshot | null)?.category === 'string'
+    ? (snapshot as ChatWorrySnapshot).category as string
+    : '기타';
+}
+
+function chatWorryTitle(snapshot: unknown): string | null {
+  const data = snapshot as ChatWorrySnapshot | null;
+  for (const value of [data?.summaryText, data?.content]) {
+    if (typeof value === 'string' && value.trim().length > 0) return value.trim();
+  }
+  return null;
+}
+
 export function ChatListContainer({
   user,
   setView,
@@ -28,7 +54,7 @@ export function ChatListContainer({
     const unsubscribe = onSnapshot(
       q,
       async (snap) => {
-        const chatItems: ChatListItem[] = [];
+        const chatItems: ChatListItemDraft[] = [];
         
         for (const docSnap of snap.docs) {
           const data = docSnap.data();
@@ -47,6 +73,7 @@ export function ChatListContainer({
 
           const unreadCount = data.unreadCounts?.[user.uid] || 0;
           const lastDate = data.lastMessageAt ? data.lastMessageAt.toDate() : (data.createdAt ? data.createdAt.toDate() : new Date());
+          const snapshotTitle = chatWorryTitle(data.worrySnapshot);
 
           let dateLabel = '';
           const now = new Date();
@@ -62,7 +89,6 @@ export function ChatListContainer({
             dateLabel = `${lastDate.getMonth() + 1}월 ${lastDate.getDate()}일`;
           }
 
-          // Fetch worry details safely (will populate later if not available immediately)
           chatItems.push({
             chatId: docSnap.id,
             opponentUid: opponentUid || '',
@@ -75,21 +101,21 @@ export function ChatListContainer({
             unreadCount: isModerationBlocked ? 0 : unreadCount,
             moderationBlocked: isModerationBlocked,
             worryId: data.worryId,
-            worryCategory: '기타', // default
-            worryTitle: '불러오는 중...', // default
+            worryCategory: chatWorryCategory(data.worrySnapshot),
+            worryTitle: snapshotTitle ?? '불러오는 중...',
+            hasWorrySnapshot: Boolean(snapshotTitle),
             _sortDate: lastDate.getTime(),
-          } as ChatListItem & { _sortDate: number, worryId: string });
+          } satisfies ChatListItemDraft);
         }
         
-        // Fetch worry data
         await Promise.all(chatItems.map(async (item: any) => {
-          if (item.worryId) {
+          if (item.worryId && !item.hasWorrySnapshot) {
             try {
               const worrySnap = await getDoc(doc(db, 'worries', item.worryId));
               if (worrySnap.exists()) {
                 const wData = worrySnap.data();
                 item.worryCategory = (wData.validCategories && wData.validCategories[0]) || '기타';
-                item.worryTitle = wData.summaryText || '게시글 내용을 불러올 수 없습니다';
+                item.worryTitle = wData.summaryText || wData.content || '게시글 내용을 불러올 수 없습니다';
               }
             } catch (e) {
                console.error('Failed to fetch worry:', e);
@@ -99,7 +125,7 @@ export function ChatListContainer({
         }));
 
         chatItems.sort((a, b) => (b as any)._sortDate - (a as any)._sortDate);
-        setChats(chatItems);
+        setChats(chatItems.map(({ _sortDate: _sortDate, worryId: _worryId, hasWorrySnapshot: _hasWorrySnapshot, ...item }) => item));
         setLoading(false);
       },
       (err) => {

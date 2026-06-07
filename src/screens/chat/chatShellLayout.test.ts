@@ -117,7 +117,9 @@ test('chat list and chat room use widened unscaled 480px frames', () => {
 
 test('chat list worry summary stays on one ellipsized line', () => {
   assert.match(chatScreenSource, /worryTitle\?: string/);
-  assert.match(chatListContainerSource, /item\.worryTitle = wData\.summaryText \|\| '게시글 내용을 불러올 수 없습니다'/);
+  assert.match(chatListContainerSource, /chatWorryTitle\(data\.worrySnapshot\)/);
+  assert.match(chatListContainerSource, /item\.worryId && !item\.hasWorrySnapshot/);
+  assert.match(chatListContainerSource, /item\.worryTitle = wData\.summaryText \|\| wData\.content \|\| '게시글 내용을 불러올 수 없습니다'/);
   assert.match(chatScreenSource, /<span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-normal text-\[#6e6a63\]" style=\{chatListCardTitleStyle\}>[\s\S]*\{chat\.worryTitle \|\| '게시글 정보 불러오는 중\.\.\.'\}[\s\S]*<\/span>/);
   assert.doesNotMatch(chatScreenSource, /line-clamp/);
 });

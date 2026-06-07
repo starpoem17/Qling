@@ -271,6 +271,33 @@ test('my given replies excludes hidden deleted or missing source worries when so
   assert.equal(selected[0].replyToContent, 'visible original');
 });
 
+test('my given replies use reply sourceWorrySnapshot without joined source worry', () => {
+  const selected = selectMyGivenReplies({
+    replies: [
+      prdReply({
+        id: 'snapshot-reply',
+        worryId: 'w1',
+        authorUid: 'author',
+        replierUid: 'me',
+        sourceWorrySnapshot: {
+          content: 'snapshot original',
+          summaryText: 'snapshot summary',
+          matchingCategories: ['진로'],
+          validCategories: ['진로'],
+          createdAt: ts(2),
+        },
+      }),
+    ],
+    userUid: 'me',
+    worriesById: new Map(),
+  });
+
+  assert.equal(selected.length, 1);
+  assert.equal(selected[0].originalContent, 'snapshot original');
+  assert.equal(selected[0].summaryText, 'snapshot summary');
+  assert.equal(selected[0].replyToContent, 'snapshot original');
+});
+
 test('existing feedback and publisher comment appear in received and my-answer read model items', () => {
   const reply = prdReply({ id: 'with-feedback', worryId: 'w1', authorUid: 'author', replierUid: 'me' });
   const feedbacksByReplyId = new Map([[

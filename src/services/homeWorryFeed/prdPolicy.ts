@@ -3,6 +3,7 @@ import type {
   HomeWorryFeedTimestamp,
   PrdAnswerFeedItem,
 } from './types';
+import type { WorryFeedSnapshot } from './worrySnapshot';
 import { normalizeWorryCategories } from '@midnight-radio/domain';
 
 export interface PrdDeliveryDoc {
@@ -14,6 +15,7 @@ export interface PrdDeliveryDoc {
   answeredAt?: unknown;
   passedAt?: unknown;
   hiddenAt?: unknown;
+  worrySnapshot?: WorryFeedSnapshot | null;
 }
 
 export interface PrdWorryDoc {

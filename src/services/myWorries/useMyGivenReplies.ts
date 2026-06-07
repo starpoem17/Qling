@@ -14,7 +14,10 @@ import {
   composeReplyReadModel,
   selectMyGivenReplies,
 } from './prdPolicy';
+import { worryDocFromFeedSnapshot } from '../homeWorryFeed/worrySnapshot';
 import type { PrdFeedbackDoc, PrdReplyDoc, PrdWorryDoc, ReplyReadModelItem } from './types';
+
+const FIRESTORE_IN_QUERY_LIMIT = 30;
 
 function toPrdReplyDocs(snapshot: QuerySnapshot<DocumentData>): PrdReplyDoc[] {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PrdReplyDoc));
@@ -28,19 +31,40 @@ function toPrdWorryDocs(snapshot: QuerySnapshot<DocumentData>): PrdWorryDoc[] {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PrdWorryDoc));
 }
 
+function chunk<T>(items: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size));
+  }
+  return chunks;
+}
+
+function sourceWorriesFromReplySnapshots(replies: PrdReplyDoc[]): Map<string, PrdWorryDoc> {
+  const worriesById = new Map<string, PrdWorryDoc>();
+  for (const reply of replies) {
+    const worry = worryDocFromFeedSnapshot({
+      worryId: reply.worryId,
+      snapshot: reply.sourceWorrySnapshot,
+    });
+    if (worry) worriesById.set(worry.id, worry as PrdWorryDoc);
+  }
+  return worriesById;
+}
+
 export function useMyGivenReplies(params: {
   user: { uid: string } | null;
   firestore?: Firestore;
 }) {
   const { user, firestore = db } = params;
   const [prdReplyDocs, setPrdReplyDocs] = useState<PrdReplyDoc[]>([]);
-  const [worriesById, setWorriesById] = useState(new Map<string, PrdWorryDoc>());
+  const [legacyWorriesById, setLegacyWorriesById] = useState(new Map<string, PrdWorryDoc>());
   const [feedbacksByReplyId, setFeedbacksByReplyId] = useState(new Map<string, PrdFeedbackDoc>());
   const [isLoadingMyGivenReplies, setIsLoadingMyGivenReplies] = useState(false);
 
   useEffect(() => {
     if (!user) {
       setPrdReplyDocs([]);
+      setLegacyWorriesById(new Map());
       setIsLoadingMyGivenReplies(false);
       return;
     }
@@ -69,33 +93,39 @@ export function useMyGivenReplies(params: {
 
   useEffect(() => {
     if (!user || prdReplyDocs.length === 0) {
-      setWorriesById(new Map());
+      setLegacyWorriesById(new Map());
       return;
     }
 
     const worryIds = [...new Set(prdReplyDocs.map(reply => reply.worryId).filter((id): id is string => typeof id === 'string' && id.length > 0))];
-    if (worryIds.length === 0) {
-      setWorriesById(new Map());
+    const snapshotWorriesById = sourceWorriesFromReplySnapshots(prdReplyDocs);
+    const legacyWorryIds = worryIds.filter(worryId => !snapshotWorriesById.has(worryId));
+    if (legacyWorryIds.length === 0) {
+      setLegacyWorriesById(new Map());
       return;
     }
 
-    const unsubscriptions = worryIds.map(worryId => onSnapshot(
-      query(collection(firestore, 'worries'), where(documentId(), '==', worryId)),
+    const unsubscriptions = chunk(legacyWorryIds, FIRESTORE_IN_QUERY_LIMIT).map(worryIdChunk => onSnapshot(
+      query(collection(firestore, 'worries'), where(documentId(), 'in', worryIdChunk)),
       snapshot => {
-        setWorriesById(prev => {
+        setLegacyWorriesById(prev => {
           const next = new Map(prev);
+          for (const worryId of worryIdChunk) {
+            next.set(worryId, { id: worryId, status: 'deleted' });
+          }
           for (const worry of toPrdWorryDocs(snapshot)) {
             next.set(worry.id, worry);
           }
-          if (snapshot.empty) next.set(worryId, { id: worryId, status: 'deleted' });
           return next;
         });
       },
       error => {
         logFirestoreListenerError('My given reply source worry listener error:', error);
-        setWorriesById(prev => {
+        setLegacyWorriesById(prev => {
           const next = new Map(prev);
-          next.set(worryId, { id: worryId, status: 'deleted' });
+          for (const worryId of worryIdChunk) {
+            next.set(worryId, { id: worryId, status: 'deleted' });
+          }
           return next;
         });
       }
@@ -132,6 +162,8 @@ export function useMyGivenReplies(params: {
 
   const myGivenReplies = useMemo(() => {
     const sourceWorryIds = [...new Set(prdReplyDocs.map(reply => reply.worryId).filter((id): id is string => typeof id === 'string' && id.length > 0))];
+    const snapshotWorriesById = sourceWorriesFromReplySnapshots(prdReplyDocs);
+    const worriesById = new Map([...snapshotWorriesById, ...legacyWorriesById]);
     const sourceWorriesReady = sourceWorryIds.length === 0 || sourceWorryIds.every(worryId => worriesById.has(worryId));
 
     return composeReplyReadModel({
@@ -143,7 +175,7 @@ export function useMyGivenReplies(params: {
       }),
       mode: 'given_by_me',
     });
-  }, [feedbacksByReplyId, prdReplyDocs, user?.uid, worriesById]);
+  }, [feedbacksByReplyId, legacyWorriesById, prdReplyDocs, user?.uid]);
 
   return { myGivenReplies, isLoadingMyGivenReplies };
 }

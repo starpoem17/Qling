@@ -3,6 +3,7 @@ import type { Messaging } from 'firebase-admin/messaging';
 import type { ConcernAnalysis } from '../matching/server/concernAnalysis';
 import type { MatchingTier } from '../matching/server/candidateRetrieval';
 import type { RankedHumanCandidate, HumanCandidate, AuthorProfile } from '../matching/server/recipientPolicy';
+import type { WorryFeedSnapshot } from '../homeWorryFeed/worrySnapshot';
 
 export type RematchRound = 1 | 2;
 export type SourceBatchRound = 0 | 1;
@@ -96,6 +97,7 @@ export interface RematchDeliveryWriteModel {
   status: 'active';
   answeredAt: null;
   passedAt: null;
+  worrySnapshot?: WorryFeedSnapshot;
   answerableUntil: null;
   batchId: string;
   batchRound: RematchRound;

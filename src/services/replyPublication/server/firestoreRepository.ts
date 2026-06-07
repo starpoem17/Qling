@@ -25,6 +25,7 @@ import {
   enqueueExperienceProfileSummaryJob,
 } from '../../matching/server/profileSummaryJobs';
 import { resolveProfileSummaryJobReason } from '../../matching/server/profileSummaryPolicy';
+import { buildWorryFeedSnapshot } from '../../homeWorryFeed/worrySnapshot';
 
 function withoutId<T extends { id: string }>(model: T): Omit<T, 'id'> {
   const { id: _id, ...rest } = model;
@@ -161,6 +162,7 @@ export function createReplyPublicationRepository(params: {
 
         const timestamp = serverTimestamp();
         const isExampleReply = delivery.isExample === true || worry.isExample === true;
+        const sourceWorrySnapshot = buildWorryFeedSnapshot(worry) ?? undefined;
         const reply: ReplyWriteModel = {
           id: deliveryId,
           deliveryId,
@@ -170,6 +172,7 @@ export function createReplyPublicationRepository(params: {
           content,
           status: 'active',
           publisherVisible: true,
+          ...(sourceWorrySnapshot ? { sourceWorrySnapshot } : {}),
           moderationLogId: moderationLog.id,
           createdAt: timestamp,
           updatedAt: timestamp,

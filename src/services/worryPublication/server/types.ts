@@ -2,6 +2,7 @@ import type { ConcernAnalysis } from '../../matching/server/concernAnalysis';
 import type { MatchingTier } from '../../matching/server/candidateRetrieval';
 import type { ExperienceProfile, ExperienceProfileStatus } from '../../matching/server/experienceProfile';
 import type { MatchingJudgeProvider } from '../../matching/server/llmJudge';
+import type { WorryFeedSnapshot } from '../../homeWorryFeed/worrySnapshot';
 import type { HighRiskBlockResult } from './riskPolicy';
 
 export type ServerTimestampValue = unknown;
@@ -137,6 +138,7 @@ export interface DeliveryWriteModel {
   authorUid: string;
   status: 'active';
   answeredAt: null;
+  worrySnapshot?: WorryFeedSnapshot;
   batchId: string;
   batchRound: 0;
   slotIndex: number;

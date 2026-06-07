@@ -34,7 +34,7 @@ export function useRepliesForWorry(params: {
   firestore?: Firestore;
 }) {
   const { user, worryId, firestore = db } = params;
-  const [prdReplies, setPrdReplies] = useState<ReplyReadModelItem[]>([]);
+  const [prdReplies, setPrdReplies] = useState<PrdReplyDoc[]>([]);
   const [readStatesByReplyId, setReadStatesByReplyId] = useState(new Map<string, ReplyReadStateDoc>());
   const [feedbacksByReplyId, setFeedbacksByReplyId] = useState(new Map<string, PrdFeedbackDoc>());
   const [isLoadingRepliesForWorry, setIsLoadingRepliesForWorry] = useState(false);
@@ -60,13 +60,7 @@ export function useRepliesForWorry(params: {
       ),
       snapshot => {
         const docs = toPrdReplyDocs(snapshot);
-        setPrdReplies(selectRepliesForWorry({
-          replies: docs,
-          userUid: user.uid,
-          worryId,
-          readStatesByReplyId,
-          feedbacksByReplyId,
-        }));
+        setPrdReplies(docs);
         setIsLoadingRepliesForWorry(false);
         setRepliesForWorryError(undefined);
       },
@@ -79,7 +73,7 @@ export function useRepliesForWorry(params: {
     );
 
     return () => unsubscribe();
-  }, [feedbacksByReplyId, firestore, readStatesByReplyId, user, worryId]);
+  }, [firestore, user, worryId]);
 
   useEffect(() => {
     if (!user || !worryId) {
@@ -109,13 +103,16 @@ export function useRepliesForWorry(params: {
   }, [firestore, user, worryId]);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !worryId) {
       setReadStatesByReplyId(new Map());
       return;
     }
 
     const unsubscribe = onSnapshot(
-      collection(firestore, 'users', user.uid, 'replyReadStates'),
+      query(
+        collection(firestore, 'users', user.uid, 'replyReadStates'),
+        where('worryId', '==', worryId)
+      ),
       snapshot => {
         setReadStatesByReplyId(new Map(
           toReplyReadStateDocs(snapshot).map(readState => [readState.replyId ?? '', readState])
@@ -128,15 +125,21 @@ export function useRepliesForWorry(params: {
     );
 
     return () => unsubscribe();
-  }, [firestore, user]);
+  }, [firestore, user, worryId]);
 
-  const repliesForWorry = useMemo(
-    () => composeReplyReadModel({
-      prdReplies,
+  const repliesForWorry = useMemo(() => {
+    if (!user || !worryId) return [];
+    return composeReplyReadModel({
+      prdReplies: selectRepliesForWorry({
+        replies: prdReplies,
+        userUid: user.uid,
+        worryId,
+        readStatesByReplyId,
+        feedbacksByReplyId,
+      }),
       mode: 'received_for_worry',
-    }),
-    [prdReplies]
-  );
+    });
+  }, [feedbacksByReplyId, prdReplies, readStatesByReplyId, user, worryId]);
 
   return { repliesForWorry, isLoadingRepliesForWorry, repliesForWorryError };
 }

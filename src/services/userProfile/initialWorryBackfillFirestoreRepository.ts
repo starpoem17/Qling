@@ -5,6 +5,7 @@ import {
 } from 'firebase-admin/firestore';
 import { normalizeWorryCategories } from '@midnight-radio/domain';
 import { ACTIVE_DELIVERY_LIMIT, normalizeHumanCandidate } from '../matching/server/recipientPolicy';
+import { buildWorryFeedSnapshot, type WorryFeedSnapshot } from '../homeWorryFeed/worrySnapshot';
 import type {
   InitialWorryBackfillCandidate,
   InitialWorryBackfillRepository,
@@ -124,6 +125,7 @@ export function createInitialWorryBackfillFirestoreRepository(params: {
           deliveryId: string;
           batchId: string;
           slotIndex: number;
+          worrySnapshot?: WorryFeedSnapshot;
         }> = [];
 
         for (const candidate of candidates) {
@@ -162,6 +164,7 @@ export function createInitialWorryBackfillFirestoreRepository(params: {
             : DEFAULT_HUMAN_DELIVERY_LIMIT;
           const humanDeliveryCount = typeof worry.humanDeliveryCount === 'number' ? worry.humanDeliveryCount : 0;
           if (humanDeliveryCount >= humanDeliveryLimit) continue;
+          const worrySnapshot = buildWorryFeedSnapshot(worry) ?? undefined;
 
           selected.push({
             worryId: candidate.id,
@@ -170,6 +173,7 @@ export function createInitialWorryBackfillFirestoreRepository(params: {
             deliveryId: `${candidate.id}_${uid}`,
             batchId: `${candidate.id}_welcome_${uid}`,
             slotIndex: selected.length,
+            ...(worrySnapshot ? { worrySnapshot } : {}),
           });
         }
 
@@ -186,7 +190,7 @@ export function createInitialWorryBackfillFirestoreRepository(params: {
             reason,
             recipientUid: uid,
           };
-          const delivery = {
+          const delivery: { id: string; [key: string]: unknown } = {
             id: item.deliveryId,
             worryId: item.worryId,
             recipientUid: uid,
@@ -211,6 +215,9 @@ export function createInitialWorryBackfillFirestoreRepository(params: {
             updatedAt: now,
             answerableUntil: null,
           };
+          if (item.worrySnapshot) {
+            delivery.worrySnapshot = item.worrySnapshot;
+          }
 
           transaction.set(db.collection('deliveryBatches').doc(item.batchId), withoutId(batch));
           transaction.set(db.collection('deliveries').doc(item.deliveryId), withoutId(delivery));

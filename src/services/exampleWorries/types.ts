@@ -1,4 +1,5 @@
 import type { Firestore } from 'firebase-admin/firestore';
+import type { WorryFeedSnapshot } from '../homeWorryFeed/worrySnapshot';
 
 export type ServerTimestampValue = unknown;
 
@@ -53,6 +54,7 @@ export interface ExampleDeliveryWriteModel {
   status: 'active';
   answeredAt: null;
   passedAt: null;
+  worrySnapshot?: WorryFeedSnapshot;
   answerableUntil: null;
   isExample: true;
   exampleSeedId: string;

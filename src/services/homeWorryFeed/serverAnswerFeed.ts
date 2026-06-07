@@ -6,6 +6,7 @@ import {
   type PrdWorryDoc,
 } from './prdPolicy';
 import type { PrdAnswerFeedItem } from './types';
+import { worryDocFromFeedSnapshot } from './worrySnapshot';
 
 export async function getPrdAnswerFeed(params: {
   db: Firestore;
@@ -26,9 +27,19 @@ export async function getPrdAnswerFeed(params: {
     && !delivery.hiddenAt
   ));
 
-  const worryIds = [...new Set(deliveries.map(delivery => delivery.worryId).filter(Boolean))] as string[];
+  const snapshotWorries: PrdWorryDoc[] = deliveries.flatMap(delivery => {
+    const worry = worryDocFromFeedSnapshot({
+      worryId: delivery.worryId,
+      snapshot: delivery.worrySnapshot,
+    });
+    return worry ? [worry] : [];
+  });
+  const snapshotWorryIds = new Set(snapshotWorries.map(worry => worry.id));
+  const legacyWorryIds = [...new Set(deliveries
+    .map(delivery => delivery.worryId)
+    .filter((worryId): worryId is string => typeof worryId === 'string' && !snapshotWorryIds.has(worryId)))];
   const [worryDocs, readStatesSnap] = await Promise.all([
-    Promise.all(worryIds.map(async worryId => {
+    Promise.all(legacyWorryIds.map(async worryId => {
       const worrySnap = await params.db.collection('worries').doc(worryId).get();
       return worrySnap.exists
         ? { id: worrySnap.id, ...worrySnap.data() } as PrdWorryDoc
@@ -38,7 +49,7 @@ export async function getPrdAnswerFeed(params: {
   ]);
 
   const worriesById = new Map(
-    worryDocs
+    [...snapshotWorries, ...worryDocs]
       .filter((worry): worry is PrdWorryDoc => worry !== null)
       .map(worry => [worry.id, worry])
   );

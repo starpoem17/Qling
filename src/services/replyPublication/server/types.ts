@@ -1,5 +1,6 @@
 import type { Firestore } from 'firebase-admin/firestore';
 import type { Messaging } from 'firebase-admin/messaging';
+import type { WorryFeedSnapshot } from '../../homeWorryFeed/worrySnapshot';
 
 export type ServerTimestampValue = unknown;
 
@@ -14,6 +15,7 @@ export interface ReplyWriteModel {
   content: string;
   status: ReplyStatus;
   publisherVisible: boolean;
+  sourceWorrySnapshot?: WorryFeedSnapshot;
   moderationLogId: string;
   createdAt: ServerTimestampValue;
   updatedAt: ServerTimestampValue;

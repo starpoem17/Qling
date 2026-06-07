@@ -12,7 +12,7 @@ function createDoc(id: string, data: Record<string, unknown> | undefined) {
   };
 }
 
-function createDb(store: Store) {
+function createDb(store: Store, reads: { worryDocGets?: number } = {}) {
   function collection(path: string) {
     return {
       where(field: string, op: string, value: unknown) {
@@ -37,6 +37,7 @@ function createDb(store: Store) {
       doc(id: string) {
         return {
           async get() {
+            if (path === 'worries') reads.worryDocGets = (reads.worryDocGets ?? 0) + 1;
             return createDoc(id, store[`${path}/${id}`]);
           },
           collection(child: string) {
@@ -88,6 +89,46 @@ test('server answer feed includes active visible delivery joined to visible worr
   assert.equal(items[0].originalContent, 'visible content');
   assert.deepEqual(items[0].categories, ['진로']);
   assert.equal(items[0].hasUnread, true);
+});
+
+test('server answer feed uses delivery worrySnapshot without reading worry document', async () => {
+  const reads = { worryDocGets: 0 };
+  const items = await getPrdAnswerFeed({
+    db: createDb(visibleStore({
+      'deliveries/delivery1': {
+        worryId: 'worry1',
+        authorUid: 'author',
+        recipientUid: 'recipient',
+        status: 'active',
+        worrySnapshot: {
+          content: 'snapshot content',
+          summaryText: 'snapshot summary',
+          matchingCategories: ['진로'],
+          validCategories: ['진로'],
+          createdAt: { toMillis: () => 2 },
+        },
+      },
+    }), reads) as never,
+    uid: 'recipient',
+  });
+
+  assert.equal(reads.worryDocGets, 0);
+  assert.equal(items.length, 1);
+  assert.equal(items[0].originalContent, 'snapshot content');
+  assert.equal(items[0].summaryText, 'snapshot summary');
+  assert.deepEqual(items[0].categories, ['진로']);
+});
+
+test('server answer feed falls back to worry document for legacy deliveries without snapshot', async () => {
+  const reads = { worryDocGets: 0 };
+  const items = await getPrdAnswerFeed({
+    db: createDb(visibleStore(), reads) as never,
+    uid: 'recipient',
+  });
+
+  assert.equal(reads.worryDocGets, 1);
+  assert.equal(items.length, 1);
+  assert.equal(items[0].originalContent, 'visible content');
 });
 
 test('server answer feed preserves read-state behavior', async () => {

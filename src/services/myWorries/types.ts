@@ -42,6 +42,13 @@ export interface PrdReplyDoc {
   content?: string;
   status?: string;
   publisherVisible?: boolean;
+  sourceWorrySnapshot?: {
+    content?: unknown;
+    summaryText?: unknown;
+    matchingCategories?: unknown;
+    validCategories?: unknown;
+    createdAt?: TimestampLike | null;
+  };
   hiddenAt?: unknown;
   createdAt?: TimestampLike | null;
   isAiGenerated?: boolean;

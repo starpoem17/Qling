@@ -20,6 +20,32 @@ export type ChatAnswerAdoptionMetrics = {
   readonly adoptedCount: number;
 };
 
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : [];
+}
+
+function firstString(...values: unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim().length > 0) return value.trim();
+  }
+  return null;
+}
+
+function buildChatWorrySnapshot(worryData: FirebaseFirestore.DocumentData | undefined) {
+  return {
+    category: stringArray(worryData?.validCategories)[0]
+      ?? stringArray(worryData?.matchingCategories)[0]
+      ?? '기타',
+    summaryText: firstString(worryData?.summaryText, worryData?.refinedContent, worryData?.content)
+      ?? '게시글 내용을 불러올 수 없습니다',
+    content: firstString(worryData?.content, worryData?.refinedContent, worryData?.summaryText)
+      ?? '게시글 내용을 불러올 수 없습니다',
+    createdAt: worryData?.createdAt ?? null,
+  };
+}
+
 export function registerChatRoutes(app: express.Express, deps: {
   db: Firestore | null;
   messaging: Messaging | null;
@@ -89,6 +115,9 @@ export function registerChatRoutes(app: express.Express, deps: {
           // Update profiles just in case
           const authorSnap = await db.collection('users').doc(replyData.authorUid).get();
           const replierSnap = await db.collection('users').doc(replyData.replierUid).get();
+          const worrySnap = typeof replyData.worryId === 'string'
+            ? await db.collection('worries').doc(replyData.worryId).get()
+            : null;
           const participantProfiles = {
             [replyData.authorUid]: {
               nickname: authorSnap.data()?.nickname || '익명',
@@ -99,13 +128,19 @@ export function registerChatRoutes(app: express.Express, deps: {
               profileColor: replierSnap.data()?.profileColor || '#FF8B3D'
             }
           };
-          await activeChat.ref.update({ participantProfiles });
+          await activeChat.ref.update({
+            participantProfiles,
+            ...(worrySnap?.exists ? { worrySnapshot: buildChatWorrySnapshot(worrySnap.data()) } : {}),
+          });
           res.status(200).json({ status: 'success', chatId: activeChat.id });
           return;
         }
 
         const authorSnap = await db.collection('users').doc(replyData.authorUid).get();
         const replierSnap = await db.collection('users').doc(replyData.replierUid).get();
+        const worrySnap = typeof replyData.worryId === 'string'
+          ? await db.collection('worries').doc(replyData.worryId).get()
+          : null;
         
         const participantProfiles = {
           [replyData.authorUid]: {
@@ -129,6 +164,7 @@ export function registerChatRoutes(app: express.Express, deps: {
           replierUid: replyData.replierUid,
           participants: [replyData.authorUid, replyData.replierUid],
           participantProfiles,
+          worrySnapshot: buildChatWorrySnapshot(worrySnap?.data()),
           createdAt: FieldValue.serverTimestamp(),
           lastMessageAt: null,
           lastMessageText: '',

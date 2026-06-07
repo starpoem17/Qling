@@ -7,6 +7,7 @@ import {
 import { normalizeWorryCategories } from '@midnight-radio/domain';
 import { isEligibleHumanCandidate } from '../matching/server/recipientPolicy';
 import { normalizeExperienceProfileStatus } from '../matching/server/experienceProfile';
+import { buildWorryFeedSnapshot } from '../homeWorryFeed/worrySnapshot';
 import type {
   CommittedRematchBatch,
   RematchBatchWriteModel,
@@ -148,6 +149,7 @@ function buildDelivery(params: {
   batchRound: 1 | 2;
   rematchEligibleAfter: Date | null;
   matchingCategories: string[];
+  worrySnapshot?: RematchDeliveryWriteModel['worrySnapshot'];
 }): RematchDeliveryWriteModel {
   const delivery: RematchDeliveryWriteModel = {
     id: `${params.worryId}_${params.recipient.uid}`,
@@ -176,6 +178,9 @@ function buildDelivery(params: {
   };
   if (params.recipient.llmMatch) {
     delivery.llmMatch = params.recipient.llmMatch;
+  }
+  if (params.worrySnapshot) {
+    delivery.worrySnapshot = params.worrySnapshot;
   }
   return delivery;
 }
@@ -351,6 +356,7 @@ export function createRematchRepository(params: { db: Firestore }): RematchRepos
         if (remainingCapacity <= 0) {
           return { status: 'skipped' as const, worryId: scan.worryId, deliveryIds: [], recipientUids: [], createdCount: 0, reason: 'no_capacity' as const };
         }
+        const worrySnapshot = buildWorryFeedSnapshot(worry) ?? undefined;
 
         const selected: SelectedRematchRecipient[] = [];
         for (const recipient of recipients.slice(0, Math.min(targetCount, remainingCapacity))) {
@@ -404,6 +410,7 @@ export function createRematchRepository(params: { db: Firestore }): RematchRepos
           batchRound: nextRound,
           rematchEligibleAfter,
           matchingCategories: scan.matchingCategories,
+          worrySnapshot,
         }));
 
         transaction.set(db.collection('deliveryBatches').doc(batch.id), withoutId(batch));

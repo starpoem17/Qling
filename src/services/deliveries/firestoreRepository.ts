@@ -14,6 +14,7 @@ import type {
 import type { HumanCandidate } from '../matching/server/recipientPolicy';
 import { isEligibleHumanCandidate } from '../matching/server/recipientPolicy';
 import { normalizeExperienceProfileStatus } from '../matching/server/experienceProfile';
+import { buildWorryFeedSnapshot } from '../homeWorryFeed/worrySnapshot';
 
 function withoutId<T extends { id: string }>(model: T): Omit<T, 'id'> {
   const { id: _id, ...rest } = model;
@@ -84,6 +85,7 @@ function replacementDelivery(params: {
   authorGender: string;
   recipient: PassReplacementSelectedRecipient;
   timestamp: unknown;
+  worrySnapshot?: PassReplacementDeliveryWriteModel['worrySnapshot'];
 }): PassReplacementDeliveryWriteModel {
   const delivery: PassReplacementDeliveryWriteModel = {
     id: `${params.worryId}_${params.recipient.uid}`,
@@ -113,6 +115,9 @@ function replacementDelivery(params: {
 
   if (params.recipient.llmMatch) {
     delivery.llmMatch = params.recipient.llmMatch;
+  }
+  if (params.worrySnapshot) {
+    delivery.worrySnapshot = params.worrySnapshot;
   }
 
   return delivery;
@@ -371,6 +376,7 @@ export function createDeliveryPassRepository(params: {
         const authorGender = typeof worry.authorGenderSnapshot === 'string'
           ? worry.authorGenderSnapshot
           : (typeof worry.authorGender === 'string' ? worry.authorGender : '');
+        const worrySnapshot = buildWorryFeedSnapshot(worry) ?? undefined;
         const replacement = {
           ...replacementDelivery({
             passedDeliveryId: deliveryId,
@@ -379,6 +385,7 @@ export function createDeliveryPassRepository(params: {
             authorGender,
             recipient: selectedRecipient,
             timestamp,
+            worrySnapshot,
           }),
           matchCategoriesSnapshot: stringArray(worry.matchingCategories),
         };

@@ -6,6 +6,7 @@ import {
 import { normalizeWorryCategories } from '@midnight-radio/domain';
 import { createExampleFeedbackRunAfter } from './policy';
 import { adaptActiveExampleWorrySeed } from './seedAdapter';
+import { buildWorryFeedSnapshot } from '../homeWorryFeed/worrySnapshot';
 import type {
   CreateExamplesForUserResult,
   ExampleDeliveryWriteModel,
@@ -107,6 +108,7 @@ function buildExampleDelivery(params: {
   seed: SelectedExampleSeed;
   user: FirebaseFirestore.DocumentData;
   timestamp: unknown;
+  worrySnapshot: ExampleDeliveryWriteModel['worrySnapshot'];
 }): ExampleDeliveryWriteModel {
   const worryId = exampleWorryId(params.uid, params.seed.id);
   return {
@@ -117,6 +119,7 @@ function buildExampleDelivery(params: {
     status: 'active',
     answeredAt: null,
     passedAt: null,
+    worrySnapshot: params.worrySnapshot,
     answerableUntil: null,
     isExample: true,
     exampleSeedId: params.seed.id,
@@ -185,7 +188,12 @@ export function createExampleWorriesFirestoreRepository(params: {
 
         const timestamp = FieldValue.serverTimestamp();
         const worries = seeds.map(seed => buildExampleWorry({ uid, seed, timestamp }));
-        const deliveries = seeds.map(seed => buildExampleDelivery({ uid, seed, user, timestamp }));
+        const deliveries = seeds.flatMap(seed => {
+          const worry = worries.find(item => item.sourceSeedId === seed.id);
+          const worrySnapshot = buildWorryFeedSnapshot(worry);
+          if (!worrySnapshot) return [];
+          return [buildExampleDelivery({ uid, seed, user, timestamp, worrySnapshot })];
+        });
 
         for (const worry of worries) {
           transaction.set(db.collection('worries').doc(worry.id), withoutId(worry));

@@ -14,6 +14,7 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
   function snapshot(path: string, state: Store) {
     return {
       id: path.split('/').at(-1) ?? '',
+      ref: { path },
       exists: state.has(path),
       data: () => {
         const data = state.get(path);
@@ -32,6 +33,12 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
             path: `${name}/${id}`,
           };
         },
+        where(field: string, op: string, value: unknown) {
+          return {
+            path: name,
+            filters: [[field, op, value]],
+          };
+        },
       };
     },
     async runTransaction<T>(callback: (transaction: unknown) => Promise<T>) {
@@ -41,6 +48,17 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
       const result = await callback({
         get: async (docRef: { path: string }) => {
           if (hasWritten) throw new Error(`read_after_write:${docRef.path}`);
+          if ('filters' in docRef) {
+            const query = docRef as unknown as { path: string; filters: unknown[][] };
+            const prefix = `${query.path}/`;
+            const docs = [...stateWithStaged().entries()]
+              .filter(([path]) => path.startsWith(prefix) && !path.slice(prefix.length).includes('/'))
+              .filter(([, data]) => query.filters.every(([field, op, value]) => (
+                op === '==' && data[String(field)] === value
+              )))
+              .map(([path]) => snapshot(path, stateWithStaged()));
+            return { docs, empty: docs.length === 0 };
+          }
           return snapshot(docRef.path, stateWithStaged());
         },
         update: (docRef: { path: string }, data: Record<string, unknown>) => {
@@ -180,10 +198,11 @@ test('reply hide sets hidden fields without changing delivery or user counters',
   assert.equal(db.store.get('users/recipient')?.activeDeliveryCount, 4);
 });
 
-test('internal worry hide sets hidden fields only and does not cascade child deliveries', async () => {
+test('internal worry hide hides active child deliveries from user-facing reads', async () => {
   const db = createFakeFirestore({
     'worries/w1': { status: 'active', authorUid: 'author' },
     'deliveries/d1': { worryId: 'w1', status: 'active', recipientUid: 'recipient' },
+    'replies/r1': { worryId: 'w1', status: 'active', replierUid: 'recipient' },
     'users/recipient': { activeDeliveryCount: 1 },
   });
   const repository = createAdminHidingRepository({ db: db as never });
@@ -197,6 +216,7 @@ test('internal worry hide sets hidden fields only and does not cascade child del
   assert.equal(result.status, 'hidden');
   assert.equal(db.store.get('worries/w1')?.status, 'hidden');
   assert.equal(db.store.get('worries/w1')?.hiddenBy, 'operator');
-  assert.equal(db.store.get('deliveries/d1')?.status, 'active');
-  assert.equal(db.store.get('users/recipient')?.activeDeliveryCount, 1);
+  assert.equal(db.store.get('deliveries/d1')?.status, 'hidden');
+  assert.equal(db.store.get('replies/r1')?.status, 'hidden');
+  assert.equal(db.store.get('users/recipient')?.activeDeliveryCount, 0);
 });
