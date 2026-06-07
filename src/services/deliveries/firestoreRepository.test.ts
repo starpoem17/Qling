@@ -12,6 +12,11 @@ function clone(value: Record<string, unknown>) {
 
 function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
   const store: Store = new Map(Object.entries(initial).map(([path, value]) => [path, clone(value)]));
+  const collectionReads: Array<{
+    collectionName: string;
+    filters: Array<[string, string, unknown]>;
+    maxResults?: number;
+  }> = [];
 
   function ref(path: string) {
     const id = path.split('/').at(-1) ?? '';
@@ -29,15 +34,14 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
     };
   }
 
-  function queryRef(name: string, filters: Array<[string, unknown]> = [], maxResults?: number) {
+  function queryRef(name: string, filters: Array<[string, string, unknown]> = [], maxResults?: number) {
     return {
       __query: true,
       collectionName: name,
       filters,
       maxResults,
       where(field: string, op: string, expected: unknown) {
-        assert.equal(op, '==');
-        return queryRef(name, [...filters, [field, expected]], maxResults);
+        return queryRef(name, [...filters, [field, op, expected]], maxResults);
       },
       limit(limitValue: number) {
         return queryRef(name, filters, limitValue);
@@ -50,16 +54,21 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
 
   function querySnapshot(
     name: string,
-    filters: Array<[string, unknown]>,
+    filters: Array<[string, string, unknown]>,
     state: Store,
     maxResults?: number
   ) {
+    collectionReads.push({ collectionName: name, filters, maxResults });
     const prefix = `${name}/`;
     const docs = [...state.entries()]
       .filter(([path, data]) => (
         path.startsWith(prefix)
         && !path.slice(prefix.length).includes('/')
-        && filters.every(([field, expected]) => data[field] === expected)
+        && filters.every(([field, op, expected]) => {
+          if (op === '==') return data[field] === expected;
+          if (op === '<') return typeof data[field] === 'number' && typeof expected === 'number' && data[field] < expected;
+          throw new Error(`unsupported_filter:${op}`);
+        })
       ))
       .slice(0, maxResults)
       .map(([path]) => snapshot(path, state));
@@ -68,6 +77,7 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
 
   return {
     store,
+    collectionReads,
     collection(name: string) {
       return {
         doc(id = `${name}-generated`) {
@@ -90,10 +100,13 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
           };
         },
         where(field: string, op: string, expected: unknown) {
-          assert.equal(op, '==');
-          return queryRef(name, [[field, expected]]);
+          return queryRef(name, [[field, op, expected]]);
+        },
+        limit(limitValue: number) {
+          return queryRef(name, [], limitValue);
         },
         async get() {
+          collectionReads.push({ collectionName: name, filters: [] });
           const prefix = `${name}/`;
           const docs = [...store.entries()]
             .filter(([path]) => path.startsWith(prefix) && !path.slice(prefix.length).includes('/'))
@@ -119,7 +132,7 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
         return next;
       };
       const result = await callback({
-        get: async (docRef: { path?: string; __query?: boolean; collectionName?: string; filters?: Array<[string, unknown]>; maxResults?: number }) => {
+        get: async (docRef: { path?: string; __query?: boolean; collectionName?: string; filters?: Array<[string, string, unknown]>; maxResults?: number }) => {
           if (hasWritten) {
             throw new Error(`read_after_write:${docRef.path ?? docRef.collectionName}`);
           }
@@ -239,6 +252,29 @@ test('active own delivery pass sets passed, decrements passer, creates attempt a
   assert.equal(db.store.get('worries/worry1')?.humanDeliveryCount, 2);
   assert.equal(db.store.get('worries/worry1')?.passedAt, undefined);
   assert.equal(db.store.get('worries/worry1')?.passerUid, undefined);
+});
+
+test('pass replacement scan uses bounded capacity query instead of full user collection scan', async () => {
+  const db = createFakeFirestore(baseState({
+    'users/full': { gender: 'female', interests: ['career'], activeDeliveryCount: 10 },
+    'users/legacy': { gender: 'female', interests: ['career'] },
+  }));
+  const repo = createDeliveryPassRepository({ db: db as never });
+
+  const scan = await repo.fetchReplacementScan({ deliveryId: 'delivery1' });
+
+  assert.deepEqual(
+    db.collectionReads.filter(read => read.collectionName === 'users').map(read => ({
+      filters: read.filters,
+      maxResults: read.maxResults,
+    })),
+    [
+      { filters: [['activeDeliveryCount', '<', 10]], maxResults: 200 },
+      { filters: [], maxResults: 50 },
+    ]
+  );
+  assert.equal(scan.candidates.some(candidate => candidate.uid === 'full'), false);
+  assert.equal(scan.candidates.some(candidate => candidate.uid === 'legacy'), true);
 });
 
 test('missing passer user doc still passes and retry after user creation does not decrement', async () => {

@@ -5,7 +5,7 @@ import {
   type Transaction,
 } from 'firebase-admin/firestore';
 import { normalizeWorryCategories } from '@midnight-radio/domain';
-import { isEligibleHumanCandidate } from '../matching/server/recipientPolicy';
+import { ACTIVE_DELIVERY_LIMIT, isEligibleHumanCandidate } from '../matching/server/recipientPolicy';
 import { normalizeExperienceProfileStatus } from '../matching/server/experienceProfile';
 import { buildWorryFeedSnapshot } from '../homeWorryFeed/worrySnapshot';
 import type {
@@ -21,6 +21,8 @@ import type {
 
 const JOB_NAME = 'rematchDueDeliveries';
 const MAX_LIMIT = 100;
+const REMATCH_CANDIDATE_QUERY_LIMIT = 500;
+const REMATCH_LEGACY_CANDIDATE_FALLBACK_LIMIT = 100;
 
 function withoutId<T extends { id: string }>(model: T): Omit<T, 'id'> {
   const { id: _id, ...rest } = model;
@@ -193,6 +195,26 @@ async function queryIsEmpty(
   return snap.empty || snap.docs.length === 0;
 }
 
+async function fetchRematchCandidateDocs(db: Firestore) {
+  const byCapacitySnap = await db.collection('users')
+    .where('activeDeliveryCount', '<', ACTIVE_DELIVERY_LIMIT)
+    .limit(REMATCH_CANDIDATE_QUERY_LIMIT)
+    .get();
+  const docsById = new Map(byCapacitySnap.docs.map(doc => [doc.id, doc]));
+  if (docsById.size < REMATCH_LEGACY_CANDIDATE_FALLBACK_LIMIT) {
+    const legacySnap = await db.collection('users')
+      .limit(REMATCH_LEGACY_CANDIDATE_FALLBACK_LIMIT)
+      .get();
+    for (const doc of legacySnap.docs) {
+      const activeDeliveryCount = doc.data().activeDeliveryCount;
+      if (!docsById.has(doc.id) && typeof activeDeliveryCount !== 'number') {
+        docsById.set(doc.id, doc);
+      }
+    }
+  }
+  return [...docsById.values()];
+}
+
 export function createRematchRepository(params: { db: Firestore }): RematchRepository {
   const { db } = params;
 
@@ -204,8 +226,8 @@ export function createRematchRepository(params: { db: Firestore }): RematchRepos
     async fetchScans({ limit }) {
       const safeLimit = Math.max(1, Math.min(limit, MAX_LIMIT));
       const worriesSnap = await db.collection('worries').where('status', '==', 'active').limit(safeLimit).get();
-      const usersSnap = await db.collection('users').get();
-      const candidates = usersSnap.docs.map(doc => userDocToCandidate(doc.id, doc.data()));
+      const userDocs = await fetchRematchCandidateDocs(db);
+      const candidates = userDocs.map(doc => userDocToCandidate(doc.id, doc.data()));
       const scans: RematchScan[] = [];
 
       for (const worryDoc of worriesSnap.docs) {

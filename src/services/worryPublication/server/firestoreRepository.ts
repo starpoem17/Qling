@@ -102,7 +102,8 @@ export function createInitialWorryPublicationRepository(params: {
           .limit(LEGACY_CANDIDATE_FALLBACK_LIMIT)
           .get();
         for (const doc of legacySnap.docs) {
-          if (!candidatesByUid.has(doc.id)) {
+          const activeDeliveryCount = doc.data().activeDeliveryCount;
+          if (!candidatesByUid.has(doc.id) && typeof activeDeliveryCount !== 'number') {
             candidatesByUid.set(doc.id, userDocToCandidate(doc.id, doc.data()));
           }
         }

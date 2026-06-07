@@ -12,9 +12,12 @@ import type {
   PassReplacementSelectedRecipient,
 } from './types';
 import type { HumanCandidate } from '../matching/server/recipientPolicy';
-import { isEligibleHumanCandidate } from '../matching/server/recipientPolicy';
+import { ACTIVE_DELIVERY_LIMIT, isEligibleHumanCandidate } from '../matching/server/recipientPolicy';
 import { normalizeExperienceProfileStatus } from '../matching/server/experienceProfile';
 import { buildWorryFeedSnapshot } from '../homeWorryFeed/worrySnapshot';
+
+const PASS_REPLACEMENT_CANDIDATE_QUERY_LIMIT = 200;
+const PASS_REPLACEMENT_LEGACY_CANDIDATE_FALLBACK_LIMIT = 50;
 
 function withoutId<T extends { id: string }>(model: T): Omit<T, 'id'> {
   const { id: _id, ...rest } = model;
@@ -76,6 +79,26 @@ function queryIsEmpty(snapshot: FirebaseFirestore.QuerySnapshot): boolean {
 
 function countHumanDeliveries(snapshot: FirebaseFirestore.QuerySnapshot): number {
   return snapshot.docs.filter(doc => doc.data().isAiRecipient !== true).length;
+}
+
+async function fetchPassReplacementCandidateDocs(db: Firestore) {
+  const byCapacitySnap = await db.collection('users')
+    .where('activeDeliveryCount', '<', ACTIVE_DELIVERY_LIMIT)
+    .limit(PASS_REPLACEMENT_CANDIDATE_QUERY_LIMIT)
+    .get();
+  const docsById = new Map(byCapacitySnap.docs.map(doc => [doc.id, doc]));
+  if (docsById.size < PASS_REPLACEMENT_LEGACY_CANDIDATE_FALLBACK_LIMIT) {
+    const legacySnap = await db.collection('users')
+      .limit(PASS_REPLACEMENT_LEGACY_CANDIDATE_FALLBACK_LIMIT)
+      .get();
+    for (const doc of legacySnap.docs) {
+      const activeDeliveryCount = doc.data().activeDeliveryCount;
+      if (!docsById.has(doc.id) && typeof activeDeliveryCount !== 'number') {
+        docsById.set(doc.id, doc);
+      }
+    }
+  }
+  return [...docsById.values()];
 }
 
 function replacementDelivery(params: {
@@ -237,10 +260,10 @@ export function createDeliveryPassRepository(params: {
       const delivery = snapshotData(deliveryDoc);
       const worryId = typeof delivery.worryId === 'string' ? delivery.worryId : '';
       const authorUid = typeof delivery.authorUid === 'string' ? delivery.authorUid : '';
-      const [worryDoc, authorDoc, usersSnap, deliveriesSnap, repliesSnap] = await Promise.all([
+      const [worryDoc, authorDoc, userDocs, deliveriesSnap, repliesSnap] = await Promise.all([
         worryId ? db.collection('worries').doc(worryId).get() : Promise.resolve(null),
         authorUid ? db.collection('users').doc(authorUid).get() : Promise.resolve(null),
-        db.collection('users').get(),
+        fetchPassReplacementCandidateDocs(db),
         db.collection('deliveries').where('worryId', '==', worryId).get(),
         db.collection('replies').where('worryId', '==', worryId).get(),
       ]);
@@ -268,7 +291,7 @@ export function createDeliveryPassRepository(params: {
       if (typeof delivery.authorUid === 'string') excludedUids.add(delivery.authorUid);
 
       return {
-        candidates: usersSnap.docs.map(doc => userDocToCandidate(doc.id, doc.data())),
+        candidates: userDocs.map(doc => userDocToCandidate(doc.id, doc.data())),
         excludedUids,
         existingHumanDeliveryCount,
         replierUids,

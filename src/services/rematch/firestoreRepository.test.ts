@@ -26,6 +26,11 @@ function applyFieldValue(current: Record<string, unknown>, data: Record<string, 
 
 function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
   const store: Store = new Map(Object.entries(initial).map(([path, value]) => [path, clone(value)]));
+  const collectionReads: Array<{
+    collectionName: string;
+    filters: Array<[string, string, unknown]>;
+    maxResults?: number;
+  }> = [];
 
   function snapshot(path: string, state: Store) {
     return {
@@ -39,15 +44,14 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
     };
   }
 
-  function queryRef(name: string, filters: Array<[string, unknown]> = [], maxResults?: number) {
+  function queryRef(name: string, filters: Array<[string, string, unknown]> = [], maxResults?: number) {
     return {
       __query: true,
       collectionName: name,
       filters,
       maxResults,
       where(field: string, op: string, expected: unknown) {
-        assert.equal(op, '==');
-        return queryRef(name, [...filters, [field, expected]], maxResults);
+        return queryRef(name, [...filters, [field, op, expected]], maxResults);
       },
       limit(limitValue: number) {
         return queryRef(name, filters, limitValue);
@@ -58,13 +62,18 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
     };
   }
 
-  function querySnapshot(name: string, filters: Array<[string, unknown]>, state: Store, maxResults?: number) {
+  function querySnapshot(name: string, filters: Array<[string, string, unknown]>, state: Store, maxResults?: number) {
+    collectionReads.push({ collectionName: name, filters, maxResults });
     const prefix = `${name}/`;
     const docs = [...state.entries()]
       .filter(([path, data]) => (
         path.startsWith(prefix)
         && !path.slice(prefix.length).includes('/')
-        && filters.every(([field, expected]) => data[field] === expected)
+        && filters.every(([field, op, expected]) => {
+          if (op === '==') return data[field] === expected;
+          if (op === '<') return typeof data[field] === 'number' && typeof expected === 'number' && data[field] < expected;
+          throw new Error(`unsupported_filter:${op}`);
+        })
       ))
       .slice(0, maxResults)
       .map(([path]) => snapshot(path, state));
@@ -73,6 +82,7 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
 
   return {
     store,
+    collectionReads,
     collection(name: string) {
       return {
         doc(id = `${name}-generated`) {
@@ -85,8 +95,10 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
           };
         },
         where(field: string, op: string, expected: unknown) {
-          assert.equal(op, '==');
-          return queryRef(name, [[field, expected]]);
+          return queryRef(name, [[field, op, expected]]);
+        },
+        limit(limitValue: number) {
+          return queryRef(name, [], limitValue);
         },
         async get() {
           return querySnapshot(name, [], store);
@@ -98,7 +110,7 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
       let hasWritten = false;
       const stateWithStaged = () => new Map([...store.entries(), ...staged.entries()]);
       const result = await callback({
-        get: async (ref: { path?: string; __query?: boolean; collectionName?: string; filters?: Array<[string, unknown]>; maxResults?: number }) => {
+        get: async (ref: { path?: string; __query?: boolean; collectionName?: string; filters?: Array<[string, string, unknown]>; maxResults?: number }) => {
           if (hasWritten) throw new Error(`read_after_write:${ref.path ?? ref.collectionName}`);
           if (ref.__query && ref.collectionName && ref.filters) {
             return querySnapshot(ref.collectionName, ref.filters, stateWithStaged(), ref.maxResults);
@@ -226,6 +238,30 @@ test('example worries are skipped during scan', async () => {
   const scans = await repo.fetchScans({ now, limit: 10 });
 
   assert.deepEqual(scans, []);
+});
+
+test('rematch scan uses bounded capacity query instead of full user collection scan', async () => {
+  const db = createFakeFirestore(baseState({
+    'users/full': { gender: 'female', interests: ['career'], activeDeliveryCount: 10 },
+    'users/legacy': { gender: 'female', interests: ['career'] },
+  }));
+  const repo = createRematchRepository({ db: db as never });
+
+  const scans = await repo.fetchScans({ now, limit: 10 });
+
+  assert.equal(scans.length, 1);
+  assert.deepEqual(
+    db.collectionReads.filter(read => read.collectionName === 'users').map(read => ({
+      filters: read.filters,
+      maxResults: read.maxResults,
+    })),
+    [
+      { filters: [['activeDeliveryCount', '<', 10]], maxResults: 500 },
+      { filters: [], maxResults: 100 },
+    ]
+  );
+  assert.equal(scans[0].candidates.some(candidate => candidate.uid === 'full'), false);
+  assert.equal(scans[0].candidates.some(candidate => candidate.uid === 'legacy'), true);
 });
 
 test('example worries are skipped during transaction recheck without delivery batch creation', async () => {

@@ -5,7 +5,7 @@ import type { MaterializedRankingSnapshot, RankingFeedbackDoc, RankingReplyDoc, 
 
 async function loadRankingSourceDocs(params: { readonly db: Firestore }) {
   const [usersSnapshot, feedbacksSnapshot, repliesSnapshot] = await Promise.all([
-    params.db.collection('users').get(),
+    params.db.collection('users').where('nickname', '>', '').get(),
     params.db.collection('feedbacks').get(),
     params.db.collection('replies').get(),
   ]);

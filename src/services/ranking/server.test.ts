@@ -55,8 +55,9 @@ test('server rankings use current snapshot without scanning source collections',
   assert.equal(result.total.viewer?.percentile, 100);
 });
 
-test('server rankings fall back to full scan when snapshot is missing', async () => {
+test('server rankings fall back to filtered source scan when snapshot is missing', async () => {
   const readCollections: string[] = [];
+  const sourceReads: string[] = [];
   const db = {
     collection(name: string) {
       readCollections.push(name);
@@ -71,9 +72,26 @@ test('server rankings fall back to full scan when snapshot is missing', async ()
         };
       }
       return {
-        get: async () => ({
-          docs: sourceDocs[name] ?? [],
-        }),
+        where(field: string, op: string, value: unknown) {
+          return {
+            get: async () => {
+              sourceReads.push(`${name}.where(${field}${op}${String(value)})`);
+              return {
+                docs: (sourceDocs[name] ?? []).filter(doc => {
+                  const data = doc.data();
+                  if (op === '>') return typeof data[field] === 'string' && typeof value === 'string' && data[field] > value;
+                  throw new Error(`unsupported_filter:${op}`);
+                }),
+              };
+            },
+          };
+        },
+        get: async () => {
+          sourceReads.push(`${name}.get`);
+          return {
+            docs: sourceDocs[name] ?? [],
+          };
+        },
       };
     },
   };
@@ -85,6 +103,7 @@ test('server rankings fall back to full scan when snapshot is missing', async ()
   });
 
   assert.deepEqual(readCollections, ['rankingSnapshots', 'users', 'feedbacks', 'replies']);
+  assert.deepEqual(sourceReads, ['users.where(nickname>)', 'feedbacks.get', 'replies.get']);
   assert.equal(result.total.viewer?.uid, 'viewer');
 });
 
