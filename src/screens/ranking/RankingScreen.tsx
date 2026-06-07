@@ -349,7 +349,7 @@ function RankingSheet({
 
 function RankingRow({ entry }: { readonly entry: RankingDisplayEntry }) {
   return (
-    <li className="flex h-[57px] items-center gap-3 border-b border-[#f1f3f5] py-3 last:border-b-0">
+    <li className="flex h-[57px] shrink-0 items-center gap-3 border-b border-[#f1f3f5] py-3 last:border-b-0">
       <span className="flex h-5 w-5 shrink-0 items-start justify-center text-[16px] font-medium leading-[21px] text-[#8b95a1] font-['Qling_Noto_Sans_KR']">
         {entry.rank}
       </span>

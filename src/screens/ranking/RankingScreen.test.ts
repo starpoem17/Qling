@@ -222,6 +222,7 @@ test('ranking sheet renders entries by slot after the podium even when rank numb
   assert.match(html, />Co First D</);
   assert.match(html, />Fifth Slot</);
   assert.match(html, /absolute bottom-0 left-0 top-12 flex w-full flex-col overflow-y-auto px-5/);
+  assert.match(html, /class="flex h-\[57px\] shrink-0 items-center gap-3 border-b border-\[#f1f3f5\] py-3 last:border-b-0"/);
   assert.doesNotMatch(html, /아직 순위가 없어요/);
 });
 
