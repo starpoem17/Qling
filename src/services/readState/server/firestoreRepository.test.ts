@@ -6,6 +6,7 @@ type Store = Map<string, Record<string, unknown>>;
 
 function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
   const store: Store = new Map(Object.entries(initial).map(([path, value]) => [path, { ...value }]));
+  const readCounts = new Map<string, number>();
 
   function ref(path: string) {
     const id = path.split('/').at(-1) ?? '';
@@ -38,12 +39,14 @@ function createFakeFirestore(initial: Record<string, Record<string, unknown>>) {
 
   return {
     store,
+    readCounts,
     collection,
     async runTransaction<T>(callback: (transaction: unknown) => Promise<T>) {
       let hasWritten = false;
       return callback({
         get: async (target: { path: string; filters?: Array<{ field: string; value: unknown }> }) => {
           if (hasWritten) throw new Error(`read_after_write:${target.path}`);
+          readCounts.set(target.path, (readCounts.get(target.path) ?? 0) + 1);
           if (target.filters) {
             const docs = [...store.entries()]
               .filter(([path]) => path.startsWith(`${target.path}/`))
@@ -144,7 +147,7 @@ test('delivery read validates missing wrong recipient and hidden delivery', asyn
   await assert.rejects(() => hidden.markDeliveryRead({ recipientUid: 'recipient', deliveryId: 'd1' }), /delivery_hidden/);
 });
 
-test('reply read marks current replies privately and repeat is no-op', async () => {
+test('reply read marks current replies privately and repeat remains idempotent', async () => {
   const db = createFakeFirestore({
     'worries/w1': { authorUid: 'author' },
     'replies/r1': { worryId: 'w1', authorUid: 'author', replierUid: 'recipient', status: 'active' },
@@ -157,11 +160,34 @@ test('reply read marks current replies privately and repeat is no-op', async () 
   const second = await repo.markRepliesForWorryRead({ authorUid: 'author', worryId: 'w1' });
 
   assert.equal(first.markedCount, 2);
-  assert.equal(second.markedCount, 0);
+  assert.equal(second.markedCount, 2);
   assert.equal(db.store.get('users/author/replyReadStates/r1')?.replyId, 'r1');
   assert.equal(db.store.get('users/author/replyReadStates/r2')?.replyId, 'r2');
   assert.equal(db.store.get('users/author/replyReadStates/r3'), undefined);
   assert.equal(db.store.get('replies/r1')?.readByAuthorAt, undefined);
+});
+
+test('reply read does not pre-read deterministic reply read-state docs', async () => {
+  const db = createFakeFirestore({
+    'worries/w1': { authorUid: 'author' },
+    'replies/r1': { worryId: 'w1', authorUid: 'author', replierUid: 'recipient', status: 'active' },
+    'users/author/replyReadStates/r1': {
+      replyId: 'r1',
+      worryId: 'w1',
+      authorUid: 'author',
+      readByAuthorAt: 'old',
+      createdAt: 'old',
+      updatedAt: 'old',
+    },
+  });
+  const repo = createReadStateRepository({ db: db as never });
+
+  const result = await repo.markRepliesForWorryRead({ authorUid: 'author', worryId: 'w1' });
+
+  assert.equal(result.markedCount, 1);
+  assert.equal(db.readCounts.get('users/author/replyReadStates/r1'), undefined);
+  assert.equal(db.store.get('users/author/replyReadStates/r1')?.replyId, 'r1');
+  assert.ok(db.store.get('users/author/replyReadStates/r1')?.readByAuthorAt);
 });
 
 test('reply read can mark an AI reply by deterministic reply ID', async () => {
@@ -219,5 +245,5 @@ test('later reply remains unread until another endpoint call', async () => {
 
   assert.equal(db.store.get('users/author/replyReadStates/r2'), undefined);
   const result = await repo.markRepliesForWorryRead({ authorUid: 'author', worryId: 'w1' });
-  assert.equal(result.markedCount, 1);
+  assert.equal(result.markedCount, 2);
 });

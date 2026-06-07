@@ -130,17 +130,11 @@ export function createReadStateRepository(params: {
           .doc(authorUid)
           .collection('replyReadStates')
           .doc(replyId));
-        const readStateDocs = await Promise.all(readStateRefs.map(readStateRef => transaction.get(readStateRef)));
         const timestamp = serverTimestamp();
-        let markedCount = 0;
 
-        readStateDocs.forEach((readStateDoc, index) => {
-          if (readStateDoc.exists && readStateDoc.data()?.readByAuthorAt) {
-            return;
-          }
-
+        readStateRefs.forEach((readStateRef, index) => {
           const replyId = replyIdsToMark[index];
-          transaction.set(readStateRefs[index], {
+          transaction.set(readStateRef, {
             replyId,
             worryId,
             authorUid,
@@ -148,13 +142,12 @@ export function createReadStateRepository(params: {
             createdAt: timestamp,
             updatedAt: timestamp,
           }, { merge: true });
-          markedCount += 1;
         });
 
         return {
           status: 'read' as const,
           worryId,
-          markedCount,
+          markedCount: replyIdsToMark.length,
         };
       });
     },
