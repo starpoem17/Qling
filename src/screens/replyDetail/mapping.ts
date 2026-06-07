@@ -84,6 +84,7 @@ export function selectReplyForDetailRoute(params: {
   if (typeof params.route === 'string' && params.selectedReply?.id === selectedReplyId && (
     currentRoute === 'received_answer_detail'
     || currentRoute === 'read_received_reply'
+    || currentRoute === 'my_answer_detail'
     || currentRoute === 'answer_check'
   )) {
     return params.selectedReply;

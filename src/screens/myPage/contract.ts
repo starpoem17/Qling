@@ -102,6 +102,7 @@ export type MyAnswersScreenProps = {
   readonly items: readonly MyAnswerListItemProps[];
   readonly chatCreationReplyId?: string | null;
   readonly onBack: () => void;
+  readonly onOpenDetail: (item: MyAnswerListItemProps) => void;
   readonly onStartChat: (item: MyAnswerListItemProps) => void;
 };
 

@@ -30,6 +30,7 @@ import {
   routeToEditInterests,
   routeToAnswerCheck,
   routeToMyAnswers,
+  routeToMyAnswerDetail,
   routeToMyWorries,
   routeToReceivedReplyDetail,
   routeToWriteReply,
@@ -180,6 +181,7 @@ test('routes pass, feedback, write, detail, and my-page subroute targets', () =>
     worryId: 'worry-1',
   });
   assert.equal(routeToMyAnswers(), 'my_answers');
+  assert.deepEqual(routeToMyAnswerDetail({ replyId: 'reply-1' }), { route: 'my_answer_detail', replyId: 'reply-1' });
   assert.equal(routeToMyWorries(), 'my_worries');
   assert.equal(routeToEditInterests(), 'edit_interests');
 });
@@ -304,7 +306,6 @@ test('Phase 1 my-page account routes include MVP subroutes and exclude removed r
     'operation_policy',
     'app_install_guide',
     'notification_settings',
-    'my_answer_detail',
     'read_my_reply',
   ]) {
     assert.equal((MY_PAGE_SUBROUTES as readonly string[]).includes(excluded), false);

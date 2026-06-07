@@ -42,6 +42,7 @@ import { WriteReplyContainer } from './screens/writeForm/WriteReplyContainer';
 import { WriteReplySuccessContainer } from './screens/writeForm/WriteReplySuccessContainer';
 import { MyPageContainer } from './screens/myPage/MyPageContainer';
 import { MyAnswersContainer } from './screens/myPage/MyAnswersContainer';
+import { MyAnswerDetailContainer } from './screens/myPage/MyAnswerDetailContainer';
 import {
   MyWorriesContainer,
   type SelectedMyReply,
@@ -120,7 +121,7 @@ function pwaRouteChromeForRoute(route: AppRoute): { readonly top: string; readon
   if (route === 'edit_interests') {
     return { top: '#ff8b3d', bottom: '#fff7e3' };
   }
-  if (route === '마이페이지' || route === 'my_page' || route === 'my_answers') {
+  if (route === '마이페이지' || route === 'my_page' || route === 'my_answers' || route === 'my_answer_detail') {
     return { top: '#ff8b3d', bottom: '#fff5eb' };
   }
   return null;
@@ -371,6 +372,7 @@ export default function App() {
   const currentWriteReplyRoute = typeof view === 'object' && view.route === 'write_reply' ? view : null;
   const currentWriteReplySuccessRoute = typeof view === 'object' && view.route === 'write_reply_success' ? view : null;
   const currentAnswerCheckRoute = typeof view === 'object' && view.route === 'answer_check' ? view : null;
+  const currentMyAnswerDetailRoute = typeof view === 'object' && view.route === 'my_answer_detail' ? view : null;
 
   useEffect(() => {
     const standalonePwaRouteChrome = pwaRouteChromeForRoute(currentRoute);
@@ -440,11 +442,12 @@ export default function App() {
               ? 'px-0 pt-0 pb-0 overflow-hidden bg-[#ff8b0d]'
               : routeBoundary.mountsBottomNavigation ? 'pt-0' : 'pt-6',
             routeBoundary.mainScrollMode === 'document' && 'overflow-y-auto',
-            currentRoute === '답변하기' || currentRoute === 'received_worries' || currentRoute === '나의 고민' || currentRoute === 'my_worries' || currentRoute === 'my_worry_detail' || currentRoute === 'answer_check' || currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page' || currentRoute === 'my_answers' || currentRoute === 'edit_interests' || currentRoute === '채팅' || currentRoute === 'chat' || currentRoute === 'chat_room' || currentRoute === 'report_user'
+            currentRoute === '답변하기' || currentRoute === 'received_worries' || currentRoute === '나의 고민' || currentRoute === 'my_worries' || currentRoute === 'my_worry_detail' || currentRoute === 'answer_check' || currentRoute === '순위' || currentRoute === 'ranking' || currentRoute === 'privacy_policy' || currentRoute === '마이페이지' || currentRoute === 'my_page' || currentRoute === 'my_answers' || currentRoute === 'edit_interests' || currentRoute === 'my_answer_detail' || currentRoute === '채팅' || currentRoute === 'chat' || currentRoute === 'chat_room' || currentRoute === 'report_user'
               ? 'overflow-hidden'
               : undefined,
             currentRoute === 'chat_room' ? 'px-0 pb-0 pt-0 bg-[#fff1d1]' : undefined,
             currentRoute === 'edit_interests' ? 'pt-0 pb-0' : undefined,
+            currentRoute === 'my_answer_detail' ? 'pt-0 pb-0 bg-[var(--qling-color-cream)]' : undefined,
           ],
       )}
     >
@@ -505,6 +508,20 @@ export default function App() {
             <motion.div key="my_answers" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
               <MyAnswersContainer
                 user={user}
+                setSelectedReply={setSelectedReply}
+                setView={setView}
+                setFilterAlert={setFilterAlert}
+              />
+            </motion.div>
+          )}
+
+          {currentRoute === 'my_answer_detail' && currentMyAnswerDetailRoute && (
+            <motion.div key="my_answer_detail" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="h-full min-h-0">
+              <MyAnswerDetailContainer
+                user={user}
+                route={currentMyAnswerDetailRoute}
+                selectedReply={selectedReply}
+                setSelectedReply={setSelectedReply}
                 setView={setView}
                 setFilterAlert={setFilterAlert}
               />

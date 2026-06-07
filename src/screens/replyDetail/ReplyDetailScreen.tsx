@@ -61,8 +61,8 @@ function DetailFrame({
   readonly children: ReactNode;
 }) {
   return (
-    <div className="mx-auto max-w-xl space-y-5 pb-6">
-      <div className="sticky top-16 z-20 -mx-[var(--qling-space-shell-x)] bg-[var(--qling-color-cream)]/95 px-[var(--qling-space-shell-x)] py-3 backdrop-blur-md">
+    <div className="mx-auto flex h-full min-h-0 max-w-xl flex-col">
+      <div className="sticky top-0 z-20 -mx-[var(--qling-space-shell-x)] shrink-0 bg-[var(--qling-color-cream)]/95 px-[var(--qling-space-shell-x)] py-3 backdrop-blur-md">
         <div className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center">
           <button
             type="button"
@@ -75,7 +75,11 @@ function DetailFrame({
           <h1 className="text-center text-lg font-extrabold text-[var(--qling-color-text)]">{title}</h1>
         </div>
       </div>
-      {children}
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6 pt-5 [-webkit-overflow-scrolling:touch]">
+        <div className="space-y-5">
+          {children}
+        </div>
+      </div>
     </div>
   );
 }

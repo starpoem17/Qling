@@ -81,6 +81,7 @@ export function MyAnswersScreenView(props: MyAnswersScreenProps & {
                     key={reply.replyId}
                     reply={reply}
                     chatCreationReplyId={props.chatCreationReplyId}
+                    onOpenDetail={props.onOpenDetail}
                     onStartChatConfirm={props.onOpenChatStartConfirmation}
                   />
                 ))}
@@ -111,10 +112,12 @@ function MyAnswersStateCard({ children }: { readonly children: ReactNode }) {
 function MyAnswerCard({
   reply,
   chatCreationReplyId,
+  onOpenDetail,
   onStartChatConfirm,
 }: {
   readonly reply: MyAnswersScreenProps['items'][number];
   readonly chatCreationReplyId?: string | null;
+  readonly onOpenDetail: (item: MyAnswersScreenProps['items'][number]) => void;
   readonly onStartChatConfirm: (item: MyAnswersScreenProps['items'][number]) => void;
 }) {
   const hasComment = Boolean(reply.feedbackComment);
@@ -126,29 +129,36 @@ function MyAnswerCard({
       aria-label={reply.accessibilityLabel}
       className="relative block w-full rounded-[18px] bg-white px-[18px] pb-[19px] pt-[11px] text-left shadow-[0_4px_4px_rgb(0_0_0/0.25)]"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          {reply.categoryLabel && (
-            <span className="inline-flex shrink-0 rounded-full bg-[#ffe4cc] px-3 py-[5px] text-[11px] font-bold leading-normal text-[#ff8b3d]">
-              {reply.categoryLabel}
-            </span>
-          )}
-          {reply.dateLabel && <span className="text-[12px] font-semibold leading-[23px] text-[#b8b8b8]">{reply.dateLabel}</span>}
-          {reply.isUnread && <SuccessBadge label="새 반응" />}
+      <button
+        type="button"
+        aria-label={`${reply.accessibilityLabel}, 전문 보기`}
+        onClick={() => onOpenDetail(reply)}
+        className="block w-full text-left focus:outline-none focus-visible:rounded-[12px] focus-visible:ring-2 focus-visible:ring-[#ff8b3d] focus-visible:ring-offset-2"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            {reply.categoryLabel && (
+              <span className="inline-flex shrink-0 rounded-full bg-[#ffe4cc] px-3 py-[5px] text-[11px] font-bold leading-normal text-[#ff8b3d]">
+                {reply.categoryLabel}
+              </span>
+            )}
+            {reply.dateLabel && <span className="text-[12px] font-semibold leading-[23px] text-[#b8b8b8]">{reply.dateLabel}</span>}
+            {reply.isUnread && <SuccessBadge label="새 반응" />}
+          </div>
+          {reply.hasReceivedHeart && <Heart className="mt-0.5 h-5 w-5 shrink-0 fill-[#e94335] text-[#e94335]" aria-hidden="true" />}
         </div>
-        {reply.hasReceivedHeart && <Heart className="mt-0.5 h-5 w-5 shrink-0 fill-[#e94335] text-[#e94335]" aria-hidden="true" />}
-      </div>
-      <p className="mt-[21px] whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 tracking-[-0.03em] text-[#2a2a2a]">
-        {reply.originalWorryPreview}
-      </p>
-      <p className="mt-[14px] whitespace-pre-wrap break-words border-t border-[#c2c4c8] pt-[13px] text-[13px] font-semibold leading-[1.45] tracking-[-0.04em] text-[#1a1a1e]">
-        {reply.previewText}
-      </p>
-      {reply.feedbackComment && (
-        <p className="mt-3 whitespace-pre-wrap break-words border-t border-[#c2c4c8] pt-[9px] text-[13px] font-semibold leading-[1.45] tracking-[-0.04em] text-[#1a1a1e]">
-          {reply.feedbackComment}
+        <p className="mt-[21px] whitespace-pre-wrap break-words text-[16px] font-extrabold leading-6 tracking-[-0.03em] text-[#2a2a2a]">
+          {reply.originalWorryPreview}
         </p>
-      )}
+        <p className="mt-[14px] whitespace-pre-wrap break-words border-t border-[#c2c4c8] pt-[13px] text-[13px] font-semibold leading-[1.45] tracking-[-0.04em] text-[#1a1a1e]">
+          {reply.previewText}
+        </p>
+        {reply.feedbackComment && (
+          <p className="mt-3 whitespace-pre-wrap break-words border-t border-[#c2c4c8] pt-[9px] text-[13px] font-semibold leading-[1.45] tracking-[-0.04em] text-[#1a1a1e]">
+            {reply.feedbackComment}
+          </p>
+        )}
+      </button>
       {hasComment && (
         <button
           type="button"

@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import type { User } from 'firebase/auth';
-import { useMyGivenReplies } from '../../services/myWorries';
+import { useMyGivenReplies, type ReplyReadModelItem } from '../../services/myWorries';
 import {
   backRouteForRoute,
+  routeToMyAnswerDetail,
   type AppRouteViewState,
 } from '../../services/appShell/prdNavigationPolicy';
 import { MyAnswersScreen } from './MyAnswersScreen';
@@ -10,6 +12,7 @@ import { mapMyGivenReplyToListItem } from './mapping';
 
 export type MyAnswersContainerProps = {
   readonly user: User | null;
+  readonly setSelectedReply: Dispatch<SetStateAction<ReplyReadModelItem | null>>;
   readonly setView: (view: AppRouteViewState) => void;
   readonly setFilterAlert: (message: string) => void;
 };
@@ -29,6 +32,11 @@ export function MyAnswersContainer(props: MyAnswersContainerProps) {
       items={items}
       chatCreationReplyId={chatCreationReplyId}
       onBack={() => props.setView(backRouteForRoute('my_answers'))}
+      onOpenDetail={item => {
+        const selectedReply = myGivenReplies.find(reply => reply.id === item.replyId) ?? null;
+        props.setSelectedReply(selectedReply);
+        props.setView(routeToMyAnswerDetail({ replyId: item.replyId }));
+      }}
       onStartChat={async item => {
         if (!item.worryId || chatCreationReplyId) return;
 

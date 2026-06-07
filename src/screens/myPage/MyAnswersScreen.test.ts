@@ -22,6 +22,7 @@ function baseProps(overrides: Partial<MyAnswersScreenProps> = {}): MyAnswersScre
       accessibilityLabel: '내가 쓴 답변, 카테고리 자존감, 피드백 받은 하트, 코멘트 있음',
     }],
     onBack: () => undefined,
+    onOpenDetail: () => undefined,
     onStartChat: () => undefined,
     ...overrides,
   };
@@ -199,11 +200,28 @@ test('my answers disables chat start controls while chat creation is processing'
   assert.equal(confirmButton.props['aria-busy'], true);
 });
 
-test('my answers screen does not make item cards navigate to detail routes', () => {
+test('my answers screen opens detail from item content', () => {
+  const events: string[] = [];
+  const tree = MyAnswersScreenView(viewProps({
+    onOpenDetail: item => events.push(item.replyId),
+  }));
+  const detailButton = findElement(tree, element => (
+    element.type === 'button'
+    && typeof element.props['aria-label'] === 'string'
+    && element.props['aria-label'].includes('전문 보기')
+  ));
+
+  const onClick = detailButton.props.onClick as () => void;
+  onClick();
+
+  assert.deepEqual(events, ['reply-1']);
+});
+
+test('my answers screen exposes accessible detail buttons without hiding chat start action', () => {
   const html = renderToStaticMarkup(createElement(MyAnswersScreen, baseProps()));
 
-  assert.doesNotMatch(html, /<button[^>]*aria-label="내가 쓴 답변/);
-  assert.doesNotMatch(html, /my_answer_detail|read_my_reply|routeToMyReplyDetail/);
+  assert.match(html, /aria-label="내가 쓴 답변[^"]*전문 보기"/);
+  assert.match(html, /aria-label="익명 채팅 시작하기"/);
 });
 
 test('my answers screen hides dislike feedback and publisher private data from DOM', () => {

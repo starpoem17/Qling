@@ -44,6 +44,7 @@ test('maps canonical route states to their Phase 3 route rendering boundaries', 
   assert.equal(routeRenderingGroupForRoute('나의 고민'), 'authenticated shell');
   assert.equal(routeRenderingGroupForRoute('answer_check'), 'answer check');
   assert.equal(routeRenderingGroupForRoute('received_answer_detail'), 'reply details');
+  assert.equal(routeRenderingGroupForRoute('my_answer_detail'), 'reply details');
   assert.equal(routeRenderingGroupForRoute('my_worry_detail'), 'reply details');
   assert.equal(routeRenderingGroupForRoute('마이페이지'), 'my-page/account');
   assert.equal(routeRenderingGroupForRoute('my_answers'), 'my-page/account');
@@ -58,7 +59,6 @@ test('keeps excluded MVP routes out of route rendering boundary groups', () => {
     'operation_policy',
     'app_install_guide',
     'notification_settings',
-    'my_answer_detail',
     'read_my_reply',
   ]) {
     assert.equal((allBoundaryRoutes as readonly string[]).includes(excluded), false);

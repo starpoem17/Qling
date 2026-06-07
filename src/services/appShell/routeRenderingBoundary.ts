@@ -94,7 +94,7 @@ export const ROUTE_RENDERING_BOUNDARY = {
     nextContainerBoundary: 'Answer-check read model loading, feedback/comment mutations, local hidden state, and presentation are owned by the answerCheck deep module.',
   },
   'reply details': {
-    routes: ['received_answer_detail', 'read_received_reply', 'my_worry_detail'],
+    routes: ['received_answer_detail', 'read_received_reply', 'my_answer_detail', 'my_worry_detail'],
     appBoundary: 'App shell may select the reply/worry detail route container and preserve detail ids.',
     nextContainerBoundary: 'Reply detail read models, feedback/comment mutations, and detail presentation move in Phase 7.',
   },

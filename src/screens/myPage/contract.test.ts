@@ -123,6 +123,7 @@ test('my answers and my worries contracts expose list states and route callbacks
       accessibilityLabel: '내가 쓴 답변, 원래 고민 원래 고민, 피드백 없음, 선택되지 않음',
     }],
     onBack: () => undefined,
+    onOpenDetail: () => undefined,
     onStartChat: () => undefined,
   } satisfies MyAnswersScreenProps;
   const worries = {
