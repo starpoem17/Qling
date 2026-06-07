@@ -27,7 +27,7 @@ export default defineConfig(({mode}) => {
           id: '/qling',
           name: 'Qling',
           short_name: 'Qling',
-          description: '밤을 위로하는 익명 라디오 사연 앱',
+          description: '고민 끝에 큐링',
           theme_color: '#FDFCF8',
           background_color: '#FDFCF8',
           display: 'standalone',
