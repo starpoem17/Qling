@@ -4,7 +4,7 @@ import { FigmaCanvasFrame, FigmaTopBar } from '../shared/ui';
 import type { WriteFormScreenProps } from './contract';
 
 const pwaTopbarShift = 'var(--qling-pwa-topbar-shift, 0px)';
-const sendButtonBaseTop = 'calc((var(--qling-visual-viewport-height) - var(--qling-space-nav-height)) - 88px)';
+const sendButtonBaseTop = 'calc((var(--qling-stable-viewport-height) - var(--qling-space-nav-height)) - var(--qling-write-form-send-bottom-offset))';
 const sendButtonTop = `calc(${sendButtonBaseTop} + ${pwaTopbarShift})`;
 const topBoxTop = `calc(100px + ${pwaTopbarShift})`;
 const inputAreaTop = `calc(200px + ${pwaTopbarShift})`;

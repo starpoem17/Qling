@@ -175,6 +175,7 @@ test('detects iOS Safari browser and standalone PWA mode before app boot', () =>
   assert.match(indexHtml, /const isIos = \/iPad\|iPhone\|iPod\/\.test\(ua\)/);
   assert.match(indexHtml, /const isSafari = \/Safari\/\.test\(ua\) && !\/CriOS\|FxiOS\|EdgiOS\|OPiOS\/\.test\(ua\)/);
   assert.match(indexHtml, /window\.matchMedia\('\(display-mode: standalone\)'\)\.matches \|\| Boolean\(navigator\.standalone\)/);
+  assert.match(indexHtml, /document\.documentElement\.classList\.add\('qling-standalone-pwa'\)/);
   assert.match(indexHtml, /document\.documentElement\.classList\.add\('qling-ios-safari-browser'\)/);
   assert.match(indexHtml, /document\.documentElement\.classList\.add\('qling-ios-standalone-pwa'\)/);
   assert.match(indexHtml, /document\.querySelector\('meta\[name="theme-color"\]'\)\?\.setAttribute\('content', '#fff5eb'\)/);
@@ -186,6 +187,17 @@ test('detects iOS Safari browser and standalone PWA mode before app boot', () =>
   assert.match(cssSource, /html\.qling-ios-safari-browser[\s\S]*--qling-space-nav-base-height: 65px;/);
   assert.match(cssSource, /html\.qling-ios-safari-browser[\s\S]*--qling-space-nav-height: var\(--qling-space-nav-base-height\);/);
   assert.match(cssSource, /html\.qling-ios-safari-browser \.qling-production-main--with-bottom-nav[\s\S]*padding-top: 0;/);
+});
+
+test('bottom navigation shell routes lock parent scrolling while text inputs are focused', () => {
+  const source = fs.readFileSync('src/screens/shared/ui.tsx', 'utf8');
+  const cssSource = fs.readFileSync('src/index.css', 'utf8');
+
+  assert.match(source, /hasBottomNavigation && isBottomNavTextInputFocused && 'qling-production-main--bottom-nav-input-focused'/);
+  assert.match(source, /onFocusCapture=\{handleFocusCapture\}/);
+  assert.match(source, /onBlurCapture=\{handleBlurCapture\}/);
+  assert.match(source, /function isTextInputElement/);
+  assert.match(cssSource, /\.qling-production-main--bottom-nav-input-focused[\s\S]*overflow: hidden !important;/);
 });
 
 test('bottom navigation shell routes remove default top padding', () => {

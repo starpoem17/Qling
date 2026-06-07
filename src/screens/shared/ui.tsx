@@ -1,4 +1,4 @@
-import { useEffect, useId, type HTMLAttributes, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type FocusEvent, type HTMLAttributes, type MouseEvent, type ReactNode } from 'react';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
 import { normalizeProfileColor } from '../../lib/profileColor';
 import {
@@ -36,31 +36,65 @@ export function MobileAppShell({
   hasBottomNavigation = Boolean(bottomNavigation),
   mainClassName,
 }: MobileAppShellProps) {
+  const stableViewportHeightRef = useRef(0);
+  const [isBottomNavTextInputFocused, setIsBottomNavTextInputFocused] = useState(false);
+
   useEffect(() => {
     const visualViewport = window.visualViewport;
     if (!visualViewport) return;
 
     const root = document.documentElement;
-    const updateVisualViewportHeight = () => {
-      root.style.setProperty('--qling-visual-viewport-height', `${visualViewport.height}px`);
+    const readViewportHeight = () => Math.max(
+      visualViewport.height,
+      window.innerHeight,
+      root.clientHeight,
+    );
+    const updateStableViewportHeight = (reset = false) => {
+      const nextHeight = readViewportHeight();
+      stableViewportHeightRef.current = reset
+        ? nextHeight
+        : Math.max(stableViewportHeightRef.current, nextHeight);
+      root.style.setProperty('--qling-stable-viewport-height', `${stableViewportHeightRef.current}px`);
     };
 
-    updateVisualViewportHeight();
-    visualViewport.addEventListener('resize', updateVisualViewportHeight);
-    visualViewport.addEventListener('scroll', updateVisualViewportHeight);
-    window.addEventListener('orientationchange', updateVisualViewportHeight);
+    const resetStableViewportHeight = () => updateStableViewportHeight(true);
+
+    updateStableViewportHeight(true);
+    const preserveStableViewportHeight = () => updateStableViewportHeight(false);
+
+    visualViewport.addEventListener('resize', preserveStableViewportHeight);
+    visualViewport.addEventListener('scroll', preserveStableViewportHeight);
+    window.addEventListener('orientationchange', resetStableViewportHeight);
 
     return () => {
-      visualViewport.removeEventListener('resize', updateVisualViewportHeight);
-      visualViewport.removeEventListener('scroll', updateVisualViewportHeight);
-      window.removeEventListener('orientationchange', updateVisualViewportHeight);
-      root.style.removeProperty('--qling-visual-viewport-height');
+      visualViewport.removeEventListener('resize', preserveStableViewportHeight);
+      visualViewport.removeEventListener('scroll', preserveStableViewportHeight);
+      window.removeEventListener('orientationchange', resetStableViewportHeight);
+      root.style.removeProperty('--qling-stable-viewport-height');
     };
   }, []);
 
+  const handleFocusCapture = (event: FocusEvent<HTMLDivElement>) => {
+    if (!hasBottomNavigation) return;
+    if (isTextInputElement(event.target)) {
+      setIsBottomNavTextInputFocused(true);
+    }
+  };
+
+  const handleBlurCapture = () => {
+    if (!hasBottomNavigation) return;
+    window.requestAnimationFrame(() => {
+      setIsBottomNavTextInputFocused(isTextInputElement(document.activeElement));
+    });
+  };
+
   return (
     <div className="qling-production-root overflow-hidden text-[var(--qling-color-text)] font-sans selection:bg-[var(--qling-color-cream-soft)]">
-      <div className="qling-production-frame">
+      <div
+        className="qling-production-frame"
+        onFocusCapture={handleFocusCapture}
+        onBlurCapture={handleBlurCapture}
+      >
         {header}
         <main
           className={cn(
@@ -68,6 +102,7 @@ export function MobileAppShell({
             hasBottomNavigation
               ? 'qling-production-main--with-bottom-nav overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]'
               : 'pb-12',
+            hasBottomNavigation && isBottomNavTextInputFocused && 'qling-production-main--bottom-nav-input-focused',
             mainClassName,
           )}
         >
@@ -77,6 +112,12 @@ export function MobileAppShell({
       </div>
     </div>
   );
+}
+
+function isTextInputElement(target: EventTarget | Element | null): target is HTMLInputElement | HTMLTextAreaElement {
+  if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLTextAreaElement)) return false;
+  if (target instanceof HTMLTextAreaElement) return true;
+  return !['button', 'checkbox', 'color', 'file', 'hidden', 'image', 'radio', 'range', 'reset', 'submit'].includes(target.type);
 }
 
 export function FigmaCanvasFrame({

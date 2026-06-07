@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { Children, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { WriteWorryScreen } from './WriteWorryScreen';
@@ -57,8 +58,8 @@ test('write worry screen uses the widened unscaled form frame while keeping the 
   assert.doesNotMatch(html, /질문 작성/);
   assert.match(html, /left-5 right-5 rounded-\[18px\]/);
   assert.match(html, /top:calc\(120px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
-  assert.match(html, /height:max\(240px, calc\(calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 88px\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) - calc\(120px \+ var\(--qling-pwa-topbar-shift, 0px\)\) - 23px\)\)/);
-  assert.match(html, /top:calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 88px\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.match(html, /height:max\(240px, calc\(calc\(calc\(\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\) - var\(--qling-write-form-send-bottom-offset\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) - calc\(120px \+ var\(--qling-pwa-topbar-shift, 0px\)\) - 23px\)\)/);
+  assert.match(html, /top:calc\(calc\(\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\) - var\(--qling-write-form-send-bottom-offset\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
   assert.doesNotMatch(html, /min\(541px/);
   assert.doesNotMatch(html, /min\(684px/);
   assert.match(html, /left-1\/2 inline-flex h-12 w-\[267px\] -translate-x-1\/2/);
@@ -71,6 +72,16 @@ test('write worry screen uses the widened unscaled form frame while keeping the 
   assert.doesNotMatch(html, /writeWorryCanvasScale/);
   assert.doesNotMatch(html, /top-\[684px\]/);
   assert.doesNotMatch(html, /top-\[69px\]/);
+});
+
+test('write worry PWA spacing uses the shared 24px bottom-nav gap variable', () => {
+  const source = fs.readFileSync('src/screens/writeForm/WriteWorryScreen.tsx', 'utf8');
+  const cssSource = fs.readFileSync('src/index.css', 'utf8');
+
+  assert.match(source, /var\(--qling-stable-viewport-height\)/);
+  assert.match(source, /var\(--qling-write-form-send-bottom-offset\)/);
+  assert.match(cssSource, /--qling-write-form-send-bottom-offset: 88px;/);
+  assert.match(cssSource, /html\.qling-standalone-pwa[\s\S]*--qling-write-form-send-bottom-offset: calc\(72px \+ var\(--qling-pwa-topbar-shift, 0px\)\);/);
 });
 
 test('write worry screen forwards typing, back, and publish events', () => {

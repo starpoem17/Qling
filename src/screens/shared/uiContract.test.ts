@@ -84,13 +84,13 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
   const cssSource = fs.readFileSync(path.join(process.cwd(), 'src', 'index.css'), 'utf8');
 
-  assert.match(cssSource, /\.qling-production-root[\s\S]*height: var\(--qling-visual-viewport-height\);/);
-  assert.match(cssSource, /\.qling-production-root[\s\S]*min-height: var\(--qling-visual-viewport-height\);/);
+  assert.match(cssSource, /\.qling-production-root[\s\S]*height: var\(--qling-stable-viewport-height\);/);
+  assert.match(cssSource, /\.qling-production-root[\s\S]*min-height: var\(--qling-stable-viewport-height\);/);
   assert.match(cssSource, /\.qling-production-root[\s\S]*overflow: hidden;/);
   assert.match(cssSource, /\.qling-production-frame[\s\S]*display: flex;/);
   assert.match(cssSource, /\.qling-production-frame[\s\S]*flex-direction: column;/);
-  assert.match(cssSource, /\.qling-production-frame[\s\S]*height: var\(--qling-visual-viewport-height\);/);
-  assert.match(cssSource, /\.qling-production-frame[\s\S]*min-height: var\(--qling-visual-viewport-height\);/);
+  assert.match(cssSource, /\.qling-production-frame[\s\S]*height: var\(--qling-stable-viewport-height\);/);
+  assert.match(cssSource, /\.qling-production-frame[\s\S]*min-height: var\(--qling-stable-viewport-height\);/);
   assert.match(cssSource, /\.qling-production-frame[\s\S]*overflow: hidden;/);
   assert.match(cssSource, /--font-sans: "SUIT Variable", "Qling Noto Sans KR", "SUIT"/);
   assert.match(cssSource, /--qling-font-sans: "SUIT Variable", "Qling Noto Sans KR", "SUIT"/);
@@ -110,7 +110,7 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.match(cssSource, /html\.qling-ios-standalone-pwa[\s\S]*--qling-space-nav-base-height: 65px;/);
   assert.match(cssSource, /html\.qling-ios-standalone-pwa[\s\S]*--qling-space-nav-height: var\(--qling-space-nav-base-height\);/);
   assert.match(cssSource, /--qling-space-nav-height: calc\(var\(--qling-space-nav-base-height\) \+ var\(--qling-space-safe-bottom\)\);/);
-  assert.match(cssSource, /--qling-tab-viewport-height: calc\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\);/);
+  assert.match(cssSource, /--qling-tab-viewport-height: calc\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\);/);
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*height: 100%;/);
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*overflow: hidden;/);
   assert.match(cssSource, /html,\s*body,\s*#root[\s\S]*overscroll-behavior: none;/);
@@ -124,18 +124,25 @@ test('bottom navigation participates in shell flex layout without viewport fixed
   assert.doesNotMatch(source, /fixed bottom-0 left-0 right-0/);
 });
 
-test('mobile app shell exposes visual viewport height for iOS Safari tab screens', () => {
+test('mobile app shell keeps bottom-nav layout on stable viewport height during keyboard focus', () => {
   const source = fs.readFileSync(path.join(process.cwd(), 'src', 'screens', 'shared', 'ui.tsx'), 'utf8');
   const cssSource = fs.readFileSync(path.join(process.cwd(), 'src', 'index.css'), 'utf8');
 
-  assert.match(cssSource, /--qling-visual-viewport-height: 100dvh;/);
+  assert.match(cssSource, /--qling-stable-viewport-height: 100dvh;/);
+  assert.match(cssSource, /--qling-visual-viewport-height: var\(--qling-stable-viewport-height\);/);
   assert.match(source, /window\.visualViewport/);
-  assert.match(source, /--qling-visual-viewport-height/);
+  assert.match(source, /--qling-stable-viewport-height/);
   assert.match(source, /visualViewport\.height/);
+  assert.match(source, /Math\.max\(stableViewportHeightRef\.current, nextHeight\)/);
   assert.match(source, /visualViewport\.addEventListener\('resize'/);
   assert.match(source, /visualViewport\.addEventListener\('scroll'/);
   assert.match(source, /window\.addEventListener\('orientationchange'/);
-  assert.match(source, /root\.style\.removeProperty\('--qling-visual-viewport-height'\)/);
+  assert.match(source, /root\.style\.removeProperty\('--qling-stable-viewport-height'\)/);
+  assert.match(source, /onFocusCapture=\{handleFocusCapture\}/);
+  assert.match(source, /onBlurCapture=\{handleBlurCapture\}/);
+  assert.match(source, /qling-production-main--bottom-nav-input-focused/);
+  assert.match(cssSource, /\.qling-production-main--bottom-nav-input-focused[\s\S]*overflow: hidden !important;/);
+  assert.match(source, /function isTextInputElement/);
 });
 
 test('figma top bar keeps the shared Figma back and title coordinates', () => {

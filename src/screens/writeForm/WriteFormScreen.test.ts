@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { Children, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { WORRY_CATEGORIES } from '@midnight-radio/domain';
@@ -125,7 +126,7 @@ test('write reply screen uses Figma canvas positions while keeping the send butt
   assert.match(html, /top:calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
   assert.match(html, /relative mx-4 overflow-hidden rounded-\[18px\] bg-white/);
   assert.match(html, /absolute inset-0 z-20 cursor-pointer appearance-none rounded-\[18px\] border-0 bg-transparent p-0 text-left/);
-  assert.match(html, /height:max\(240px, calc\(calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 88px\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) - calc\(200px \+ var\(--qling-pwa-topbar-shift, 0px\)\) - 23px\)\)/);
+  assert.match(html, /height:max\(240px, calc\(calc\(calc\(\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\) - var\(--qling-write-form-send-bottom-offset\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) - calc\(200px \+ var\(--qling-pwa-topbar-shift, 0px\)\) - 23px\)\)/);
   assert.match(html, /mx-5 mt-\[21px\] block overflow-hidden/);
   assert.match(html, /mx-auto mt-\[23px\] flex h-12 w-\[267px\]/);
   assert.match(html, /pb-\[calc\(var\(--qling-space-nav-height\)\+32px\)\]/);
@@ -133,7 +134,17 @@ test('write reply screen uses Figma canvas positions while keeping the send butt
   assert.doesNotMatch(html, /min\(684px/);
   assert.doesNotMatch(html, /writeCanvasScale/);
   assert.doesNotMatch(html, /min-height:calc\(min\(100vw, var\(--qling-mobile-canvas-max-width\)\) \* 852 \/ 393\)/);
-  assert.doesNotMatch(html, /top:calc\(calc\(\(var\(--qling-visual-viewport-height\) - var\(--qling-space-nav-height\)\) - 88px\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+  assert.doesNotMatch(html, /top:calc\(calc\(\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\) - var\(--qling-write-form-send-bottom-offset\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\)/);
+});
+
+test('write reply PWA spacing uses the shared 24px bottom-nav gap variable', () => {
+  const source = fs.readFileSync('src/screens/writeForm/WriteFormScreen.tsx', 'utf8');
+  const cssSource = fs.readFileSync('src/index.css', 'utf8');
+
+  assert.match(source, /var\(--qling-stable-viewport-height\)/);
+  assert.match(source, /var\(--qling-write-form-send-bottom-offset\)/);
+  assert.match(cssSource, /--qling-write-form-send-bottom-offset: 88px;/);
+  assert.match(cssSource, /html\.qling-standalone-pwa[\s\S]*--qling-write-form-send-bottom-offset: calc\(72px \+ var\(--qling-pwa-topbar-shift, 0px\)\);/);
 });
 
 test('write reply screen toggles expansion from the whole card and forwards other events without route objects', () => {

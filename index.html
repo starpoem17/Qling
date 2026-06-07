@@ -12,6 +12,9 @@
         const isIos = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || Boolean(navigator.standalone);
+        if (isStandalone) {
+          document.documentElement.classList.add('qling-standalone-pwa');
+        }
         if (!isIos || !isSafari) return;
 
         if (isStandalone) {
