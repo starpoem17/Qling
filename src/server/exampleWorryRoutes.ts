@@ -1,6 +1,7 @@
 import type express from 'express';
 import type { Auth } from 'firebase-admin/auth';
 import type { Firestore } from 'firebase-admin/firestore';
+import type { Messaging } from 'firebase-admin/messaging';
 import { createRequireActiveFirebaseAuth, type ActiveAuthenticatedRequest } from './auth';
 import { requireInternalJobSecret } from './internalAuth';
 import {
@@ -9,13 +10,14 @@ import {
   type CreateDueExampleFeedbacksResult,
   type CreateExamplesForUserResult,
 } from '../services/exampleWorries';
+import { sendReplyLikedNotificationAfterCommit } from '../services/notifications';
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
 
 type ExampleWorryService = {
   createExamplesForUser(params: { uid: string }): Promise<CreateExamplesForUserResult>;
-  createDueExampleFeedbacks(params: { now?: Date; limit?: number }): Promise<CreateDueExampleFeedbacksResult>;
+  createDueExampleFeedbacks(params: { now?: Date; limit?: number; includeExisting?: boolean }): Promise<CreateDueExampleFeedbacksResult>;
 };
 
 function parseCreateExamplesBody(body: unknown): { status: 'ok' } | { status: 'invalid' } {
@@ -28,12 +30,12 @@ function parseCreateExamplesBody(body: unknown): { status: 'ok' } | { status: 'i
 }
 
 function parseJobBody(body: unknown): (
-  | { status: 'ok'; now?: Date; limit?: number }
+  | { status: 'ok'; now?: Date; limit?: number; includeExisting?: boolean }
   | { status: 'invalid' }
 ) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return { status: 'invalid' };
   const input = body as Record<string, unknown>;
-  if (!Object.keys(input).every(key => ['now', 'limit'].includes(key))) return { status: 'invalid' };
+  if (!Object.keys(input).every(key => ['now', 'limit', 'includeExisting'].includes(key))) return { status: 'invalid' };
 
   let now: Date | undefined;
   if ('now' in input) {
@@ -50,7 +52,13 @@ function parseJobBody(body: unknown): (
     limit = input.limit;
   }
 
-  return { status: 'ok', now, limit };
+  let includeExisting: boolean | undefined;
+  if ('includeExisting' in input) {
+    if (typeof input.includeExisting !== 'boolean') return { status: 'invalid' };
+    includeExisting = input.includeExisting;
+  }
+
+  return { status: 'ok', now, limit, includeExisting };
 }
 
 function sendCreateExamplesResult(res: express.Response, result: CreateExamplesForUserResult): void {
@@ -84,6 +92,7 @@ function sendJobResult(res: express.Response, result: CreateDueExampleFeedbacksR
 export function registerExampleWorryRoutes(app: express.Express, deps: {
   db: Firestore | null;
   auth: Auth;
+  messaging?: Messaging | null;
   service?: ExampleWorryService;
 }): void {
   if (!deps.db) {
@@ -108,7 +117,28 @@ export function registerExampleWorryRoutes(app: express.Express, deps: {
 
   const service = deps.service ?? {
     createExamplesForUser: ({ uid }) => createExamplesForUser({ uid, db: deps.db }),
-    createDueExampleFeedbacks: ({ now, limit }) => createDueExampleFeedbacks({ now, limit, db: deps.db }),
+    createDueExampleFeedbacks: ({ now, limit, includeExisting }) => createDueExampleFeedbacks({
+      now,
+      limit,
+      includeExisting,
+      db: deps.db,
+      notifyReplyLiked: ({ feedbackId, replyId, replierUid }) => sendReplyLikedNotificationAfterCommit({
+        db: deps.db as Firestore,
+        messaging: deps.messaging ?? null,
+        targetUid: replierUid,
+        sourceId: feedbackId,
+        sourceType: 'feedback',
+      }).then(result => {
+        if (result.warnings.length > 0) {
+          console.warn('[ExampleFeedbackPush] Reply-liked push completed with warnings.', {
+            feedbackId,
+            replyId,
+            replierUid,
+            warnings: result.warnings,
+          });
+        }
+      }),
+    }),
   };
 
   app.post(
@@ -147,7 +177,7 @@ export function registerExampleWorryRoutes(app: express.Express, deps: {
       res.status(400).json({
         error: {
           code: 'invalid_body',
-          message: 'Request body must be an object with optional now and limit fields.',
+          message: 'Request body must be an object with optional now, limit, and includeExisting fields.',
         },
       });
       return;
@@ -157,6 +187,7 @@ export function registerExampleWorryRoutes(app: express.Express, deps: {
       sendJobResult(res, await service.createDueExampleFeedbacks({
         now: body.now,
         limit: body.limit ?? DEFAULT_LIMIT,
+        includeExisting: body.includeExisting ?? true,
       }));
     } catch (error) {
       res.status(500).json({

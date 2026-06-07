@@ -138,6 +138,7 @@ async function startServer() {
     });
     registerExampleWorryRoutes(app, {
       db,
+      messaging,
       auth: getAuth(),
     });
     registerExperienceProfileSummaryRoutes(app, {
@@ -252,6 +253,7 @@ async function startServer() {
     });
     registerExampleWorryRoutes(app, {
       db: null,
+      messaging: null,
       auth: {} as never,
     });
     registerExperienceProfileSummaryRoutes(app, {

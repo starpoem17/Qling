@@ -232,6 +232,108 @@ export function createExampleWorriesFirestoreRepository(params: {
       }));
     },
 
+    async listScheduledFeedbackJobs({ limit }) {
+      const snap = await db.collection('exampleFeedbackJobs')
+        .where('kind', '==', 'example_like')
+        .where('status', '==', 'scheduled')
+        .limit(limit)
+        .get();
+
+      return snap.docs.map(doc => ({
+        id: doc.id,
+        replyId: typeof doc.data().replyId === 'string' ? doc.data().replyId : doc.id,
+      }));
+    },
+
+    async listAnsweredExampleRepliesWithoutFeedback({ limit }) {
+      const snap = await db.collection('replies')
+        .where('isExampleReply', '==', true)
+        .where('status', '==', 'active')
+        .limit(limit)
+        .get();
+
+      return snap.docs
+        .filter(doc => {
+          const data = doc.data();
+          return data.feedbackType !== 'like' && data.isAiGenerated !== true;
+        })
+        .map(doc => ({ id: doc.id }));
+    },
+
+    async scheduleImmediateFeedbackJobForReply({ replyId, now }) {
+      return db.runTransaction(async transaction => {
+        const replyRef = db.collection('replies').doc(replyId);
+        const jobRef = db.collection('exampleFeedbackJobs').doc(exampleFeedbackJobId(replyId));
+        const feedbackRef = db.collection('feedbacks').doc(replyId);
+        const [replyDoc, jobDoc, feedbackDoc] = await Promise.all([
+          transaction.get(replyRef),
+          transaction.get(jobRef),
+          transaction.get(feedbackRef),
+        ]);
+
+        const jobId = exampleFeedbackJobId(replyId);
+        const feedbackId = replyId;
+        if (jobDoc.exists && jobDoc.data()?.status === 'completed') {
+          return { jobId, replyId, status: 'idempotent' as const, feedbackId };
+        }
+
+        if (feedbackDoc.exists) {
+          const feedback = feedbackDoc.data() ?? {};
+          if (
+            feedback.type === 'like'
+            && feedback.comment === null
+            && feedback.helpedCountApplied === true
+            && feedback.isForExampleReply === true
+          ) {
+            transaction.set(jobRef, {
+              kind: 'example_like',
+              runAfter: now,
+              status: 'completed',
+              replyId,
+              targetUid: typeof feedback.replierUid === 'string' ? feedback.replierUid : '',
+              attempts: 0,
+              createdAt: now,
+              updatedAt: now,
+              completedAt: now,
+              feedbackId,
+              error: null,
+            }, { merge: true });
+            return { jobId, replyId, status: 'idempotent' as const, feedbackId };
+          }
+          return { jobId, replyId, status: 'skipped' as const, reason: 'feedback_conflict' };
+        }
+
+        if (!replyDoc.exists) {
+          return { jobId, replyId, status: 'skipped' as const, reason: 'reply_missing' };
+        }
+
+        const reply = replyDoc.data() ?? {};
+        const replierUid = typeof reply.replierUid === 'string' && reply.replierUid.trim() ? reply.replierUid : null;
+        if (
+          reply.isExampleReply !== true
+          || reply.isAiGenerated === true
+          || reply.status !== 'active'
+          || !replierUid
+        ) {
+          return { jobId, replyId, status: 'skipped' as const, reason: 'reply_ineligible' };
+        }
+
+        transaction.set(jobRef, {
+          kind: 'example_like',
+          runAfter: now,
+          status: 'scheduled',
+          replyId,
+          targetUid: replierUid,
+          attempts: 0,
+          createdAt: jobDoc.exists ? jobDoc.data()?.createdAt ?? now : now,
+          updatedAt: now,
+          error: null,
+        }, { merge: true });
+
+        return { jobId, replyId, status: 'completed' as const, feedbackId, replierUid };
+      });
+    },
+
     async processFeedbackJob({ jobId, now }): Promise<ExampleFeedbackJobResult> {
       return db.runTransaction(async transaction => {
         const jobRef = db.collection('exampleFeedbackJobs').doc(jobId);
@@ -243,7 +345,12 @@ export function createExampleWorriesFirestoreRepository(params: {
         const replyId = typeof job.replyId === 'string' ? job.replyId : jobId;
         const feedbackId = replyId;
         if (job.status === 'completed') {
-          return { jobId, replyId, status: 'idempotent', feedbackId: typeof job.feedbackId === 'string' ? job.feedbackId : feedbackId };
+          return {
+            jobId,
+            replyId,
+            status: 'idempotent',
+            feedbackId: typeof job.feedbackId === 'string' ? job.feedbackId : feedbackId,
+          };
         }
         if (job.status !== 'scheduled') {
           return { jobId, replyId, status: 'skipped', reason: 'job_not_scheduled' };
@@ -275,7 +382,13 @@ export function createExampleWorriesFirestoreRepository(params: {
               updatedAt: now,
               error: null,
             }, { merge: true });
-            return { jobId, replyId, status: 'idempotent', feedbackId };
+            return {
+              jobId,
+              replyId,
+              status: 'idempotent',
+              feedbackId,
+              replierUid: typeof feedback.replierUid === 'string' ? feedback.replierUid : undefined,
+            };
           }
           transaction.set(jobRef, {
             status: 'skipped',
@@ -335,7 +448,7 @@ export function createExampleWorriesFirestoreRepository(params: {
           updatedAt: now,
           error: null,
         }, { merge: true });
-        return { jobId, replyId, status: 'completed', feedbackId };
+        return { jobId, replyId, status: 'completed', feedbackId, replierUid };
       });
     },
   };

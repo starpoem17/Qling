@@ -52,7 +52,10 @@ function createRepo(options: {
       };
     },
     listDueFeedbackJobs: async () => [],
+    listScheduledFeedbackJobs: async () => [],
     processFeedbackJob: async () => ({ jobId: 'job', replyId: 'reply', status: 'skipped' }),
+    listAnsweredExampleRepliesWithoutFeedback: async () => [],
+    scheduleImmediateFeedbackJobForReply: async () => ({ jobId: 'job', replyId: 'reply', status: 'skipped' }),
   };
   return { repo, commits };
 }

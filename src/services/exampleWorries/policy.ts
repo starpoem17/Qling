@@ -1,8 +1,7 @@
 import type { ExampleWorrySeed, SelectedExampleSeed } from './types';
 
 const MAX_EXAMPLES = 5;
-const MIN_FEEDBACK_DELAY_MS = 5 * 60 * 1000;
-const MAX_FEEDBACK_DELAY_MS = 15 * 60 * 1000;
+export const EXAMPLE_FEEDBACK_DELAY_MS = 10 * 60 * 1000;
 
 export function selectExampleSeeds(params: {
   seeds: ExampleWorrySeed[];
@@ -30,10 +29,7 @@ export function createExampleFeedbackRunAfter(params: {
   delayMs?: number;
   random?: () => number;
 }): Date {
-  const span = MAX_FEEDBACK_DELAY_MS - MIN_FEEDBACK_DELAY_MS;
-  const delay = params.delayMs ?? MIN_FEEDBACK_DELAY_MS + Math.floor((params.random ?? Math.random)() * (span + 1));
-  const clampedDelay = Math.max(MIN_FEEDBACK_DELAY_MS, Math.min(delay, MAX_FEEDBACK_DELAY_MS));
-  return new Date(params.submittedAt.getTime() + clampedDelay);
+  return new Date(params.submittedAt.getTime() + (params.delayMs ?? EXAMPLE_FEEDBACK_DELAY_MS));
 }
 
 export function buildExampleAutoLikeComment(): null {

@@ -142,13 +142,35 @@ test('POST /api/internal/create-example-feedbacks requires internal job secret a
   assert.equal(res.statusCode, 200);
   assert.deepEqual(calls[0], {
     name: 'createDueExampleFeedbacks',
-    params: { now: new Date('2026-05-13T00:00:00.000Z'), limit: 5 },
+    params: { now: new Date('2026-05-13T00:00:00.000Z'), limit: 5, includeExisting: true },
+  });
+
+  const backfill = captureRoutes();
+  const backfillRes = await invoke(backfill.routes.get('/api/internal/create-example-feedbacks')!, {
+    headers: { authorization: 'Bearer secret' },
+    body: { includeExisting: true, limit: 5 },
+  });
+  assert.equal(backfillRes.statusCode, 200);
+  assert.deepEqual(backfill.calls[0], {
+    name: 'createDueExampleFeedbacks',
+    params: { now: undefined, limit: 5, includeExisting: true },
+  });
+
+  const disabledBackfill = captureRoutes();
+  const disabledRes = await invoke(disabledBackfill.routes.get('/api/internal/create-example-feedbacks')!, {
+    headers: { authorization: 'Bearer secret' },
+    body: { includeExisting: false, limit: 5 },
+  });
+  assert.equal(disabledRes.statusCode, 200);
+  assert.deepEqual(disabledBackfill.calls[0], {
+    name: 'createDueExampleFeedbacks',
+    params: { now: undefined, limit: 5, includeExisting: false },
   });
 });
 
 test('POST /api/internal/create-example-feedbacks validates exact body matrix', async () => {
   process.env.INTERNAL_JOB_SECRET = 'secret';
-  for (const body of [null, [], 'x', { now: 'bad' }, { limit: 0 }, { limit: 101 }, { dryRun: true }]) {
+  for (const body of [null, [], 'x', { now: 'bad' }, { limit: 0 }, { limit: 101 }, { includeExisting: 'yes' }, { dryRun: true }]) {
     const { routes, calls } = captureRoutes();
     const res = await invoke(routes.get('/api/internal/create-example-feedbacks')!, {
       headers: { authorization: 'Bearer secret' },

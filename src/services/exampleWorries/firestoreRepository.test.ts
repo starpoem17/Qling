@@ -83,6 +83,7 @@ test('builds deterministic scheduled job with no comment surface', () => {
   assert.equal(job.targetUid, 'user1');
   assert.equal(job.attempts, 0);
   assert.ok(job.runAfter instanceof Date);
+  assert.equal(job.runAfter.getTime() - new Date('2026-05-13T00:00:00.000Z').getTime(), 10 * 60 * 1000);
 });
 
 test('createExamplesOnce stores seed summary metadata on example worries', async () => {
@@ -195,4 +196,36 @@ test('incompatible existing feedback skips without helpedCount mutation', async 
   assert.equal(result.reason, 'feedback_conflict');
   assert.equal(db.store.get('users/recipient')?.helpedCount, 0);
   assert.equal(db.store.get('exampleFeedbackJobs/reply1')?.status, 'skipped');
+});
+
+test('immediate backfill schedules an answered example reply and processing creates one like', async () => {
+  const now = new Date('2026-05-13T00:20:00.000Z');
+  const db = createFakeFirestore({
+    'replies/reply1': {
+      deliveryId: 'delivery1',
+      worryId: 'worry1',
+      authorUid: 'example_author',
+      replierUid: 'recipient',
+      content: 'reply',
+      status: 'active',
+      isAiGenerated: false,
+      isExampleReply: true,
+    },
+    'users/recipient': {
+      helpedCount: 0,
+    },
+  });
+  const repo = createExampleWorriesFirestoreRepository({ db: db as never });
+
+  const scheduled = await repo.scheduleImmediateFeedbackJobForReply({ replyId: 'reply1', now });
+  const processed = await repo.processFeedbackJob({ jobId: 'reply1', now });
+  const repeated = await repo.processFeedbackJob({ jobId: 'reply1', now });
+
+  assert.equal(scheduled.status, 'completed');
+  assert.equal(processed.status, 'completed');
+  assert.equal(repeated.status, 'idempotent');
+  assert.equal(processed.replierUid, 'recipient');
+  assert.equal(db.store.get('exampleFeedbackJobs/reply1')?.runAfter, now);
+  assert.equal(db.store.get('feedbacks/reply1')?.type, 'like');
+  assert.equal(db.store.get('users/recipient')?.helpedCount, 1);
 });

@@ -116,6 +116,7 @@ export interface ExampleFeedbackJobResult {
   replyId: string;
   status: 'completed' | 'idempotent' | 'skipped' | 'failed';
   feedbackId?: string;
+  replierUid?: string;
   reason?: string;
 }
 
@@ -161,8 +162,18 @@ export interface ExampleWorriesRepository {
     now: Date;
     limit: number;
   }): Promise<Array<{ id: string; replyId: string }>>;
+  listScheduledFeedbackJobs(params: {
+    limit: number;
+  }): Promise<Array<{ id: string; replyId: string }>>;
   processFeedbackJob(params: {
     jobId: string;
+    now: Date;
+  }): Promise<ExampleFeedbackJobResult>;
+  listAnsweredExampleRepliesWithoutFeedback(params: {
+    limit: number;
+  }): Promise<Array<{ id: string }>>;
+  scheduleImmediateFeedbackJobForReply(params: {
+    replyId: string;
     now: Date;
   }): Promise<ExampleFeedbackJobResult>;
 }
@@ -177,6 +188,12 @@ export interface CreateExamplesForUserParams {
 export interface CreateDueExampleFeedbacksParams {
   now?: Date;
   limit?: number;
+  includeExisting?: boolean;
   db?: Firestore | null;
   repository?: ExampleWorriesRepository;
+  notifyReplyLiked?: (params: {
+    feedbackId: string;
+    replyId: string;
+    replierUid: string;
+  }) => Promise<void>;
 }

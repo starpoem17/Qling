@@ -5,6 +5,8 @@ import type { ExampleFeedbackJobResult, ExampleWorriesRepository } from './types
 
 function createRepo(results: ExampleFeedbackJobResult[]) {
   const processed: string[] = [];
+  const immediate: string[] = [];
+  const scheduledJobs: string[] = [];
   const repo: ExampleWorriesRepository = {
     readUserProfile: async () => null,
     listSelectableSeeds: async () => [],
@@ -12,10 +14,25 @@ function createRepo(results: ExampleFeedbackJobResult[]) {
     listDueFeedbackJobs: async () => results.map(result => ({ id: result.jobId, replyId: result.replyId })),
     processFeedbackJob: async ({ jobId }) => {
       processed.push(jobId);
-      return results.find(result => result.jobId === jobId)!;
+      return results.find(result => result.jobId === jobId) ?? {
+        jobId,
+        replyId: jobId,
+        status: 'completed',
+        feedbackId: jobId,
+        replierUid: `${jobId}-user`,
+      };
     },
+    listScheduledFeedbackJobs: async () => scheduledJobs.map(id => ({ id, replyId: id })),
+    listAnsweredExampleRepliesWithoutFeedback: async () => immediate.map(id => ({ id })),
+    scheduleImmediateFeedbackJobForReply: async ({ replyId }) => ({
+      jobId: replyId,
+      replyId,
+      status: 'completed',
+      feedbackId: replyId,
+      replierUid: `${replyId}-user`,
+    }),
   };
-  return { repo, processed };
+  return { repo, processed, immediate, scheduledJobs };
 }
 
 test('processes due jobs and reports completed skipped and failed status counts', async () => {
@@ -49,4 +66,43 @@ test('repeated deterministic job execution is surfaced as idempotent, not duplic
   assert.equal(result.status, 'completed');
   assert.equal(result.status === 'completed' ? result.completedCount : 0, 1);
   assert.equal(result.status === 'completed' ? result.results[0].status : '', 'idempotent');
+});
+
+test('notifies only newly completed example likes after commit', async () => {
+  const notifications: unknown[] = [];
+  const { repo } = createRepo([
+    { jobId: 'reply1', replyId: 'reply1', status: 'completed', feedbackId: 'reply1', replierUid: 'user1' },
+    { jobId: 'reply2', replyId: 'reply2', status: 'idempotent', feedbackId: 'reply2', replierUid: 'user2' },
+  ]);
+
+  const result = await createDueExampleFeedbacks({
+    repository: repo,
+    notifyReplyLiked: async params => {
+      notifications.push(params);
+    },
+  });
+
+  assert.equal(result.status, 'completed');
+  assert.deepEqual(notifications, [{
+    feedbackId: 'reply1',
+    replyId: 'reply1',
+    replierUid: 'user1',
+  }]);
+});
+
+test('includeExisting schedules already answered example replies for immediate feedback', async () => {
+  const { repo, processed, scheduledJobs } = createRepo([
+    { jobId: 'due1', replyId: 'due1', status: 'completed', feedbackId: 'due1', replierUid: 'due-user' },
+  ]);
+  scheduledJobs.push('reply1');
+
+  const result = await createDueExampleFeedbacks({
+    repository: repo,
+    limit: 5,
+    includeExisting: true,
+  });
+
+  assert.equal(result.status, 'completed');
+  assert.deepEqual(processed, ['due1', 'reply1']);
+  assert.equal(result.status === 'completed' ? result.checkedCount : 0, 2);
 });

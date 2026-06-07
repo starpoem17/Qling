@@ -67,15 +67,15 @@ test('uses injected deterministic ordering', () => {
   assert.deepEqual(selected.map(item => item.selectionIndex), [0, 1, 2]);
 });
 
-test('feedback delay stays between five and fifteen minutes and auto comment is null', () => {
+test('feedback delay is exactly ten minutes by default and auto comment is null', () => {
   const submittedAt = new Date('2026-05-13T00:00:00.000Z');
-  const min = createExampleFeedbackRunAfter({ submittedAt, random: () => 0 });
-  const max = createExampleFeedbackRunAfter({ submittedAt, random: () => 1 });
-  const clamped = createExampleFeedbackRunAfter({ submittedAt, delayMs: 60 * 1000 });
+  const defaultRunAfter = createExampleFeedbackRunAfter({ submittedAt });
+  const deterministic = createExampleFeedbackRunAfter({ submittedAt, random: () => 1 });
+  const explicitDelay = createExampleFeedbackRunAfter({ submittedAt, delayMs: 60 * 1000 });
 
-  assert.equal(min.getTime() - submittedAt.getTime(), 5 * 60 * 1000);
-  assert.equal(max.getTime() - submittedAt.getTime(), 15 * 60 * 1000);
-  assert.equal(clamped.getTime() - submittedAt.getTime(), 5 * 60 * 1000);
+  assert.equal(defaultRunAfter.getTime() - submittedAt.getTime(), 10 * 60 * 1000);
+  assert.equal(deterministic.getTime() - submittedAt.getTime(), 10 * 60 * 1000);
+  assert.equal(explicitDelay.getTime() - submittedAt.getTime(), 60 * 1000);
   assert.equal(buildExampleAutoLikeComment(), null);
 });
 
