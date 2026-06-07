@@ -144,7 +144,7 @@ test('write reply screen uses Figma canvas positions while keeping the send butt
   assert.doesNotMatch(html, /transform:scale/);
   assert.match(html, /top:calc\(100px \+ var\(--qling-pwa-topbar-shift, 0px\)\);bottom:calc\(100% - calc\(calc\(\(var\(--qling-stable-viewport-height\) - var\(--qling-space-nav-height\)\) - var\(--qling-write-form-send-bottom-offset\)\) \+ var\(--qling-pwa-topbar-shift, 0px\)\) \+ 23px\)/);
   assert.match(html, /absolute left-4 right-4 flex min-h-0 flex-col gap-\[21px\] overflow-hidden/);
-  assert.match(html, /w-full shrink-0 overflow-hidden rounded-\[18px\] bg-white/);
+  assert.match(html, /relative w-full shrink-0 overflow-hidden rounded-\[18px\] bg-white/);
   assert.match(html, /absolute inset-0 z-20 cursor-pointer appearance-none rounded-\[18px\] border-0 bg-transparent p-0 text-left/);
   assert.match(html, /height:79px/);
   assert.match(html, /relative mx-1 block min-h-\[240px\] flex-1 overflow-hidden/);
@@ -211,6 +211,22 @@ test('write reply screen toggles expansion from the whole card and forwards othe
     'back',
     'publish:delivery-1:worry-1',
   ]);
+});
+
+test('write reply textarea typing does not toggle the original card', () => {
+  const events: string[] = [];
+  const tree = WriteFormScreen(baseProps({
+    isOriginalExpanded: true,
+    onDraftChange: value => events.push(`draft:${value}`),
+    onToggleOriginalExpanded: () => events.push('toggle-original'),
+  }));
+  const card = findElement(tree, element => element.type === 'section' && element.props.id === 'write-reply-original-card');
+  const textarea = findElement(tree, element => element.type === 'textarea');
+
+  assert.match(String(card.props.className ?? ''), /relative/);
+  change(textarea, '입력창 터치 후 작성');
+
+  assert.deepEqual(events, ['draft:입력창 터치 후 작성']);
 });
 
 test('write reply expanded original body keeps scroll gestures separate from tap-to-collapse', () => {

@@ -34,7 +34,7 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
         <section
           id="write-reply-original-card"
           className={cn(
-            'w-full shrink-0 overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
+            'relative w-full shrink-0 overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
             props.isOriginalExpanded && 'flex min-h-[79px] flex-col',
           )}
           style={originalCardStyle}
