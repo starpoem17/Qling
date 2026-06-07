@@ -29,8 +29,7 @@ const rankingPodiumToSheetGap = 4;
 const rankingSheetTop = `max(${rankingSheetMinimumTop}px, calc(${rankingTopGraphicOffset} + ${rankingPodiumTop} + ${rankingThirdPodiumNumberBottom}px + ${rankingPodiumToSheetGap}px))`;
 const viewerRankCardTop = `calc(${rankingTabViewportHeight} - 79px)`;
 const rankingSheetReadyHeight = `max(372px, calc(${rankingTabViewportHeight} - ${rankingSheetTop}))`;
-const rankingSheetReadyHeightWithViewer = `max(72px, calc(${viewerRankCardTop} - ${rankingSheetTop} - 12px))`;
-const rankingSheetEmptyTopWithViewer = `min(156px, max(8px, calc(${rankingSheetReadyHeightWithViewer} / 2 - 8px)), max(8px, calc(${viewerRankCardTop} - ${rankingSheetTop} - 28px)))`;
+const rankingSheetEmptyTopWithViewer = `max(8px, calc((${viewerRankCardTop} - ${rankingSheetTop}) / 2 - 8px))`;
 const qlingNotoSansKrStyle = { fontFamily: '"Qling Noto Sans KR"' } as const;
 
 const rankingAssetUrlByName = {
@@ -65,9 +64,14 @@ export function RankingScreen(props: RankingScreenProps) {
 
   if (props.state.status === 'error') {
     return (
-      <div className="-mx-[var(--qling-space-shell-x)] h-[var(--qling-tab-viewport-height)] overflow-hidden bg-[#ffd3a8] px-4 pt-[calc(62px+env(safe-area-inset-top,0px))]">
-        <ErrorState title="순위를 불러오지 못했어요" message={props.state.message} />
-      </div>
+      <RankingFrame>
+        <RankingHero
+          mode={mode}
+          onChange={setMode}
+          onOpenMyPage={props.onOpenMyPage}
+        />
+        <RankingSheet errorMessage={props.state.message} />
+      </RankingFrame>
     );
   }
 
@@ -292,14 +296,15 @@ function Podium({ topOffset }: { readonly topOffset: number | string }) {
 function RankingSheet({
   period,
   loading = false,
+  errorMessage,
 }: {
   readonly period?: RankingDisplayPeriod;
   readonly loading?: boolean;
+  readonly errorMessage?: string;
 }) {
   const rows = period?.entries.slice(3, 10) ?? [];
   const hasViewerCard = Boolean(period?.viewer);
-  const readyHeight = hasViewerCard ? rankingSheetReadyHeightWithViewer : rankingSheetReadyHeight;
-  const sheetStyle = { top: rankingSheetTop, height: loading ? rankingSheetReadyHeight : readyHeight };
+  const sheetStyle = { top: rankingSheetTop, height: rankingSheetReadyHeight };
   return (
     <section
       className={cn(
@@ -308,7 +313,11 @@ function RankingSheet({
       style={sheetStyle}
     >
       {loading ? (
-        <FigmaTabLoading label="순위를 불러오는 중" className="top-[73px]" />
+        <FigmaTabLoading label="순위를 불러오는 중" className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+      ) : errorMessage ? (
+        <div className="absolute inset-x-4 top-1/2 -translate-y-1/2">
+          <ErrorState title="순위를 불러오지 못했어요" message={errorMessage} />
+        </div>
       ) : (
         <>
           <h2 className="absolute left-5 top-5 text-[14px] font-bold leading-[18px] text-[#191f28] font-['Qling_Noto_Sans_KR']">
@@ -318,7 +327,10 @@ function RankingSheet({
             받은 ♥ 기준
           </div>
           {rows.length > 0 ? (
-            <ol className="absolute bottom-0 left-0 top-12 flex w-full flex-col overflow-y-auto px-5 [-webkit-overflow-scrolling:touch]">
+            <ol
+              className="absolute bottom-0 left-0 top-12 flex w-full flex-col overflow-y-auto px-5 pb-[94px] [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              data-measure="ranking-scroll-list"
+            >
               {rows.map(entry => <RankingRow key={entry.uid} entry={entry} />)}
             </ol>
           ) : (

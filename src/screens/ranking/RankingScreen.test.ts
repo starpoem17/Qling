@@ -305,8 +305,8 @@ test('ranking sheet is empty when there are fewer than four ranked entries', () 
   })));
 
   assert.match(html, /아직 순위가 없어요/);
-  assert.match(html, /style="top:min\(156px, max\(8px, calc\(max\(72px/);
-  assert.match(html, /max\(8px, calc\(calc\(var\(--qling-tab-viewport-height\) - 79px\) - max\(430px, calc\(max\(12px,/);
+  assert.match(html, /style="top:max\(8px, calc\(\(calc\(var\(--qling-tab-viewport-height\) - 79px\) - max\(430px, calc\(max\(12px,/);
+  assert.match(html, /\) \/ 2 - 8px\)\)"/);
   assert.doesNotMatch(html, />User 4</);
 });
 
@@ -330,16 +330,18 @@ test('viewer rank card stays above the shell bottom navigation on shorter iPhone
   assert.doesNotMatch(html, /min\(773px/);
 });
 
-test('ready ranking sheet stops above the viewer card when my rank is visible', () => {
+test('ready ranking sheet extends behind the viewer card when my rank is visible', () => {
   const html = renderToStaticMarkup(createElement(RankingScreen, baseProps()));
 
   assert.match(html, /전체 랭킹/);
   assert.doesNotMatch(html, /top-\[400px\] h-\[372px\]/);
   assert.match(html, /style="top:max\(430px, calc\(max\(12px,/);
   assert.match(html, /overflow-hidden rounded-t-\[26px\]/);
-  assert.match(html, /height:max\(72px, calc\(calc\(var\(--qling-tab-viewport-height\) - 79px\) - max\(430px, calc\(max\(12px,/);
+  assert.match(html, /height:max\(372px, calc\(var\(--qling-tab-viewport-height\) - max\(430px, calc\(max\(12px,/);
   assert.doesNotMatch(html, /min\(452px/);
   assert.doesNotMatch(html, /min\(773px/);
+  assert.match(html, /data-measure="ranking-scroll-list"/);
+  assert.match(html, /bottom-0 left-0 top-12 flex w-full flex-col overflow-y-auto px-5 pb-\[94px\] \[-webkit-overflow-scrolling:touch\] \[scrollbar-width:none\] \[&amp;::-webkit-scrollbar\]:hidden/);
 });
 
 test('ready ranking sheet can still stretch when no viewer card is visible', () => {
@@ -375,7 +377,7 @@ test('ranking loading state uses the widened unscaled canvas', () => {
   assert.match(html, /class="absolute left-1\/2 w-\[393px\] -translate-x-1\/2" style="top:max\(12px, calc\(calc\(var\(--qling-space-safe-top\) \+ 88px\) \+ 44px \+ 24px - calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 170px\)\)\)" data-measure="ranking-top-layer"/);
   assert.match(html, /style="top:calc\(min\(var\(--qling-space-safe-top\), 14px\) \+ 326px\)"/);
   assert.match(html, /data-testid="figma-tab-loading-indicator"/);
-  assert.match(html, /left-1\/2 h-10 w-10 -translate-x-1\/2 top-\[73px\]/);
+  assert.match(html, /left-1\/2 top-1\/2 -translate-x-1\/2 -translate-y-1\/2/);
   assert.doesNotMatch(html, /랭킹을 불러오는 중/);
   assert.doesNotMatch(html, /5월 시즌|마감|누적 시즌/);
   assert.doesNotMatch(html, /전체 랭킹|받은 ♥ 기준/);
@@ -383,4 +385,18 @@ test('ranking loading state uses the widened unscaled canvas', () => {
   assert.doesNotMatch(source, /function LoadingSpinner/);
   assert.doesNotMatch(source, /border-t-\[#ff8b3d\]|border-r-\[#ff8b3d\]/);
   assert.doesNotMatch(html, /100dvh - var\(--qling-space-nav-height\)/);
+});
+
+test('ranking error state uses the extended white ranking sheet', () => {
+  const html = renderToStaticMarkup(createElement(RankingScreen, baseProps({
+    state: { status: 'error', message: '네트워크 오류' },
+  })));
+
+  assert.match(html, /data-measure="ranking-screen"/);
+  assert.match(html, /style="top:max\(430px, calc\(max\(12px,/);
+  assert.match(html, /height:max\(372px, calc\(var\(--qling-tab-viewport-height\) - max\(430px, calc\(max\(12px,/);
+  assert.match(html, /순위를 불러오지 못했어요/);
+  assert.match(html, /네트워크 오류/);
+  assert.match(html, /absolute inset-x-4 top-1\/2 -translate-y-1\/2/);
+  assert.doesNotMatch(html, /bg-\[#ffd3a8\]/);
 });
