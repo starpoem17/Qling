@@ -1,25 +1,51 @@
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { ChevronDown, Pencil } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { FigmaCanvasFrame, FigmaTopBar } from '../shared/ui';
 import type { WriteFormScreenProps } from './contract';
 
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 const pwaTopbarShift = 'var(--qling-pwa-topbar-shift, 0px)';
 const sendButtonBaseTop = 'calc((var(--qling-stable-viewport-height) - var(--qling-space-nav-height)) - var(--qling-write-form-send-bottom-offset))';
 const sendButtonTop = `calc(${sendButtonBaseTop} + ${pwaTopbarShift})`;
 const originalCardTop = `calc(100px + ${pwaTopbarShift})`;
 const originalCardCollapsedHeight = '79px';
+const originalCardCollapsedHeightPx = 79;
 const originalCardExpandedMaxHeight = `min(30%, calc(${sendButtonTop} - ${originalCardTop} - 21px - 240px - 23px))`;
-const formStackBottom = `calc(100% - ${sendButtonTop} + 23px)`;
+const inputAreaGapPx = 21;
+const inputAreaBottomGapPx = 23;
 
 export function WriteFormScreen(props: WriteFormScreenProps) {
-  let originalBodyPointerStart: { readonly x: number; readonly y: number; readonly scrollTop: number } | null = null;
+  const originalCardRef = useRef<HTMLElement | null>(null);
+  const originalBodyPointerStartRef = useRef<{ readonly x: number; readonly y: number; readonly scrollTop: number } | null>(null);
+  const [measuredOriginalCardHeight, setMeasuredOriginalCardHeight] = useState(originalCardCollapsedHeightPx);
   const isDisabled = Boolean(props.draft.submitDisabledReason);
   const validationMessage = props.draft.validation.status === 'invalid' && props.draft.value !== ''
     ? props.draft.validation.message
     : undefined;
-  const originalCardStyle = props.isOriginalExpanded
+  const originalCardStyle: CSSProperties = props.isOriginalExpanded
     ? { maxHeight: originalCardExpandedMaxHeight }
     : { height: originalCardCollapsedHeight };
+  const effectiveOriginalCardHeight = props.isOriginalExpanded ? measuredOriginalCardHeight : originalCardCollapsedHeightPx;
+  const inputAreaTop = `calc(${originalCardTop} + ${effectiveOriginalCardHeight}px + ${inputAreaGapPx}px)`;
+  const inputAreaHeight = `max(240px, calc(${sendButtonTop} - ${inputAreaTop} - ${inputAreaBottomGapPx}px))`;
+
+  useIsomorphicLayoutEffect(() => {
+    const originalCard = originalCardRef.current;
+    if (!originalCard) return;
+
+    const measureOriginalCard = () => {
+      const nextHeight = Math.ceil(originalCard.getBoundingClientRect().height);
+      if (nextHeight > 0) setMeasuredOriginalCardHeight(nextHeight);
+    };
+
+    measureOriginalCard();
+    if (typeof ResizeObserver !== 'function') return;
+
+    const resizeObserver = new ResizeObserver(measureOriginalCard);
+    resizeObserver.observe(originalCard);
+    return () => resizeObserver.disconnect();
+  }, [props.isOriginalExpanded, props.originalWorry.summaryText, props.originalWorry.originalBodyText]);
 
   return (
     <section className="h-full min-h-0 overflow-hidden bg-[#fff1d1] text-[#2a2a2a]">
@@ -27,17 +53,14 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
         <div className="relative h-full min-h-0 w-full max-w-[480px] shrink-0 overflow-hidden bg-[#fff1d1]">
       {FigmaTopBar({ title: '답변 작성', onBack: props.onBack, backLabel: '답변하기로 돌아가기' })}
 
-        <div
-          className="absolute left-4 right-4 flex min-h-0 flex-col gap-[21px] overflow-hidden"
-          style={{ top: originalCardTop, bottom: formStackBottom }}
-        >
         <section
+          ref={originalCardRef}
           id="write-reply-original-card"
           className={cn(
-            'relative w-full shrink-0 overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
+            'absolute left-4 right-4 overflow-hidden rounded-[18px] bg-white shadow-[0_4px_4px_rgb(0_0_0/0.25)]',
             props.isOriginalExpanded && 'flex min-h-[79px] flex-col',
           )}
-          style={originalCardStyle}
+          style={{ top: originalCardTop, ...originalCardStyle }}
         >
           <button
             type="button"
@@ -77,15 +100,15 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           {props.isOriginalExpanded && (
             <p
               onPointerDown={event => {
-                originalBodyPointerStart = {
+                originalBodyPointerStartRef.current = {
                   x: event.clientX,
                   y: event.clientY,
                   scrollTop: event.currentTarget.scrollTop,
                 };
               }}
               onPointerUp={event => {
-                const start = originalBodyPointerStart;
-                originalBodyPointerStart = null;
+                const start = originalBodyPointerStartRef.current;
+                originalBodyPointerStartRef.current = null;
                 if (!start) return;
                 const moved = Math.hypot(event.clientX - start.x, event.clientY - start.y);
                 const scrolled = Math.abs(event.currentTarget.scrollTop - start.scrollTop);
@@ -99,7 +122,8 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
         </section>
 
       <label
-        className="relative mx-1 block min-h-[240px] flex-1 overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
+        className="absolute left-5 right-5 block overflow-hidden rounded-[18px] border-[1.5px] border-[#ff8b3d] bg-[#fff5eb]"
+        style={{ top: inputAreaTop, height: inputAreaHeight }}
       >
         <span className="sr-only">답변 작성</span>
         <textarea
@@ -129,7 +153,6 @@ export function WriteFormScreen(props: WriteFormScreenProps) {
           {props.draft.value.length} / {props.draft.maxLength}
         </span>
       </label>
-        </div>
 
 
       <button
