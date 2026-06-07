@@ -563,7 +563,7 @@ export default function App() {
 
           {/* 3. Write Worry View */}
           {currentRoute === 'write_worry' && (
-            <motion.div key="write_worry" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+            <motion.div key="write_worry" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="h-full min-h-0">
               <WriteWorryContainer
                 user={user}
                 profile={profile}
@@ -581,7 +581,7 @@ export default function App() {
 
           {/* 4. Write Reply View */}
           {currentRoute === 'write_reply' && currentWriteReplyRoute && selectedWorry?.deliveryId === currentWriteReplyRoute.deliveryId && selectedWorry.worryId === currentWriteReplyRoute.worryId && (
-            <motion.div key="write_reply" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+            <motion.div key="write_reply" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="h-full min-h-0">
               <WriteReplyContainer
                 user={user}
                 selectedWorry={selectedWorry}

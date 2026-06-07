@@ -26,6 +26,8 @@ test('App.tsx gives write-form routes their own main canvas and standalone PWA c
   const cssSource = fs.readFileSync('src/index.css', 'utf8');
 
   assert.match(appSource, /currentRoute === 'write_worry' \|\| currentRoute === 'write_reply'\s*\?\s*'qling-write-form-main'/);
+  assert.match(appSource, /key="write_worry"[\s\S]*className="h-full min-h-0"[\s\S]*<WriteWorryContainer/);
+  assert.match(appSource, /key="write_reply"[\s\S]*className="h-full min-h-0"[\s\S]*<WriteReplyContainer/);
   assert.match(appSource, /pwaRouteChromeForRoute\(currentRoute\)/);
   assert.match(appSource, /document\.documentElement\.classList\.contains\('qling-ios-standalone-pwa'\)/);
   assert.match(appSource, /themeMeta\?\.setAttribute\('content', standalonePwaRouteChrome\.top\)/);
