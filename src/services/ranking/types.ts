@@ -27,6 +27,17 @@ export type RankingResponse = {
   };
 };
 
+export type MaterializedRankingPeriod = {
+  readonly allEntries: RankingEntry[];
+};
+
+export type MaterializedRankingSnapshot = {
+  readonly monthly: MaterializedRankingPeriod;
+  readonly total: MaterializedRankingPeriod;
+  readonly season: RankingResponse['season'];
+  readonly activeUserCount: number;
+};
+
 export type RankingUserDoc = {
   readonly uid: string;
   readonly nickname?: unknown;

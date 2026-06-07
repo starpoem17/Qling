@@ -30,6 +30,7 @@ import { registerAnswerFeedRoutes } from "./src/server/answerFeedRoutes";
 import { registerPolicyRoutes } from "./src/server/policyRoutes";
 import { registerVersionRoutes } from "./src/server/versionRoutes";
 import { registerRankingRoutes } from "./src/server/rankingRoutes";
+import { registerRankingSnapshotRoutes } from "./src/server/rankingSnapshotRoutes";
 import { registerChatRoutes } from "./src/server/chatRoutes";
 import { registerReportRoutes } from "./src/server/reportRoutes";
 import { buildChatContextModerationInstruction } from "./src/services/chatSafety/server/contextModeration";
@@ -160,6 +161,9 @@ async function startServer() {
       db,
       auth: getAuth(),
     });
+    registerRankingSnapshotRoutes(app, {
+      db,
+    });
     registerChatRoutes(app, {
       db,
       messaging,
@@ -234,6 +238,9 @@ async function startServer() {
     registerRankingRoutes(app, {
       db: null,
       auth: {} as never,
+    });
+    registerRankingSnapshotRoutes(app, {
+      db: null,
     });
     registerRematchRoutes(app, {
       db: null,

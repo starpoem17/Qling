@@ -1,6 +1,7 @@
 import type {
   RankingEntry,
   RankingFeedbackDoc,
+  MaterializedRankingSnapshot,
   RankingPeriod,
   RankingReplyDoc,
   RankingResponse,
@@ -28,6 +29,18 @@ export function composeRankingResponse(params: {
   readonly viewerUid?: string;
   readonly now: Date;
 }): RankingResponse {
+  return rankingResponseFromMaterializedSnapshot(
+    composeMaterializedRankingSnapshot(params),
+    params.viewerUid,
+  );
+}
+
+export function composeMaterializedRankingSnapshot(params: {
+  readonly users: readonly RankingUserDoc[];
+  readonly feedbacks: readonly RankingFeedbackDoc[];
+  readonly replies?: readonly RankingReplyDoc[];
+  readonly now: Date;
+}): MaterializedRankingSnapshot {
   const activeUsers = params.users.filter(isRankableUser);
   const usersByUid = new Map(activeUsers.map(user => [user.uid, user]));
   const monthRange = kstMonthRange(params.now);
@@ -66,19 +79,29 @@ export function composeRankingResponse(params: {
   });
 
   return {
-    monthly: composePeriod({
+    monthly: materializePeriod({
       activeUsers,
       metricsByUid: monthlyMetrics,
       previousMetricsByUid: previousMonthlyMetrics,
-      viewerUid: params.viewerUid,
     }),
-    total: composePeriod({
+    total: materializePeriod({
       activeUsers,
       metricsByUid: totalMetrics,
       previousMetricsByUid: previousTotalMetrics,
-      viewerUid: params.viewerUid,
     }),
     season: seasonFor(params.now),
+    activeUserCount: activeUsers.length,
+  };
+}
+
+export function rankingResponseFromMaterializedSnapshot(
+  snapshot: MaterializedRankingSnapshot,
+  viewerUid?: string,
+): RankingResponse {
+  return {
+    monthly: periodFromMaterializedSnapshot(snapshot.monthly, snapshot.activeUserCount, viewerUid),
+    total: periodFromMaterializedSnapshot(snapshot.total, snapshot.activeUserCount, viewerUid),
+    season: snapshot.season,
   };
 }
 
@@ -125,12 +148,11 @@ function metricsForPeriod(params: {
   return metrics;
 }
 
-function composePeriod(params: {
+function materializePeriod(params: {
   readonly activeUsers: readonly RankableUser[];
   readonly metricsByUid: ReadonlyMap<string, RankingMetrics>;
   readonly previousMetricsByUid: ReadonlyMap<string, RankingMetrics>;
-  readonly viewerUid?: string;
-}): RankingPeriod {
+}): MaterializedRankingSnapshot['monthly'] {
   const allEntries = rankEntries(params.activeUsers.map(user => ({
     uid: user.uid,
     nickname: displayNickname(user),
@@ -149,13 +171,22 @@ function composePeriod(params: {
     ...entry,
     rankDelta: (previousRankByUid.get(entry.uid) ?? entry.rank) - entry.rank,
   }));
-  const viewerBase = params.viewerUid
-    ? entriesWithDelta.find(entry => entry.uid === params.viewerUid)
+
+  return { allEntries: entriesWithDelta };
+}
+
+function periodFromMaterializedSnapshot(
+  period: MaterializedRankingSnapshot['monthly'],
+  activeUserCount: number,
+  viewerUid?: string,
+): RankingPeriod {
+  const viewerBase = viewerUid
+    ? period.allEntries.find(entry => entry.uid === viewerUid)
     : undefined;
 
   return {
-    entries: entriesWithDelta.filter(entry => entry.heartCount > 0).slice(0, RANKING_LIMIT),
-    viewer: viewerBase ? withPercentile(viewerBase, params.activeUsers.length) : null,
+    entries: period.allEntries.filter(entry => entry.heartCount > 0).slice(0, RANKING_LIMIT),
+    viewer: viewerBase ? withPercentile(viewerBase, activeUserCount) : null,
   };
 }
 
