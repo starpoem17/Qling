@@ -11,13 +11,15 @@ export function selectExampleSeeds(params: {
 }): SelectedExampleSeed[] {
   const interests = new Set(params.interests.map(item => item.trim()).filter(Boolean));
   const seen = new Set<string>();
-  const activeMatching = params.seeds.filter(seed => {
+  const activeSeeds = params.seeds.filter(seed => {
     if (seed.status !== 'active') return false;
     if (seen.has(seed.id)) return false;
     seen.add(seed.id);
-    return seed.categories.some(category => interests.has(category));
+    return true;
   });
-  const ordered = params.order ? params.order(activeMatching) : [...activeMatching].sort((a, b) => a.id.localeCompare(b.id));
+  const activeMatching = activeSeeds.filter(seed => seed.categories.some(category => interests.has(category)));
+  const selectable = activeMatching.length > 0 ? activeMatching : activeSeeds;
+  const ordered = params.order ? params.order(selectable) : [...selectable].sort((a, b) => a.id.localeCompare(b.id));
   return ordered.slice(0, params.maxCount ?? MAX_EXAMPLES).map((seed, index) => ({
     ...seed,
     selectionIndex: index,

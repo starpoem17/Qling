@@ -23,6 +23,12 @@ function captureRoutes(repository: UserProfileRepository, options: {
   readonly userDoc?: Record<string, unknown>;
   readonly initialWorryBackfillRepository?: InitialWorryBackfillRepository;
   readonly refillWorryInbox?: (params: { uid: string }) => Promise<{ createdCount: number; deliveryIds: readonly string[] }>;
+  readonly refreshWorryInboxAfterInterestsUpdate?: (params: { uid: string }) => Promise<{
+    hiddenDeliveryCount: number;
+    hiddenDeliveryIds: readonly string[];
+    refillDeliveryCount: number;
+    refillDeliveryIds: readonly string[];
+  }>;
 } = {}) {
   const routes = new Map<string, Array<(req: unknown, res: unknown, next?: () => void) => unknown>>();
   const app = {
@@ -49,6 +55,7 @@ function captureRoutes(repository: UserProfileRepository, options: {
     repository,
     initialWorryBackfillRepository: options.initialWorryBackfillRepository,
     refillWorryInbox: options.refillWorryInbox,
+    refreshWorryInboxAfterInterestsUpdate: options.refreshWorryInboxAfterInterestsUpdate,
   });
 
   async function call(path: string, body: unknown) {
@@ -289,6 +296,7 @@ test('onboarding profile route rejects invalid profile color before persistence'
 });
 
 test('interests update route accepts only valid interests and verified uid', async () => {
+  let refreshedUid = '';
   const route = captureRoutes({
     async reserveNickname() {
       throw new Error('unused');
@@ -303,6 +311,16 @@ test('interests update route accepts only valid interests and verified uid', asy
       });
       return { status: 'updated', interests: params.interests };
     },
+  }, {
+    async refreshWorryInboxAfterInterestsUpdate(params) {
+      refreshedUid = params.uid;
+      return {
+        hiddenDeliveryCount: 1,
+        hiddenDeliveryIds: ['old-delivery'],
+        refillDeliveryCount: 2,
+        refillDeliveryIds: ['new-delivery-1', 'new-delivery-2'],
+      };
+    },
   });
 
   const res = await route.call('/api/users/me/interests', {
@@ -313,11 +331,20 @@ test('interests update route accepts only valid interests and verified uid', asy
   });
 
   assert.equal(res.statusCode, 200);
-  assert.deepEqual(res.body, { status: 'updated', interests: ['직장'] });
+  assert.equal(refreshedUid, 'verified-user');
+  assert.deepEqual(res.body, {
+    status: 'updated',
+    interests: ['직장'],
+    hiddenDeliveryCount: 1,
+    hiddenDeliveryIds: ['old-delivery'],
+    refillDeliveryCount: 2,
+    refillDeliveryIds: ['new-delivery-1', 'new-delivery-2'],
+  });
 });
 
 test('interests update route rejects empty interests before persistence', async () => {
   let called = false;
+  let refreshCalled = false;
   const route = captureRoutes({
     async reserveNickname() {
       throw new Error('unused');
@@ -329,12 +356,18 @@ test('interests update route rejects empty interests before persistence', async 
       called = true;
       throw new Error('should not persist');
     },
+  }, {
+    async refreshWorryInboxAfterInterestsUpdate() {
+      refreshCalled = true;
+      throw new Error('should not refresh');
+    },
   });
 
   const res = await route.call('/api/users/me/interests', { interests: [] });
 
   assert.equal(res.statusCode, 400);
   assert.equal(called, false);
+  assert.equal(refreshCalled, false);
 });
 
 test('worry inbox refill route requires active user and returns created deliveries', async () => {

@@ -56,6 +56,12 @@ function isVisibleRealActiveDelivery(data: FirebaseFirestore.DocumentData): bool
     && !data.hiddenAt;
 }
 
+function activeDeliveryWorryId(data: FirebaseFirestore.DocumentData): string | null {
+  return typeof data.worryId === 'string' && data.worryId.trim().length > 0
+    ? data.worryId
+    : null;
+}
+
 function candidateFromDoc(doc: FirebaseFirestore.QueryDocumentSnapshot): InitialWorryBackfillCandidate | null {
   const data = doc.data();
   if (!isVisibleActiveWorry(data) || typeof data.authorUid !== 'string') return null;
@@ -274,4 +280,102 @@ export async function refillWorryInboxForFirestoreUser(params: {
     repository: createInitialWorryBackfillFirestoreRepository({ db: params.db }),
     targetActiveDeliveryCount: params.targetActiveDeliveryCount ?? WORRY_INBOX_REFILL_TARGET_ACTIVE_COUNT,
   });
+}
+
+async function hideUnmatchedActiveDeliveriesForInterestUpdate(params: {
+  readonly db: Firestore;
+  readonly uid: string;
+}): Promise<{
+  readonly hiddenDeliveryCount: number;
+  readonly hiddenDeliveryIds: readonly string[];
+}> {
+  return params.db.runTransaction(async transaction => {
+    const now = FieldValue.serverTimestamp();
+    const userRef = params.db.collection('users').doc(params.uid);
+    const userDoc = await transaction.get(userRef);
+    if (!userDoc.exists) {
+      return { hiddenDeliveryCount: 0, hiddenDeliveryIds: [] };
+    }
+
+    const userInterests = normalizeWorryCategories(stringArray(userDoc.data()?.interests), { fallback: false });
+    if (userInterests.length === 0) {
+      return { hiddenDeliveryCount: 0, hiddenDeliveryIds: [] };
+    }
+
+    const activeDeliveriesQuery = params.db.collection('deliveries')
+      .where('recipientUid', '==', params.uid)
+      .where('status', '==', 'active');
+    const activeDeliveriesSnap = await transaction.get(activeDeliveriesQuery);
+    const visibleRealDeliveries = activeDeliveriesSnap.docs
+      .filter(doc => isVisibleRealActiveDelivery(doc.data()));
+
+    const hiddenDeliveryDocs: FirebaseFirestore.QueryDocumentSnapshot[] = [];
+    let remainingActiveDeliveryCount = 0;
+
+    for (const deliveryDoc of visibleRealDeliveries) {
+      const delivery = deliveryDoc.data();
+      const worryId = activeDeliveryWorryId(delivery);
+      if (!worryId) {
+        hiddenDeliveryDocs.push(deliveryDoc);
+        continue;
+      }
+
+      const worryDoc = await transaction.get(params.db.collection('worries').doc(worryId));
+      const worry = worryDoc.data();
+      const worryCategories = normalizeWorryCategories([
+        ...stringArray(worry?.matchingCategories),
+        ...stringArray(worry?.validCategories),
+      ], { fallback: false });
+
+      if (!worryDoc.exists || !isVisibleActiveWorry(worry) || !hasOverlap(userInterests, worryCategories)) {
+        hiddenDeliveryDocs.push(deliveryDoc);
+        continue;
+      }
+
+      remainingActiveDeliveryCount += 1;
+    }
+
+    for (const deliveryDoc of hiddenDeliveryDocs) {
+      transaction.update(deliveryDoc.ref, {
+        hiddenAt: now,
+        hiddenReason: 'interest_update',
+        hiddenBy: 'system',
+        updatedAt: now,
+      });
+    }
+
+    transaction.set(userRef, {
+      activeDeliveryCount: remainingActiveDeliveryCount,
+      updatedAt: now,
+    }, { merge: true });
+
+    return {
+      hiddenDeliveryCount: hiddenDeliveryDocs.length,
+      hiddenDeliveryIds: hiddenDeliveryDocs.map(doc => doc.id),
+    };
+  });
+}
+
+export async function refreshWorryInboxForInterestsUpdateForFirestoreUser(params: {
+  readonly db: Firestore;
+  readonly uid: string;
+  readonly targetActiveDeliveryCount?: number;
+}) {
+  const hidden = await hideUnmatchedActiveDeliveriesForInterestUpdate({
+    db: params.db,
+    uid: params.uid,
+  });
+  const refill = await refillWorryInboxForFirestoreUser({
+    db: params.db,
+    uid: params.uid,
+    targetActiveDeliveryCount: params.targetActiveDeliveryCount ?? WORRY_INBOX_REFILL_TARGET_ACTIVE_COUNT,
+  });
+
+  return {
+    status: 'completed' as const,
+    hiddenDeliveryCount: hidden.hiddenDeliveryCount,
+    hiddenDeliveryIds: hidden.hiddenDeliveryIds,
+    refillDeliveryCount: refill.createdCount,
+    refillDeliveryIds: refill.deliveryIds,
+  };
 }

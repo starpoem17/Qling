@@ -55,6 +55,11 @@ export type UpdateInterestsResult =
   | {
       readonly status: 'updated';
       readonly interests: readonly WorryCategory[];
+      readonly hiddenDeliveryCount?: number;
+      readonly hiddenDeliveryIds?: readonly string[];
+      readonly refillDeliveryCount?: number;
+      readonly refillDeliveryIds?: readonly string[];
+      readonly inboxRefreshStatus?: 'failed';
     }
   | {
       readonly status: 'invalid' | 'server_error';

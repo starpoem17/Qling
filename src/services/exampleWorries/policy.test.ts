@@ -67,6 +67,34 @@ test('uses injected deterministic ordering', () => {
   assert.deepEqual(selected.map(item => item.selectionIndex), [0, 1, 2]);
 });
 
+test('falls back to active example seeds when no seed category matches interests', () => {
+  const selected = selectExampleSeeds({
+    seeds: [
+      seed('b', ['career']),
+      seed('inactive', ['family'], 'inactive'),
+      seed('a', ['health']),
+      seed('c', ['study']),
+    ],
+    interests: ['unknown'],
+  });
+
+  assert.deepEqual(selected.map(item => item.id), ['a', 'b', 'c']);
+  assert.deepEqual(selected.map(item => item.selectionIndex), [0, 1, 2]);
+});
+
+test('matching example seeds still take precedence over fallback seeds', () => {
+  const selected = selectExampleSeeds({
+    seeds: [
+      seed('career', ['career']),
+      seed('health', ['health']),
+      seed('study', ['study']),
+    ],
+    interests: ['health'],
+  });
+
+  assert.deepEqual(selected.map(item => item.id), ['health']);
+});
+
 test('feedback delay is exactly ten minutes by default and auto comment is null', () => {
   const submittedAt = new Date('2026-05-13T00:00:00.000Z');
   const defaultRunAfter = createExampleFeedbackRunAfter({ submittedAt });

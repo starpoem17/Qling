@@ -9,6 +9,7 @@ import { createUserProfileFirestoreRepository } from '../services/userProfile/fi
 import { backfillInitialWorriesForNewUser, type InitialWorryBackfillRepository } from '../services/userProfile/initialWorryBackfill';
 import {
   createInitialWorryBackfillFirestoreRepository,
+  refreshWorryInboxForInterestsUpdateForFirestoreUser,
   refillWorryInboxForFirestoreUser,
 } from '../services/userProfile/initialWorryBackfillFirestoreRepository';
 import type { UserProfileRepository } from '../services/userProfile/types';
@@ -56,6 +57,12 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
     readonly createdCount: number;
     readonly deliveryIds: readonly string[];
   }>;
+  readonly refreshWorryInboxAfterInterestsUpdate?: (params: { uid: string }) => Promise<{
+    readonly hiddenDeliveryCount: number;
+    readonly hiddenDeliveryIds: readonly string[];
+    readonly refillDeliveryCount: number;
+    readonly refillDeliveryIds: readonly string[];
+  }>;
 }): void {
   if (!deps.db && !deps.repository) {
     app.post('/api/users/me/nickname-reservation', (_req, res) => {
@@ -84,6 +91,11 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
     ?? (deps.repository ? null : createInitialWorryBackfillFirestoreRepository({ db: deps.db as Firestore }));
   const refillWorryInbox = deps.refillWorryInbox
     ?? (({ uid }: { uid: string }) => refillWorryInboxForFirestoreUser({ db: deps.db as Firestore, uid }));
+  const refreshWorryInboxAfterInterestsUpdate = deps.refreshWorryInboxAfterInterestsUpdate
+    ?? (({ uid }: { uid: string }) => refreshWorryInboxForInterestsUpdateForFirestoreUser({
+      db: deps.db as Firestore,
+      uid,
+    }));
 
   app.post('/api/users/me/nickname-reservation', requireVerifiedAuth, async (req, res) => {
     const nickname = typeof req.body?.nickname === 'string' ? req.body.nickname : '';
@@ -167,7 +179,24 @@ export function registerUserProfileRoutes(app: express.Express, deps: {
     });
 
     if (result.status === 'updated') {
-      res.status(200).json(result);
+      try {
+        const refresh = await refreshWorryInboxAfterInterestsUpdate({ uid: authReq.auth.uid });
+        res.status(200).json({
+          ...result,
+          hiddenDeliveryCount: refresh.hiddenDeliveryCount,
+          hiddenDeliveryIds: refresh.hiddenDeliveryIds,
+          refillDeliveryCount: refresh.refillDeliveryCount,
+          refillDeliveryIds: refresh.refillDeliveryIds,
+        });
+      } catch (error) {
+        console.error('Worry inbox refresh after interests update failed:', error);
+        res.status(200).json({
+          ...result,
+          hiddenDeliveryCount: 0,
+          refillDeliveryCount: 0,
+          inboxRefreshStatus: 'failed',
+        });
+      }
       return;
     }
 

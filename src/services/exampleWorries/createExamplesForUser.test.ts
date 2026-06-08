@@ -89,14 +89,14 @@ test('real active deliveries suppress example creation and mark examples complet
   assert.equal(commits[0].seeds.length, 0);
 });
 
-test('empty matching seeds writes completed empty state through repository', async () => {
+test('empty matching seeds fall back to active examples through repository', async () => {
   const { repo, commits } = createRepo({ interests: ['health'] });
   const result = await createExamplesForUser({ uid: 'user1', repository: repo });
 
   assert.equal(result.status, 'created');
-  assert.deepEqual(result.status === 'created' ? result.seedIds : ['not-created'], []);
+  assert.deepEqual(result.status === 'created' ? result.seedIds : [], ['seed1', 'seed2', 'seed3', 'seed4', 'seed5']);
   assert.equal(commits.length, 1);
-  assert.equal(commits[0].seeds.length, 0);
+  assert.equal(commits[0].seeds.length, 5);
 });
 
 test('commit failure returns error without pretending partial creation succeeded', async () => {
